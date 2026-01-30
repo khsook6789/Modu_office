@@ -1,525 +1,229 @@
 # 모두의 오피스 (Modu_office)
 
-기업 시설·자원 예약 및 운영 관리 플랫폼
-
-[![GitHub Repository](https://img.shields.io/badge/GitHub-piker0925%2FModu__office-blue?logo=github)](https://github.com/piker0925/Modu_office)
-
-##  개요
-
-**Modu_office**는 기업의 회의실, 장비, 시설 등을 효율적으로 관리하고 예약할 수 있는 포괄적인 플랫폼입니다. 동시성 제어를 통한 중복 예약 방지, 실시간 동기화, 세밀한 권한 관리를 통해 기업의 자원을 최적으로 활용할 수 있습니다.
-
-###  핵심 목표
-
-- 회의실/장비 예약 시 **동시성 제어**로 중복 예약 방지
-- **실시간 동기화**로 예약 현황을 동시에 반영
-- **감사 로그**로 모든 변경을 추적
-- **권한 기반 접근**으로 보안 의식 표현
+**Modu_office**는 기업 내 분산된 회의실, 공용 장비 및 각종 시설 자원을 효율적으로 관리하고 예약할 수 있는 **자원 관리 플랫폼**입니다.
+단순한 예약 기능을 넘어, 데이터 무결성을 보장하는 고성능 예약 엔진과 실시간 동기화 기술을 통해 기업 운영의 최적화를 지원합니다.
 
 ---
 
-##  기술 스택
+## 핵심 목표 (Core Objectives)
 
-| 항목 | 기술 | 용도 |
-| --- | --- | --- |
-| **프레임워크** | Spring Boot 3.3 | 웹 애플  리케이션 |
-| **ORM** | Spring Data JPA | 데이터베이스 매핑 |
-| **인증** | Spring Security + JWT | 로그인, 권한 관리 |
-| **실시간** | Spring WebSocket (STOMP) | 예약 동기화 |
-| **데이터베이스** | PostgreSQL 15+ | 동시성 제어 우수 |
-| **빌드** | Gradle | 의존성 관리 |
-| **코드 생성** | Lombok | 보일러플레이트 제거 |
-| **API 문서** | Springdoc OpenAPI | Swagger UI |
-| **검증** | Jakarta Validation | 입력값 검증 |
-| **테스트** | JUnit 5 | 단위 테스트 |
-| **로깅** | SLF4J | 기록 추적 |
-| **개발 도구** | Spring Boot DevTools | 핫 리로드 |
+- **서비스 안정성 (Stability)**: 낙관적 락(Optimistic Locking) 기술을 도입하여 다수 사용자의 대규모 동시 접근 상황에서도 데이터 충돌 없이 중복 예약을 원천 차단합니다.
+- **실시간 응답성 (Responsiveness)**: WebSocket(STOMP) 프로토콜 기반의 실시간 브로드캐스팅을 통해 예약 현황 변화를 즉각적으로 전파하여 매끄러운 사용자 경험을 제공합니다.
+- **데이터 신뢰성 (Reliability)**: PostgreSQL의 JSONB 타입을 활용한 정밀 감사 로그 시스템을 구축하여, 모든 자원의 변경 이력을 투명하게 추적하고 데이터 무결성을 보장합니다.
+- **아키텍처 확장성 (Scalability)**: 계정(Account)과 프로필(AppUser)을 분리한 유연한 도메인 설계와 세밀한 역할 기반 접근 제어(RBAC)를 통해 가파른 조직 성장에도 문제없이 대응합니다.
 
 ---
 
-##  주요 기능
+## 기술 스택 (Tech Stack)
 
-### 1. 지점 및 공간 관리
+### Backend
 
-- ✅ 지점(Office) 생성 및 관리 (이름, 위치)
-- ✅ 지점별 공간(Room) 관리 (코드, 층, 수용인원, 카테고리)
-- ✅ 공간 상태 자동 관리 (available, inactive)
+| category         | Technology                  | Description                                       |
+| :--------------- | :-------------------------- | :------------------------------------------------ |
+| **Language**     | Java 21                     | 현대적 자바 기능 기반의 안정적인 백엔드 코드      |
+| **Framework**    | Spring Boot 3.3             | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
+| **Persistence**  | Spring Data JPA (Hibernate) | 객체 지향적 데이터 접근 및 관계 매핑 관리         |
+| **Database**     | PostgreSQL 15               | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재 |
+| **Security**     | Spring Security + JWT       | 무상태(Stateless) 기반의 보안 인증 및 권한 관리   |
+| **Real-time**    | WebSocket (STOMP)           | 실시간 예약 상태 브로드캐스팅 및 전역 동기화      |
+| **External API** | Google Maps API             | 지점 위치 정보 및 거리 기반 검색 서비스 제공      |
+| **Auxiliary**    | Lombok                      | 보일러플레이트 코드 제거를 통한 생산성 향상       |
+| **Build Tool**   | Gradle                      | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
 
-### 2. 예약 시스템
+### Frontend
 
-- ✅ 예약 생성 (지점, 공간, 시간 선택)
-- ✅ **복합 무결성 제어**: (공간, 지점) 쌍을 검증하여 예약 일관성 보장
-- ✅ 시간 충돌 방지 (PostgreSQL 인덱스 및 제약 조건 활용)
-- ✅ 예약 조회 및 상태 관리 (PENDING, CONFIRMED, CANCELED)
-
-### 3. 인증 및 권한 관리 (RBAC)
-
-- ✅ 계정(Account)과 프로필(User) 분리 운영
-- ✅ **CUSTOMER**: 일반 사용자 (예약 생성 및 본인 예약 조회)
-- ✅ **OPERATOR**: 지점 운영자 (담당 지점 관리)
-- ✅ **PLATFORM_ADMIN**: 전체 시스템 관리자
-
-### 4. 감사 로그 (Audit Log)
-
-- ✅ 예약 전용 변경 이력 추적 (생성, 수정, 취소)
-- ✅ 변경 전/후 데이터 JSON 저장 (`before_data`, `after_data`)
-- ✅ 액터(Actor) 추적을 통한 책임 소재 명확화
-
-### 5. 실시간 동기화
-
-- ✅ WebSocket으로 예약 현황 실시간 반영
-- ✅ 동시 접근 시 최신 상태 즉시 업데이트
-
-### 6. 관리자 대시보드
-
-- ✅ 예약률, 인기 회의실, 시간대별 현황
-- ✅ 최근 변경 로그 조회
+| category          | Technology     | Description                                     |
+| :---------------- | :------------- | :---------------------------------------------- |
+| **Framework**     | React 19       | 컴포넌트 기반의 직관적인 사용자 인터페이스 구현 |
+| **Environment**   | Vite 7         | 현대적이고 빠른 빌드/HMR 환경 제공              |
+| **Language**      | TypeScript     | 엄격한 타입 체크를 통한 코드 안정성 향상        |
+| **Styling**       | Vanilla CSS    | 프로젝트 고유의 스타일 테마 및 일관된 UI 구성   |
+| **Routing**       | React Router 7 | 싱글 페이지 애플리케이션(SPA) 내비게이션 관리   |
+| **Communication** | Axios          | 백엔드 API와의 효율적인 비동기 통신             |
 
 ---
 
-##  프로젝트 구조
+## 프로젝트 구조 (Project Structure)
+
+### Backend Structure
 
 ```
-Modu_office/
-├── backend/                         # Spring Boot 백엔드
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/modu/modu_office/
-│   │   │   │   ├── config/              # Spring 설정 (Security, WebSocket 등)
-│   │   │   │   ├── controller/          # REST API 엔드포인트
-│   │   │   │   ├── service/             # 비즈니스 로직
-│   │   │   │   ├── repository/          # 데이터 접근 레이어
-│   │   │   │   ├── entity/              # JPA 엔티티
-│   │   │   │   ├── dto/                 # DTO (Data Transfer Object)
-│   │   │   │   ├── exception/           # 커스텀 예외
-│   │   │   │   ├── security/            # JWT, SecurityFilter 등
-│   │   │   │   └── ModuOfficeApplication.java
-│   │   │   └── resources/
-│   │   │       ├── application.properties
-│   │   │       ├── static/              # 정적 리소스
-│   │   │       └── templates/           # HTML 템플릿
-│   │   └── test/
-│   │       └── java/com/modu/modu_office/
-│   │           └── ModuOfficeApplicationTests.java
-│   ├── gradle/                      # Gradle 래퍼
-│   ├── build.gradle                 # 의존성 및 빌드 설정
-│   ├── settings.gradle
-│   └── HELP.md
-├── frontend/                        # React 프론트엔드
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── ...
-├── README.md                        # 전체 프로젝트 문서
-└── .gitignore
+backend/
+├── src/main/java/com/modu/office/
+│   ├── config/              # 전역 설정 (Security, JPA, WebSocket 등)
+│   ├── controller/          # REST API 엔드포인트 도메인별 관리
+│   │   └── Auth/            # 고객 및 운영자 전용 인증 컨트롤러
+│   ├── service/             # 도메인별 비즈니스 로직 및 트랜잭션 처리
+│   ├── repository/          # Spring Data JPA 기반 데이터 접근 계층
+│   ├── entity/              # JPA 엔티티 및 스키마 매핑 (enums 포함)
+│   ├── dto/                 # Request/Response 데이터 전송 객체
+│   ├── security/            # JWT 필터 및 인증/인가 세부 구현체
+│   └── common/              # 전역 예외 처리 및 공통 유틸리티
+└── src/main/resources/      # 환경별 프로젝트 설정 파일 (application.yml)
+```
+
+### Frontend Structure
+
+```
+frontend/
+├── src/
+│   ├── features/            # 도메인 기반 기능 모듈 (Reservation, Office 등)
+│   ├── components/          # 재사용 가능한 UI 컴포넌트
+│   ├── layouts/             # 공통 페이지 레이아웃 (Admin, Client)
+│   ├── contexts/            # 전역 상태 공유를 위한 Context API
+│   ├── routes/              # React Router 기반 페이지 라우팅 설정
+│   └── styles/              # CSS 변수 및 전역 스타일 테마
+├── package.json             # 프론트엔드 의존성 및 스크립트 설정
+└── vite.config.ts           # Vite 빌드 및 개발 환경 설정
 ```
 
 ---
 
-##  설치 및 실행
+## 주요 기능 (Major Features)
 
-### 필수 요구사항
+### 자원 관리 (Resource Management)
 
-- **Java 17+** (Spring Boot 3.3 requirement)
-- **Gradle 8.0+**
-- **PostgreSQL 15+**
-- **Git**
+- **자산의 체계적 구조화**: 지점(Office)과 하위 공간(Room)의 1:N 관계를 통해 복잡한 기업 내 자산을 직관적이고 계층적으로 관리할 수 있습니다.
+- **다차원 공간 필터링**: 수용 인원, 층수, 카테고리 등 상세 속성을 기반으로 사용자가 원하는 최적의 비즈니스 환경을 신속하게 찾아줍니다.
+- **위치 지능형 탐색**: Google Maps API와 연동된 위도/경도 기반 검색을 통해, 현 위치에서 가장 가까운 거점 오피스를 추천받아 이동 편의성을 극대화합니다.
 
-### 1. 저장소 클론
+### 예약 엔진 (Reservation Engine)
 
-```bash
-git clone https://github.com/piker0925/Modu_office.git
-cd Modu_office
-```
+- **동시성 정합성 보장**: JPA `@Version` 기반 낙관적 락을 통해 0.1초 차이로 발생하는 동시 예약 요청 중 단 하나만을 수용하여 데이터 충돌을 원천 해결합니다.
+- **지능형 스케줄 충돌 차단**: DB 제약 조건과 서비스 비즈니스 로직의 교차 검증으로 시간대 중복 예약을 완벽히 차단하여 예약 신뢰도를 높입니다.
+- **실시간 상태 전파**: WebSocket 프로토콜을 활용하여 타 사용자의 예약 또는 취소 내역을 별도 페이지 새로고침 없이 즉각 화면에 반영해 현황 파악 오류를 방지합니다.
 
-### 2. 데이터베이스 설정
+### 권한 및 보안 체계 (RBAC)
 
-PostgreSQL을 설치하고 데이터베이스를 생성합니다:
+- **사용자 중심 보안 설계**: 인증 계정(Account)과 프로필(AppUser)을 분리 설계하여 개인정보 보호를 강화하고 계정 탈취 시에도 핵심 데이터에 대한 피해를 최소화합니다.
+- **맥락 인지형 역할 제어**:
+  - **CUSTOMER**: 불필요한 기능 노출 없이 본인의 예약 내역과 예약 생성에만 집중할 수 있는 환경을 제공합니다.
+  - **OPERATOR**: 담당 지점의 실시간 점유율 조회부터 효율적인 공간 관리까지, 운영의 효율성을 높여주는 관리 도구를 제공합니다.
+  - **PLATFORM_ADMIN**: 전사 자원 설정부터 시스템 전반의 로그 모니터링까지, 통합 관제 기능을 통한 아키텍처 거버넌스를 실현합니다.
 
-```sql
-CREATE DATABASE modu_office;
-CREATE USER modu_user WITH PASSWORD 'your_password';
-ALTER ROLE modu_user SET client_encoding TO 'utf8';
-ALTER ROLE modu_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE modu_user SET default_transaction_deferrable TO on;
-GRANT ALL PRIVILEGES ON DATABASE modu_office TO modu_user;
-```
+### 감사 로그 및 대시보드 (Audit & Dashboard)
 
-### 3. 백엔드 환경 설정
-
-`backend/src/main/resources/application.properties` 파일을 수정합니다:
-
-```properties
-# 데이터베이스 연결
-spring.datasource.url=jdbc:postgresql://localhost:5432/modu_office
-spring.datasource.username=modu_user
-spring.datasource.password=your_password
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-# JPA/Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=false
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL10Dialect
-
-# JWT 설정
-jwt.secret=your_secret_key_here_must_be_at_least_32_characters_long
-jwt.expiration=86400000
-
-# 서버 설정
-server.port=8080
-server.servlet.context-path=/api
-```
-
-### 4. 백엔드 빌드 및 실행
-
-#### Gradle을 사용하여 빌드
-
-```bash
-cd backend
-./gradlew build
-```
-
-또는 Windows:
-
-```bash
-cd backend
-gradlew.bat build
-```
-
-#### 애플리케이션 실행
-
-```bash
-./gradlew bootRun
-```
-
-또는 WAR 파일로 실행:
-
-```bash
-./gradlew build
-java -jar build/libs/modu_office-0.0.1-SNAPSHOT.jar
-```
-
-백엔드 애플리케이션이 성공적으로 시작되면 다음 주소에서 접근할 수 있습니다:
-
-- **API 서버**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **WebSocket**: ws://localhost:8080/ws
-
-### 5. 프론트엔드 환경 설정 (선택사항)
-
-```bash
-cd frontend
-npm install
-npm start
-```
+- **투명한 데이터 거버넌스**: PostgreSQL `JSONB`를 활용하여 예약의 Before/After 스냅샷을 기록함으로써, 모든 변경 이력을 100% 추적 가능한 투명한 운영 환경을 보장합니다.
+- **데이터 기반 의사결정 지원**: 축적된 예약률과 점유율 통계를 시각적 대시보드로 제공하여, 공간 운영 전략 수립에 필요한 데이터 인사이트를 즉각 제공합니다.
 
 ---
 
-##  API 문서
+## 데이터베이스 스키마 (Database Schema)
 
-### Swagger UI
+### 1. Account (계정)
 
-프로젝트 실행 후 Swagger UI에서 모든 API 엔드포인트를 확인할 수 있습니다:
+- **id**: PK, Auto Increment
+- **email**: 사용자 이메일 (Unique)
+- **password_hash**: 암호화된 비밀번호
+- **status**: 계정 상태 (ACTIVE 등)
 
-```
-http://localhost:8080/swagger-ui.html
-```
+### 2. AppUser (사용자 프로필)
 
-### 주요 API 엔드포인트
+- **id**: PK, Auto Increment
+- **account_id**: Account 테이블 외래키 (1:1 관계)
+- **name**: 사용자 이름
+- **role**: 사용자 권한 (CUSTOMER, OPERATOR, PLATFORM_ADMIN)
 
-#### 인증 관련
-```
-POST   /auth/signup           - 회원가입
-POST   /auth/login            - 로그인
-POST   /auth/refresh-token    - 토큰 갱신
-```
+### 3. Office (지점)
 
-#### 지점 및 공간 관리
-```
-GET    /offices               - 지점 목록 조회
-GET    /offices/{id}/rooms    - 특정 지점의 공간 목록 조회
-POST   /offices               - 지점 추가 (관리자만)
-POST   /offices/{id}/rooms    - 공간 추가 (관리자/운영자)
-```
+- **id**: PK, Auto Increment
+- **name**: 지점명
+- **location**: 지점 위치 (주소)
+- **latitude / longitude**: 위도 / 경도
 
-#### 예약 관리
-```
-GET    /reservations          - 예약 목록 조회
-GET    /reservations/{id}     - 예약 상세 조회
-POST   /reservations          - 예약 생성 (지점/공간 검증 포함)
-PUT    /reservations/{id}     - 예약 수정
-DELETE /reservations/{id}     - 예약 취소 (CANCELED 상태 변경)
-```
+### 4. OfficeRoom (회의실/공간)
 
-#### 감사 로그 및 통계
-```
-GET    /logs/reservations     - 예약 변경 로그 조회
-GET    /dashboard/stats       - 지점별/공간별 예약 통계
-```
+- **id**: PK, Auto Increment
+- **office_id**: 소속 지점 ID (FK)
+- **name**: 공간 이름
+- **room_code**: 공간 코드 (지점 내 Unique)
+- **floor**: 층수
+- **capacity**: 수용 인원
+- **status**: 공간 상태 (AVAILABLE 등)
+- **category**: 공간 카테고리
+- **version**: 낙관적 락(Optimistic Lock) 버전 관리
 
----
+### 5. Reservation (예약)
 
-##  보안 기능
+- **id**: PK, Auto Increment
+- **title**: 예약 제목
+- **office_id**: 지점 ID (FK)
+- **room_id**: 공간 ID (FK)
+- **customer_id**: 예약자(사용자) ID (FK)
+- **start_at**: 시작 시간
+- **end_at**: 종료 시간
+- **status**: 예약 상태 (PENDING, CONFIRMED, CANCELED 등)
+- **version**: 낙관적 락 버전 관리
 
-### JWT 인증
+### 6. UpdateLog (변경 로그)
 
-모든 API 요청에 JWT 토큰이 필요합니다 (인증 엔드포인트 제외):
-
-```
-Authorization: Bearer {JWT_TOKEN}
-```
-
-### 권한 기반 접근 제어 (RBAC)
-
-- **PUBLIC**: 누구나 접근 가능
-- **USER**: 인증된 사용자만 접근
-- **ADMIN**: 관리자만 접근
-
-### 동시성 제어
-
-예약 시 낙관적 락(Optimistic Locking)을 사용하여 중복 예약을 방지합니다:
-
-```java
-@Version
-@Column(name = "version")
-private Long version;
-```
+- **id**: PK, Auto Increment
+- **reservation_id**: 관련 예약 ID (FK)
+- **actor_user_id**: 변경을 수행한 사용자 ID (FK)
+- **action**: 수행된 작업 (CREATE, UPDATE, CANCEL 등)
+- **before_data**: 변경 전 데이터 (JSONB)
+- **after_data**: 변경 후 데이터 (JSONB)
+- **occurred_at**: 발생 시각
 
 ---
 
-##  WebSocket 실시간 동기화
+## API 목록
 
-### 연결
+모든 API는 `/api` 프리픽스를 가집니다.
 
-```javascript
-const socket = new SockJS('http://localhost:8080/ws');
-const stompClient = Stomp.over(socket);
+### 1. 인증 (Auth)
 
-stompClient.connect({}, () => {
-  // 예약 변경 사항 구독
-  stompClient.subscribe('/topic/reservations', (message) => {
-    const reservation = JSON.parse(message.body);
-    console.log('예약 변경:', reservation);
-  });
-  
-  // 회의실 상태 변경 구독
-  stompClient.subscribe('/topic/rooms', (message) => {
-    const room = JSON.parse(message.body);
-    console.log('회의실 변경:', room);
-  });
-});
-```
+- **Customer**
+  - `POST /auth/customer/signup`: 고객 회원가입
+  - `POST /auth/customer/login`: 고객 로그인
+  - `POST /auth/customer/refresh`: 토큰 갱신
+- **Operator**
+  - `POST /auth/operator/signup`: 운영자 회원가입
+  - `POST /auth/operator/login`: 운영자 로그인
+  - `POST /auth/operator/refresh`: 토큰 갱신
 
-### 메시지 발행
+### 2. 지점 관리 (Office)
 
-예약 생성/수정/취소 시 자동으로 연결된 클라이언트에 메시지가 전송됩니다.
+- `POST /offices`: 지점 생성
+- `GET /offices`: 전체 지점 조회
+- `GET /offices/{id}`: 특정 지점 조회
+- `PUT /offices/{id}`: 지점 정보 수정
+- `DELETE /offices/{id}`: 지점 삭제
+- `GET /offices/search`: 지점 검색 (이름, 위치, 반경 등)
 
----
+### 3. 공간 관리 (OfficeRoom)
 
-##  테스트
+- `POST /offices/{officeId}/rooms`: 공간 생성
+- `GET /offices/{officeId}/rooms`: 지점별 공간 조회 (필터링 가능)
+- `GET /rooms/{roomId}`: 특정 공간 조회
+- `PUT /rooms/{roomId}`: 공간 정보 수정
+- `DELETE /rooms/{roomId}`: 공간 삭제
 
-### 백엔드 단위 테스트 실행
+### 4. 예약 관리 (Reservation)
 
-```bash
-cd backend
-./gradlew test
-```
+- `POST /reservations`: 예약 생성
+- `GET /reservations`: 예약 목록 조회 (필터링 가능)
+- `GET /reservations/{id}`: 예약 상세 조회
+- `PUT /reservations/{id}`: 예약 수정
+- `PATCH /reservations/{id}/confirm`: 예약 확정
+- `POST /reservations/{id}/cancel`: 예약 취소
+- `DELETE /reservations/{id}`: 예약 삭제
 
-### 특정 테스트 실행
+### 5. 감사 로그 (UpdateLog)
 
-```bash
-./gradlew test --tests com.modu.modu_office.service.ReservationServiceTest
-```
-
-### 테스트 커버리지 리포트 생성
-
-```bash
-./gradlew test jacocoTestReport
-```
+- `GET /logs`: 전체 로그 조회
+- `GET /logs/reservation/{reservationId}`: 특정 예약 로그 조회
 
 ---
 
-##  데이터베이스 스키마 (ERD)
+## 개발 가이드 - 커밋 메시지 (Commit Message Convention)
 
-### ER Diagram
-```mermaid
-erDiagram
-    account ||--|| app_user : "1:1 (account_id)"
-    office ||--o{ office_room : "1:N (office_id)"
-    office ||--o{ reservation : "1:N (office_id)"
-    office_room ||--o{ reservation : "1:N (room_id, office_id)"
-    app_user ||--o{ reservation : "customer (customer_id)"
-    reservation ||--o{ update_log : "1:N (reservation_id)"
-    app_user ||--o{ update_log : "actor (actor_user_id)"
-```
-
-### 주요 테이블 상세
-
-| 테이블명 | 설명 | 핵심 제약 조건 |
-| --- | --- | --- |
-| **account** | 로그인 계정 정보 | `email` Unique |
-| **app_user** | 사용자 프로필 (Role 포함) | `account_id` Unique FK |
-| **office** | 지점(공간의 상위 그룹) | `name` Not Null |
-| **office_room** | 개별 예약 공간 | `(office_id, room_code)` Unique |
-| **reservation** | 예약 정보 | **복합 FK**: `(room_id, office_id)` 참조 |
-| **update_log** | 예약 변경 감사 로그 | JSONB 형식 상세 데이터 저장 |
-
-### 데이터 무결성 전략
-- **복합 외래키 (Composite FK)**: `reservation` 테이블에서 `room_id`와 `office_id`를 함께 묶어 `office_room`을 참조함으로써, 특정 지점에 존재하지 않는 공간이 예약되는 것을 데이터베이스 레벨에서 원천 차단합니다.
-- **ENUM 타입**: `account_status`, `user_role`, `room_status`, `reservation_status`, `log_action` 등을 PostgreSQL 커스텀 타입으로 정의하여 데이터 정합성을 유지합니다.
-- **트리거 (Trigger)**: 모든 주요 테이블에 `set_updated_at()` 트리거를 적용하여 변경 시점을 자동으로 기록합니다.
-
----
-
-##  로깅
-
-### 로그 레벨 설정
-
-`backend/src/main/resources/application.properties`에서 로그 레벨을 조정할 수 있습니다:
-
-```properties
-# Spring Boot 로깅
-logging.level.root=INFO
-logging.level.com.modu.modu_office=DEBUG
-logging.level.org.springframework.web=INFO
-logging.level.org.hibernate.SQL=DEBUG
-```
-
-### 로그 파일
-
-로그는 다음 위치에 저장됩니다:
-
-```
-backend/logs/modu-office.log
-```
-
----
-
-##  개발 가이드
-
-### IDE 추천
-
-- **IntelliJ IDEA** (권장)
-- **Eclipse**
-- **Visual Studio Code** + Extension Pack for Java
-
-### 코드 스타일
-
-이 프로젝트는 Google Java Style Guide를 따릅니다. IDE에서 포맷팅을 자동으로 적용하려면:
-
-**IntelliJ IDEA**:
-- File → Settings → Code Style → Java
-- Scheme를 "Google Style"로 설정
-
-### Git 커밋 메시지
-
-```
-feat: 새로운 기능 추가
-fix: 버그 수정
-docs: 문서 수정
-style: 코드 스타일 변경 (포맷, 세미콜론 누락 등)
-refactor: 코드 리팩토링
-test: 테스트 추가/수정
-chore: 빌드 설정, 의존성 업데이트
-```
-
-### 핫 리로드 활성화
-
-Spring Boot DevTools를 사용하여 개발 중 자동 재시작을 활성화합니다.
-
-`backend/src/main/resources/application.properties`에 다음을 추가합니다:
-
-```properties
-spring.devtools.restart.enabled=true
-spring.devtools.livereload.enabled=true
-```
-
-IDE에서 프로젝트를 빌드하면 자동으로 애플리케이션이 재시작됩니다.
-
----
-
-##  문제 해결
-
-### PostgreSQL 연결 오류
-
-**오류**: `org.postgresql.util.PSQLException: Connection to localhost:5432 refused`
-
-**해결**:
-1. PostgreSQL 서비스가 실행 중인지 확인
-2. 데이터베이스 URL, 사용자명, 비밀번호 확인
-3. PostgreSQL이 방화벽을 통해 접근 가능한지 확인
-
-### JWT 토큰 만료
-
-**오류**: `Unauthorized: Token expired`
-
-**해결**:
-- 새로운 토큰을 요청하거나 `/auth/refresh-token` 엔드포인트 사용
-
-### 동시성 예외
-
-**오류**: `org.hibernate.StaleObjectStateException`
-
-**해결**:
-- 낙관적 락 충돌 감지, 재시도 로직 구현
-
----
-
-##  라이선스
-
-이 프로젝트는 MIT 라이선스 하에 있습니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
----
-
-##  기여하기
-
-버그 리포트, 기능 제안, Pull Request를 환영합니다!
-
-### 기여 방법
-
-1. 이 저장소를 Fork합니다
-2. 기능 브랜치를 생성합니다 (`git checkout -b feature/AmazingFeature`)
-3. 변경 사항을 커밋합니다 (`git commit -m 'feat: Add some AmazingFeature'`)
-4. 브랜치에 푸시합니다 (`git push origin feature/AmazingFeature`)
-5. Pull Request를 생성합니다
-
----
-
-##  문의
-
-- **이슈 보고**: [GitHub Issues](https://github.com/piker0925/Modu_office/issues)
-- **이메일**: piker0925@gmail.com
-- **GitHub 프로필**: [piker0925](https://github.com/piker0925)
-
----
-
-##  참고 자료
-
-- [Spring Boot 공식 문서](https://spring.io/projects/spring-boot)
-- [Spring Data JPA 가이드](https://spring.io/guides/gs/accessing-data-jpa/)
-- [Spring Security 문서](https://spring.io/projects/spring-security)
-- [Spring WebSocket 가이드](https://spring.io/guides/gs/messaging-stomp-websocket/)
-- [PostgreSQL 공식 문서](https://www.postgresql.org/docs/)
-- [JWT 소개](https://jwt.io/)
-
----
-
-##  버전 히스토리
-
-### v0.1.0 (2026-01-12)
-- 데이터베이스 스키마 고도화 (A안 반영)
-- 지점(Office) 및 공간(Room) 구조로 변경
-- 복합 외래키를 통한 예약 무결성 강화
-- 계정(Account) 및 사용자(User) 도메인 분리
-- JSONB 기반의 상세 감사 로그 시스템 도입
-
-### v0.0.1 (2026-01-11)
-- 초기 프로젝트 설정
-- 기본 회의실 관리 기능
-- 사용자 인증 및 권한 관리
-- 예약 시스템 구현
-
----
-
-**마지막 업데이트**: 2026년 1월 11일
-
-
+| 태그       | 설명                                      |
+| ---------- | ----------------------------------------- |
+| `feat`     | 새로운 기능 추가                          |
+| `fix`      | 버그 수정                                 |
+| `docs`     | 문서 수정                                 |
+| `style`    | 코드 스타일 변경 (포맷, 세미콜론 누락 등) |
+| `refactor` | 코드 리팩토링                             |
+| `test`     | 테스트 추가/수정                          |
+| `chore`    | 빌드 설정, 의존성 업데이트                |
