@@ -101,4 +101,32 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                         @Param("startAt") LocalDateTime startAt,
                         @Param("endAt") LocalDateTime endAt,
                         @Param("statuses") List<ReservationStatus> statuses);
+
+        /**
+         * 특정 회의실에 활성 상태의 예약이 있는지 확인
+         * 
+         * @param roomId   회의실 ID
+         * @param statuses 확인할 예약 상태 목록
+         * @return 활성 예약이 있으면 true
+         */
+        boolean existsByRoomIdAndStatusIn(Long roomId, List<ReservationStatus> statuses);
+
+        /**
+         * 특정 지점에 활성 상태의 예약이 있는지 확인
+         * 
+         * @param officeId 지점 ID
+         * @param statuses 확인할 예약 상태 목록
+         * @return 활성 예약이 있으면 true
+         */
+        boolean existsByOfficeIdAndStatusIn(Long officeId, List<ReservationStatus> statuses);
+
+        /**
+         * 특정 회의실의 모든 예약 삭제 (Cascade Delete)
+         */
+        void deleteAllByRoomId(Long roomId);
+
+        /**
+         * 특정 지점의 모든 예약 삭제 (Cascade Delete)
+         */
+        void deleteAllByOfficeId(Long officeId);
 }

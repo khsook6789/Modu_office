@@ -32,6 +32,7 @@ public class AuthService {
         private final AuthenticationManager authenticationManager;
         private final JwtTokenProvider tokenProvider;
 
+        @SuppressWarnings("null")
         @Transactional
         public void signupCustomer(CustomerSignupRequest request) {
                 validateEmail(request.getEmail());
@@ -50,6 +51,7 @@ public class AuthService {
                 appUserRepository.save(appUser);
         }
 
+        @SuppressWarnings("null")
         @Transactional
         public void signupOperator(OperatorSignupRequest request) {
                 validateEmail(request.getEmail());
@@ -128,6 +130,7 @@ public class AuthService {
                                 .build();
         }
 
+        @SuppressWarnings("null")
         private TokenResponse createTokenResponse(Authentication authentication, Account account) {
                 String accessToken = tokenProvider.generateAccessToken(authentication);
                 String refreshTokenValue = tokenProvider.generateRefreshToken();

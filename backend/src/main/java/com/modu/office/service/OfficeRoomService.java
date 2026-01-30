@@ -4,9 +4,11 @@ import com.modu.office.dto.request.OfficeRoomRequest;
 import com.modu.office.dto.response.OfficeRoomResponse;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.OfficeRoomRepository;
+import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class OfficeRoomService {
 
     private final OfficeRoomRepository officeRoomRepository;
     private final OfficeRepository officeRepository;
+    private final ReservationRepository reservationRepository;
 
     /**
      * 새 회의실 생성
@@ -99,6 +102,16 @@ public class OfficeRoomService {
         if (!officeRoomRepository.existsById(roomId)) {
             throw new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId);
         }
+
+        // 활성 예약이 있는지 확인
+        List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+        if (reservationRepository.existsByRoomIdAndStatusIn(roomId, activeStatuses)) {
+            throw new IllegalStateException("활성 상태의 예약이 있는 회의실은 삭제할 수 없습니다. 회의실 ID: " + roomId);
+        }
+
+        // 활성 예약이 없다면, 나머지(취소된/완료된) 예약은 모두 삭제 (Cascade Delete)
+        reservationRepository.deleteAllByRoomId(roomId);
+
         officeRoomRepository.deleteById(roomId);
     }
 

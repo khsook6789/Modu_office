@@ -3,7 +3,9 @@ package com.modu.office.service;
 import com.modu.office.dto.request.OfficeRequest;
 import com.modu.office.dto.response.OfficeResponse;
 import com.modu.office.entity.Office;
+import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.repository.OfficeRepository;
+import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class OfficeService {
 
     private final OfficeRepository officeRepository;
     private final GeocodingService geocodingService;
+    private final ReservationRepository reservationRepository;
 
     /**
      * 새 지점 생성
@@ -99,6 +102,18 @@ public class OfficeService {
         if (!officeRepository.existsById(id)) {
             throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id);
         }
+
+        // 활성 예약이 있는지 확인
+        List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+        if (reservationRepository.existsByOfficeIdAndStatusIn(id, activeStatuses)) {
+            throw new IllegalStateException("활성 상태의 예약이 있는 지점은 삭제할 수 없습니다. 지점 ID: " + id);
+        }
+
+        // 활성 예약이 없다면, 나머지(취소된/완료된) 예약은 모두 삭제 (Cascade Delete)
+        // 회의실은 Office의 CascadeType.ALL에 의해 삭제되지만,
+        // Reservation이 회의실/지점을 참조하므로 먼저 정리해야 함
+        reservationRepository.deleteAllByOfficeId(id);
+
         officeRepository.deleteById(id);
     }
 

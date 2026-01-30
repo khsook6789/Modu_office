@@ -1,7 +1,6 @@
 package com.modu.office.listener;
 
 import com.modu.office.entity.UpdateLog;
-import com.modu.office.entity.converter.LogActionConverter;
 import com.modu.office.entity.enums.LogAction;
 import com.modu.office.event.ReservationChangedEvent;
 import com.modu.office.event.ReservationCreatedEvent;
@@ -30,6 +29,7 @@ public class LogEventListener {
          * 예약 생성 이벤트 처리
          * 트랜잭션이 최종 커밋된 후에만 실행되어 데이터 일관성 보장
          */
+        @SuppressWarnings("null")
         @Transactional(propagation = Propagation.REQUIRES_NEW)
         @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
         public void handleReservationCreated(ReservationCreatedEvent event) {
@@ -37,7 +37,7 @@ public class LogEventListener {
 
                 UpdateLog auditLog = UpdateLog.builder()
                                 .reservation(event.getReservation())
-                                .action(com.modu.office.entity.enums.LogAction.CREATE)
+                                .action(LogAction.CREATE)
                                 .actor(event.getActor())
                                 .beforeData(null) // 생성 시에는 이전 데이터 없음
                                 .afterData(ReservationLogConverter.toMap(event.getReservation()))
@@ -51,6 +51,7 @@ public class LogEventListener {
          * 예약 변경(수정/취소) 이벤트 처리
          * beforeData를 이벤트에서 받아 변경 전/후 비교 가능
          */
+        @SuppressWarnings("null")
         @Transactional(propagation = Propagation.REQUIRES_NEW)
         @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
         public void handleReservationChanged(ReservationChangedEvent event) {

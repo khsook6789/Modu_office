@@ -32,6 +32,22 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Office management - Admin only for write operations
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/offices/**").authenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/offices/**")
+                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/offices/**")
+                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/offices/**")
+                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        // Room management - Admin only for write operations
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/rooms/**").authenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/rooms/**")
+                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/rooms/**")
+                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/rooms/**")
+                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
