@@ -18,17 +18,21 @@
 
 ### Backend
 
-| category         | Technology                  | Description                                       |
-| :--------------- | :-------------------------- | :------------------------------------------------ |
-| **Language**     | Java 21                     | 현대적 자바 기능 기반의 안정적인 백엔드 코드      |
-| **Framework**    | Spring Boot 3.3             | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
-| **Persistence**  | Spring Data JPA (Hibernate) | 객체 지향적 데이터 접근 및 관계 매핑 관리         |
-| **Database**     | PostgreSQL 15               | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재 |
-| **Security**     | Spring Security + JWT       | 무상태(Stateless) 기반의 보안 인증 및 권한 관리   |
-| **Real-time**    | WebSocket (STOMP)           | 실시간 예약 상태 브로드캐스팅 및 전역 동기화      |
-| **External API** | Google Maps API             | 지점 위치 정보 및 거리 기반 검색 서비스 제공      |
-| **Auxiliary**    | Lombok                      | 보일러플레이트 코드 제거를 통한 생산성 향상       |
-| **Build Tool**   | Gradle                      | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
+| category         | Technology            | Description                                       |
+| :--------------- | :-------------------- | :------------------------------------------------ |
+| **Framework**    | Spring Boot 3.3       | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
+| **Language**     | Java 21               | 현대적 자바 기능 기반의 안정적인 백엔드 코드      |
+| **Persistence**  | Spring Data JPA       | 객체 지향적 데이터 접근 및 관계 매핑 관리         |
+| **Database**     | PostgreSQL 15         | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재 |
+| **Security**     | Spring Security + JWT | 무상태(Stateless) 기반의 보안 인증 및 권한 관리   |
+| **Real-time**    | WebSocket (STOMP)     | `구현 예정` 예약 현황의 실시간 브로드캐스팅       |
+| **Validation**   | Jakarta Validation    | DTO 입력값 검증 및 데이터 무결성 보장             |
+| **Testing**      | JUnit 5               | 단위/통합 테스트를 통한 코드 신뢰성 확보          |
+| **Logging**      | SLF4J                 | 시스템 동작 추적 및 디버깅을 위한 로깅            |
+| **DevOps**       | Spring Boot DevTools  | 핫 리로드 등 개발 생산성 향상 도구                |
+| **External API** | Google Maps API       | 지점 위치 정보 및 거리 기반 검색 서비스 제공      |
+| **Auxiliary**    | Lombok                | 보일러플레이트 코드 제거를 통한 생산성 향상       |
+| **Build Tool**   | Gradle                | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
 
 ### Frontend
 
