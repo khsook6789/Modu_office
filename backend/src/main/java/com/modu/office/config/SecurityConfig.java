@@ -1,6 +1,8 @@
 package com.modu.office.config;
 
 import com.modu.office.security.JwtAuthenticationFilter;
+import com.modu.office.security.OAuth2AuthenticationSuccessHandler;
+import com.modu.office.service.CustomOAuth2UserService;
 import com.modu.office.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +26,8 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,7 +35,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+
                         // Office management - Admin only for write operations
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/offices/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/offices/**")
@@ -40,6 +45,7 @@ public class SecurityConfig {
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/offices/**")
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+
                         // Room management - Admin only for write operations
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/rooms/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/rooms/**")
@@ -49,6 +55,11 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/rooms/**")
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
                         .anyRequest().authenticated())
+
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2AuthenticationSuccessHandler))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

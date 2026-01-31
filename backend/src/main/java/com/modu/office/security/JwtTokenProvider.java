@@ -40,7 +40,25 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // OAuth2 로그인을 위한 오버로드 메서드
+    public String generateAccessToken(String email) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + accessTokenExpirationInMs);
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
     public String generateRefreshToken() {
+        return java.util.UUID.randomUUID().toString();
+    }
+
+    // OAuth2 로그인을 위한 오버로드 메서드
+    public String generateRefreshToken(String email) {
         return java.util.UUID.randomUUID().toString();
     }
 
