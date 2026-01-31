@@ -80,3 +80,4 @@ tmp/
 
 # --- Tools & Assistant ---
 .antigravity/
+.agent/
