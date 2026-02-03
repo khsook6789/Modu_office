@@ -49,7 +49,10 @@ public class LogEventListener {
 
         /**
          * 예약 변경(수정/취소) 이벤트 처리
-         * beforeData를 이벤트에서 받아 변경 전/후 비교 가능
+         * <p>
+         * beforeData를 이벤트에서 받아 변경 전/후 비교 가능합니다.
+         * customData가 존재하면 (예: adminReason) afterData JSONB에 병합합니다.
+         * </p>
          */
         @SuppressWarnings("null")
         @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -58,12 +61,22 @@ public class LogEventListener {
                 log.debug("Handling ReservationChangedEvent for reservation ID: {} with action: {}",
                                 event.getReservation().getId(), event.getAction());
 
+                // afterData 생성 (변경 후 예약 스냅샷)
+                java.util.Map<String, Object> afterData = new java.util.HashMap<>(
+                                ReservationLogConverter.toMap(event.getReservation()));
+
+                // customData가 있으면 afterData에 병합 (예: adminReason)
+                if (event.getCustomData() != null && !event.getCustomData().isEmpty()) {
+                        afterData.putAll(event.getCustomData());
+                        log.debug("Merged customData into afterData: {}", event.getCustomData());
+                }
+
                 UpdateLog auditLog = UpdateLog.builder()
                                 .reservation(event.getReservation())
                                 .action(event.getAction())
                                 .actor(event.getActor())
                                 .beforeData(event.getBeforeData())
-                                .afterData(ReservationLogConverter.toMap(event.getReservation()))
+                                .afterData(afterData)
                                 .build();
 
                 updateLogRepository.save(auditLog);

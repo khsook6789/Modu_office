@@ -202,6 +202,7 @@ frontend/
 - `GET /rooms/{roomId}`: 특정 공간 조회
 - `PUT /rooms/{roomId}`: 공간 정보 수정
 - `DELETE /rooms/{roomId}`: 공간 삭제
+- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (OPERATOR/PLATFORM_ADMIN 전용)
 
 ### 4. 예약 관리 (Reservation)
 
@@ -211,9 +212,13 @@ frontend/
 - `PUT /reservations/{id}`: 예약 수정
 - `PATCH /reservations/{id}/confirm`: 예약 확정
 - `POST /reservations/{id}/cancel`: 예약 취소
-- `DELETE /reservations/{id}`: 예약 삭제
+- ~~`DELETE /reservations/{id}`: 예약 삭제~~ (감사 로그 무결성 보호를 위해 제거됨)
 
-### 5. 감사 로그 (UpdateLog)
+### 5. 관리자 전용 예약 관리 (Admin Reservation)
+
+- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (OPERATOR/PLATFORM_ADMIN 전용)
+
+### 6. 감사 로그 (UpdateLog)
 
 - `GET /logs`: 전체 로그 조회
 - `GET /logs/reservation/{reservationId}`: 특정 예약 로그 조회
