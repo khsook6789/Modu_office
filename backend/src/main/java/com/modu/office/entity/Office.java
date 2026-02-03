@@ -38,15 +38,20 @@ public class Office extends BaseEntity {
     @Column(name = "longitude")
     private Double longitude;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_user_id", nullable = false)
+    private AppUser ownerUser;
+
     @OneToMany(mappedBy = "office", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OfficeRoom> rooms = new ArrayList<>();
 
     @Builder
-    public Office(String name, String location, Double latitude, Double longitude) {
+    public Office(String name, String location, Double latitude, Double longitude, AppUser ownerUser) {
         this.name = name;
         this.location = location;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.ownerUser = ownerUser;
     }
 
     public void addRoom(OfficeRoom room) {
