@@ -140,6 +140,7 @@ frontend/
 - **name**: 지점명
 - **location**: 지점 위치 (주소)
 - **latitude / longitude**: 위도 / 경도
+- **open_time/close_time**: 영업시
 
 ### 4. OfficeRoom (회의실/공간)
 
@@ -153,7 +154,17 @@ frontend/
 - **category**: 공간 카테고리
 - **version**: 낙관적 락(Optimistic Lock) 버전 관리
 
-### 5. Reservation (예약)
+### 5. Facility (설비)
+- **id**: PK, Auto Increment
+- **name**: 시설 코드/키 (Unique)
+- **label**: 표시 이름(설명)
+- **is_active**: 활성 여부
+
+### 6. Office_Room_Facility
+- **room_id**: OfficeRoom FK
+- **facility_id**: Facility FK
+
+### 7. Reservation (예약)
 
 - **id**: PK, Auto Increment
 - **title**: 예약 제목
@@ -165,7 +176,17 @@ frontend/
 - **status**: 예약 상태 (PENDING, CONFIRMED, CANCELED 등)
 - **version**: 낙관적 락 버전 관리
 
-### 6. UpdateLog (변경 로그)
+### 8. Review (후기)
+
+- **id**: PK, Auto Increment
+- **reservation_id**: Reservation FK (Unique → 예약 1건당 후기 1개)
+- **author_user_id**: 작성자 AppUser FK
+- **office_id**: Office FK
+- **room_id**: OfficeRoom FK
+- **rating**: 평점 (1~5)
+- **content**: 후기 내용
+
+### 9. UpdateLog (변경 로그)
 
 - **id**: PK, Auto Increment
 - **reservation_id**: 관련 예약 ID (FK)
@@ -174,6 +195,13 @@ frontend/
 - **before_data**: 변경 전 데이터 (JSONB)
 - **after_data**: 변경 후 데이터 (JSONB)
 - **occurred_at**: 발생 시각
+
+### 10. RefreshToken(jwt 토큰)
+
+- **id**: PK, Auto Increment
+- **token**: RefreshToken(Unique)
+- **account_id**: Account FK (Unique → 계정당 Refresh Token 1개 보장)
+- **expiry_date**: 만료 시각
 
 ---
 
