@@ -181,8 +181,6 @@ frontend/
 - **id**: PK, Auto Increment
 - **reservation_id**: Reservation FK (Unique → 예약 1건당 후기 1개)
 - **author_user_id**: 작성자 AppUser FK
-- **office_id**: Office FK
-- **room_id**: OfficeRoom FK
 - **rating**: 평점 (1~5)
 - **content**: 후기 내용
 
