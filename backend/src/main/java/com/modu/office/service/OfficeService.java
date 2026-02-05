@@ -36,7 +36,9 @@ public class OfficeService {
                 .name(request.getName())
                 .location(request.getLocation())
                 .latitude(request.getLatitude())
-                .longitude(request.getLongitude());
+                .longitude(request.getLongitude())
+                .openTime(request.getOpenTime())
+                .closeTime(request.getCloseTime());
 
         // 좌표가 없고 주소가 있는 경우 지오코딩 시도
         if (request.getLatitude() == null && request.getLongitude() == null && request.getLocation() != null) {
@@ -89,6 +91,14 @@ public class OfficeService {
                 office.setLatitude(latLng.lat);
                 office.setLongitude(latLng.lng);
             });
+        }
+
+        // 영업시간 업데이트
+        if (request.getOpenTime() != null) {
+            office.setOpenTime(request.getOpenTime());
+        }
+        if (request.getCloseTime() != null) {
+            office.setCloseTime(request.getCloseTime());
         }
 
         return OfficeResponse.fromEntity(office);
