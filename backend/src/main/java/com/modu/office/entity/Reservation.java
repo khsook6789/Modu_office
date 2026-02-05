@@ -19,7 +19,7 @@ public class Reservation extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 200)
+    @Column(name = "title", length = 200)
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

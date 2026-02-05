@@ -27,14 +27,6 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "author_user_id", nullable = false)
     private AppUser authorUser;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "office_id", nullable = false)
-    private Office office;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "room_id", nullable = false)
-    private OfficeRoom room;
-
     @Column(name = "rating", nullable = false)
     private Short rating;
 
@@ -42,13 +34,10 @@ public class Review extends BaseEntity {
     private String content;
 
     @Builder
-    public Review(Reservation reservation, AppUser authorUser, Office office, OfficeRoom room, Short rating,
-            String content) {
+    public Review(Reservation reservation, AppUser authorUser, Short rating, String content) {
         validateRating(rating);
         this.reservation = reservation;
         this.authorUser = authorUser;
-        this.office = office;
-        this.room = room;
         this.rating = rating;
         this.content = content;
     }
