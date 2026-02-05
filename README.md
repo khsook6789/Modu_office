@@ -114,6 +114,9 @@ frontend/
 
 ## 데이터베이스 스키마 (Database Schema)
 
+## ERD
+<img width="1326" height="2358" alt="Image" src="https://github.com/user-attachments/assets/2e57dead-fcf3-4f0d-8083-a2a05e3a15bb" />
+
 ### 1. Account (계정)
 
 - **id**: PK, Auto Increment
