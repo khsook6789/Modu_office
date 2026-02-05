@@ -121,19 +121,22 @@ frontend/
 
 - **id**: PK, Auto Increment
 - **email**: 사용자 이메일 (Unique)
-- **password_hash**: 암호화된 비밀번호
-- **status**: 계정 상태 (ACTIVE 등)
+- **password_hash**: 암호화된 비밀번호(LOCAL 로그인 시 사용, OAuth면 NULL 가능)
+- **login_type**: 로그인 타입 (LOCAL, NAVER 등)
+- **oauth_id**: OAuth 제공자 사용자 식별자 (NAVER user id )
+- **status**: 계정 상태 (ACTIVE, SUSPENDED, DELETED)
 
 ### 2. AppUser (사용자 프로필)
 
 - **id**: PK, Auto Increment
-- **account_id**: Account 테이블 외래키 (1:1 관계)
+- **account_id**: Account 테이블 FK (1:1 관계)
 - **name**: 사용자 이름
 - **role**: 사용자 권한 (CUSTOMER, OPERATOR, PLATFORM_ADMIN)
 
 ### 3. Office (지점)
 
 - **id**: PK, Auto Increment
+- **owner_user_id**: 지점 소유자(운영자) AppUser FK
 - **name**: 지점명
 - **location**: 지점 위치 (주소)
 - **latitude / longitude**: 위도 / 경도
