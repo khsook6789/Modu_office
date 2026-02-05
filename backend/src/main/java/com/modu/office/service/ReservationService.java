@@ -208,7 +208,7 @@ public class ReservationService {
             // 예약 수정 이벤트 발행 (감사 로그 자동 기록)
             eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                     reservation, beforeData, com.modu.office.entity.enums.LogAction.UPDATE,
-                    reservation.getCustomer()));
+                    reservation.getCustomer(), null));
 
             return ReservationResponse.fromEntity(reservation);
 
@@ -250,12 +250,63 @@ public class ReservationService {
         // 예약 취소 이벤트 발행 (감사 로그 자동 기록)
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getCustomer()));
+                reservation.getCustomer(), null));
+    }
+
+    /**
+     * 관리자 권한 예약 강제 취소 (adminReason 포함)
+     * <p>
+     * OPERATOR 또는 PLATFORM_ADMIN이 다른 사용자의 예약을 취소할 때 사용합니다.
+     * 취소 사유는 UpdateLog의 JSONB after_data 필드에 "adminReason" 키로 저장됩니다.
+     * </p>
+     *
+     * @param reservationId 취소할 예약 ID
+     * @param adminReason   관리자 취소 사유
+     * @param adminUser     실행자 (관리자)
+     * @return AdminCancelResponse (취소된 예약 정보 + 사유)
+     */
+    @Transactional
+    public com.modu.office.dto.response.AdminCancelResponse adminCancelReservation(
+            Long reservationId,
+            String adminReason,
+            AppUser adminUser) {
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId));
+
+        if (reservation.isCancelled()) {
+            throw new IllegalStateException("이미 취소된 예약입니다.");
+        }
+
+        // 변경 전 데이터 캡처
+        java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
+
+        // 예약 취소 처리
+        reservation.cancel();
+
+        // customData에 adminReason 포함 (LogEventListener에서 감지)
+        java.util.Map<String, Object> customData = java.util.Map.of("adminReason", adminReason);
+
+        // 예약 취소 이벤트 발행 (adminReason 포함)
+        eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
+                reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
+                adminUser, customData));
+
+        return new com.modu.office.dto.response.AdminCancelResponse(
+                reservationId,
+                reservation.getCustomer().getAccount().getEmail(),
+                java.time.LocalDateTime.now(),
+                adminReason);
     }
 
     /**
      * 예약 삭제 (hard delete)
+     * <p>
+     * WARNING: 이 메서드는 감사 로그 무결성을 해칠 수 있으므로 사용을 지양합니다.
+     * Phase 4에서 제거될 예정입니다.
+     * </p>
      */
+    @Deprecated
     @Transactional
     public void deleteReservation(Long id) {
         if (!reservationRepository.existsById(id)) {

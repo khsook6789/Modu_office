@@ -132,4 +132,64 @@ public class OfficeRoomService {
                 .map(OfficeRoomResponse::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 회의실 상태 일괄 변경
+     * <p>
+     * 특정 지점 내의 모든 회의실, 또는 필터 조건(층, 카테고리)에 맞는 회의실 상태를 일괄 변경합니다.
+     * Optimistic Lock(@Version)을 통해 동시성 제어가 자동으로 적용됩니다.
+     * </p>
+     *
+     * @param officeId 지점 ID
+     * @param request  일괄 변경 요청 (targetStatus, floor, category, reason)
+     * @return 변경 결과 (영향받은 회의실 수 및 ID 목록)
+     */
+    @Transactional
+    public com.modu.office.dto.response.BulkStatusUpdateResponse bulkUpdateRoomStatus(
+            Long officeId,
+            com.modu.office.dto.request.BulkRoomStatusRequest request) {
+
+        // 1. 지점 존재 확인
+        if (!officeRepository.existsById(officeId)) {
+            throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
+        }
+
+        // 2. 필터 조건에 맞는 회의실 조회
+        List<OfficeRoom> targetRooms;
+
+        if (request.floor() != null && request.category() != null) {
+            // 층과 카테고리 모두 필터링
+            targetRooms = officeRoomRepository.findByOfficeId(officeId).stream()
+                    .filter(room -> room.getFloor().equals(request.floor()))
+                    .filter(room -> request.category().equals(room.getCategory()))
+                    .collect(Collectors.toList());
+        } else if (request.floor() != null) {
+            // 층만 필터링
+            targetRooms = officeRoomRepository.findByOfficeId(officeId).stream()
+                    .filter(room -> room.getFloor().equals(request.floor()))
+                    .collect(Collectors.toList());
+        } else if (request.category() != null) {
+            // 카테고리만 필터링
+            targetRooms = officeRoomRepository.findByOfficeId(officeId).stream()
+                    .filter(room -> request.category().equals(room.getCategory()))
+                    .collect(Collectors.toList());
+        } else {
+            // 필터 없음 - 전체 회의실
+            targetRooms = officeRoomRepository.findByOfficeId(officeId);
+        }
+
+        // 3. 각 회의실의 상태 변경 (JPA Dirty Checking)
+        List<Long> affectedRoomIds = targetRooms.stream()
+                .map(room -> {
+                    room.setStatus(request.targetStatus());
+                    return room.getId();
+                })
+                .collect(Collectors.toList());
+
+        // 4. 결과 반환
+        return new com.modu.office.dto.response.BulkStatusUpdateResponse(
+                affectedRoomIds.size(),
+                affectedRoomIds,
+                request.targetStatus());
+    }
 }

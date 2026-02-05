@@ -3,9 +3,9 @@ package com.modu.office.entity.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum LogAction {
-    CREATE("create"),
-    UPDATE("update"),
-    CANCEL("cancel");
+    CREATE("CREATE"),
+    UPDATE("UPDATE"),
+    CANCEL("CANCEL");
 
     private final String value;
 

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalTime;
 
 /**
  * 지점 정보를 관리하는 엔티티
@@ -38,15 +39,31 @@ public class Office extends BaseEntity {
     @Column(name = "longitude")
     private Double longitude;
 
+    @Setter
+    @Column(name = "open_time", nullable = false)
+    private LocalTime openTime;
+
+    @Setter
+    @Column(name = "close_time", nullable = false)
+    private LocalTime closeTime;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_user_id", nullable = false)
+    private AppUser ownerUser;
+
     @OneToMany(mappedBy = "office", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OfficeRoom> rooms = new ArrayList<>();
 
     @Builder
-    public Office(String name, String location, Double latitude, Double longitude) {
+    public Office(String name, String location, Double latitude, Double longitude, LocalTime openTime,
+            LocalTime closeTime, AppUser ownerUser) {
         this.name = name;
         this.location = location;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.openTime = openTime;
+        this.closeTime = closeTime;
+        this.ownerUser = ownerUser;
     }
 
     public void addRoom(OfficeRoom room) {

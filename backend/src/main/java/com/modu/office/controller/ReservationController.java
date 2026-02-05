@@ -96,13 +96,4 @@ public class ReservationController {
         reservationService.cancelReservation(id);
         return ResponseEntity.ok(ApiResponse.success("예약이 취소되었습니다.", null));
     }
-
-    /**
-     * 예약 삭제 (hard delete)
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.ok(ApiResponse.success("예약이 삭제되었습니다.", null));
-    }
 }

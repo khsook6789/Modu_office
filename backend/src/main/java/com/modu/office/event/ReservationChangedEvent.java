@@ -19,4 +19,5 @@ public class ReservationChangedEvent {
     private final Map<String, Object> beforeData;
     private final LogAction action;
     private final AppUser actor;
+    private final Map<String, Object> customData; // adminReason 등 메타데이터 저장용
 }

@@ -47,15 +47,18 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .getUserInfoEndpoint()
                 .getUserNameAttributeName();
 
+        // registrationId로부터 역할 판단
+        UserRole userRole = determineUserRole(registrationId);
+
         // OAuth2UserInfo 생성
         OAuth2UserInfo oAuth2UserInfo = getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
 
         // 사용자 처리 (신규 가입 또는 기존 사용자)
-        Account account = processOAuth2User(oAuth2UserInfo);
+        Account account = processOAuth2User(oAuth2UserInfo, userRole);
         AppUser appUser = appUserRepository.findByAccount(account)
                 .orElseThrow(() -> new OAuth2AuthenticationException("User profile not found"));
 
-        log.info("OAuth2 login successful for user: {}", account.getEmail());
+        log.info("OAuth2 login successful for user: {} with role: {}", account.getEmail(), appUser.getRole());
 
         // Spring Security가 사용할 OAuth2User 객체 반환
         return new DefaultOAuth2User(
@@ -65,10 +68,27 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     /**
+     * registrationId로부터 사용자 역할 판단
+     */
+    private UserRole determineUserRole(String registrationId) {
+        if (registrationId.endsWith("-operator")) {
+            return UserRole.OPERATOR;
+        } else if (registrationId.endsWith("-customer")) {
+            return UserRole.CUSTOMER;
+        } else {
+            // 기존 사용자 호환성 유지 (naver만 사용하는 경우 CUSTOMER로 간주)
+            return UserRole.CUSTOMER;
+        }
+    }
+
+    /**
      * OAuth2 제공자별 사용자 정보 객체 생성
      */
     private OAuth2UserInfo getOAuth2UserInfo(String registrationId, java.util.Map<String, Object> attributes) {
-        if ("naver".equals(registrationId)) {
+        // registrationId에서 role 접미사 제거 (naver-customer, naver-operator -> naver)
+        String provider = registrationId.replace("-customer", "").replace("-operator", "");
+
+        if ("naver".equals(provider)) {
             return new NaverOAuth2UserInfo(attributes);
         }
         throw new OAuth2AuthenticationException("Unsupported OAuth2 provider: " + registrationId);
@@ -77,14 +97,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     /**
      * OAuth2 사용자 처리: 신규 가입 또는 기존 사용자 정보 업데이트
      */
-    private Account processOAuth2User(OAuth2UserInfo oAuth2UserInfo) {
+    private Account processOAuth2User(OAuth2UserInfo oAuth2UserInfo, UserRole userRole) {
         LoginType loginType = LoginType.valueOf(oAuth2UserInfo.getProvider().toUpperCase());
 
         // 기존 OAuth 계정 조회
         Account account = accountRepository.findByLoginTypeAndOauthId(loginType, oAuth2UserInfo.getProviderId())
                 .orElseGet(() -> {
                     // 신규 사용자 생성
-                    log.info("Creating new OAuth2 user: {}", oAuth2UserInfo.getEmail());
+                    log.info("Creating new OAuth2 user: {} with role: {}", oAuth2UserInfo.getEmail(), userRole);
                     Account newAccount = Account.builder()
                             .email(oAuth2UserInfo.getEmail())
                             .loginType(loginType)
@@ -92,11 +112,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .build();
                     Account savedAccount = accountRepository.save(newAccount);
 
-                    // AppUser 프로필 생성
+                    // AppUser 프로필 생성 (전달받은 role 사용)
                     AppUser newAppUser = AppUser.builder()
                             .account(savedAccount)
                             .name(oAuth2UserInfo.getName())
-                            .role(UserRole.CUSTOMER)
+                            .role(userRole)
                             .build();
                     appUserRepository.save(newAppUser);
 

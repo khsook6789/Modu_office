@@ -85,4 +85,21 @@ public class OfficeRoomController {
         officeRoomService.deleteRoom(roomId);
         return ResponseEntity.ok(ApiResponse.success("회의실이 삭제되었습니다.", null));
     }
+
+    /**
+     * 회의실 상태 일괄 변경
+     * <p>
+     * 특정 지점의 회의실 상태를 필터 조건(층, 카테고리)에 따라 일괄 변경합니다.
+     * OPERATOR와 PLATFORM_ADMIN만 접근 가능합니다.
+     * </p>
+     */
+    @PatchMapping("/offices/{id}/rooms/status")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    public ResponseEntity<ApiResponse<com.modu.office.dto.response.BulkStatusUpdateResponse>> bulkUpdateRoomStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody com.modu.office.dto.request.BulkRoomStatusRequest request) {
+        com.modu.office.dto.response.BulkStatusUpdateResponse response = officeRoomService.bulkUpdateRoomStatus(id,
+                request);
+        return ResponseEntity.ok(ApiResponse.success("회의실 상태가 일괄 변경되었습니다.", response));
+    }
 }

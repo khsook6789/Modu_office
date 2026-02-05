@@ -19,7 +19,7 @@ public class Reservation extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 200)
+    @Column(name = "title", length = 200)
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -85,13 +85,13 @@ public class Reservation extends BaseEntity {
      * 예약 취소
      */
     public void cancel() {
-        this.status = ReservationStatus.CANCELLED;
+        this.status = ReservationStatus.CANCELED;
     }
 
     /**
      * 예약이 취소되었는지 확인
      */
     public boolean isCancelled() {
-        return this.status == ReservationStatus.CANCELLED;
+        return this.status == ReservationStatus.CANCELED;
     }
 }
