@@ -67,6 +67,21 @@ public class OfficeRoomController {
     }
 
     /**
+     * 다중 시설 필터링 검색
+     * <p>
+     * facilityIds 파라미터로 지정된 모든 시설을 보유한 회의실만 검색합니다 (AND 검색).
+     * 예: facilityIds=1,2,3 → 시설 1 AND 2 AND 3을 모두 가진 방만 반환
+     * </p>
+     */
+    @GetMapping("/rooms/search")
+    public ResponseEntity<ApiResponse<List<OfficeRoomResponse>>> searchRooms(
+            @RequestParam Long officeId,
+            @RequestParam(required = false) List<Long> facilityIds) {
+        List<OfficeRoomResponse> rooms = officeRoomService.searchRoomsByFacilities(officeId, facilityIds);
+        return ResponseEntity.ok(ApiResponse.success(rooms));
+    }
+
+    /**
      * 회의실 정보 수정
      */
     @PutMapping("/rooms/{roomId}")

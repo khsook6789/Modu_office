@@ -26,7 +26,7 @@ public class AppUser extends BaseEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, columnDefinition = "user_role")
+    @Column(name = "role", nullable = false)
     private UserRole role = UserRole.CUSTOMER;
 
     @Builder

@@ -28,7 +28,7 @@ public class UpdateLog {
     private Reservation reservation;
 
     @Convert(converter = com.modu.office.entity.converter.LogActionConverter.class)
-    @Column(name = "action", nullable = false, columnDefinition = "log_action")
+    @Column(name = "action", nullable = false)
     private LogAction action;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -39,11 +39,11 @@ public class UpdateLog {
     private LocalDateTime occurredAt = LocalDateTime.now();
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "before_data", columnDefinition = "jsonb")
+    @Column(name = "before_data")
     private Map<String, Object> beforeData;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "after_data", columnDefinition = "jsonb")
+    @Column(name = "after_data")
     private Map<String, Object> afterData;
 
     @Builder

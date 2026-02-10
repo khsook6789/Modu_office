@@ -41,7 +41,7 @@ public class Reservation extends BaseEntity {
     private LocalDateTime endAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "reservation_status")
+    @Column(name = "status", nullable = false)
     private ReservationStatus status = ReservationStatus.PENDING;
 
     @Version

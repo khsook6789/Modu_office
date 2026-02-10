@@ -1,12 +1,17 @@
 package com.modu.office.service;
 
 import com.modu.office.dto.request.OfficeRoomRequest;
+import com.modu.office.dto.response.FacilityResponse;
 import com.modu.office.dto.response.OfficeRoomResponse;
+import com.modu.office.entity.Facility;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.OfficeRoomFacility;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
+import com.modu.office.repository.FacilityRepository;
 import com.modu.office.repository.OfficeRepository;
+import com.modu.office.repository.OfficeRoomFacilityRepository;
 import com.modu.office.repository.OfficeRoomRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +34,8 @@ public class OfficeRoomService {
     private final OfficeRoomRepository officeRoomRepository;
     private final OfficeRepository officeRepository;
     private final ReservationRepository reservationRepository;
+    private final FacilityRepository facilityRepository;
+    private final OfficeRoomFacilityRepository officeRoomFacilityRepository;
 
     /**
      * 새 회의실 생성
@@ -49,7 +56,13 @@ public class OfficeRoomService {
                 .build();
 
         OfficeRoom savedRoom = officeRoomRepository.save(room);
-        return OfficeRoomResponse.fromEntity(savedRoom);
+
+        // Facility 관계 매핑
+        if (request.getFacilityIds() != null && !request.getFacilityIds().isEmpty()) {
+            attachFacilitiesToRoom(savedRoom, request.getFacilityIds());
+        }
+
+        return buildRoomResponseWithFacilities(savedRoom);
     }
 
     /**
@@ -58,7 +71,7 @@ public class OfficeRoomService {
     public OfficeRoomResponse getRoomById(Long roomId) {
         OfficeRoom room = officeRoomRepository.findById(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
-        return OfficeRoomResponse.fromEntity(room);
+        return buildRoomResponseWithFacilities(room);
     }
 
     /**
@@ -71,7 +84,34 @@ public class OfficeRoomService {
         }
 
         return officeRoomRepository.findByOfficeId(officeId).stream()
-                .map(OfficeRoomResponse::fromEntity)
+                .map(this::buildRoomResponseWithFacilities)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 지정된 모든 시설을 보유한 회의실 검색 (AND 검색)
+     * 
+     * @param officeId    지점 ID
+     * @param facilityIds 필요한 시설 ID 목록
+     * @return 모든 시설을 보유한 회의실 목록
+     */
+    public List<OfficeRoomResponse> searchRoomsByFacilities(Long officeId, List<Long> facilityIds) {
+        // 지점 존재 여부 확인
+        if (!officeRepository.existsById(officeId)) {
+            throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
+        }
+
+        // facilityIds가 비어있으면 전체 검색
+        if (facilityIds == null || facilityIds.isEmpty()) {
+            return getRoomsByOfficeId(officeId);
+        }
+
+        // 다중 시설 AND 검색
+        return officeRoomRepository.findByOfficeIdAndFacilityIdsContainingAll(
+                officeId,
+                facilityIds,
+                facilityIds.size()).stream()
+                .map(this::buildRoomResponseWithFacilities)
                 .collect(Collectors.toList());
     }
 
@@ -91,7 +131,16 @@ public class OfficeRoomService {
         room.setCapacity(request.getCapacity());
         room.setCategory(request.getCategory());
 
-        return OfficeRoomResponse.fromEntity(room);
+        // Facility 관계 재설정
+        if (request.getFacilityIds() != null) {
+            // 기존 관계 삭제 후 새로 추가
+            officeRoomFacilityRepository.deleteByRoomId(roomId);
+            if (!request.getFacilityIds().isEmpty()) {
+                attachFacilitiesToRoom(room, request.getFacilityIds());
+            }
+        }
+
+        return buildRoomResponseWithFacilities(room);
     }
 
     /**
@@ -191,5 +240,49 @@ public class OfficeRoomService {
                 affectedRoomIds.size(),
                 affectedRoomIds,
                 request.targetStatus());
+    }
+
+    /**
+     * 회의실에 부대시설 연결
+     */
+    private void attachFacilitiesToRoom(OfficeRoom room, List<Long> facilityIds) {
+        List<Facility> facilities = facilityRepository.findAllById(facilityIds);
+
+        if (facilities.size() != facilityIds.size()) {
+            throw new EntityNotFoundException("일부 시설을 찾을 수 없습니다.");
+        }
+
+        List<OfficeRoomFacility> roomFacilities = facilities.stream()
+                .map(facility -> OfficeRoomFacility.builder()
+                        .room(room)
+                        .facility(facility)
+                        .build())
+                .collect(Collectors.toList());
+
+        officeRoomFacilityRepository.saveAll(roomFacilities);
+    }
+
+    /**
+     * 회의실 응답 DTO 생성 시 Facility 목록 포함
+     */
+    private OfficeRoomResponse buildRoomResponseWithFacilities(OfficeRoom room) {
+        List<OfficeRoomFacility> roomFacilities = officeRoomFacilityRepository.findByIdRoomId(room.getId());
+        List<FacilityResponse> facilities = roomFacilities.stream()
+                .map(rf -> FacilityResponse.fromEntity(rf.getFacility()))
+                .collect(Collectors.toList());
+
+        return OfficeRoomResponse.builder()
+                .id(room.getId())
+                .officeId(room.getOffice().getId())
+                .name(room.getName())
+                .roomCode(room.getRoomCode())
+                .floor(room.getFloor())
+                .status(room.getStatus())
+                .capacity(room.getCapacity())
+                .category(room.getCategory())
+                .facilities(facilities)
+                .createdAt(room.getCreatedAt())
+                .updatedAt(room.getUpdatedAt())
+                .build();
     }
 }

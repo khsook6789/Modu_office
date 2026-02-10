@@ -37,7 +37,7 @@ public class Account extends BaseEntity {
     private String oauthId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "account_status")
+    @Column(name = "status", nullable = false)
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @Builder
