@@ -115,6 +115,7 @@ frontend/
 ## 데이터베이스 스키마 (Database Schema)
 
 ## ERD
+
 <img width="2755" height="1290" alt="Image" src="https://github.com/user-attachments/assets/f5b08439-8d44-4f0b-b07b-cd86975b4ad2" />
 
 ### 1. Account (계정)
@@ -155,12 +156,14 @@ frontend/
 - **version**: 낙관적 락(Optimistic Lock) 버전 관리
 
 ### 5. Facility (설비)
+
 - **id**: PK, Auto Increment
 - **name**: 시설 코드/키 (Unique)
 - **label**: 표시 이름(설명)
 - **is_active**: 활성 여부
 
 ### 6. Office_Room_Facility
+
 - **room_id**: OfficeRoom FK
 - **facility_id**: Facility FK
 
@@ -232,11 +235,21 @@ frontend/
 - `POST /offices/{officeId}/rooms`: 공간 생성
 - `GET /offices/{officeId}/rooms`: 지점별 공간 조회 (필터링 가능)
 - `GET /rooms/{roomId}`: 특정 공간 조회
+- `GET /rooms/search`: 다중 편의시설 기반 회의실 검색 (AND 조건)
 - `PUT /rooms/{roomId}`: 공간 정보 수정
 - `DELETE /rooms/{roomId}`: 공간 삭제
 - `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (OPERATOR/PLATFORM_ADMIN 전용)
 
-### 4. 예약 관리 (Reservation)
+### 4. 편의시설 관리 (Facility)
+
+- `POST /admin/facilities`: 편의시설 생성 (Admin)
+- `GET /facilities`: 활성 편의시설 목록 조회
+- `GET /admin/facilities`: 전체 편의시설 목록 조회 (Admin)
+- `GET /admin/facilities/{id}`: 편의시설 상세 조회 (Admin)
+- `PUT /admin/facilities/{id}`: 편의시설 수정 (Admin)
+- `DELETE /admin/facilities/{id}`: 편의시설 삭제 (Admin)
+
+### 5. 예약 관리 (Reservation)
 
 - `POST /reservations`: 예약 생성
 - `GET /reservations`: 예약 목록 조회 (필터링 가능)
@@ -246,11 +259,11 @@ frontend/
 - `POST /reservations/{id}/cancel`: 예약 취소
 - ~~`DELETE /reservations/{id}`: 예약 삭제~~ (감사 로그 무결성 보호를 위해 제거됨)
 
-### 5. 관리자 전용 예약 관리 (Admin Reservation)
+### 6. 관리자 전용 예약 관리 (Admin Reservation)
 
 - `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (OPERATOR/PLATFORM_ADMIN 전용)
 
-### 6. 감사 로그 (UpdateLog)
+### 7. 감사 로그 (UpdateLog)
 
 - `GET /logs`: 전체 로그 조회
 - `GET /logs/reservation/{reservationId}`: 특정 예약 로그 조회
