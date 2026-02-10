@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 /**
  * OfficeRoom 비즈니스 로직 서비스
  */
-@SuppressWarnings("null")
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -42,6 +41,9 @@ public class OfficeRoomService {
      */
     @Transactional
     public OfficeRoomResponse createRoom(Long officeId, OfficeRoomRequest request) {
+        java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다.");
+        java.util.Objects.requireNonNull(request, "요청 정보는 필수입니다.");
+
         Office office = officeRepository.findById(officeId)
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId));
 
@@ -55,7 +57,7 @@ public class OfficeRoomService {
                 .category(request.getCategory())
                 .build();
 
-        OfficeRoom savedRoom = officeRoomRepository.save(room);
+        OfficeRoom savedRoom = officeRoomRepository.save(java.util.Objects.requireNonNull(room));
 
         // Facility 관계 매핑
         if (request.getFacilityIds() != null && !request.getFacilityIds().isEmpty()) {
@@ -69,7 +71,7 @@ public class OfficeRoomService {
      * ID로 회의실 조회
      */
     public OfficeRoomResponse getRoomById(Long roomId) {
-        OfficeRoom room = officeRoomRepository.findById(roomId)
+        OfficeRoom room = officeRoomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
         return buildRoomResponseWithFacilities(room);
     }
@@ -79,7 +81,7 @@ public class OfficeRoomService {
      */
     public List<OfficeRoomResponse> getRoomsByOfficeId(Long officeId) {
         // 지점 존재 여부 확인
-        if (!officeRepository.existsById(officeId)) {
+        if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
             throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
         }
 
@@ -97,7 +99,7 @@ public class OfficeRoomService {
      */
     public List<OfficeRoomResponse> searchRoomsByFacilities(Long officeId, List<Long> facilityIds) {
         // 지점 존재 여부 확인
-        if (!officeRepository.existsById(officeId)) {
+        if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
             throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
         }
 
@@ -120,7 +122,7 @@ public class OfficeRoomService {
      */
     @Transactional
     public OfficeRoomResponse updateRoom(Long roomId, OfficeRoomRequest request) {
-        OfficeRoom room = officeRoomRepository.findById(roomId)
+        OfficeRoom room = officeRoomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // Service 레이어에서 직접 필드 업데이트
@@ -148,7 +150,7 @@ public class OfficeRoomService {
      */
     @Transactional
     public void deleteRoom(Long roomId) {
-        if (!officeRoomRepository.existsById(roomId)) {
+        if (!officeRoomRepository.existsById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))) {
             throw new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId);
         }
 
@@ -199,7 +201,7 @@ public class OfficeRoomService {
             com.modu.office.dto.request.BulkRoomStatusRequest request) {
 
         // 1. 지점 존재 확인
-        if (!officeRepository.existsById(officeId)) {
+        if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
             throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
         }
 
@@ -246,7 +248,8 @@ public class OfficeRoomService {
      * 회의실에 부대시설 연결
      */
     private void attachFacilitiesToRoom(OfficeRoom room, List<Long> facilityIds) {
-        List<Facility> facilities = facilityRepository.findAllById(facilityIds);
+        List<Facility> facilities = facilityRepository
+                .findAllById(java.util.Objects.requireNonNull(facilityIds, "시설 ID 목록은 필수입니다."));
 
         if (facilities.size() != facilityIds.size()) {
             throw new EntityNotFoundException("일부 시설을 찾을 수 없습니다.");
@@ -259,7 +262,7 @@ public class OfficeRoomService {
                         .build())
                 .collect(Collectors.toList());
 
-        officeRoomFacilityRepository.saveAll(roomFacilities);
+        officeRoomFacilityRepository.saveAll(java.util.Objects.requireNonNull(roomFacilities));
     }
 
     /**

@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Import(JpaConfig.class)
 @DisplayName("OfficeRoomFacilityRepository 통합 테스트")
+@SuppressWarnings("null")
 class OfficeRoomFacilityRepositoryTest {
 
         @Autowired

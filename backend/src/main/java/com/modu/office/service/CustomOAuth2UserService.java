@@ -110,7 +110,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .loginType(loginType)
                             .oauthId(oAuth2UserInfo.getProviderId())
                             .build();
-                    Account savedAccount = accountRepository.save(newAccount);
+                    Account savedAccount = accountRepository.save(java.util.Objects.requireNonNull(newAccount));
 
                     // AppUser 프로필 생성 (전달받은 role 사용)
                     AppUser newAppUser = AppUser.builder()
@@ -118,7 +118,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .name(oAuth2UserInfo.getName())
                             .role(userRole)
                             .build();
-                    appUserRepository.save(newAppUser);
+                    appUserRepository.save(java.util.Objects.requireNonNull(newAppUser));
 
                     return savedAccount;
                 });

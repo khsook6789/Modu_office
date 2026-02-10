@@ -32,28 +32,28 @@ public class AuthService {
         private final AuthenticationManager authenticationManager;
         private final JwtTokenProvider tokenProvider;
 
-        @SuppressWarnings("null")
         @Transactional
         public void signupCustomer(CustomerSignupRequest request) {
+                java.util.Objects.requireNonNull(request, "회원가입 요청 정보는 필수입니다.");
                 validateEmail(request.getEmail());
 
                 Account account = Account.builder()
                                 .email(request.getEmail())
                                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                                 .build();
-                accountRepository.save(account);
+                accountRepository.save(java.util.Objects.requireNonNull(account));
 
                 AppUser appUser = AppUser.builder()
                                 .account(account)
                                 .name(request.getName())
                                 .role(UserRole.CUSTOMER)
                                 .build();
-                appUserRepository.save(appUser);
+                appUserRepository.save(java.util.Objects.requireNonNull(appUser));
         }
 
-        @SuppressWarnings("null")
         @Transactional
         public void signupOperator(OperatorSignupRequest request) {
+                java.util.Objects.requireNonNull(request, "회원가입 요청 정보는 필수입니다.");
                 validateEmail(request.getEmail());
 
                 // For real-world apps, operator signup might need admin approval or specific
@@ -62,14 +62,14 @@ public class AuthService {
                                 .email(request.getEmail())
                                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                                 .build();
-                accountRepository.save(account);
+                accountRepository.save(java.util.Objects.requireNonNull(account));
 
                 AppUser appUser = AppUser.builder()
                                 .account(account)
                                 .name(request.getName())
                                 .role(UserRole.OPERATOR)
                                 .build();
-                appUserRepository.save(appUser);
+                appUserRepository.save(java.util.Objects.requireNonNull(appUser));
         }
 
         @Transactional
@@ -110,7 +110,8 @@ public class AuthService {
 
         @Transactional
         public TokenResponse refreshAccessToken(String refreshTokenValue) {
-                RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
+                RefreshToken refreshToken = refreshTokenRepository
+                                .findByToken(java.util.Objects.requireNonNull(refreshTokenValue, "리프레시 토큰은 필수입니다."))
                                 .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
 
                 if (refreshToken.isExpired()) {
@@ -130,7 +131,6 @@ public class AuthService {
                                 .build();
         }
 
-        @SuppressWarnings("null")
         private TokenResponse createTokenResponse(Authentication authentication, Account account) {
                 String accessToken = tokenProvider.generateAccessToken(authentication);
                 String refreshTokenValue = tokenProvider.generateRefreshToken();
@@ -148,7 +148,7 @@ public class AuthService {
                                                 .expiryDate(expiryDate)
                                                 .build());
 
-                refreshTokenRepository.save(refreshToken);
+                refreshTokenRepository.save(java.util.Objects.requireNonNull(refreshToken));
 
                 return TokenResponse.builder()
                                 .accessToken(accessToken)

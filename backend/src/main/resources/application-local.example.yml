@@ -1,0 +1,53 @@
+# ==========================================
+# application-local.example.yml
+# 로컬 개발 환경 설정 템플릿 (팀 공유용)
+# 이 파일을 복사하여 'application-local.yml'을 생성하고,
+# 실제 값({ ... })을 채워서 사용하세요.
+# ==========================================
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/modu_office?stringtype=unspecified
+    username: "{ postgres_username }"
+    password: "{ postgres_password }"
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          # Customer 전용 OAuth2 로그인
+          naver-customer:
+            provider: naver
+            client-id: "{ naver_client_id }"
+            client-secret: "{ naver_client_secret }"
+            # {baseUrl}을 사용하면 http://localhost:8080 등으로 자동 매핑됩니다.
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-customer"
+            authorization-grant-type: authorization_code
+            scope: name,email
+            client-name: Naver (Customer)
+
+          # Operator 전용 OAuth2 로그인
+          naver-operator:
+            provider: naver
+            client-id: "{ naver_client_id }"
+            client-secret: "{ naver_client_secret }"
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-operator"
+            authorization-grant-type: authorization_code
+            scope: name,email
+            client-name: Naver (Operator)
+
+app:
+  jwt:
+    secret: "{ jwt_secret_key_base64 }" # Base64 인코딩된 32바이트 이상 문자열
+    access-token-expiration-milliseconds: 3600000 # 1 hour
+    refresh-token-expiration-milliseconds: 604800000 # 7 days
+
+google:
+  maps:
+    api-key: "{ google_maps_api_key }"

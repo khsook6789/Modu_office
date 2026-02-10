@@ -13,7 +13,9 @@ public class NaverOAuth2UserInfo implements OAuth2UserInfo {
 
     public NaverOAuth2UserInfo(Map<String, Object> attributes) {
         // 네이버는 사용자 정보를 "response" 키 안에 포함
-        this.attributes = (Map<String, Object>) attributes.get("response");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+        this.attributes = response;
     }
 
     @Override

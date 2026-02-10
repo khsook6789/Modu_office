@@ -14,6 +14,7 @@ import com.modu.office.repository.OfficeRoomRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,8 @@ import java.util.stream.Collectors;
 /**
  * Reservation 비즈니스 로직 서비스
  */
-@SuppressWarnings("null")
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -52,13 +54,16 @@ public class ReservationService {
             validateTimeRange(request.getStartAt(), request.getEndAt());
 
             // 2. 관련 엔티티 존재 확인
-            Office office = officeRepository.findById(request.getOfficeId())
+            Office office = officeRepository
+                    .findById(java.util.Objects.requireNonNull(request.getOfficeId(), "지점 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + request.getOfficeId()));
 
-            OfficeRoom room = officeRoomRepository.findById(request.getRoomId())
+            OfficeRoom room = officeRoomRepository
+                    .findById(java.util.Objects.requireNonNull(request.getRoomId(), "회의실 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + request.getRoomId()));
 
-            AppUser customer = appUserRepository.findById(request.getCustomerId())
+            AppUser customer = appUserRepository
+                    .findById(java.util.Objects.requireNonNull(request.getCustomerId(), "사용자 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + request.getCustomerId()));
 
             // 3. 회의실이 해당 지점에 속하는지 확인
@@ -91,7 +96,7 @@ public class ReservationService {
                     .status(ReservationStatus.PENDING)
                     .build();
 
-            Reservation savedReservation = reservationRepository.save(reservation);
+            Reservation savedReservation = reservationRepository.save(java.util.Objects.requireNonNull(reservation));
 
             // 예약 생성 이벤트 발행 (감사 로그 자동 기록)
             eventPublisher.publishEvent(new com.modu.office.event.ReservationCreatedEvent(
@@ -109,7 +114,7 @@ public class ReservationService {
      * ID로 예약 조회
      */
     public ReservationResponse getReservationById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
         return ReservationResponse.fromEntity(reservation);
     }
@@ -159,7 +164,8 @@ public class ReservationService {
     @Transactional
     public ReservationResponse updateReservation(Long id, ReservationUpdateRequest request) {
         try {
-            Reservation reservation = reservationRepository.findById(id)
+            Reservation reservation = reservationRepository
+                    .findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
 
             // 취소된 예약은 수정 불가
@@ -195,13 +201,17 @@ public class ReservationService {
 
             // 상태 수정 (직접 setter 사용 - 일반적인 업데이트용)
             if (request.getStatus() != null) {
-                // 특정 상태 전환은 도메인 메소드 사용 권장
                 if (request.getStatus() == ReservationStatus.CONFIRMED
                         && reservation.getStatus() == ReservationStatus.PENDING) {
                     reservation.confirm();
+                } else if (request.getStatus() == ReservationStatus.CANCELED) {
+                    // 취소 요청은 cancel 메서드 사용 권장하지만, update로 들어온 경우도 처리
+                    reservation.cancel();
                 } else {
-                    // 기타 상태 변경은 setter 추가 필요
-                    // 임시로 리플렉션 사용 또는 setter 추가
+                    // 기타 상태 변경 (예: PENDING으로 되돌리기 등 관리자 기능)
+                    // 현재 도메인 로직상 명시적인 메서드가 없으므로, 필요한 경우 도메인 엔티티에 메서드 추가 필요
+                    // 여기서는 유효하지 않은 상태 변경 요청으로 간주하거나 무시할 수 있음
+                    log.warn("지원하지 않는 상태 변경 요청 무시됨: {} -> {}", reservation.getStatus(), request.getStatus());
                 }
             }
 
@@ -223,7 +233,7 @@ public class ReservationService {
      */
     @Transactional
     public ReservationResponse confirmReservation(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
 
         reservation.confirm();
@@ -235,7 +245,7 @@ public class ReservationService {
      */
     @Transactional
     public void cancelReservation(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
 
         if (reservation.isCancelled()) {
@@ -271,7 +281,8 @@ public class ReservationService {
             String adminReason,
             AppUser adminUser) {
 
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository
+                .findById(java.util.Objects.requireNonNull(reservationId, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId));
 
         if (reservation.isCancelled()) {
@@ -309,6 +320,7 @@ public class ReservationService {
     @Deprecated
     @Transactional
     public void deleteReservation(Long id) {
+        java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다.");
         if (!reservationRepository.existsById(id)) {
             throw new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id);
         }
@@ -319,6 +331,9 @@ public class ReservationService {
      * 시간 범위 유효성 검증
      */
     private void validateTimeRange(LocalDateTime startAt, LocalDateTime endAt) {
+        java.util.Objects.requireNonNull(startAt, "시작 시간은 필수입니다.");
+        java.util.Objects.requireNonNull(endAt, "종료 시간은 필수입니다.");
+
         if (endAt.isBefore(startAt) || endAt.isEqual(startAt)) {
             throw new IllegalArgumentException("종료 시간은 시작 시간 이후여야 합니다.");
         }

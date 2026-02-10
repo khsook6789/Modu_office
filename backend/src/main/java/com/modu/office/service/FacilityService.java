@@ -33,6 +33,8 @@ public class FacilityService {
      */
     @Transactional
     public FacilityResponse createFacility(FacilityRequest request) {
+        java.util.Objects.requireNonNull(request, "요청 정보는 필수입니다.");
+
         // 중복 검증
         if (facilityRepository.existsByName(request.getName())) {
             throw new IllegalArgumentException("이미 존재하는 시설 코드입니다: " + request.getName());
@@ -44,7 +46,7 @@ public class FacilityService {
                 .isActive(request.getIsActive())
                 .build();
 
-        Facility savedFacility = facilityRepository.save(facility);
+        Facility savedFacility = facilityRepository.save(java.util.Objects.requireNonNull(facility));
         return FacilityResponse.fromEntity(savedFacility);
     }
 
@@ -52,7 +54,7 @@ public class FacilityService {
      * ID로 시설 조회
      */
     public FacilityResponse getFacilityById(Long id) {
-        Facility facility = facilityRepository.findById(id)
+        Facility facility = facilityRepository.findById(java.util.Objects.requireNonNull(id, "시설 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
         return FacilityResponse.fromEntity(facility);
     }
@@ -80,7 +82,7 @@ public class FacilityService {
      */
     @Transactional
     public FacilityResponse updateFacility(Long id, FacilityRequest request) {
-        Facility facility = facilityRepository.findById(id)
+        Facility facility = facilityRepository.findById(java.util.Objects.requireNonNull(id, "시설 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
 
         // 다른 시설이 동일한 name을 사용하는지 확인
@@ -106,7 +108,7 @@ public class FacilityService {
      */
     @Transactional
     public void deleteFacility(Long id) {
-        Facility facility = facilityRepository.findById(id)
+        Facility facility = facilityRepository.findById(java.util.Objects.requireNonNull(id, "시설 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
 
         // 사용 중인지 확인

@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 /**
  * Office 비즈니스 로직 서비스
  */
-@SuppressWarnings("null")
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,7 +47,7 @@ public class OfficeService {
             });
         }
 
-        Office savedOffice = officeRepository.save(officeBuilder.build());
+        Office savedOffice = officeRepository.save(java.util.Objects.requireNonNull(officeBuilder.build()));
         return OfficeResponse.fromEntity(savedOffice);
     }
 
@@ -56,7 +55,7 @@ public class OfficeService {
      * ID로 지점 조회
      */
     public OfficeResponse getOfficeById(Long id) {
-        Office office = officeRepository.findById(id)
+        Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
         return OfficeResponse.fromEntity(office);
     }
@@ -75,7 +74,7 @@ public class OfficeService {
      */
     @Transactional
     public OfficeResponse updateOffice(Long id, OfficeRequest request) {
-        Office office = officeRepository.findById(id)
+        Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
 
         // Service 레이어에서 직접 필드 업데이트
@@ -109,7 +108,7 @@ public class OfficeService {
      */
     @Transactional
     public void deleteOffice(Long id) {
-        if (!officeRepository.existsById(id)) {
+        if (!officeRepository.existsById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))) {
             throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id);
         }
 
