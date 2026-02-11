@@ -220,6 +220,9 @@ frontend/
   - `POST /auth/operator/signup`: 운영자 회원가입
   - `POST /auth/operator/login`: 운영자 로그인
   - `POST /auth/operator/refresh`: 토큰 갱신
+- **Admin**
+  - `GET /admin/operators/pending`: 승인 대기 중인 Operator 목록 조회
+  - `PATCH /admin/operators/{id}/approve`: Operator 승인 처리
 
 ### 2. 지점 관리 (Office)
 
