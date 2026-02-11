@@ -3,12 +3,16 @@ package com.modu.office.service;
 import com.modu.office.dto.request.OfficeRoomRequest;
 import com.modu.office.dto.response.FacilityResponse;
 import com.modu.office.dto.response.OfficeRoomResponse;
+import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Facility;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.OfficeRoom;
 import com.modu.office.entity.OfficeRoomFacility;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
+import com.modu.office.entity.enums.UserRole;
+import com.modu.office.repository.AccountRepository;
+import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.FacilityRepository;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.OfficeRoomFacilityRepository;
@@ -16,6 +20,7 @@ import com.modu.office.repository.OfficeRoomRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,17 +40,21 @@ public class OfficeRoomService {
     private final ReservationRepository reservationRepository;
     private final FacilityRepository facilityRepository;
     private final OfficeRoomFacilityRepository officeRoomFacilityRepository;
+    private final AccountRepository accountRepository;
+    private final AppUserRepository appUserRepository;
 
     /**
      * 새 회의실 생성
      */
     @Transactional
-    public OfficeRoomResponse createRoom(Long officeId, OfficeRoomRequest request) {
+    public OfficeRoomResponse createRoom(Long officeId, OfficeRoomRequest request, String email) {
         java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다.");
         java.util.Objects.requireNonNull(request, "요청 정보는 필수입니다.");
 
         Office office = officeRepository.findById(officeId)
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId));
+
+        validateOwnership(office, email);
 
         OfficeRoom room = OfficeRoom.builder()
                 .office(office)
@@ -121,9 +130,11 @@ public class OfficeRoomService {
      * 회의실 정보 수정
      */
     @Transactional
-    public OfficeRoomResponse updateRoom(Long roomId, OfficeRoomRequest request) {
+    public OfficeRoomResponse updateRoom(Long roomId, OfficeRoomRequest request, String email) {
         OfficeRoom room = officeRoomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
+
+        validateOwnership(room.getOffice(), email);
 
         // Service 레이어에서 직접 필드 업데이트
         room.setName(request.getName());
@@ -149,10 +160,11 @@ public class OfficeRoomService {
      * 회의실 삭제
      */
     @Transactional
-    public void deleteRoom(Long roomId) {
-        if (!officeRoomRepository.existsById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))) {
-            throw new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId);
-        }
+    public void deleteRoom(Long roomId, String email) {
+        OfficeRoom room = officeRoomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
+                .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
+
+        validateOwnership(room.getOffice(), email);
 
         // 활성 예약이 있는지 확인
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
@@ -198,12 +210,13 @@ public class OfficeRoomService {
     @Transactional
     public com.modu.office.dto.response.BulkStatusUpdateResponse bulkUpdateRoomStatus(
             Long officeId,
-            com.modu.office.dto.request.BulkRoomStatusRequest request) {
+            com.modu.office.dto.request.BulkRoomStatusRequest request,
+            String email) {
 
-        // 1. 지점 존재 확인
-        if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
-            throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
-        }
+        // 1. 지점 존재 및 소유권 확인
+        Office office = officeRepository.findById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))
+                .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId));
+        validateOwnership(office, email);
 
         // 2. 필터 조건에 맞는 회의실 조회
         List<OfficeRoom> targetRooms;
@@ -287,5 +300,22 @@ public class OfficeRoomService {
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
                 .build();
+    }
+
+    /**
+     * 소유권 검증 — PLATFORM_ADMIN은 모든 지점 접근 가능, OPERATOR는 소유한 지점만
+     */
+    private void validateOwnership(Office office, String email) {
+        AppUser currentUser = accountRepository.findByEmail(email)
+                .flatMap(account -> appUserRepository.findByAccount(account))
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. email: " + email));
+
+        if (currentUser.getRole() == UserRole.PLATFORM_ADMIN) {
+            return;
+        }
+
+        if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("해당 지점에 대한 권한이 없습니다.");
+        }
     }
 }

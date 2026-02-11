@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +28,10 @@ public class OfficeController {
      * 새 지점 생성
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<OfficeResponse>> createOffice(@Valid @RequestBody OfficeRequest request) {
-        OfficeResponse response = officeService.createOffice(request);
+    public ResponseEntity<ApiResponse<OfficeResponse>> createOffice(
+            @Valid @RequestBody OfficeRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        OfficeResponse response = officeService.createOffice(request, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("지점이 생성되었습니다.", response));
     }
@@ -56,8 +60,9 @@ public class OfficeController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<OfficeResponse>> updateOffice(
             @PathVariable Long id,
-            @Valid @RequestBody OfficeRequest request) {
-        OfficeResponse response = officeService.updateOffice(id, request);
+            @Valid @RequestBody OfficeRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        OfficeResponse response = officeService.updateOffice(id, request, userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("지점 정보가 수정되었습니다.", response));
     }
 
@@ -65,8 +70,10 @@ public class OfficeController {
      * 지점 삭제
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteOffice(@PathVariable Long id) {
-        officeService.deleteOffice(id);
+    public ResponseEntity<ApiResponse<Void>> deleteOffice(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        officeService.deleteOffice(id, userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("지점이 삭제되었습니다.", null));
     }
 

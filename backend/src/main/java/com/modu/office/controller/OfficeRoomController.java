@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +31,9 @@ public class OfficeRoomController {
     @PostMapping("/offices/{officeId}/rooms")
     public ResponseEntity<ApiResponse<OfficeRoomResponse>> createRoom(
             @PathVariable Long officeId,
-            @Valid @RequestBody OfficeRoomRequest request) {
-        OfficeRoomResponse response = officeRoomService.createRoom(officeId, request);
+            @Valid @RequestBody OfficeRoomRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        OfficeRoomResponse response = officeRoomService.createRoom(officeId, request, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("회의실이 생성되었습니다.", response));
     }
@@ -87,8 +90,9 @@ public class OfficeRoomController {
     @PutMapping("/rooms/{roomId}")
     public ResponseEntity<ApiResponse<OfficeRoomResponse>> updateRoom(
             @PathVariable Long roomId,
-            @Valid @RequestBody OfficeRoomRequest request) {
-        OfficeRoomResponse response = officeRoomService.updateRoom(roomId, request);
+            @Valid @RequestBody OfficeRoomRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        OfficeRoomResponse response = officeRoomService.updateRoom(roomId, request, userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("회의실 정보가 수정되었습니다.", response));
     }
 
@@ -96,8 +100,10 @@ public class OfficeRoomController {
      * 회의실 삭제
      */
     @DeleteMapping("/rooms/{roomId}")
-    public ResponseEntity<ApiResponse<Void>> deleteRoom(@PathVariable Long roomId) {
-        officeRoomService.deleteRoom(roomId);
+    public ResponseEntity<ApiResponse<Void>> deleteRoom(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        officeRoomService.deleteRoom(roomId, userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("회의실이 삭제되었습니다.", null));
     }
 
@@ -112,9 +118,10 @@ public class OfficeRoomController {
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<com.modu.office.dto.response.BulkStatusUpdateResponse>> bulkUpdateRoomStatus(
             @PathVariable Long id,
-            @Valid @RequestBody com.modu.office.dto.request.BulkRoomStatusRequest request) {
+            @Valid @RequestBody com.modu.office.dto.request.BulkRoomStatusRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
         com.modu.office.dto.response.BulkStatusUpdateResponse response = officeRoomService.bulkUpdateRoomStatus(id,
-                request);
+                request, userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("회의실 상태가 일괄 변경되었습니다.", response));
     }
 }

@@ -2,12 +2,17 @@ package com.modu.office.service;
 
 import com.modu.office.dto.request.OfficeRequest;
 import com.modu.office.dto.response.OfficeResponse;
+import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.enums.ReservationStatus;
+import com.modu.office.entity.enums.UserRole;
+import com.modu.office.repository.AccountRepository;
+import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,19 +30,24 @@ public class OfficeService {
     private final OfficeRepository officeRepository;
     private final GeocodingService geocodingService;
     private final ReservationRepository reservationRepository;
+    private final AccountRepository accountRepository;
+    private final AppUserRepository appUserRepository;
 
     /**
-     * 새 지점 생성
+     * 새 지점 생성 — 현재 로그인한 사용자를 소유자로 설정
      */
     @Transactional
-    public OfficeResponse createOffice(OfficeRequest request) {
+    public OfficeResponse createOffice(OfficeRequest request, String email) {
+        AppUser currentUser = findAppUserByEmail(email);
+
         Office.OfficeBuilder officeBuilder = Office.builder()
                 .name(request.getName())
                 .location(request.getLocation())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .openTime(request.getOpenTime())
-                .closeTime(request.getCloseTime());
+                .closeTime(request.getCloseTime())
+                .ownerUser(currentUser);
 
         // 좌표가 없고 주소가 있는 경우 지오코딩 시도
         if (request.getLatitude() == null && request.getLongitude() == null && request.getLocation() != null) {
@@ -70,12 +80,14 @@ public class OfficeService {
     }
 
     /**
-     * 지점 정보 수정
+     * 지점 정보 수정 — 소유권 검증 후 수정
      */
     @Transactional
-    public OfficeResponse updateOffice(Long id, OfficeRequest request) {
+    public OfficeResponse updateOffice(Long id, OfficeRequest request, String email) {
         Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
+
+        validateOwnership(office, email);
 
         // Service 레이어에서 직접 필드 업데이트
         office.setName(request.getName());
@@ -104,13 +116,14 @@ public class OfficeService {
     }
 
     /**
-     * 지점 삭제 (연결된 회의실도 함께 삭제됨)
+     * 지점 삭제 — 소유권 검증 후 삭제
      */
     @Transactional
-    public void deleteOffice(Long id) {
-        if (!officeRepository.existsById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))) {
-            throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id);
-        }
+    public void deleteOffice(Long id, String email) {
+        Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
+                .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
+
+        validateOwnership(office, email);
 
         // 활성 예약이 있는지 확인
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
@@ -118,11 +131,7 @@ public class OfficeService {
             throw new IllegalStateException("활성 상태의 예약이 있는 지점은 삭제할 수 없습니다. 지점 ID: " + id);
         }
 
-        // 활성 예약이 없다면, 나머지(취소된/완료된) 예약은 모두 삭제 (Cascade Delete)
-        // 회의실은 Office의 CascadeType.ALL에 의해 삭제되지만,
-        // Reservation이 회의실/지점을 참조하므로 먼저 정리해야 함
         reservationRepository.deleteAllByOfficeId(id);
-
         officeRepository.deleteById(id);
     }
 
@@ -151,5 +160,29 @@ public class OfficeService {
         return officeRepository.findNearBy(lat, lng, radius).stream()
                 .map(OfficeResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 소유권 검증 — PLATFORM_ADMIN은 모든 지점 접근 가능, OPERATOR는 소유한 지점만
+     */
+    private void validateOwnership(Office office, String email) {
+        AppUser currentUser = findAppUserByEmail(email);
+
+        if (currentUser.getRole() == UserRole.PLATFORM_ADMIN) {
+            return; // 관리자는 모든 지점 접근 가능
+        }
+
+        if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("해당 지점에 대한 권한이 없습니다.");
+        }
+    }
+
+    /**
+     * 이메일로 AppUser 조회
+     */
+    AppUser findAppUserByEmail(String email) {
+        return accountRepository.findByEmail(email)
+                .flatMap(account -> appUserRepository.findByAccount(account))
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. email: " + email));
     }
 }
