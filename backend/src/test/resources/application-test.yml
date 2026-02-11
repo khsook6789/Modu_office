@@ -18,6 +18,7 @@ spring:
     console:
       enabled: false
 
+  # OAuth2 더미 클라이언트 등록 (SecurityConfig의 oauth2Login이 ClientRegistrationRepository를 요구)
   security:
     oauth2:
       client:
@@ -26,9 +27,9 @@ spring:
             provider: naver
             client-id: test-client-id
             client-secret: test-client-secret
-            client-name: Test Naver (Customer)
+            client-name: Naver (Customer)
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8080/login/oauth2/code/naver-customer"
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-customer"
             scope:
               - name
               - email
@@ -36,9 +37,9 @@ spring:
             provider: naver
             client-id: test-client-id
             client-secret: test-client-secret
-            client-name: Test Naver (Operator)
+            client-name: Naver (Operator)
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8080/login/oauth2/code/naver-operator"
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-operator"
             scope:
               - name
               - email
