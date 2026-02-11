@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,7 +72,10 @@ public class ReservationService {
                 throw new IllegalArgumentException("회의실이 해당 지점에 속하지 않습니다.");
             }
 
-            // 4. 낙관적 락을 사용한 시간 충돌 확인
+            // 4. 영업시간 검증
+            validateBusinessHours(office, request.getStartAt(), request.getEndAt());
+
+            // 5. 낙관적 락을 사용한 시간 충돌 확인
             List<ReservationStatus> activeStatuses = Arrays.asList(
                     ReservationStatus.PENDING,
                     ReservationStatus.CONFIRMED);
@@ -85,7 +89,7 @@ public class ReservationService {
                 throw new IllegalStateException("해당 시간대에 이미 예약이 존재합니다.");
             }
 
-            // 5. 예약 생성
+            // 6. 예약 생성
             Reservation reservation = Reservation.builder()
                     .title(request.getTitle())
                     .office(office)
@@ -179,6 +183,9 @@ public class ReservationService {
             // 시간 수정
             if (request.getStartAt() != null && request.getEndAt() != null) {
                 validateTimeRange(request.getStartAt(), request.getEndAt());
+
+                // 영업시간 검증
+                validateBusinessHours(reservation.getOffice(), request.getStartAt(), request.getEndAt());
 
                 // 낙관적 락을 사용한 시간 충돌 확인 (현재 예약 제외)
                 List<ReservationStatus> activeStatuses = Arrays.asList(
@@ -341,6 +348,27 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now();
         if (startAt.isBefore(now)) {
             throw new IllegalArgumentException("시작 시간은 현재 시간 이후여야 합니다.");
+        }
+    }
+
+    /**
+     * 영업시간 검증
+     * <p>
+     * 예약 시작 및 종료 시간이 지점의 영업시간 내에 있는지 검증합니다.
+     * </p>
+     *
+     * @param office  지점 정보
+     * @param startAt 예약 시작 시간
+     * @param endAt   예약 종료 시간
+     */
+    private void validateBusinessHours(Office office, LocalDateTime startAt, LocalDateTime endAt) {
+        LocalTime startTime = startAt.toLocalTime();
+        LocalTime endTime = endAt.toLocalTime();
+
+        if (startTime.isBefore(office.getOpenTime()) || endTime.isAfter(office.getCloseTime())) {
+            throw new IllegalArgumentException(
+                    String.format("영업시간(%s~%s) 외 예약은 불가능합니다.",
+                            office.getOpenTime(), office.getCloseTime()));
         }
     }
 }

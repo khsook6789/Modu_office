@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "app_user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AppUser extends BaseEntity {
+public class AppUser extends BaseEntity implements org.springframework.security.core.userdetails.UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,5 +34,42 @@ public class AppUser extends BaseEntity {
         this.account = account;
         this.name = name;
         this.role = role != null ? role : UserRole.CUSTOMER;
+    }
+
+    // UserDetails Implementation
+    @Override
+    public java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> getAuthorities() {
+        return java.util.Collections.singletonList(
+                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + this.role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.account != null ? this.account.getPasswordHash() : null;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.account != null ? this.account.getEmail() : null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.account != null && this.account.getStatus() == com.modu.office.entity.enums.AccountStatus.ACTIVE;
     }
 }

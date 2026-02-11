@@ -3,12 +3,14 @@ package com.modu.office.controller;
 import com.modu.office.common.ApiResponse;
 import com.modu.office.dto.request.OfficeRoomRequest;
 import com.modu.office.dto.response.OfficeRoomResponse;
+import com.modu.office.entity.AppUser;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.service.OfficeRoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -87,8 +89,9 @@ public class OfficeRoomController {
     @PutMapping("/rooms/{roomId}")
     public ResponseEntity<ApiResponse<OfficeRoomResponse>> updateRoom(
             @PathVariable Long roomId,
-            @Valid @RequestBody OfficeRoomRequest request) {
-        OfficeRoomResponse response = officeRoomService.updateRoom(roomId, request);
+            @Valid @RequestBody OfficeRoomRequest request,
+            @AuthenticationPrincipal AppUser currentUser) {
+        OfficeRoomResponse response = officeRoomService.updateRoom(roomId, request, currentUser);
         return ResponseEntity.ok(ApiResponse.success("회의실 정보가 수정되었습니다.", response));
     }
 
@@ -96,8 +99,10 @@ public class OfficeRoomController {
      * 회의실 삭제
      */
     @DeleteMapping("/rooms/{roomId}")
-    public ResponseEntity<ApiResponse<Void>> deleteRoom(@PathVariable Long roomId) {
-        officeRoomService.deleteRoom(roomId);
+    public ResponseEntity<ApiResponse<Void>> deleteRoom(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal AppUser currentUser) {
+        officeRoomService.deleteRoom(roomId, currentUser);
         return ResponseEntity.ok(ApiResponse.success("회의실이 삭제되었습니다.", null));
     }
 

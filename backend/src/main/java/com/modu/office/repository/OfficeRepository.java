@@ -49,4 +49,12 @@ public interface OfficeRepository extends JpaRepository<Office, Long> {
      */
     @Query(value = "SELECT * FROM office WHERE (6371 * acos(cos(radians(:lat)) * cos(radians(latitude)) * cos(radians(longitude) - radians(:lng)) + sin(radians(:lat)) * sin(radians(latitude)))) < :radius ORDER BY (6371 * acos(cos(radians(:lat)) * cos(radians(latitude)) * cos(radians(longitude) - radians(:lng)) + sin(radians(:lat)) * sin(radians(latitude))))", nativeQuery = true)
     List<Office> findNearBy(@Param("lat") double lat, @Param("lng") double lng, @Param("radius") double radius);
+
+    /**
+     * 특정 운영자가 소유한 지점 목록 조회
+     * 
+     * @param ownerUser 지점 소유자(운영자)
+     * @return 해당 운영자가 소유한 지점 목록
+     */
+    List<Office> findAllByOwnerUser(com.modu.office.entity.AppUser ownerUser);
 }
