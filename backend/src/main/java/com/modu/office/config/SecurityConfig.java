@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -37,7 +39,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
 
-                        // Office management - Admin only for write operations
+                        // Office management - PLATFORM_ADMIN or OPERATOR only for write operations
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/offices/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/offices/**")
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
@@ -46,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/offices/**")
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
 
-                        // Room management - Admin only for write operations
+                        // Room management - PLATFORM_ADMIN or OPERATOR only for write operations
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/rooms/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/rooms/**")
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
@@ -54,6 +56,10 @@ public class SecurityConfig {
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/rooms/**")
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+
+                        // operator 가입 승인 - PLATFORM_ADMIN only
+                        .requestMatchers("/api/admin/operators/**").hasRole("PLATFORM_ADMIN")
+
                         .anyRequest().authenticated())
 
                 .oauth2Login(oauth2 -> oauth2
