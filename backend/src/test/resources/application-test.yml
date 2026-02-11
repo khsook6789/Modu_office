@@ -25,20 +25,24 @@ spring:
         registration:
           naver-customer:
             provider: naver
-            client-id: "test-client-id"
-            client-secret: "test-client-secret"
-            redirect-uri: "{baseUrl}/login/oauth2/code/naver-customer"
-            authorization-grant-type: authorization_code
-            scope: name,email
+            client-id: test-client-id
+            client-secret: test-client-secret
             client-name: Naver (Customer)
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-customer"
+            scope:
+              - name
+              - email
           naver-operator:
             provider: naver
-            client-id: "test-client-id"
-            client-secret: "test-client-secret"
-            redirect-uri: "{baseUrl}/login/oauth2/code/naver-operator"
-            authorization-grant-type: authorization_code
-            scope: name,email
+            client-id: test-client-id
+            client-secret: test-client-secret
             client-name: Naver (Operator)
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-operator"
+            scope:
+              - name
+              - email
         provider:
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize

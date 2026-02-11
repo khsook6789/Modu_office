@@ -6,8 +6,6 @@ import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.UserRole;
-import com.modu.office.repository.AccountRepository;
-import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,16 +28,12 @@ public class OfficeService {
     private final OfficeRepository officeRepository;
     private final GeocodingService geocodingService;
     private final ReservationRepository reservationRepository;
-    private final AccountRepository accountRepository;
-    private final AppUserRepository appUserRepository;
 
     /**
      * 새 지점 생성 — 현재 로그인한 사용자를 소유자로 설정
      */
     @Transactional
-    public OfficeResponse createOffice(OfficeRequest request, String email) {
-        AppUser currentUser = findAppUserByEmail(email);
-
+    public OfficeResponse createOffice(OfficeRequest request, AppUser currentUser) {
         Office.OfficeBuilder officeBuilder = Office.builder()
                 .name(request.getName())
                 .location(request.getLocation())
@@ -83,11 +77,12 @@ public class OfficeService {
      * 지점 정보 수정 — 소유권 검증 후 수정
      */
     @Transactional
-    public OfficeResponse updateOffice(Long id, OfficeRequest request, String email) {
+    public OfficeResponse updateOffice(Long id, OfficeRequest request, AppUser currentUser) {
         Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
 
-        validateOwnership(office, email);
+        // 운영자 권한 검증
+        validateOperatorAccess(currentUser, office);
 
         // Service 레이어에서 직접 필드 업데이트
         office.setName(request.getName());
@@ -119,11 +114,12 @@ public class OfficeService {
      * 지점 삭제 — 소유권 검증 후 삭제
      */
     @Transactional
-    public void deleteOffice(Long id, String email) {
+    public void deleteOffice(Long id, AppUser currentUser) {
         Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
 
-        validateOwnership(office, email);
+        // 운영자 권한 검증
+        validateOperatorAccess(currentUser, office);
 
         // 활성 예약이 있는지 확인
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
@@ -163,26 +159,33 @@ public class OfficeService {
     }
 
     /**
-     * 소유권 검증 — PLATFORM_ADMIN은 모든 지점 접근 가능, OPERATOR는 소유한 지점만
+     * 운영자 권한 검증
+     * <p>
+     * OPERATOR는 자신이 소유한 지점만 수정/삭제 가능.
+     * PLATFORM_ADMIN은 모든 지점 접근 가능.
+     * </p>
      */
-    private void validateOwnership(Office office, String email) {
-        AppUser currentUser = findAppUserByEmail(email);
-
-        if (currentUser.getRole() == UserRole.PLATFORM_ADMIN) {
-            return; // 관리자는 모든 지점 접근 가능
-        }
-
-        if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("해당 지점에 대한 권한이 없습니다.");
+    private void validateOperatorAccess(AppUser currentUser, Office office) {
+        if (currentUser.getRole() == UserRole.OPERATOR) {
+            if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
+                throw new AccessDeniedException("담당 지점이 아닙니다.");
+            }
         }
     }
 
     /**
-     * 이메일로 AppUser 조회
+     * 내 담당 지점 목록 조회
+     * <p>
+     * 현재 로그인한 사용자가 소유한 지점 목록을 반환합니다.
+     * </p>
+     *
+     * @param currentUser 현재 로그인한 사용자
+     * @return 담당 지점 목록
      */
-    AppUser findAppUserByEmail(String email) {
-        return accountRepository.findByEmail(email)
-                .flatMap(account -> appUserRepository.findByAccount(account))
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. email: " + email));
+    public List<OfficeResponse> getMyOffices(AppUser currentUser) {
+        List<Office> offices = officeRepository.findAllByOwnerUser(currentUser);
+        return offices.stream()
+                .map(OfficeResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 }
