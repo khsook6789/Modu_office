@@ -117,6 +117,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .account(savedAccount)
                             .name(oAuth2UserInfo.getName())
                             .role(userRole)
+                            .approvalStatus(userRole == UserRole.OPERATOR
+                                    ? com.modu.office.entity.enums.OperatorApprovalStatus.PENDING
+                                    : null)
                             .build();
                     appUserRepository.save(java.util.Objects.requireNonNull(newAppUser));
 
