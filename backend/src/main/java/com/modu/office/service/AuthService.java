@@ -8,6 +8,7 @@ import com.modu.office.dto.response.TokenResponse;
 import com.modu.office.entity.Account;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.RefreshToken;
+import com.modu.office.entity.enums.OperatorApprovalStatus;
 import com.modu.office.entity.enums.UserRole;
 import com.modu.office.repository.AccountRepository;
 import com.modu.office.repository.AppUserRepository;
@@ -56,8 +57,6 @@ public class AuthService {
                 java.util.Objects.requireNonNull(request, "회원가입 요청 정보는 필수입니다.");
                 validateEmail(request.getEmail());
 
-                // For real-world apps, operator signup might need admin approval or specific
-                // logic.
                 Account account = Account.builder()
                                 .email(request.getEmail())
                                 .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -68,6 +67,7 @@ public class AuthService {
                                 .account(account)
                                 .name(request.getName())
                                 .role(UserRole.OPERATOR)
+                                .approvalStatus(OperatorApprovalStatus.PENDING)
                                 .build();
                 appUserRepository.save(java.util.Objects.requireNonNull(appUser));
         }
@@ -103,6 +103,10 @@ public class AuthService {
 
                 if (appUser.getRole() != UserRole.OPERATOR) {
                         throw new IllegalArgumentException("Not authorized as Operator");
+                }
+
+                if (appUser.getApprovalStatus() != OperatorApprovalStatus.APPROVED) {
+                        throw new IllegalArgumentException("관리자 승인 대기 중입니다. 승인 후 로그인할 수 있습니다.");
                 }
 
                 return createTokenResponse(authentication, account);
