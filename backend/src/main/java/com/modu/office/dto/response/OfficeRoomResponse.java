@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import java.util.List;
+
 /**
  * OfficeRoom 응답 DTO
  */
@@ -26,6 +28,7 @@ public class OfficeRoomResponse {
     private RoomStatus status;
     private Integer capacity;
     private String category;
+    private List<FacilityResponse> facilities;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -42,6 +45,7 @@ public class OfficeRoomResponse {
                 .status(room.getStatus())
                 .capacity(room.getCapacity())
                 .category(room.getCategory())
+                .facilities(List.of()) // 기본값: 빈 리스트 (Service 레이어에서 설정)
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
                 .build();

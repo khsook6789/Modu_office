@@ -1,9 +1,9 @@
 package com.modu.office.security;
 
 import com.modu.office.entity.Account;
-import com.modu.office.entity.AppUser;
+
 import com.modu.office.repository.AccountRepository;
-import com.modu.office.repository.AppUserRepository;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,7 +29,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AccountRepository accountRepository;
-    private final AppUserRepository appUserRepository;
 
     @Value("${app.oauth2.redirect-uri:http://localhost:3000/oauth2/redirect}")
     private String redirectUri;
@@ -55,12 +54,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return;
         }
 
-        // Account 및 AppUser 조회
+        // Account 조회
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Account not found for email: " + email));
-
-        AppUser appUser = appUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalStateException("AppUser not found for account: " + email));
 
         // JWT 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(account.getEmail());
@@ -69,7 +65,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         log.info("OAuth2 login successful. Generated JWT tokens for user: {}", email);
 
         // 프론트엔드로 리다이렉트 (토큰을 쿼리 파라미터로 전달)
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+        String targetUrl = UriComponentsBuilder
+                .fromUriString(redirectUri != null ? redirectUri : "http://localhost:3000/oauth2/redirect")
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
                 .build()
@@ -84,6 +81,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private String extractEmail(Map<String, Object> attributes) {
         // 네이버의 경우 response 안에 이메일이 있음
         if (attributes.containsKey("response")) {
+            @SuppressWarnings("unchecked")
             Map<String, Object> response = (Map<String, Object>) attributes.get("response");
             return (String) response.get("email");
         }

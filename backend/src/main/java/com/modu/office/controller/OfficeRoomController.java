@@ -3,12 +3,14 @@ package com.modu.office.controller;
 import com.modu.office.common.ApiResponse;
 import com.modu.office.dto.request.OfficeRoomRequest;
 import com.modu.office.dto.response.OfficeRoomResponse;
+import com.modu.office.entity.AppUser;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.service.OfficeRoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +31,9 @@ public class OfficeRoomController {
     @PostMapping("/offices/{officeId}/rooms")
     public ResponseEntity<ApiResponse<OfficeRoomResponse>> createRoom(
             @PathVariable Long officeId,
-            @Valid @RequestBody OfficeRoomRequest request) {
-        OfficeRoomResponse response = officeRoomService.createRoom(officeId, request);
+            @Valid @RequestBody OfficeRoomRequest request,
+            @AuthenticationPrincipal AppUser currentUser) {
+        OfficeRoomResponse response = officeRoomService.createRoom(officeId, request, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("회의실이 생성되었습니다.", response));
     }
@@ -67,13 +70,29 @@ public class OfficeRoomController {
     }
 
     /**
+     * 다중 시설 필터링 검색
+     * <p>
+     * facilityIds 파라미터로 지정된 모든 시설을 보유한 회의실만 검색합니다 (AND 검색).
+     * 예: facilityIds=1,2,3 → 시설 1 AND 2 AND 3을 모두 가진 방만 반환
+     * </p>
+     */
+    @GetMapping("/rooms/search")
+    public ResponseEntity<ApiResponse<List<OfficeRoomResponse>>> searchRooms(
+            @RequestParam Long officeId,
+            @RequestParam(required = false) List<Long> facilityIds) {
+        List<OfficeRoomResponse> rooms = officeRoomService.searchRoomsByFacilities(officeId, facilityIds);
+        return ResponseEntity.ok(ApiResponse.success(rooms));
+    }
+
+    /**
      * 회의실 정보 수정
      */
     @PutMapping("/rooms/{roomId}")
     public ResponseEntity<ApiResponse<OfficeRoomResponse>> updateRoom(
             @PathVariable Long roomId,
-            @Valid @RequestBody OfficeRoomRequest request) {
-        OfficeRoomResponse response = officeRoomService.updateRoom(roomId, request);
+            @Valid @RequestBody OfficeRoomRequest request,
+            @AuthenticationPrincipal AppUser currentUser) {
+        OfficeRoomResponse response = officeRoomService.updateRoom(roomId, request, currentUser);
         return ResponseEntity.ok(ApiResponse.success("회의실 정보가 수정되었습니다.", response));
     }
 
@@ -81,8 +100,10 @@ public class OfficeRoomController {
      * 회의실 삭제
      */
     @DeleteMapping("/rooms/{roomId}")
-    public ResponseEntity<ApiResponse<Void>> deleteRoom(@PathVariable Long roomId) {
-        officeRoomService.deleteRoom(roomId);
+    public ResponseEntity<ApiResponse<Void>> deleteRoom(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal AppUser currentUser) {
+        officeRoomService.deleteRoom(roomId, currentUser);
         return ResponseEntity.ok(ApiResponse.success("회의실이 삭제되었습니다.", null));
     }
 
@@ -97,9 +118,10 @@ public class OfficeRoomController {
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<com.modu.office.dto.response.BulkStatusUpdateResponse>> bulkUpdateRoomStatus(
             @PathVariable Long id,
-            @Valid @RequestBody com.modu.office.dto.request.BulkRoomStatusRequest request) {
+            @Valid @RequestBody com.modu.office.dto.request.BulkRoomStatusRequest request,
+            @AuthenticationPrincipal AppUser currentUser) {
         com.modu.office.dto.response.BulkStatusUpdateResponse response = officeRoomService.bulkUpdateRoomStatus(id,
-                request);
+                request, currentUser);
         return ResponseEntity.ok(ApiResponse.success("회의실 상태가 일괄 변경되었습니다.", response));
     }
 }

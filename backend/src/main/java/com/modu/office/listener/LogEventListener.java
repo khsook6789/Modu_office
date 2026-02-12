@@ -29,7 +29,6 @@ public class LogEventListener {
          * 예약 생성 이벤트 처리
          * 트랜잭션이 최종 커밋된 후에만 실행되어 데이터 일관성 보장
          */
-        @SuppressWarnings("null")
         @Transactional(propagation = Propagation.REQUIRES_NEW)
         @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
         public void handleReservationCreated(ReservationCreatedEvent event) {
@@ -43,7 +42,7 @@ public class LogEventListener {
                                 .afterData(ReservationLogConverter.toMap(event.getReservation()))
                                 .build();
 
-                updateLogRepository.save(auditLog);
+                updateLogRepository.save(java.util.Objects.requireNonNull(auditLog));
                 log.info("Audit log created for new reservation ID: {}", event.getReservation().getId());
         }
 
@@ -54,7 +53,6 @@ public class LogEventListener {
          * customData가 존재하면 (예: adminReason) afterData JSONB에 병합합니다.
          * </p>
          */
-        @SuppressWarnings("null")
         @Transactional(propagation = Propagation.REQUIRES_NEW)
         @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
         public void handleReservationChanged(ReservationChangedEvent event) {
@@ -79,7 +77,7 @@ public class LogEventListener {
                                 .afterData(afterData)
                                 .build();
 
-                updateLogRepository.save(auditLog);
+                updateLogRepository.save(java.util.Objects.requireNonNull(auditLog));
                 log.info("Audit log created for reservation ID: {} with action: {}",
                                 event.getReservation().getId(), event.getAction());
         }

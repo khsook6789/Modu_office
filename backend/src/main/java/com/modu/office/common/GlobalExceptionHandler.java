@@ -79,6 +79,17 @@ public class GlobalExceptionHandler {
         }
 
         /**
+         * 접근 권한 없음 처리 (403 Forbidden)
+         */
+        @ExceptionHandler({ org.springframework.security.access.AccessDeniedException.class,
+                        org.springframework.security.authorization.AuthorizationDeniedException.class })
+        public ResponseEntity<ApiResponse<Void>> handleAccessDenied(Exception e) {
+                log.error("Access denied: {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body(ApiResponse.error("접근 권한이 없습니다."));
+        }
+
+        /**
          * 일반적인 서버 에러 처리 (500 Internal Server Error)
          */
         @ExceptionHandler(Exception.class)

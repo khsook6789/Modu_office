@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * OfficeRoom 생성/수정 요청 DTO
  */
@@ -37,4 +39,10 @@ public class OfficeRoomRequest {
 
     @Size(max = 100, message = "카테고리는 100자 이내여야 합니다.")
     private String category;
+
+    /**
+     * 회의실에 연결할 부대시설 ID 목록
+     * (선택적 필드, 비어있을 경우 시설 연결 없음)
+     */
+    private List<Long> facilityIds;
 }

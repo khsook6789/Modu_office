@@ -23,7 +23,7 @@ public class OperatorAuthController {
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@Valid @RequestBody OperatorSignupRequest request) {
         authService.signupOperator(request);
-        return ResponseEntity.ok("사용자 등록 완료");
+        return ResponseEntity.ok("가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
     }
 
     @PostMapping("/login")

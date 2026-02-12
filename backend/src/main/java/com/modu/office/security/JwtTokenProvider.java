@@ -1,9 +1,10 @@
 package com.modu.office.security;
 
+import com.modu.office.config.AppProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -12,25 +13,19 @@ import java.util.Date;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${app.jwt.secret}")
-    private String jwtSecret;
-
-    @Value("${app.jwt.access-token-expiration-milliseconds}")
-    private long accessTokenExpirationInMs;
-
-    @Value("${app.jwt.refresh-token-expiration-milliseconds}")
-    private long refreshTokenExpirationInMs;
+    private final AppProperties appProperties;
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        return Keys.hmacShaKeyFor(appProperties.jwt().secret().getBytes());
     }
 
     public String generateAccessToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + accessTokenExpirationInMs);
+        Date expiryDate = new Date(now.getTime() + appProperties.jwt().accessTokenExpirationMilliseconds());
 
         return Jwts.builder()
                 .setSubject(username)
@@ -43,7 +38,7 @@ public class JwtTokenProvider {
     // OAuth2 로그인을 위한 오버로드 메서드
     public String generateAccessToken(String email) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + accessTokenExpirationInMs);
+        Date expiryDate = new Date(now.getTime() + appProperties.jwt().accessTokenExpirationMilliseconds());
 
         return Jwts.builder()
                 .setSubject(email)
@@ -63,7 +58,7 @@ public class JwtTokenProvider {
     }
 
     public long getRefreshTokenExpirationInMs() {
-        return refreshTokenExpirationInMs;
+        return appProperties.jwt().refreshTokenExpirationMilliseconds();
     }
 
     public String getUsernameFromJWT(String token) {
