@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRooms } from '../../contexts/RoomContext';
-import RoomCard, { type Room } from './RoomCard';
+import RoomCard from './RoomCard';
 import Input from '../../components/Input';
+import { officeApi, type Office } from './api/office.api';
+import OfficeMap from '../../components/Map/OfficeMap'; // Import the new component
 import './RoomsListPage.css';
 
 // Mock Data removed - using properties from RoomContext
@@ -11,6 +13,15 @@ export default function RoomsListPage() {
     const { user } = useAuth();
     const { rooms, addRoom } = useRooms();
     const [filter, setFilter] = useState<'ALL' | 'AVAILABLE'>('ALL');
+    const [viewMode, setViewMode] = useState<'LIST' | 'MAP'>('LIST'); // New state for view mode
+    const [offices, setOffices] = useState<Office[]>([]); // New state for offices
+
+    useEffect(() => {
+        // Fetch offices when component mounts
+        officeApi.getAllOffices()
+            .then(data => setOffices(data))
+            .catch(err => console.error('Failed to fetch offices:', err));
+    }, []);
     
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,36 +57,64 @@ export default function RoomsListPage() {
                     <h1 className="text-3xl font-bold text-gradient">공간 예약</h1>
                     <p className="rooms-subtitle">회의에 적합한 공간을 찾아보세요</p>
                 </div>
-                {user?.role === 'ADMIN' && (
-                    <button 
-                        className="btn btn-primary"
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        + 회의실 추가
-                    </button>
-                )}
+                <div style={{ display: 'flex', gap: '10px' }}>
+                     <div className="view-toggle" style={{ display: 'flex', background: '#333', borderRadius: '8px', padding: '4px' }}>
+                        <button 
+                            className={`btn ${viewMode === 'LIST' ? 'btn-primary' : 'btn-ghost'}`}
+                            onClick={() => setViewMode('LIST')}
+                            style={{ padding: '6px 12px', fontSize: '14px' }}
+                        >
+                            목록
+                        </button>
+                        <button 
+                            className={`btn ${viewMode === 'MAP' ? 'btn-primary' : 'btn-ghost'}`}
+                            onClick={() => setViewMode('MAP')}
+                            style={{ padding: '6px 12px', fontSize: '14px' }}
+                        >
+                            지도
+                        </button>
+                    </div>
+
+                    {user?.role === 'ADMIN' && (
+                        <button 
+                            className="btn btn-primary"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            + 회의실 추가
+                        </button>
+                    )}
+                </div>
             </div>
 
-            <div className="filters-bar">
-                <button
-                    className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-                    onClick={() => setFilter('ALL')}
-                >
-                    전체
-                </button>
-                <button
-                    className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
-                    onClick={() => setFilter('AVAILABLE')}
-                >
-                    예약 가능
-                </button>
-            </div>
+            {viewMode === 'LIST' ? (
+                <>
+                    <div className="filters-bar">
+                        <button
+                            className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
+                            onClick={() => setFilter('ALL')}
+                        >
+                            전체
+                        </button>
+                        <button
+                            className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
+                            onClick={() => setFilter('AVAILABLE')}
+                        >
+                            예약 가능
+                        </button>
+                    </div>
 
-            <div className="rooms-grid">
-                {filteredRooms.map(room => (
-                    <RoomCard key={room.id} room={room} />
-                ))}
-            </div>
+                    <div className="rooms-grid">
+                        {filteredRooms.map(room => (
+                            <RoomCard key={room.id} room={room} />
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <div style={{ marginTop: '20px' }}>
+                     {/* Pass fetched offices to the map */}
+                    <OfficeMap offices={offices} />
+                </div>
+            )}
 
             {/* Simple Modal for Adding Room */}
             {isModalOpen && (

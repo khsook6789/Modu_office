@@ -1,5 +1,9 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { reviewApi, type Review } from '../reviews/api/review.api';
+import ReviewList from '../reviews/components/ReviewList';
+import ReviewForm from '../reviews/components/ReviewForm';
+import { useAuth } from '../../contexts/AuthContext';
 import './RoomDetailPage.css';
 
 // Mock Data (In real app, fetch by ID)
@@ -14,36 +18,121 @@ const ROOM_DETAILS = {
     pricePerHour: 50, // Mock price generic unit
 };
 
-const TIME_SLOTS = [
-    { time: '09:00', available: true },
-    { time: '10:00', available: false }, // Occupied
-    { time: '11:00', available: true },
-    { time: '13:00', available: true },
-    { time: '14:00', available: true },
-    { time: '15:00', available: false },
-    { time: '16:00', available: true },
-    { time: '17:00', available: true },
-];
-
 export default function RoomDetailPage() {
-    // const { id } = useParams();
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-    const [selectedTime, setSelectedTime] = useState<string | null>(null);
+    // Use params if available, otherwise mock ID
+    const { id } = useParams();
+    const roomId = id ? Number(id) : 1; // Default to 1 if no ID
+    const navigate = useNavigate();
+    const { user } = useAuth();
+
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [averageRating, setAverageRating] = useState(0);
+    const [loadingReviews, setLoadingReviews] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
 
     // Fallback if room not found in mock (just use the mock object mostly)
     const room = ROOM_DETAILS;
 
+    useEffect(() => {
+        loadReviews();
+        if (user) {
+            import('../wishlist/api/wishlist.api').then(({ wishlistApi }) => {
+                wishlistApi.isLiked(user.id, roomId).then(setIsLiked);
+            });
+        }
+    }, [roomId, user]);
+
+    const handleToggleWishlist = async () => {
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+        const { wishlistApi } = await import('../wishlist/api/wishlist.api');
+        const newState = await wishlistApi.toggleWishlist(user.id, roomId);
+        setIsLiked(newState);
+    };
+
+    const loadReviews = async () => {
+        setLoadingReviews(true);
+        try {
+            const data = await reviewApi.getReviewsByRoomId(roomId);
+            setReviews(data);
+
+            if (data.length > 0) {
+                const sum = data.reduce((acc, curr) => acc + curr.rating, 0);
+                setAverageRating(Number((sum / data.length).toFixed(1)));
+            } else {
+                setAverageRating(0);
+            }
+        } catch (error) {
+            console.error("Failed to load reviews", error);
+        } finally {
+            setLoadingReviews(false);
+        }
+    };
+
+    const handleReviewSubmit = async (rating: number, comment: string) => {
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            await reviewApi.createReview({
+                roomId,
+                userId: user.id,
+                userName: user.name,
+                rating,
+                comment,
+            });
+            await loadReviews(); // Reload to show new review
+        } catch (error) {
+            console.error("Failed to submit review", error);
+            alert('리뷰 등록에 실패했습니다.');
+        }
+    };
+
+    const handleDeleteReview = async (reviewId: string) => {
+        if (window.confirm('리뷰를 삭제하시겠습니까?')) {
+            try {
+                await reviewApi.deleteReview(reviewId);
+                await loadReviews();
+            } catch (error) {
+                console.error("Failed to delete review", error);
+            }
+        }
+    };
+
     const handleBook = () => {
-        alert(`${selectedDate} ${selectedTime}에 ${room.name} 예약이 확정되었습니다.`);
+        // Navigate to booking page with room ID
+        navigate(`/rooms/${roomId}/book`);
     };
 
     return (
         <div className="room-detail-page">
             <Link to="/rooms" className="back-link">← 목록으로 돌아가기</Link>
 
-            <div className="room-title-section">
-                <h1 className="text-3xl font-bold text-gradient">{room.name}</h1>
-                <p className="text-muted">📍 {room.location} • 👥 수용인원: {room.capacity}명</p>
+            <div className="room-title-section flex justify-between items-end">
+                <div className="flex items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gradient">{room.name}</h1>
+                        <p className="text-muted">📍 {room.location} • 👥 수용인원: {room.capacity}명</p>
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-2">
+                    <button
+                        onClick={handleToggleWishlist}
+                        className={`text-2xl transition-colors ${isLiked ? 'text-red-500' : 'text-gray-300 hover:text-red-300'}`}
+                        title={isLiked ? "관심 목록에서 제거" : "관심 목록에 추가"}
+                    >
+                        {isLiked ? '♥' : '♡'}
+                    </button>
+                    <div className="text-2xl font-bold text-yellow-500">
+                        ★ {averageRating} <span className="text-sm text-gray-400 font-normal">({reviews.length} reviews)</span>
+                    </div>
+                </div>
             </div>
 
             <div className="room-detail-grid">
@@ -68,6 +157,26 @@ export default function RoomDetailPage() {
                             ))}
                         </div>
                     </div>
+
+                    {/* Review Section */}
+                    <div className="info-section mt-xl pt-lg border-t">
+                        <h2 className="section-title mb-md">이용 후기</h2>
+
+                        {user ? (
+                            <ReviewForm onSubmit={handleReviewSubmit} />
+                        ) : (
+                            <div className="bg-gray-50 p-md rounded mb-lg text-center text-sm">
+                                <p className="text-muted mb-xs">후기를 작성하려면 로그인이 필요합니다.</p>
+                                <Link to="/login" className="text-primary font-bold hover:underline">로그인하기</Link>
+                            </div>
+                        )}
+
+                        {loadingReviews ? (
+                            <div className="text-center py-lg">Loading reviews...</div>
+                        ) : (
+                            <ReviewList reviews={reviews} onDelete={handleDeleteReview} />
+                        )}
+                    </div>
                 </div>
 
                 {/* Right Column: Booking Widget */}
@@ -75,43 +184,16 @@ export default function RoomDetailPage() {
                     <div className="booking-widget">
                         <h2 className="widget-title">이 공간 예약하기</h2>
 
-                        <div className="date-picker-wrapper">
-                            <label className="input-label text-sm font-bold mb-xs block">날짜 선택</label>
-                            <input
-                                type="date"
-                                className="input-field"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                            />
-                        </div>
-
-                        <label className="input-label text-sm font-bold mb-xs block">시간 선택</label>
-                        <div className="time-grid">
-                            {TIME_SLOTS.map((slot) => (
-                                <button
-                                    key={slot.time}
-                                    className={`time-slot ${selectedTime === slot.time ? 'selected' : ''}`}
-                                    disabled={!slot.available}
-                                    onClick={() => setSelectedTime(slot.time)}
-                                >
-                                    {slot.time}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="summary-section mb-lg p-sm rounded-md" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                            <div className="flex-between text-sm mb-xs">
-                                <span className="text-muted">선택됨:</span>
-                                <span className="font-bold">{selectedDate} @ {selectedTime || '--:--'}</span>
-                            </div>
+                        {/* Date/Time selection moved to Booking Page */}
+                        <div className="p-md text-center bg-gray-50 rounded mb-lg">
+                            <p className="text-sm text-muted mb-sm">원하는 날짜와 시간을 선택하여<br />예약을 진행하세요.</p>
                         </div>
 
                         <button
                             className="btn btn-primary w-full py-3"
-                            disabled={!selectedTime}
                             onClick={handleBook}
                         >
-                            예약 확정
+                            예약하기
                         </button>
                     </div>
 

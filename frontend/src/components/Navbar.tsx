@@ -6,7 +6,7 @@ import './Navbar.css';
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
+
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export default function Navbar() {
 
   const toggleTheme = async () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    
+
     // View Transitions API support
     if (!document.startViewTransition) {
       setTheme(nextTheme);
@@ -68,9 +68,9 @@ export default function Navbar() {
         </Link>
 
         <div className="flex-center gap-md">
-          <button 
-            onClick={toggleTheme} 
-            className="btn-icon theme-toggle-btn" 
+          <button
+            onClick={toggleTheme}
+            className="btn-icon theme-toggle-btn"
             aria-label="Toggle theme"
             title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
           >
@@ -93,18 +93,40 @@ export default function Navbar() {
             )}
           </button>
           {user ? (
-            <>
-              {/* <Link to="/rooms" className="nav-link">회의실</Link>  Removed as it is redundant with the logo */}
+            <div className="flex-center gap-md">
+              {/* Common Links */}
+              <Link to="/community" className="nav-link">커뮤니티</Link>
               <Link to="/my-bookings" className="nav-link">내 예약</Link>
-              {user.role === 'ADMIN' && (
-                <Link to="/admin" className="nav-link text-accent">관리자</Link>
+
+              {/* Role Based Links */}
+              {(user.role === 'OPERATOR' || user.role === 'ADMIN') && (
+                <Link to="/operator" className="nav-link font-bold text-primary">운영자 대시보드</Link>
               )}
-              <div className="separator"></div>
-              <span className="text-sm text-muted">{user.name}님</span>
-              <button onClick={handleLogout} className="btn btn-secondary text-xs">로그아웃</button>
-            </>
+
+              {user.role === 'ADMIN' && (
+                <Link to="/admin" className="nav-link text-accent font-bold">관리자</Link>
+              )}
+
+              <div className="separator mx-sm h-4 border-l border-gray-300"></div>
+
+              {/* User Profile Area */}
+              <div className="flex items-center gap-sm">
+                <Link to="/mypage" className="flex items-center gap-xs hover:text-primary transition-colors">
+                  <span className="text-sm font-medium">{user.name}님</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-secondary text-xs px-3 py-1 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 transition-all"
+                >
+                  로그아웃
+                </button>
+              </div>
+            </div>
           ) : (
-            <Link to="/login" className="btn btn-primary">로그인</Link>
+            <div className="flex gap-sm">
+              <Link to="/login" className="btn btn-ghost text-sm">로그인</Link>
+              <Link to="/signup" className="btn btn-primary text-sm px-4 py-2 rounded-full">회원가입</Link>
+            </div>
           )}
         </div>
       </div>

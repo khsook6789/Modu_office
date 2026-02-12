@@ -2,8 +2,9 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface User {
     id: string;
+    email: string; // Added email
     name: string;
-    role: 'USER' | 'ADMIN';
+    role: 'USER' | 'ADMIN' | 'OPERATOR';
 }
 
 interface AuthContextType {
@@ -19,7 +20,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize state from localStorage
     const [user, setUser] = useState<User | null>(() => {
         const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : null;
+        if (storedUser) {
+            try {
+                return JSON.parse(storedUser);
+            } catch (e) {
+                console.error("Failed to parse user from local storage", e);
+                return null;
+            }
+        }
+        return null;
     });
 
     const login = (userData: User, token: string) => {

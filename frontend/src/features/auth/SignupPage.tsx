@@ -1,15 +1,16 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+// import { useAuth } from '../../contexts/AuthContext'; // Removed unused import
 import Input from '../../components/Input';
+import { authApi } from './api/auth.api';
 import './SignupPage.css';
 
 export default function SignupPage() {
+    const [userType, setUserType] = useState<'CUSTOMER' | 'OPERATOR'>('CUSTOMER');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: FormEvent) => {
@@ -17,46 +18,60 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const existingUser = users.find((u: any) => u.email === email);
-
-            if (existingUser) {
-                alert('이미 가입된 이메일 주소입니다.');
-                setLoading(false);
-                return;
+            if (userType === 'CUSTOMER') {
+                await authApi.signup({ name, email, password });
+                alert('회원가입이 완료되었습니다. 로그인해주세요.');
+                navigate('/login');
+            } else {
+                await authApi.signupOperator({ name, email, password });
+                alert('파트너(운영자) 가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.');
+                navigate('/login');
             }
-
-            const newUser = { name, email, password };
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
-
-            login({
-                id: email,
-                name: name,
-                role: 'USER'
-            }, 'mock-jwt-token-user');
-            navigate('/rooms');
-        } catch (error) {
-            console.error(error);
+        } catch (error: any) {
+            console.error('Signup error:', error);
+            alert(error.message || '회원가입에 실패했습니다.');
             setLoading(false);
         }
     };
 
     return (
         <div className="card signup-card">
-            <div className="text-center mb-lg">
-                <h1 className="signup-title font-bold mb-sm">회원가입</h1>
-                <p className="signup-subtitle text-muted text-sm">오늘 바로 Modu Office를 시작하세요</p>
+            <div className="text-center mb-md">
+                <h1 className="signup-title font-bold mb-xs">회원가입</h1>
+                <p className="signup-subtitle text-muted text-sm">Modu Office와 함께하세요</p>
+            </div>
+
+            {/* User Type Toggle */}
+            <div className="flex justify-center mb-md">
+                <div className="flex bg-gray-100 p-1 rounded-lg" style={{ background: '#f5f5f5', display: 'inline-flex' }}>
+                    <button
+                        type="button"
+                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'CUSTOMER'
+                                ? 'bg-white shadow text-primary font-bold'
+                                : 'text-muted hover:text-gray-700'
+                            }`}
+                        onClick={() => setUserType('CUSTOMER')}
+                    >
+                        일반 회원
+                    </button>
+                    <button
+                        type="button"
+                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'OPERATOR'
+                                ? 'bg-white shadow text-primary font-bold'
+                                : 'text-muted hover:text-gray-700'
+                            }`}
+                        onClick={() => setUserType('OPERATOR')}
+                    >
+                        오피스 운영자
+                    </button>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit}>
                 <Input
-                    label="이름"
+                    label={userType === 'CUSTOMER' ? "이름" : "대표자명"}
                     type="text"
-                    placeholder="홍길동"
+                    placeholder={userType === 'CUSTOMER' ? "홍길동" : "사업자명 또는 대표자명"}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -88,7 +103,7 @@ export default function SignupPage() {
                     className="btn btn-primary signup-btn w-full mt-md text-md py-3"
                     disabled={loading}
                 >
-                    {loading ? '가입 중...' : '가입하기'}
+                    {loading ? '가입 처리 중...' : (userType === 'CUSTOMER' ? '회원가입 하기' : '파트너 가입 신청')}
                 </button>
             </form>
 

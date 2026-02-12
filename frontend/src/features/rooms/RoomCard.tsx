@@ -1,4 +1,7 @@
+import { useState, useEffect, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { wishlistApi } from '../wishlist/api/wishlist.api';
 import './RoomCard.css';
 
 export interface Room {
@@ -16,9 +19,56 @@ interface RoomCardProps {
 }
 
 export default function RoomCard({ room }: RoomCardProps) {
+    const { user } = useAuth();
+    const [isLiked, setIsLiked] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            wishlistApi.isLiked(user.id, Number(room.id)).then(setIsLiked);
+        }
+    }, [user, room.id]);
+
+    const handleToggleWishlist = async (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        const newState = await wishlistApi.toggleWishlist(user.id, Number(room.id));
+        setIsLiked(newState);
+    };
+
     return (
-        <Link to={`/rooms/${room.id}`} style={{ textDecoration: 'none' }}>
-            <div className="card room-card">
+        <div className="card room-card" style={{ position: 'relative' }}>
+            <button
+                onClick={handleToggleWishlist}
+                className="wishlist-btn"
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 10,
+                    background: 'rgba(0,0,0,0.5)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: isLiked ? '#ef4444' : 'white',
+                    fontSize: '18px',
+                    transition: 'all 0.2s'
+                }}
+            >
+                {isLiked ? '♥' : '♡'}
+            </button>
+
+            <Link to={`/rooms/${room.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
                 <div className="room-image-wrapper">
                     {room.imageUrl ? (
                         <img src={room.imageUrl} alt={room.name} className="room-image" />
@@ -55,7 +105,7 @@ export default function RoomCard({ room }: RoomCardProps) {
                         <span className="btn btn-secondary text-xs">View Details</span>
                     </div>
                 </div>
-            </div>
-        </Link>
+            </Link>
+        </div>
     );
 }

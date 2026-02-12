@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Input from '../../components/Input';
+import { authApi } from './api/auth.api';
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -18,33 +19,24 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await authApi.login({ email, password });
+            
+            // Map backend response to AuthContext User type
+            const userData = {
+                id: response.user.id,
+                name: response.user.name,
+                role: response.user.role as 'USER' | 'ADMIN'
+            };
 
-            if (email === 'admin@modu.com' && password === 'admin') {
-                login({
-                    id: 'admin-id',
-                    name: '관리자',
-                    role: 'ADMIN'
-                }, 'mock-jwt-token-admin');
-                navigate('/admin');
-                return;
-            }
+            login(userData, response.accessToken);
+            
+            // Store refresh token if needed, or handle it in client.ts interceptors
+            localStorage.setItem('refreshToken', response.refreshToken);
 
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const user = users.find((u: any) => u.email === email && u.password === password);
-
-            if (user) {
-                login({
-                    id: user.email, // using email as id for now
-                    name: user.name,
-                    role: user.role || 'USER'
-                }, 'mock-jwt-token-user');
-                navigate('/rooms');
-            } else {
-                throw new Error('Invalid credentials');
-            }
-        } catch (err) {
-            setError('로그인에 실패했습니다. 계정 정보를 확인해주세요.');
+            navigate('/rooms');
+        } catch (err: any) {
+            console.error('Login error:', err);
+            setError(err.message || '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
         } finally {
             setLoading(false);
         }
