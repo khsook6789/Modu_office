@@ -25,59 +25,69 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ReservationEventListener {
 
-    private final UpdateLogService updateLogService;
+        private final UpdateLogService updateLogService;
+        private final com.modu.office.service.WebSocketNotificationService notificationService;
 
-    /**
-     * 예약 생성 이벤트 처리
-     * 
-     * @param event 예약 생성 이벤트
-     */
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleReservationCreated(ReservationCreatedEvent event) {
-        log.info("Processing ReservationCreatedEvent for reservation ID: {}",
-                event.getReservation().getId());
+        /**
+         * 예약 생성 이벤트 처리
+         * 
+         * @param event 예약 생성 이벤트
+         */
+        @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+        public void handleReservationCreated(ReservationCreatedEvent event) {
+                log.info("Processing ReservationCreatedEvent for reservation ID: {}",
+                                event.getReservation().getId());
 
-        // beforeData는 null (새로 생성된 예약이므로 이전 데이터 없음)
-        // afterData는 생성된 예약 정보
-        updateLogService.createLog(
-                event.getReservation(),
-                LogAction.CREATE,
-                event.getActor(),
-                null,
-                ReservationLogConverter.toMap(event.getReservation()));
+                // 1. 감사 로그 저장
+                updateLogService.createLog(
+                                event.getReservation(),
+                                LogAction.CREATE,
+                                event.getActor(),
+                                null,
+                                ReservationLogConverter.toMap(event.getReservation()));
 
-        log.debug("Successfully saved CREATE log for reservation ID: {}",
-                event.getReservation().getId());
-    }
+                // 2. WebSocket 실시간 알림 전송
+                notificationService.notifyReservationCreated(
+                                event.getReservation().getRoom().getId(),
+                                event.getReservation());
 
-    /**
-     * 예약 변경 이벤트 처리 (UPDATE, CANCEL)
-     * 
-     * @param event 예약 변경 이벤트
-     */
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleReservationChanged(ReservationChangedEvent event) {
-        log.info("Processing ReservationChangedEvent for reservation ID: {} with action: {}",
-                event.getReservation().getId(), event.getAction());
-
-        // afterData 생성 (변경 후 예약 스냅샷)
-        Map<String, Object> afterData = new HashMap<>(
-                ReservationLogConverter.toMap(event.getReservation()));
-
-        // customData가 있으면 afterData에 병합 (예: adminReason)
-        if (event.getCustomData() != null && !event.getCustomData().isEmpty()) {
-            afterData.putAll(event.getCustomData());
-            log.debug("Merged customData into afterData: {}", event.getCustomData());
+                log.debug("Successfully processed CREATE event for reservation ID: {}",
+                                event.getReservation().getId());
         }
 
-        updateLogService.createLog(
-                event.getReservation(),
-                event.getAction(),
-                event.getActor(),
-                event.getBeforeData(),
-                afterData);
+        /**
+         * 예약 변경 이벤트 처리 (UPDATE, CANCEL)
+         * 
+         * @param event 예약 변경 이벤트
+         */
+        @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+        public void handleReservationChanged(ReservationChangedEvent event) {
+                log.info("Processing ReservationChangedEvent for reservation ID: {} with action: {}",
+                                event.getReservation().getId(), event.getAction());
 
-        log.debug("Successfully saved {} log for reservation ID: {}",
-                event.getAction(), event.getReservation().getId());
-    }
+                // 1. 감사 로그 저장
+                Map<String, Object> afterData = new HashMap<>(
+                                ReservationLogConverter.toMap(event.getReservation()));
+
+                if (event.getCustomData() != null && !event.getCustomData().isEmpty()) {
+                        afterData.putAll(event.getCustomData());
+                }
+
+                updateLogService.createLog(
+                                event.getReservation(),
+                                event.getAction(),
+                                event.getActor(),
+                                event.getBeforeData(),
+                                afterData);
+
+                // 2. WebSocket 실시간 알림 전송 (취소 시)
+                if (event.getAction() == LogAction.CANCEL) {
+                        notificationService.notifyReservationCancelled(
+                                        event.getReservation().getRoom().getId(),
+                                        event.getReservation().getId());
+                }
+
+                log.debug("Successfully processed {} event for reservation ID: {}",
+                                event.getAction(), event.getReservation().getId());
+        }
 }

@@ -259,4 +259,65 @@ class ReservationEventListenerTest {
                 assertThat(log.getAfterData().get("adminReason")).isEqualTo("고객 요청에 의한 취소");
                 assertThat(log.getAfterData().get("status")).isEqualTo("CANCELED");
         }
+
+        @org.springframework.boot.test.mock.mockito.MockBean
+        private com.modu.office.service.WebSocketNotificationService notificationService;
+
+        @Test
+        @DisplayName("예약 생성 시 WebSocket 알림이 전송된다")
+        void 예약_생성_시_WebSocket_알림이_전송된다() {
+                // given
+                Reservation reservations = transactionTemplate.execute(status -> {
+                        Reservation res = Reservation.builder()
+                                        .customer(customer)
+                                        .office(office)
+                                        .room(officeRoom)
+                                        .title("WebSocket Test")
+                                        .startAt(LocalDateTime.now().plusDays(1))
+                                        .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
+                                        .status(ReservationStatus.PENDING)
+                                        .build();
+                        reservationRepository.save(res);
+
+                        // when
+                        eventPublisher.publishEvent(new ReservationCreatedEvent(res, customer));
+                        return res;
+                });
+
+                // then
+                org.mockito.Mockito.verify(notificationService).notifyReservationCreated(
+                                org.mockito.ArgumentMatchers.eq(officeRoom.getId()),
+                                org.mockito.ArgumentMatchers.any(Reservation.class));
+        }
+
+        @Test
+        @DisplayName("예약 취소 시 WebSocket 알림이 전송된다")
+        void 예약_취소_시_WebSocket_알림이_전송된다() {
+                // given
+                Reservation reservation = transactionTemplate.execute(status -> {
+                        Reservation res = Reservation.builder()
+                                        .customer(customer)
+                                        .office(office)
+                                        .room(officeRoom)
+                                        .title("Cancel Test")
+                                        .startAt(LocalDateTime.now().plusDays(1))
+                                        .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
+                                        .status(ReservationStatus.CONFIRMED)
+                                        .build();
+                        reservationRepository.save(res);
+                        return res;
+                });
+
+                // when
+                transactionTemplate.execute(status -> {
+                        eventPublisher.publishEvent(new ReservationChangedEvent(
+                                        reservation, new HashMap<>(), LogAction.CANCEL, operator, null));
+                        return null;
+                });
+
+                // then
+                org.mockito.Mockito.verify(notificationService).notifyReservationCancelled(
+                                org.mockito.ArgumentMatchers.eq(officeRoom.getId()),
+                                org.mockito.ArgumentMatchers.eq(reservation.getId()));
+        }
 }
