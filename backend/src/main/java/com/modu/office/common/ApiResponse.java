@@ -15,12 +15,14 @@ import lombok.NoArgsConstructor;
 public class ApiResponse<T> {
 
     private String status;
+    private String code;
     private String message;
     private T data;
 
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
                 .status("SUCCESS")
+                .code("200")
                 .message("요청이 성공적으로 처리되었습니다.")
                 .data(data)
                 .build();
@@ -29,16 +31,43 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
                 .status("SUCCESS")
+                .code("200")
                 .message(message)
                 .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(String code, String message) {
+        return ApiResponse.<T>builder()
+                .status("ERROR")
+                .code(code)
+                .message(message)
+                .data(null)
                 .build();
     }
 
     public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()
                 .status("ERROR")
+                .code("500")
                 .message(message)
                 .data(null)
+                .build();
+    }
+
+    /**
+     * Validation 에러용 응답 생성
+     * 필드별 에러를 data에 담아 반환합니다.
+     * 
+     * @param fieldErrors 필드명과 에러 메시지 맵
+     * @return Validation 에러 응답
+     */
+    public static <T> ApiResponse<T> validationError(T fieldErrors) {
+        return ApiResponse.<T>builder()
+                .status("ERROR")
+                .code("400")
+                .message("입력값 검증에 실패했습니다")
+                .data(fieldErrors)
                 .build();
     }
 }
