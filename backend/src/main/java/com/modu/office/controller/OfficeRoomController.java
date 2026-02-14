@@ -70,18 +70,27 @@ public class OfficeRoomController {
     }
 
     /**
-     * 다중 시설 필터링 검색
-     * <p>
-     * facilityIds 파라미터로 지정된 모든 시설을 보유한 회의실만 검색합니다 (AND 검색).
-     * 예: facilityIds=1,2,3 → 시설 1 AND 2 AND 3을 모두 가진 방만 반환
-     * </p>
+     * 고급 회의실 검색 (예약 가능 여부, 위치, 편의시설 등)
      */
     @GetMapping("/rooms/search")
-    public ResponseEntity<ApiResponse<List<OfficeRoomResponse>>> searchRooms(
-            @RequestParam Long officeId,
-            @RequestParam(required = false) List<Long> facilityIds) {
-        List<OfficeRoomResponse> rooms = officeRoomService.searchRoomsByFacilities(officeId, facilityIds);
-        return ResponseEntity.ok(ApiResponse.success(rooms));
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<OfficeRoomResponse>>> searchRooms(
+            @RequestParam(required = false) java.time.LocalDateTime startDate,
+            @RequestParam(required = false) java.time.LocalDateTime endDate,
+            @RequestParam(required = false) Integer minCapacity,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) List<String> facilityNames,
+            @RequestParam(required = false) String keyword,
+            org.springframework.data.domain.Pageable pageable) {
+
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new com.modu.office.exception.InvalidValueException(
+                    com.modu.office.exception.ErrorCode.INVALID_INPUT_VALUE);
+        }
+
+        org.springframework.data.domain.Page<OfficeRoomResponse> results = officeRoomService.searchRooms(
+                startDate, endDate, minCapacity, category, facilityNames, keyword, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(results));
     }
 
     /**
