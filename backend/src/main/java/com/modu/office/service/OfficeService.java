@@ -159,6 +159,15 @@ public class OfficeService {
     }
 
     /**
+     * 통합 키워드 검색 (이름 또는 위치)
+     */
+    public org.springframework.data.domain.Page<OfficeResponse> searchOffices(String keyword,
+            org.springframework.data.domain.Pageable pageable) {
+        return officeRepository.searchOffices(keyword, pageable)
+                .map(OfficeResponse::fromEntity);
+    }
+
+    /**
      * 운영자 권한 검증
      * <p>
      * OPERATOR는 자신이 소유한 지점만 수정/삭제 가능.
