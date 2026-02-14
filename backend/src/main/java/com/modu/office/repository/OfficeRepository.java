@@ -9,11 +9,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.modu.office.repository.custom.OfficeRepositoryCustom;
+
 /**
  * Office 엔티티에 대한 데이터 액세스 레포지토리
  */
 @Repository
-public interface OfficeRepository extends JpaRepository<Office, Long> {
+public interface OfficeRepository extends JpaRepository<Office, Long>, OfficeRepositoryCustom {
 
     /**
      * 이름으로 지점 검색 (부분 일치)
