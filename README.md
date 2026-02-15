@@ -101,9 +101,9 @@ frontend/
 
 - **사용자 중심 보안 설계**: 인증 계정(Account)과 프로필(AppUser)을 분리 설계하여 개인정보 보호를 강화하고 계정 탈취 시에도 핵심 데이터에 대한 피해를 최소화합니다.
 - **맥락 인지형 역할 제어**:
-  - **CUSTOMER**: 불필요한 기능 노출 없이 본인의 예약 내역과 예약 생성에만 집중할 수 있는 환경을 제공합니다.
-  - **OPERATOR**: 담당 지점의 실시간 점유율 조회부터 효율적인 공간 관리까지, 운영의 효율성을 높여주는 관리 도구를 제공합니다.
-  - **PLATFORM_ADMIN**: 전사 자원 설정부터 시스템 전반의 로그 모니터링까지, 통합 관제 기능을 통한 아키텍처 거버넌스를 실현합니다.
+  - **CUSTOMER (고객)**: 불필요한 기능 노출 없이 본인의 예약 내역과 예약 생성에만 집중할 수 있는 환경을 제공합니다.
+  - **OPERATOR (운영자 - 회의실 관리자)**: 담당 지점의 실시간 점유율 조회부터 효율적인 공간 관리까지, 운영의 효율성을 높여주는 관리 도구를 제공합니다.
+  - **PLATFORM_ADMIN (관리자 - 시스템 관리자)**: 전사 자원 설정부터 시스템 전반의 로그 모니터링까지, 통합 관제 기능을 통한 아키텍처 거버넌스를 실현합니다.
 
 ### 감사 로그 및 대시보드 (Audit & Dashboard)
 
@@ -132,7 +132,7 @@ frontend/
 - **id**: PK, Auto Increment
 - **account_id**: Account 테이블 FK (1:1 관계)
 - **name**: 사용자 이름
-- **role**: 사용자 권한 (CUSTOMER, OPERATOR, PLATFORM_ADMIN)
+- **role**: 사용자 권한 (CUSTOMER, OPERATOR, PLATFORM_ADMIN - 운영자, 관리자 등)
 
 ### 3. Office (지점)
 
@@ -220,9 +220,9 @@ frontend/
   - `POST /auth/operator/signup`: 운영자 회원가입
   - `POST /auth/operator/login`: 운영자 로그인
   - `POST /auth/operator/refresh`: 토큰 갱신
-- **Admin**
-  - `GET /admin/operators/pending`: 승인 대기 중인 Operator 목록 조회
-  - `PATCH /admin/operators/{id}/approve`: Operator 승인 처리
+- **Admin (관리자 - 시스템 관리자)**
+  - `GET /admin/operators/pending`: 승인 대기 중인 OPERATOR 목록 조회
+  - `PATCH /admin/operators/{id}/approve`: OPERATOR 승인 처리
 
 ### 2. 지점 관리 (Office)
 
@@ -238,19 +238,25 @@ frontend/
 - `POST /offices/{officeId}/rooms`: 공간 생성
 - `GET /offices/{officeId}/rooms`: 지점별 공간 조회 (필터링 가능)
 - `GET /rooms/{roomId}`: 특정 공간 조회
-- `GET /rooms/search`: 다중 편의시설 기반 회의실 검색 (AND 조건)
+- `GET /rooms/search`: 고급 공간 검색 (위치, 예약 가능 여부, 편의시설 등)
+  - **Query Parameters**:
+    - `lat`, `lng`, `radius`: 내 위치 기반 반경(km) 검색
+    - `startDate`, `endDate`: 예약 가능한 시간대 필터
+    - `minCapacity`, `category`, `keyword`: 인원, 유형, 검색어 필터
+    - `facilityNames`: 필수 편의시설 목록 (AND 조건)
+    - `sortBy`: 정렬 조건 (`DISTANCE`, `CAPACITY_ASC`, `CAPACITY_DESC`, `RATING`)
 - `PUT /rooms/{roomId}`: 공간 정보 수정
 - `DELETE /rooms/{roomId}`: 공간 삭제
-- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (OPERATOR/PLATFORM_ADMIN 전용)
+- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (운영자/관리자 전용)
 
 ### 4. 편의시설 관리 (Facility)
 
-- `POST /admin/facilities`: 편의시설 생성 (Admin)
+- `POST /admin/facilities`: 편의시설 생성 (관리자)
 - `GET /facilities`: 활성 편의시설 목록 조회
-- `GET /admin/facilities`: 전체 편의시설 목록 조회 (Admin)
-- `GET /admin/facilities/{id}`: 편의시설 상세 조회 (Admin)
-- `PUT /admin/facilities/{id}`: 편의시설 수정 (Admin)
-- `DELETE /admin/facilities/{id}`: 편의시설 삭제 (Admin)
+- `GET /admin/facilities`: 전체 편의시설 목록 조회 (관리자)
+- `GET /admin/facilities/{id}`: 편의시설 상세 조회 (관리자)
+- `PUT /admin/facilities/{id}`: 편의시설 수정 (관리자)
+- `DELETE /admin/facilities/{id}`: 편의시설 삭제 (관리자)
 
 ### 5. 예약 관리 (Reservation)
 
@@ -264,7 +270,7 @@ frontend/
 
 ### 6. 관리자 전용 예약 관리 (Admin Reservation)
 
-- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (OPERATOR/PLATFORM_ADMIN 전용)
+- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (운영자/관리자 전용)
 
 ### 7. 감사 로그 (UpdateLog)
 
