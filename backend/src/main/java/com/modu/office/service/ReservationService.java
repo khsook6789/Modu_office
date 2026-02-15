@@ -20,9 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Reservation 비즈니스 로직 서비스
@@ -157,6 +161,23 @@ public class ReservationService {
         return reservationRepository.findByStatus(status).stream()
                 .map(ReservationResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 오퍼레이터용 예약 검색 (동적 쿼리)
+     * 
+     * @param officeId  지점 ID (Optional)
+     * @param guestName 예약자 이름 (Optional, contains)
+     * @param status    예약 상태 (Optional)
+     * @param startDate 조회 시작 날짜 (Optional)
+     * @param endDate   조회 종료 날짜 (Optional)
+     * @param pageable  페이징 정보
+     * @return 검색된 예약 목록 (Page)
+     */
+    public Page<ReservationResponse> searchReservations(Long officeId, String guestName, ReservationStatus status,
+            LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        return reservationRepository.search(officeId, guestName, status, startDate, endDate, pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
