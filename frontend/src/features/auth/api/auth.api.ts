@@ -12,7 +12,7 @@ export interface LoginResponse {
     refreshToken: string;
     tokenType: string;
     user: {
-        id: string; // email in this case based on backend logic usually, or we can fetch profile
+        id: string; 
         email: string;
         name: string;
         role: string;
@@ -27,122 +27,66 @@ export interface LoginRequest {
 export const authApi = {
     login: async (data: LoginRequest) => {
         try {
+            // 1. Try Customer Login
             const response = await client.post<LoginResponse>('/auth/customer/login', data);
-
+            
+            // If backend doesn't return user info (only token), construct it
             if (!response.user) {
-                const isAdmin = data.email.includes('admin');
-                const isOperator = data.email.includes('operator');
-
                 // @ts-ignore
                 response.user = {
                     id: data.email,
                     email: data.email,
-                    name: 'Test User',
-                    role: isAdmin ? 'ADMIN' : (isOperator ? 'OPERATOR' : 'USER'),
+                    name: data.email.split('@')[0],
+                    role: 'CUSTOMER'
                 };
             }
             return response;
         } catch (error) {
-            console.warn("Backend unavailable, using MOCK data for login");
-
-            // Check localStorage first
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const user = users.find((u: any) => u.email === data.email);
-
-            if (user) {
-                // If user found in localStorage, use their role
-                // Simple password check (not secure for prod, ok for mock)
-                if (user.password && user.password !== data.password) {
-                    throw new Error('비밀번호가 일치하지 않습니다.');
+            console.warn("Customer login failed, attempting Operator login...", error);
+            try {
+                // 2. Try Operator/Admin Login
+                // If this succeeds, the user is an Operator (or Admin)
+                const response = await client.post<LoginResponse>('/auth/operator/login', data);
+                
+                if (!response.user) {
+                    // Check if they are potentially a super admin by email convention, otherwise Operator
+                    const isAdmin = data.email.includes('admin');
+                    // @ts-ignore
+                    response.user = {
+                        id: data.email,
+                        email: data.email,
+                        name: data.email.split('@')[0],
+                        role: isAdmin ? 'PLATFORM_ADMIN' : 'OPERATOR'
+                    };
                 }
-
-                return {
-                    accessToken: 'mock-access-token',
-                    refreshToken: 'mock-refresh-token',
-                    tokenType: 'Bearer',
-                    user: {
-                        id: user.email,
-                        email: user.email,
-                        name: user.name,
-                        role: user.role,
-                    }
-                } as LoginResponse;
+                return response;
+            } catch (opError) {
+                console.error("Operator login also failed", opError);
+                throw new Error("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
             }
-
-            // Fallback to email-based role assignment if not in localStorage
-            const isAdmin = data.email.includes('admin');
-            const isOperator = data.email.includes('operator');
-
-            return {
-                accessToken: 'mock-access-token',
-                refreshToken: 'mock-refresh-token',
-                tokenType: 'Bearer',
-                user: {
-                    id: data.email,
-                    email: data.email,
-                    name: 'Mock User',
-                    role: isAdmin ? 'ADMIN' : (isOperator ? 'OPERATOR' : 'USER'),
-                }
-            } as LoginResponse;
         }
     },
 
     signup: async (data: SignupData) => {
-        try {
-            return await client.post<string>('/auth/customer/signup', {
-                email: data.email,
-                password: data.password,
-                name: data.name,
-                phoneNumber: data.phoneNumber,
-            });
-        } catch (error) {
-            console.warn("Backend unavailable, using MOCK data for signup");
-
-            // Persist to localStorage
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            if (!users.find((u: any) => u.email === data.email)) {
-                users.push({
-                    email: data.email,
-                    password: data.password,
-                    name: data.name,
-                    role: 'USER'
-                });
-                localStorage.setItem('users', JSON.stringify(users));
-            }
-
-            return "Mock Signup Success";
-        }
+        return await client.post<string>('/auth/customer/signup', {
+            email: data.email,
+            password: data.password,
+            name: data.name,
+            phoneNumber: data.phoneNumber,
+        });
     },
 
     signupOperator: async (data: SignupData) => {
-        try {
-            return await client.post<string>('/auth/operator/signup', {
-                email: data.email,
-                password: data.password,
-                name: data.name,
-            });
-        } catch (error) {
-            console.warn("Backend unavailable, using MOCK data for operator signup");
-
-            // Persist to localStorage
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            if (!users.find((u: any) => u.email === data.email)) {
-                users.push({
-                    email: data.email,
-                    password: data.password,
-                    name: data.name,
-                    role: 'OPERATOR'
-                });
-                localStorage.setItem('users', JSON.stringify(users));
-            }
-
-            return "Mock Operator Signup Success";
-        }
+        return await client.post<string>('/auth/operator/signup', {
+            email: data.email,
+            password: data.password,
+            name: data.name,
+        });
     },
 
-    // Admin login usually same endpoint or separate? Assuming customer login checks role for now
-    // If backend has specific admin login, use that.
     adminLogin: (data: LoginRequest) => {
-        return client.post<LoginResponse>('/auth/customer/login', data);
+        // Explicitly call logic or just alias login if user wants to use same flow
+        // But if adminLogin is called explicitly, maybe direct to operator?
+        return client.post<LoginResponse>('/auth/operator/login', data);
     }
 };
