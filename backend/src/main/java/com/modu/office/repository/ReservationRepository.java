@@ -2,6 +2,7 @@ package com.modu.office.repository;
 
 import com.modu.office.entity.Reservation;
 import com.modu.office.entity.enums.ReservationStatus;
+import com.modu.office.repository.custom.ReservationRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +17,7 @@ import java.util.List;
  * Reservation 엔티티에 대한 데이터 액세스 레포지토리
  */
 @Repository
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
 
         /**
          * 특정 사용자의 모든 예약 조회
