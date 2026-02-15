@@ -1,5 +1,7 @@
 package com.modu.office.repository;
 
+import com.modu.office.dto.request.OfficeRoomSearchCondition;
+
 import com.modu.office.config.QueryDslConfig;
 import com.modu.office.config.JpaConfig;
 import java.time.LocalTime;
@@ -94,12 +96,15 @@ class OfficeRoomRepositoryCustomTest {
                 appUserRepository.save(user);
 
                 // Office 생성
+                // Office 생성
                 office = Office.builder()
                                 .name("Gangnam Branch")
                                 .location("Gangnam-gu")
                                 .ownerUser(user)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
+                                .latitude(37.4979) // Gangnam Station
+                                .longitude(127.0276)
                                 .build();
                 officeRepository.save(office);
 
@@ -174,16 +179,26 @@ class OfficeRoomRepositoryCustomTest {
                 em.clear();
 
                 // 1. 겹치는 시간 검색 (11:00 ~ 13:00) -> Room 1 제외되어야 함
+                OfficeRoomSearchCondition conditionOverlap = OfficeRoomSearchCondition.builder()
+                                .startDate(now.plusHours(1))
+                                .endDate(now.plusHours(3))
+                                .build();
+
                 Page<OfficeRoom> resultOverlap = officeRoomRepository.searchRooms(
-                                now.plusHours(1), now.plusHours(3), null, null, null, null, PageRequest.of(0, 10));
+                                conditionOverlap, PageRequest.of(0, 10));
 
                 assertThat(resultOverlap.getContent()).extracting("name")
                                 .doesNotContain("Room A")
                                 .contains("Room B");
 
                 // 2. 안 겹치는 시간 검색 (13:00 ~ 14:00) -> 둘 다 나와야 함
+                OfficeRoomSearchCondition conditionFree = OfficeRoomSearchCondition.builder()
+                                .startDate(now.plusHours(3))
+                                .endDate(now.plusHours(4))
+                                .build();
+
                 Page<OfficeRoom> resultFree = officeRoomRepository.searchRooms(
-                                now.plusHours(3), now.plusHours(4), null, null, null, null, PageRequest.of(0, 10));
+                                conditionFree, PageRequest.of(0, 10));
 
                 assertThat(resultFree.getContent()).hasSize(2);
         }
@@ -195,8 +210,12 @@ class OfficeRoomRepositoryCustomTest {
                 String keyword = "Gangnam"; // 오피스 이름에 포함
 
                 // When
+                OfficeRoomSearchCondition condition = OfficeRoomSearchCondition.builder()
+                                .keyword(keyword)
+                                .build();
+
                 Page<OfficeRoom> result = officeRoomRepository.searchRooms(
-                                null, null, null, null, null, keyword, PageRequest.of(0, 10));
+                                condition, PageRequest.of(0, 10));
 
                 // Then
                 assertThat(result.getContent()).hasSize(2); // 둘 다 Gangnam Branch 소속
@@ -209,8 +228,12 @@ class OfficeRoomRepositoryCustomTest {
                 List<String> requiredFacilities = List.of("WIFI");
 
                 // When
+                OfficeRoomSearchCondition condition = OfficeRoomSearchCondition.builder()
+                                .facilityNames(requiredFacilities)
+                                .build();
+
                 Page<OfficeRoom> result = officeRoomRepository.searchRooms(
-                                null, null, null, null, requiredFacilities, null, PageRequest.of(0, 10));
+                                condition, PageRequest.of(0, 10));
 
                 // Then: Room 1(WIFI), Room 2(WIFI+PROJECTOR) 모두 조회되어야 함
                 assertThat(result.getContent()).extracting("name")
@@ -224,12 +247,60 @@ class OfficeRoomRepositoryCustomTest {
                 List<String> requiredFacilities = List.of("WIFI", "PROJECTOR");
 
                 // When
+                OfficeRoomSearchCondition condition = OfficeRoomSearchCondition.builder()
+                                .facilityNames(requiredFacilities)
+                                .build();
+
                 Page<OfficeRoom> result = officeRoomRepository.searchRooms(
-                                null, null, null, null, requiredFacilities, null, PageRequest.of(0, 10));
+                                condition, PageRequest.of(0, 10));
 
                 // Then: Room 2만 조회되어야 함
                 assertThat(result.getContent()).extracting("name")
                                 .contains("Room B")
                                 .doesNotContain("Room A");
+        }
+
+        @Test
+        @DisplayName("거리순 정렬 - 가까운 오피스부터 조회")
+        void sortByDistance() {
+                // Given: 멀리 떨어진 오피스 추가 (Busan)
+                Office officeBusan = Office.builder()
+                                .name("Busan Branch")
+                                .location("Busan")
+                                .ownerUser(office.getOwnerUser()) // 같은 유저 사용
+                                .latitude(35.1796)
+                                .longitude(129.0756)
+                                .openTime(LocalTime.of(9, 0))
+                                .closeTime(LocalTime.of(18, 0))
+                                .build();
+                officeRepository.save(officeBusan);
+
+                OfficeRoom roomBusan = OfficeRoom.builder()
+                                .office(officeBusan)
+                                .name("Room Busan")
+                                .roomCode("B001")
+                                .capacity(10)
+                                .status(RoomStatus.AVAILABLE)
+                                .build();
+                officeRoomRepository.save(roomBusan);
+
+                // User Location: Seoul (Near Gangnam)
+                double userLat = 37.5;
+                double userLng = 127.0;
+
+                OfficeRoomSearchCondition condition = OfficeRoomSearchCondition.builder()
+                                .lat(userLat)
+                                .lng(userLng)
+                                .radius(500.0) // 충분히 넓게
+                                .sortBy("DISTANCE")
+                                .build();
+
+                // When
+                Page<OfficeRoom> result = officeRoomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: Gangnam(Room A/B) -> Busan(Room Busan) 순서
+                List<OfficeRoom> content = result.getContent();
+                assertThat(content).extracting("name")
+                                .containsSubsequence("Room A", "Room Busan"); // A가 Busan보다 앞에 와야 함
         }
 }
