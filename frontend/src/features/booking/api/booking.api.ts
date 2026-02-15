@@ -1,97 +1,58 @@
-// import { client } from '../../../api/client';
-// import { OfficeRoomResponse } from '../../rooms/api/room.api';
+import { client } from '../../../api/client';
 
 export interface Booking {
     id: number;
+    title: string;
+    officeId: number;
     roomId: number;
-    roomName: string;
-    officeName: string;
-    date: string;
-    startTime: string;
-    endTime: string;
-    guestCount: number;
-    totalPrice: number;
-    status: 'CONFIRMED' | 'CANCELLED' | 'PENDING';
-    createdAt: string;
+    roomName?: string; // Backend might need to join this or frontend fetches it
+    officeName?: string;
+    customerId: number;
+    startAt: string; // ISO LocalDateTime
+    endAt: string;   // ISO LocalDateTime
+    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+    version?: number;
 }
 
 export interface CreateBookingRequest {
+    title: string;
+    officeId: number;
     roomId: number;
-    date: string;
-    startTime: string;
-    endTime: string;
-    guestCount: number;
-    totalPrice: number;
+    customerId: number; // Required by Backend
+    startAt: string;
+    endAt: string;
 }
 
-// Mock Data Store (in memory for demo session)
-let MOCK_BOOKINGS: Booking[] = [
-    {
-        id: 1,
-        roomId: 101,
-        roomName: 'Meeting Room A',
-        officeName: '강남 공유오피스',
-        date: '2023-10-25',
-        startTime: '14:00',
-        endTime: '16:00',
-        guestCount: 4,
-        totalPrice: 20000,
-        status: 'CONFIRMED',
-        createdAt: '2023-10-20T10:00:00'
-    }
-];
+interface ApiResponse<T> {
+    status: string;
+    message: string;
+    data: T;
+}
 
 export const bookingApi = {
-    // Get all bookings for the current user
-    getMyBookings: () => {
-        // return client.get<Booking[]>('/bookings/me');
-        return Promise.resolve([...MOCK_BOOKINGS]);
+    // Get all bookings (optional filters can be added)
+    getMyBookings: async (customerId?: number) => {
+        // Backend doesn't support "me" endpoint, must filter by customerId
+        // If customerId is unknown, this will fail or return empty
+        const params = customerId ? { customerId } : {};
+        const response = await client.get<ApiResponse<Booking[]>>('/reservations', { params });
+        return response.data;
     },
 
     // Create a new booking
-    createBooking: (data: CreateBookingRequest) => {
-        // return client.post<Booking>('/bookings', data);
-        console.log('Mock Create Booking:', data);
-        const newBooking: Booking = {
-            id: Math.floor(Math.random() * 10000),
-            ...data,
-            roomName: 'Meeting Room (Mock)', // In real app, backend joins this
-            officeName: 'Office (Mock)',     // In real app, backend joins this
-            status: 'PENDING', // Initially pending until payment
-            createdAt: new Date().toISOString()
-        };
-        // We don't push to MOCK_BOOKINGS here because strictly we should do it after payment success
-        // But for "createBooking" step usually returns an ID to proceed to payment
-        return Promise.resolve(newBooking);
+    createBooking: async (data: CreateBookingRequest) => {
+        const response = await client.post<ApiResponse<Booking>>('/reservations', data);
+        return response.data;
     },
 
-    // Confirm booking (after payment)
-    confirmBooking: (bookingId: number) => {
-        // return client.post(`/bookings/${bookingId}/confirm`);
-        // Find if it exists in a "pending" list or just mock it
-        const booking = {
-            id: bookingId,
-            roomId: 101,
-            roomName: 'Meeting Room (Mock)',
-            officeName: 'Office (Mock)',
-            date: new Date().toISOString().split('T')[0],
-            startTime: '10:00',
-            endTime: '12:00',
-            guestCount: 3,
-            totalPrice: 30000,
-            status: 'CONFIRMED' as const,
-            createdAt: new Date().toISOString()
-        };
-        MOCK_BOOKINGS.unshift(booking);
-        return Promise.resolve(booking);
+    // Confirm booking
+    confirmBooking: async (bookingId: number) => {
+        const response = await client.patch<ApiResponse<Booking>>(`/reservations/${bookingId}/confirm`);
+        return response.data;
     },
 
     // Cancel booking
-    cancelBooking: (bookingId: number) => {
-        // return client.post(`/bookings/${bookingId}/cancel`);
-        MOCK_BOOKINGS = MOCK_BOOKINGS.map(b =>
-            b.id === bookingId ? { ...b, status: 'CANCELLED' } : b
-        );
-        return Promise.resolve();
+    cancelBooking: async (bookingId: number) => {
+        await client.post<ApiResponse<void>>(`/reservations/${bookingId}/cancel`, {});
     }
 };

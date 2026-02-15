@@ -37,7 +37,7 @@ export default function MyBookingsPage() {
     const today = new Date();
     // Sort bookings: Future first, then Past
     const sortedBookings = [...bookings].sort((a, b) => {
-        return new Date(b.date + 'T' + b.startTime).getTime() - new Date(a.date + 'T' + a.startTime).getTime();
+        return new Date(b.date + 'T' + b.start_at).getTime() - new Date(a.date + 'T' + a.start_at).getTime();
     });
 
     return (
@@ -51,7 +51,7 @@ export default function MyBookingsPage() {
             ) : (
                 <div className="grid gap-md">
                     {sortedBookings.map((booking) => {
-                        const bookingDate = new Date(booking.date + 'T' + booking.startTime);
+                        const bookingDate = new Date(booking.date + 'T' + booking.start_at);
                         const isPast = bookingDate < today;
                         const isCancelled = booking.status === 'CANCELLED';
 
@@ -71,7 +71,7 @@ export default function MyBookingsPage() {
                                     <p className="text-gray-600 text-sm">{booking.officeName}</p>
                                     <div className="mt-sm text-sm">
                                         <p>📅 {booking.date}</p>
-                                        <p>⏰ {booking.startTime} ~ {booking.endTime} ({booking.guestCount}명)</p>
+                                        <p>⏰ {booking.start_at} ~ {booking.end_at} ({booking.guestCount}명)</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-col justify-between items-end">
