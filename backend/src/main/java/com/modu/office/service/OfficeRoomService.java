@@ -126,26 +126,16 @@ public class OfficeRoomService {
     /**
      * 고급 검색 및 필터링 (QueryDSL)
      *
-     * @param startDate     예약 시작 시간
-     * @param endDate       예약 종료 시간
-     * @param minCapacity   최소 수용 인원
-     * @param category      카테고리
-     * @param facilityNames 포함되어야 할 편의시설 이름 목록
-     * @param keyword       검색 키워드
-     * @param pageable      페이징 정보
+     * @param condition 검색 조건 DTO (위치, 시간, 필터, 정렬)
+     * @param pageable  페이징 정보
      * @return 검색된 회의실 목록 (페이징)
      */
     public org.springframework.data.domain.Page<OfficeRoomResponse> searchRooms(
-            java.time.LocalDateTime startDate,
-            java.time.LocalDateTime endDate,
-            Integer minCapacity,
-            String category,
-            List<String> facilityNames,
-            String keyword,
+            com.modu.office.dto.request.OfficeRoomSearchCondition condition,
             org.springframework.data.domain.Pageable pageable) {
 
         return officeRoomRepository
-                .searchRooms(startDate, endDate, minCapacity, category, facilityNames, keyword, pageable)
+                .searchRooms(condition, pageable)
                 .map(this::buildRoomResponseWithFacilities);
     }
 

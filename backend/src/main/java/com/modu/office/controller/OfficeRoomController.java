@@ -72,23 +72,22 @@ public class OfficeRoomController {
     /**
      * 고급 회의실 검색 (예약 가능 여부, 위치, 편의시설 등)
      */
+    /**
+     * 고급 회의실 검색 (예약 가능 여부, 위치, 편의시설 등)
+     */
     @GetMapping("/rooms/search")
     public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<OfficeRoomResponse>>> searchRooms(
-            @RequestParam(required = false) java.time.LocalDateTime startDate,
-            @RequestParam(required = false) java.time.LocalDateTime endDate,
-            @RequestParam(required = false) Integer minCapacity,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) List<String> facilityNames,
-            @RequestParam(required = false) String keyword,
+            @ModelAttribute com.modu.office.dto.request.OfficeRoomSearchCondition condition,
             org.springframework.data.domain.Pageable pageable) {
 
-        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+        if (condition.getStartDate() != null && condition.getEndDate() != null &&
+                condition.getStartDate().isAfter(condition.getEndDate())) {
             throw new com.modu.office.exception.InvalidValueException(
                     com.modu.office.exception.ErrorCode.INVALID_INPUT_VALUE);
         }
 
         org.springframework.data.domain.Page<OfficeRoomResponse> results = officeRoomService.searchRooms(
-                startDate, endDate, minCapacity, category, facilityNames, keyword, pageable);
+                condition, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(results));
     }
