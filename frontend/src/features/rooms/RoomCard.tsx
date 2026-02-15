@@ -1,73 +1,26 @@
-import { useState, useEffect, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { wishlistApi } from '../wishlist/api/wishlist.api';
 import './RoomCard.css';
 
-export interface Room {
+export interface OfficeRoom {
     id: string;
+    officeId: number;  // Added to support office-room relationship
     name: string;
     location: string;
     capacity: number;
     equipment: string[];
     imageUrl?: string;
     isAvailable: boolean;
+    rating?: number; // Added rating
 }
 
 interface RoomCardProps {
-    room: Room;
+    room: OfficeRoom;
 }
 
 export default function RoomCard({ room }: RoomCardProps) {
-    const { user } = useAuth();
-    const [isLiked, setIsLiked] = useState(false);
-
-    useEffect(() => {
-        if (user) {
-            wishlistApi.isLiked(user.id, Number(room.id)).then(setIsLiked);
-        }
-    }, [user, room.id]);
-
-    const handleToggleWishlist = async (e: MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!user) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
-
-        const newState = await wishlistApi.toggleWishlist(user.id, Number(room.id));
-        setIsLiked(newState);
-    };
 
     return (
         <div className="card room-card" style={{ position: 'relative' }}>
-            <button
-                onClick={handleToggleWishlist}
-                className="wishlist-btn"
-                style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    zIndex: 10,
-                    background: 'rgba(0,0,0,0.5)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    color: isLiked ? '#ef4444' : 'white',
-                    fontSize: '18px',
-                    transition: 'all 0.2s'
-                }}
-            >
-                {isLiked ? '♥' : '♡'}
-            </button>
-
             <Link to={`/rooms/${room.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
                 <div className="room-image-wrapper">
                     {room.imageUrl ? (
@@ -77,6 +30,15 @@ export default function RoomCard({ room }: RoomCardProps) {
                             No Image
                         </div>
                     )}
+                    {/* Rating Badge Overlay */}
+                    <div className="rating-badge" style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        background: 'rgba(0,0,0,0.6)', color: '#fbbf24', // Amber-400
+                        padding: '4px 8px', borderRadius: '12px',
+                        fontSize: '0.8rem', fontWeight: 'bold', backdropFilter: 'blur(4px)'
+                    }}>
+                        ⭐ {room.rating ? room.rating.toFixed(1) : 'New'}
+                    </div>
                 </div>
 
                 <div className="room-content">

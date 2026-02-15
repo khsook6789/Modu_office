@@ -1,3 +1,4 @@
+import { roomApi } from './api/room.api';
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { reviewApi, type Review } from '../reviews/api/review.api';
@@ -6,70 +7,67 @@ import ReviewForm from '../reviews/components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
 import './RoomDetailPage.css';
 
-// Mock Data (In real app, fetch by ID)
-const ROOM_DETAILS = {
-    id: '1',
-    name: 'Galaxy Conference Hall',
-    location: '10층 동관',
-    capacity: 20,
-    description: '최첨단 화상 회의 장비와 탁 트인 도시 전망을 갖춘 넓은 컨퍼런스 홀입니다. 이사회 회의나 대규모 팀 프레젠테이션에 적합합니다.',
-    equipment: ['4K 프로젝터', 'Polycom 화상 장비', '디지털 화이트보드', '음향 시스템', '인체공학 의자'],
-    imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000',
-    pricePerHour: 50, // Mock price generic unit
-};
-
 export default function RoomDetailPage() {
     // Use params if available, otherwise mock ID
     const { id } = useParams();
-    const roomId = id ? Number(id) : 1; // Default to 1 if no ID
+    const roomId = id ? Number(id) : 101; // Default to 101 if no ID
+
     const navigate = useNavigate();
     const { user } = useAuth();
+    
+    // Room State
+    const [room, setRoom] = useState<any>(null); // Ideally use Room type
+    const [loadingRoom, setLoadingRoom] = useState(true);
 
     const [reviews, setReviews] = useState<Review[]>([]);
-    const [averageRating, setAverageRating] = useState(0);
     const [loadingReviews, setLoadingReviews] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
-
-    // Fallback if room not found in mock (just use the mock object mostly)
-    const room = ROOM_DETAILS;
-
-    useEffect(() => {
-        loadReviews();
-        if (user) {
-            import('../wishlist/api/wishlist.api').then(({ wishlistApi }) => {
-                wishlistApi.isLiked(user.id, roomId).then(setIsLiked);
-            });
-        }
-    }, [roomId, user]);
-
-    const handleToggleWishlist = async () => {
-        if (!user) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
-        const { wishlistApi } = await import('../wishlist/api/wishlist.api');
-        const newState = await wishlistApi.toggleWishlist(user.id, roomId);
-        setIsLiked(newState);
-    };
 
     const loadReviews = async () => {
         setLoadingReviews(true);
         try {
             const data = await reviewApi.getReviewsByRoomId(roomId);
             setReviews(data);
-
-            if (data.length > 0) {
-                const sum = data.reduce((acc, curr) => acc + curr.rating, 0);
-                setAverageRating(Number((sum / data.length).toFixed(1)));
-            } else {
-                setAverageRating(0);
-            }
         } catch (error) {
             console.error("Failed to load reviews", error);
         } finally {
             setLoadingReviews(false);
         }
     };
+
+    useEffect(() => {
+        const fetchRoom = async () => {
+            try {
+                const data = await roomApi.getRoomById(roomId);
+                // Map to UI shape
+                setRoom({
+                    id: data.id,
+                    name: data.name,
+                    location: `${data.floor}F - ${data.roomCode}`,
+                    capacity: data.capacity,
+                    description: '넓은 공간과 최신 장비를 갖춘 프리미엄 회의실입니다.', 
+                    equipment: data.equipment || [],
+                    imageUrl: data.imageUrl,
+                    pricePerHour: 0,
+                    rating: (data as any).rating || 0
+                });
+            } catch (error) {
+                console.error("Failed to load room", error);
+            } finally {
+                setLoadingRoom(false);
+            }
+        };
+
+        fetchRoom();
+        loadReviews();
+    }, [roomId, user]);
+
+    if (loadingRoom) {
+        return <div className="text-center py-20">Loading room details...</div>;
+    }
+
+    if (!room) {
+        return <div className="text-center py-20">Room not found</div>;
+    }
 
     const handleReviewSubmit = async (rating: number, comment: string) => {
         if (!user) {
@@ -122,15 +120,11 @@ export default function RoomDetailPage() {
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
-                    <button
-                        onClick={handleToggleWishlist}
-                        className={`text-2xl transition-colors ${isLiked ? 'text-red-500' : 'text-gray-300 hover:text-red-300'}`}
-                        title={isLiked ? "관심 목록에서 제거" : "관심 목록에 추가"}
-                    >
-                        {isLiked ? '♥' : '♡'}
-                    </button>
-                    <div className="text-2xl font-bold text-yellow-500">
-                        ★ {averageRating} <span className="text-sm text-gray-400 font-normal">({reviews.length} reviews)</span>
+                    <div className="text-xl font-bold text-warning flex items-center gap-1">
+                        <span className="text-2xl">⭐</span> {room.rating ? room.rating.toFixed(1) : 'New'}
+                    </div>
+                    <div className="text-sm text-gray-400 font-normal">
+                       ({reviews.length} reviews)
                     </div>
                 </div>
             </div>
