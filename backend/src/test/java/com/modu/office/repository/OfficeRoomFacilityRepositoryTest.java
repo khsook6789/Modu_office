@@ -15,6 +15,12 @@ import com.modu.office.entity.enums.LoginType;
 import com.modu.office.entity.enums.UserRole;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.modu.office.config.SecurityConfig;
+import com.modu.office.config.WebSocketConfig;
+import com.modu.office.config.QueryDslConfig;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+
 import java.time.LocalTime;
 import java.util.List;
 
@@ -25,9 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Many-to-Many 관계 매핑 검증
  * - 복합키 동작 확인
  */
-@DataJpaTest
+@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SecurityConfig.class,
+                WebSocketConfig.class }))
 @ActiveProfiles("test")
-@Import(JpaConfig.class)
+@Import({ JpaConfig.class, QueryDslConfig.class })
 @DisplayName("OfficeRoomFacilityRepository 통합 테스트")
 @SuppressWarnings("null")
 class OfficeRoomFacilityRepositoryTest {
