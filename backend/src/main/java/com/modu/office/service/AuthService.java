@@ -2,6 +2,7 @@ package com.modu.office.service;
 
 import com.modu.office.dto.request.customer.CustomerLoginRequest;
 import com.modu.office.dto.request.customer.CustomerSignupRequest;
+import com.modu.office.dto.request.admin.AdminLoginRequest;
 import com.modu.office.dto.request.operator.OperatorLoginRequest;
 import com.modu.office.dto.request.operator.OperatorSignupRequest;
 import com.modu.office.dto.response.TokenResponse;
@@ -107,6 +108,24 @@ public class AuthService {
 
                 if (appUser.getApprovalStatus() != OperatorApprovalStatus.APPROVED) {
                         throw new IllegalArgumentException("관리자 승인 대기 중입니다. 승인 후 로그인할 수 있습니다.");
+                }
+
+                return createTokenResponse(authentication, account);
+        }
+
+        @Transactional
+        public TokenResponse loginAdmin(AdminLoginRequest request) {
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+
+                Account account = accountRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+
+                AppUser appUser = appUserRepository.findByAccount(account)
+                                .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
+
+                if (appUser.getRole() != UserRole.PLATFORM_ADMIN) {
+                        throw new IllegalArgumentException("Not authorized as Admin");
                 }
 
                 return createTokenResponse(authentication, account);
