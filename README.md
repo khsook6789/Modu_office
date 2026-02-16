@@ -141,7 +141,8 @@ frontend/
 - **name**: 지점명
 - **location**: 지점 위치 (주소)
 - **latitude / longitude**: 위도 / 경도
-- **open_time/close_time**: 영업시
+- **open_time / close_time**: 영업 시간
+- **open_days**: 영업 요일 배열 (1=월요일, 7=일요일)
 
 ### 4. OfficeRoom (회의실/공간)
 
@@ -151,8 +152,9 @@ frontend/
 - **room_code**: 공간 코드 (지점 내 Unique)
 - **floor**: 층수
 - **capacity**: 수용 인원
-- **status**: 공간 상태 (AVAILABLE 등)
 - **category**: 공간 카테고리
+- **price**: 시간당 가격
+- **status**: 공간 상태 (AVAILABLE, INACTIVE)
 - **version**: 낙관적 락(Optimistic Lock) 버전 관리
 
 ### 5. Facility (설비)
@@ -197,12 +199,20 @@ frontend/
 - **after_data**: 변경 후 데이터 (JSONB)
 - **occurred_at**: 발생 시각
 
-### 10. RefreshToken(jwt 토큰)
+### 10. RefreshToken (JWT 토큰)
 
 - **id**: PK, Auto Increment
-- **token**: RefreshToken(Unique)
+- **token**: RefreshToken (Unique)
 - **account_id**: Account FK (Unique → 계정당 Refresh Token 1개 보장)
 - **expiry_date**: 만료 시각
+
+### 11. RoomFavorite (즐겨찾기)
+
+- **id**: PK, Auto Increment
+- **user_id**: 사용자 ID (AppUser FK)
+- **room_id**: 회의실 ID (OfficeRoom FK)
+- **created_at**: 등록 시각
+- **Unique Constraint**: (user_id, room_id) - 중복 즐겨찾기 방지
 
 ---
 
@@ -217,33 +227,38 @@ frontend/
   - `POST /auth/customer/login`: 고객 로그인
   - `POST /auth/customer/refresh`: 토큰 갱신
 - **Operator**
-  - `POST /auth/operator/signup`: 운영자 회원가입
+  - `POST /auth/operator/signup`: 운영자 회원가입 (Admin 승인 필요)
   - `POST /auth/operator/login`: 운영자 로그인
   - `POST /auth/operator/refresh`: 토큰 갱신
 - **Admin**
-  - `GET /admin/operators/pending`: 승인 대기 중인 Operator 목록 조회
-  - `PATCH /admin/operators/{id}/approve`: Operator 승인 처리
+  - `POST /auth/admin/login`: 관리자 로그인
+  - `POST /auth/admin/refresh`: 토큰 갱신
 
-### 2. 지점 관리 (Office)
+### 2. 관리자 - Operator 승인 관리 (Admin)
 
-- `POST /offices`: 지점 생성
+- `GET /admin/operators/pending`: 승인 대기 중인 Operator 목록 조회
+- `PATCH /admin/operators/{id}/approve`: Operator 승인 처리
+
+### 3. 지점 관리 (Office)
+
+- `POST /offices`: 지점 생성 (Operator/Admin)
 - `GET /offices`: 전체 지점 조회
 - `GET /offices/{id}`: 특정 지점 조회
-- `PUT /offices/{id}`: 지점 정보 수정
-- `DELETE /offices/{id}`: 지점 삭제
-- `GET /offices/search`: 지점 검색 (이름, 위치, 반경 등)
+- `PUT /offices/{id}`: 지점 정보 수정 (본인 지점만)
+- `DELETE /offices/{id}`: 지점 삭제 (본인 지점만)
+- `GET /offices/search`: 지점 검색 (키워드 또는 위치 기반)
+- `GET /offices/my-offices`: 내 담당 지점 목록 조회 (Operator/Admin)
 
-### 3. 공간 관리 (OfficeRoom)
+### 4. 회의실 관리 (OfficeRoom)
 
-- `POST /offices/{officeId}/rooms`: 공간 생성
-- `GET /offices/{officeId}/rooms`: 지점별 공간 조회 (필터링 가능)
-- `GET /rooms/{roomId}`: 특정 공간 조회
-- `GET /rooms/search`: 다중 편의시설 기반 회의실 검색 (AND 조건)
-- `PUT /rooms/{roomId}`: 공간 정보 수정
-- `DELETE /rooms/{roomId}`: 공간 삭제
-- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (OPERATOR/PLATFORM_ADMIN 전용)
+- `POST /rooms`: 회의실 생성 (Operator/Admin)
+- `GET /rooms`: 회의실 목록 조회 (officeId 필터링)
+- `GET /rooms/{id}`: 특정 회의실 조회
+- `PUT /rooms/{id}`: 회의실 정보 수정 (본인 지점만)
+- `DELETE /rooms/{id}`: 회의실 삭제 (본인 지점만)
+- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (Operator/Admin)
 
-### 4. 편의시설 관리 (Facility)
+### 5. 편의시설 관리 (Facility)
 
 - `POST /admin/facilities`: 편의시설 생성 (Admin)
 - `GET /facilities`: 활성 편의시설 목록 조회
@@ -252,7 +267,7 @@ frontend/
 - `PUT /admin/facilities/{id}`: 편의시설 수정 (Admin)
 - `DELETE /admin/facilities/{id}`: 편의시설 삭제 (Admin)
 
-### 5. 예약 관리 (Reservation)
+### 6. 예약 관리 (Reservation)
 
 - `POST /reservations`: 예약 생성
 - `GET /reservations`: 예약 목록 조회 (필터링 가능)
@@ -260,16 +275,22 @@ frontend/
 - `PUT /reservations/{id}`: 예약 수정
 - `PATCH /reservations/{id}/confirm`: 예약 확정
 - `POST /reservations/{id}/cancel`: 예약 취소
-- ~~`DELETE /reservations/{id}`: 예약 삭제~~ (감사 로그 무결성 보호를 위해 제거됨)
 
-### 6. 관리자 전용 예약 관리 (Admin Reservation)
+### 7. 관리자 - 예약 관리 (Admin Reservation)
 
-- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (OPERATOR/PLATFORM_ADMIN 전용)
+- `POST /admin/reservations/{id}/cancel`: 예약 강제 취소 (Operator/Admin)
 
-### 7. 감사 로그 (UpdateLog)
+### 8. 감사 로그 (UpdateLog)
 
 - `GET /logs`: 전체 로그 조회
 - `GET /logs/reservation/{reservationId}`: 특정 예약 로그 조회
+
+### 9. 즐겨찾기 (RoomFavorite)
+
+- `POST /favorites`: 즐겨찾기 추가
+- `DELETE /favorites/{roomId}`: 즐겨찾기 삭제
+- `GET /favorites`: 내 즐겨찾기 목록 조회
+- `GET /favorites/check/{roomId}`: 즐겨찾기 여부 확인
 
 ---
 
