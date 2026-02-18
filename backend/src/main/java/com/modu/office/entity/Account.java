@@ -48,4 +48,18 @@ public class Account extends BaseEntity {
         this.loginType = loginType != null ? loginType : LoginType.LOCAL;
         this.oauthId = oauthId;
     }
+
+    /**
+     * 비밀번호 변경
+     */
+    public void changePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+    }
+
+    /**
+     * 계정 비활성화
+     */
+    public void deactivate() {
+        this.status = AccountStatus.DELETED;
+    }
 }

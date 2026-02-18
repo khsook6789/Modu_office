@@ -37,4 +37,9 @@ public interface RoomFavoriteRepository extends JpaRepository<RoomFavorite, Long
      * 특정 회의실이 삭제될 때 관련 즐겨찾기 삭제 (Cascade)
      */
     void deleteAllByRoomId(Long roomId);
+
+    /**
+     * 특정 사용자의 모든 즐겨찾기 삭제 (회원탈퇴 시 사용)
+     */
+    void deleteAllByUserId(Long userId);
 }
