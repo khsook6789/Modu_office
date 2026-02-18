@@ -23,8 +23,9 @@ export default function RoomFormPage() {
     const [capacity, setCapacity] = useState('4');
     const [price, setPrice] = useState('10000');
     const [category, setCategory] = useState('MEETING_ROOM');
-    const [facilities, setFacilities] = useState<string[]>([]);
+    const [equipment, setEquipment] = useState<string[]>([]);
     const [imageUrl, setImageUrl] = useState('');
+    const [fetchedOfficeId, setFetchedOfficeId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -38,8 +39,9 @@ export default function RoomFormPage() {
                     setCapacity(String(room.capacity));
                     setPrice('10000'); // Price is not in API response yet, using default
                     setCategory(room.category);
-                    setFacilities([]); // Facilities not in API yet
+                    setEquipment(room.equipment || []); // Use equipment from room data (need to ensure getRoomById returns it)
                     setImageUrl(room.imageUrl || '');
+                    setFetchedOfficeId(room.officeId);
                 })
                 .catch(err => {
                     console.error("Failed to fetch room", err);
@@ -50,7 +52,7 @@ export default function RoomFormPage() {
     }, [isEditMode, roomId]);
 
     const handleCheck = (id: string) => {
-        setFacilities(prev =>
+        setEquipment(prev =>
             prev.includes(id)
                 ? prev.filter(item => item !== id)
                 : [...prev, id]
@@ -61,15 +63,17 @@ export default function RoomFormPage() {
         e.preventDefault();
         setLoading(true);
 
+        const currentOfficeId = officeId ? Number(officeId) : fetchedOfficeId;
+        
         const roomData = {
-            officeId: Number(officeId),
+            officeId: currentOfficeId,
             name,
             floor: Number(floor),
             roomCode,
             capacity: Number(capacity),
             price: Number(price),
             category,
-            facilities,
+            equipment,
             imageUrl
         };
 
@@ -78,7 +82,7 @@ export default function RoomFormPage() {
                 await roomApi.updateRoom(Number(roomId), roomData);
                 alert('회의실 정보가 수정되었습니다.');
             } else {
-                await roomApi.createRoom(Number(officeId), roomData);
+                await roomApi.createRoom(Number(currentOfficeId), roomData);
                 alert('회의실이 추가되었습니다.');
             }
 
@@ -170,7 +174,7 @@ export default function RoomFormPage() {
                             <label key={opt.id} className="flex items-center gap-xs cursor-pointer p-xs hover:bg-gray-50 rounded">
                                 <input
                                     type="checkbox"
-                                    checked={facilities.includes(opt.id)}
+                                    checked={equipment.includes(opt.id)}
                                     onChange={() => handleCheck(opt.id)}
                                     className="w-4 h-4 text-primary"
                                 />
