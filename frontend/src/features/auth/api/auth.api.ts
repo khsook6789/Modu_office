@@ -37,7 +37,7 @@ export const authApi = {
                     id: data.email,
                     email: data.email,
                     name: data.email.split('@')[0],
-                    role: 'CUSTOMER'
+                    role: 'USER'
                 };
             }
             return response;
@@ -56,7 +56,7 @@ export const authApi = {
                         id: data.email,
                         email: data.email,
                         name: data.email.split('@')[0],
-                        role: isAdmin ? 'PLATFORM_ADMIN' : 'OPERATOR'
+                        role: isAdmin ? 'ADMIN' : 'OPERATOR'
                     };
                 }
                 return response;
