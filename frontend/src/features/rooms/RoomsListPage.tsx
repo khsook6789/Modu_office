@@ -99,7 +99,7 @@ function RoomsListPageContent() {
                     <p className="rooms-subtitle">회의에 적합한 공간을 찾아보세요</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    {(user?.role === 'PLATFORM_ADMIN' || user?.role === 'OPERATOR') && (
+                    {(user?.role === 'ADMIN' || user?.role === 'OPERATOR') && (
                         <>
                             <button 
                                 className="btn btn-secondary"
@@ -121,7 +121,7 @@ function RoomsListPageContent() {
             </div>
 
             {/* Office Selector */}
-            <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
+            <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: 'var(--color-bg-card)', border: 'var(--glass-border)', borderRadius: 'var(--radius-lg)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
                     <div style={{ flex: 1 }}>
                         <OfficeSelectorDropdown />
@@ -133,7 +133,7 @@ function RoomsListPageContent() {
                     )}
                 </div>
                 {selectedOffice && (
-                    <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                    <p style={{ marginTop: '10px', fontSize: '14px', color: 'var(--color-text-muted)' }}>
                         📍 {selectedOffice.location} | 🕒 {selectedOffice.openTime} - {selectedOffice.closeTime}
                     </p>
                 )}
@@ -159,13 +159,13 @@ function RoomsListPageContent() {
                     <RoomCard key={room.id} room={room} />
                 ))}
                 {filteredRooms.length === 0 && selectedOfficeId && (
-                    <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#999' }}>
+                    <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
                         이 오피스에는 아직 회의실이 없습니다.<br />
-                        {(user?.role === 'PLATFORM_ADMIN' || user?.role === 'OPERATOR') && '회의실을 추가해보세요!'}
+                        {(user?.role === 'ADMIN' || user?.role === 'OPERATOR') && '회의실을 추가해보세요!'}
                     </p>
                 )}
                 {!selectedOfficeId && (
-                    <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#999' }}>
+                    <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
                         오피스를 선택하면 회의실 목록이 표시됩니다.
                     </p>
                 )}
@@ -175,11 +175,11 @@ function RoomsListPageContent() {
             {isOfficeModalOpen && (
                 <div className="modal-overlay" style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, backdropFilter: 'blur(4px)'
+                    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, backdropFilter: 'blur(8px)'
                 }}>
-                    <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-                        <h2 className="text-xl font-bold mb-md">새 오피스(지점) 등록</h2>
+                    <div className="card" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--color-bg-card)' }}>
+                        <h2 className="text-xl font-bold mb-md text-gradient">새 오피스(지점) 등록</h2>
                         <form onSubmit={handleCreateOffice}>
                             <Input label="오피스 이름" value={newOfficeData.name} onChange={e => setNewOfficeData({...newOfficeData, name: e.target.value})} required fullWidth />
                             <Input label="위치 (주소)" value={newOfficeData.location} onChange={e => setNewOfficeData({...newOfficeData, location: e.target.value})} required fullWidth />
@@ -197,13 +197,13 @@ function RoomsListPageContent() {
             {isModalOpen && (
                 <div className="modal-overlay" style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, backdropFilter: 'blur(4px)'
+                    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, backdropFilter: 'blur(8px)'
                 }}>
-                    <div className="card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
-                        <h2 className="text-xl font-bold mb-md">새 회의실 추가</h2>
+                    <div className="card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', backgroundColor: 'var(--color-bg-card)' }}>
+                        <h2 className="text-xl font-bold mb-md text-gradient">새 회의실 추가</h2>
                         {selectedOffice && (
-                            <p style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
+                            <p style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'rgba(217, 190, 158, 0.1)', border: '1px solid rgba(217, 190, 158, 0.2)', borderRadius: 'var(--radius-md)', color: 'var(--color-primary)' }}>
                                 <strong>{selectedOffice.name}</strong>에 회의실을 추가합니다
                             </p>
                         )}

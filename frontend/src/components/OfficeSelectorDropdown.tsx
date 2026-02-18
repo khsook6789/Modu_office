@@ -1,16 +1,15 @@
-import React from 'react';
 import { useOfficeContext } from '../contexts/OfficeContext';
 
 export const OfficeSelectorDropdown: React.FC = () => {
     const { offices, selectedOfficeId, selectOffice, isLoading } = useOfficeContext();
 
     if (isLoading) {
-        return <div className="office-selector">Loading offices...</div>;
+        return <div className="office-selector" style={{ color: 'var(--color-text-muted)' }}>Loading offices...</div>;
     }
 
     if (offices.length === 0) {
         return (
-            <div className="office-selector no-offices">
+            <div className="office-selector no-offices" style={{ padding: '10px', color: 'var(--color-warning)' }}>
                 <p>⚠️ You don't have any offices yet. Please create one first.</p>
             </div>
         );
@@ -18,8 +17,8 @@ export const OfficeSelectorDropdown: React.FC = () => {
 
     return (
         <div className="office-selector">
-            <label htmlFor="office-select">
-                <strong>Select Office:</strong>
+            <label htmlFor="office-select" style={{ color: 'var(--color-text-main)', fontWeight: 'bold' }}>
+                Select Office:
             </label>
             <select
                 id="office-select"
@@ -29,13 +28,16 @@ export const OfficeSelectorDropdown: React.FC = () => {
                     marginLeft: '10px',
                     padding: '8px 12px',
                     fontSize: '14px',
-                    borderRadius: '4px',
-                    border: '1px solid #ccc',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'var(--glass-border)',
+                    background: 'var(--color-bg-card)',
+                    color: 'var(--color-text-main)',
+                    outline: 'none'
                 }}
             >
-                <option value="">-- Select an Office --</option>
+                <option value="" style={{ background: 'var(--color-bg-dark)' }}>-- Select an Office --</option>
                 {offices.map((office) => (
-                    <option key={office.id} value={office.id}>
+                    <option key={office.id} value={office.id} style={{ background: 'var(--color-bg-dark)' }}>
                         {office.name} ({office.location})
                     </option>
                 ))}
