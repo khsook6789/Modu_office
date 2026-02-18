@@ -3,6 +3,7 @@ package com.modu.office.repository.custom;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.QOffice;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
