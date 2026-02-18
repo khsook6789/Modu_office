@@ -47,6 +47,10 @@ public class Office extends BaseEntity {
     @Column(name = "close_time", nullable = false)
     private LocalTime closeTime;
 
+    @Setter
+    @Column(name = "open_days", columnDefinition = "SMALLINT[]")
+    private Short[] openDays;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_user_id", nullable = false)
     private AppUser ownerUser;
@@ -56,13 +60,14 @@ public class Office extends BaseEntity {
 
     @Builder
     public Office(String name, String location, Double latitude, Double longitude, LocalTime openTime,
-            LocalTime closeTime, AppUser ownerUser) {
+            LocalTime closeTime, Short[] openDays, AppUser ownerUser) {
         this.name = name;
         this.location = location;
         this.latitude = latitude;
         this.longitude = longitude;
         this.openTime = openTime;
         this.closeTime = closeTime;
+        this.openDays = openDays;
         this.ownerUser = ownerUser;
     }
 

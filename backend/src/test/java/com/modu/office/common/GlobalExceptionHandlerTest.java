@@ -35,10 +35,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@org.springframework.test.context.ActiveProfiles("test")
+@org.springframework.boot.context.properties.EnableConfigurationProperties(com.modu.office.config.GoogleProperties.class)
 class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.modu.office.service.GeocodingService geocodingService;
 
     /**
      * 테스트용 Bean Configuration

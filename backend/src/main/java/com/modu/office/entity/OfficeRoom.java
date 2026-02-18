@@ -3,6 +3,7 @@ package com.modu.office.entity;
 import com.modu.office.entity.enums.RoomStatus;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -54,13 +55,17 @@ public class OfficeRoom extends BaseEntity {
     @Column(name = "category", length = 100)
     private String category;
 
+    @Setter
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal price = BigDecimal.ZERO;
+
     @Version
     @Column(name = "version")
     private Long version;
 
     @Builder
     public OfficeRoom(Office office, String name, String roomCode, Integer floor, RoomStatus status, Integer capacity,
-            String category) {
+            String category, BigDecimal price) {
         this.office = office;
         this.name = name;
         this.roomCode = roomCode;
@@ -68,6 +73,7 @@ public class OfficeRoom extends BaseEntity {
         this.status = status != null ? status : RoomStatus.AVAILABLE;
         this.capacity = capacity;
         this.category = category;
+        this.price = price != null ? price : BigDecimal.ZERO;
     }
 
     // status는 검증 로직이 있어 수동 setter 유지
