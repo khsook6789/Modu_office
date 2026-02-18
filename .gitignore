@@ -94,6 +94,7 @@ tmp/
 *.swp
 *.patch
 *.diff
+*.txt
 
 # --- Tools & Assistant ---
 .antigravity/
