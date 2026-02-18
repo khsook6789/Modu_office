@@ -185,4 +185,13 @@ public class AuthService {
                         throw new IllegalArgumentException("Email already in use");
                 }
         }
+
+        /**
+         * 로그아웃 - RefreshToken 삭제
+         */
+        @Transactional
+        public void logout(AppUser currentUser) {
+                Account account = currentUser.getAccount();
+                refreshTokenRepository.deleteByAccount(account);
+        }
 }
