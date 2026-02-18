@@ -1,5 +1,4 @@
 @import './styles/variables.css';
-@import './styles/animations.css';
 
 *,
 *::before,
@@ -11,7 +10,7 @@
 
 body {
   font-family: var(--font-family-main);
-  background-color: var(--color-bg-main);
+  background-color: var(--color-bg-dark);
   color: var(--color-text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
