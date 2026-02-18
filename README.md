@@ -226,13 +226,16 @@ frontend/
   - `POST /auth/customer/signup`: 고객 회원가입
   - `POST /auth/customer/login`: 고객 로그인
   - `POST /auth/customer/refresh`: 토큰 갱신
+  - `POST /auth/customer/logout`: 고객 로그아웃
 - **Operator**
   - `POST /auth/operator/signup`: 운영자 회원가입 (Admin 승인 필요)
   - `POST /auth/operator/login`: 운영자 로그인
   - `POST /auth/operator/refresh`: 토큰 갱신
+  - `POST /auth/operator/logout`: 운영자 로그아웃
 - **Admin**
   - `POST /auth/admin/login`: 관리자 로그인
   - `POST /auth/admin/refresh`: 토큰 갱신
+  - `POST /auth/admin/logout`: 관리자 로그아웃
 
 ### 2. 관리자 - Operator 승인 관리 (Admin)
 
@@ -291,6 +294,13 @@ frontend/
 - `DELETE /favorites/{roomId}`: 즐겨찾기 삭제
 - `GET /favorites`: 내 즐겨찾기 목록 조회
 - `GET /favorites/check/{roomId}`: 즐겨찾기 여부 확인
+
+### 10. 사용자 프로필 (User Profile)
+
+- `GET /users/me`: 내 정보 조회
+- `PUT /users/me`: 내 정보 수정 (이름 변경)
+- `PUT /users/me/password`: 비밀번호 변경
+- `DELETE /users/me`: 회원탈퇴 (소프트 삭제)
 
 ---
 
