@@ -48,7 +48,7 @@ public class Office extends BaseEntity {
     private LocalTime closeTime;
 
     @Setter
-    @Column(name = "open_days", columnDefinition = "SMALLINT[]")
+    @Column(name = "open_days")
     private Short[] openDays;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
