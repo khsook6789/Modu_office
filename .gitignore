@@ -84,7 +84,6 @@ coverage/
 frontend/resource/Git/
 
 # --- Database ---
-*.sql
 *.dump
 postgresql-*.log
 
