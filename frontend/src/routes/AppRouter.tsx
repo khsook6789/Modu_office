@@ -16,32 +16,22 @@ import OfficeFormPage from "../features/office/OfficeFormPage";
 import RoomManagementPage from "../features/rooms/RoomManagementPage";
 import RoomFormPage from "../features/rooms/RoomFormPage";
 
-import PostListPage from '../features/community/PostListPage';
-import PostFormPage from '../features/community/PostFormPage';
-import PostDetailPage from '../features/community/PostDetailPage';
-
 import BookingPage from "../features/booking/BookingPage";
-import PaymentPage from "../features/booking/PaymentPage";
 import BookingSuccessPage from "../features/booking/BookingSuccessPage";
 import MyBookingsPage from "../features/booking/MyBookingsPage";
 
 import OperatorDashboard from "../features/operator/OperatorDashboard";
 import AdminDashboard from "../features/admin/AdminDashboard";
 import MyPage from "../features/user/MyPage";
+import LandingPage from "../features/landing/LandingPage";
 
-// Placeholder Components (to be moved to features later)
-
-function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 'USER' | 'ADMIN' | 'OPERATOR' }) {
+function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 'CUSTOMER' | 'PLATFORM_ADMIN' | 'OPERATOR' }) {
   const { user } = useAuth();
 
   if (!user) return <Navigate to="/login" replace />;
 
-  if (user.role === 'OPERATOR' && user.id.includes('pending')) {
-    // Rely on manual redirection or separate logic
-  }
-
-  if (role && (user.role as string) !== role) {
-    if (user.role === 'ADMIN') return children;
+  if (role && user.role !== role) {
+    if (user.role === 'PLATFORM_ADMIN') return children;
     return <Navigate to="/" replace />;
   }
 
@@ -61,7 +51,10 @@ export default function AppRouter() {
           </Route>
 
           <Route element={<MainLayout />}>
-            <Route path="/" element={<Navigate to="/rooms" replace />} />
+            <Route path="/intro" element={<LandingPage />} />
+            {/* Redirect / to /intro as default public landing */}
+            <Route path="/" element={<Navigate to="/intro" replace />} />
+            
             <Route path="/rooms" element={
               <ProtectedRoute>
                 <RoomsListPage />
@@ -79,11 +72,7 @@ export default function AppRouter() {
                 <BookingPage />
               </ProtectedRoute>
             } />
-            <Route path="/payment" element={
-              <ProtectedRoute>
-                <PaymentPage />
-              </ProtectedRoute>
-            } />
+            {/* PaymentPage Removed */}
             <Route path="/booking/success/:id" element={
               <ProtectedRoute>
                 <BookingSuccessPage />
@@ -101,19 +90,7 @@ export default function AppRouter() {
               </ProtectedRoute>
             } />
 
-            {/* Community Routes */}
-            <Route path="/community" element={<PostListPage />} />
-            <Route path="/community/new" element={
-              <ProtectedRoute>
-                <PostFormPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/community/:id" element={<PostDetailPage />} />
-            <Route path="/community/:id/edit" element={
-              <ProtectedRoute>
-                <PostFormPage />
-              </ProtectedRoute>
-            } />
+            {/* Community Routes Removed */}
 
             {/* Operator Routes */}
             <Route path="/operator" element={
@@ -143,7 +120,7 @@ export default function AppRouter() {
             } />
 
             <Route path="/admin" element={
-              <ProtectedRoute role="ADMIN">
+              <ProtectedRoute role="PLATFORM_ADMIN">
                 <AdminDashboard />
               </ProtectedRoute>
             } />

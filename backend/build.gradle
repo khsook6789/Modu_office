@@ -46,6 +46,10 @@ dependencies {
     implementation 'com.google.maps:google-maps-services:2.2.0'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+    // Flyway (DB schema version management)
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"

@@ -6,7 +6,7 @@ import { authApi } from './api/auth.api';
 import './SignupPage.css';
 
 export default function SignupPage() {
-    const [userType, setUserType] = useState<'CUSTOMER' | 'OPERATOR'>('CUSTOMER');
+    const [userType, setUserType] = useState<'USER' | 'OPERATOR'>('USER');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,7 +18,7 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            if (userType === 'CUSTOMER') {
+            if (userType === 'USER') {
                 await authApi.signup({ name, email, password });
                 alert('회원가입이 완료되었습니다. 로그인해주세요.');
                 navigate('/login');
@@ -46,11 +46,10 @@ export default function SignupPage() {
                 <div className="flex bg-gray-100 p-1 rounded-lg" style={{ background: '#f5f5f5', display: 'inline-flex' }}>
                     <button
                         type="button"
-                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'CUSTOMER'
-                                ? 'bg-white shadow text-primary font-bold'
-                                : 'text-muted hover:text-gray-700'
-                            }`}
-                        onClick={() => setUserType('CUSTOMER')}
+                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'USER'
+                            ? 'bg-primary text-white shadow-md'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                        onClick={() => setUserType('USER')}
                     >
                         일반 회원
                     </button>
@@ -69,9 +68,9 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit}>
                 <Input
-                    label={userType === 'CUSTOMER' ? "이름" : "대표자명"}
+                    label={userType === 'USER' ? "이름" : "대표자명"}
                     type="text"
-                    placeholder={userType === 'CUSTOMER' ? "홍길동" : "사업자명 또는 대표자명"}
+                    placeholder={userType === 'USER' ? "홍길동" : "사업자명 또는 대표자명"}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -103,7 +102,7 @@ export default function SignupPage() {
                     className="btn btn-primary signup-btn w-full mt-md text-md py-3"
                     disabled={loading}
                 >
-                    {loading ? '가입 처리 중...' : (userType === 'CUSTOMER' ? '회원가입 하기' : '파트너 가입 신청')}
+                    {loading ? '가입 처리 중...' : (userType === 'USER' ? '회원가입 하기' : '파트너 가입 신청')}
                 </button>
             </form>
 

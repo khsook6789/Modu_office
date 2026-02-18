@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { type OfficeRoomResponse } from '../rooms/api/room.api';
+import { type OfficeRoomResponse, roomApi } from '../rooms/api/room.api';
 import Input from '../../components/Input';
 
 export default function BookingPage() {
@@ -16,25 +16,21 @@ export default function BookingPage() {
     const [totalPrice, setTotalPrice] = useState(0);
 
     useEffect(() => {
-        // Mock fetch room details
-        // roomApi.getRoomById(roomId)
         if (roomId) {
-            setRoom({
-                id: Number(roomId),
-                officeId: 1,
-                name: 'Meeting Room A',
-                roomCode: '201',
-                floor: 2,
-                status: 'AVAILABLE',
-                capacity: 6,
-                category: 'MEETING_ROOM',
-                imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000'
-            });
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            setDate(today);
+            roomApi.getRoomById(Number(roomId))
+                .then(data => {
+                    setRoom(data);
+                    // Set default date to today
+                    const today = new Date().toISOString().split('T')[0];
+                    setDate(today);
+                })
+                .catch(err => {
+                    console.error("Failed to fetch room details", err);
+                    alert("존재하지 않는 회의실입니다.");
+                    navigate('/rooms');
+                });
         }
-    }, [roomId]);
+    }, [roomId, navigate]);
 
     // Calculate Price
     useEffect(() => {
@@ -57,8 +53,8 @@ export default function BookingPage() {
             roomId,
             roomName: room?.name,
             date,
-            startTime,
-            endTime: calculateEndTime(startTime, Number(duration)),
+            start_at: startTime,
+            end_at: calculateEndTime(startTime, Number(duration)),
             guestCount,
             totalPrice
         };

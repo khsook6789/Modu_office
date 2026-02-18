@@ -84,7 +84,6 @@ coverage/
 frontend/resource/Git/
 
 # --- Database ---
-*.sql
 *.dump
 postgresql-*.log
 
@@ -95,6 +94,7 @@ tmp/
 *.swp
 *.patch
 *.diff
+*.txt
 
 # --- Tools & Assistant ---
 .antigravity/

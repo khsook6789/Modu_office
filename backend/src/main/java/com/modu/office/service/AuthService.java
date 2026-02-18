@@ -2,6 +2,7 @@ package com.modu.office.service;
 
 import com.modu.office.dto.request.customer.CustomerLoginRequest;
 import com.modu.office.dto.request.customer.CustomerSignupRequest;
+import com.modu.office.dto.request.admin.AdminLoginRequest;
 import com.modu.office.dto.request.operator.OperatorLoginRequest;
 import com.modu.office.dto.request.operator.OperatorSignupRequest;
 import com.modu.office.dto.response.TokenResponse;
@@ -113,6 +114,24 @@ public class AuthService {
         }
 
         @Transactional
+        public TokenResponse loginAdmin(AdminLoginRequest request) {
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+
+                Account account = accountRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+
+                AppUser appUser = appUserRepository.findByAccount(account)
+                                .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
+
+                if (appUser.getRole() != UserRole.PLATFORM_ADMIN) {
+                        throw new IllegalArgumentException("Not authorized as Admin");
+                }
+
+                return createTokenResponse(authentication, account);
+        }
+
+        @Transactional
         public TokenResponse refreshAccessToken(String refreshTokenValue) {
                 RefreshToken refreshToken = refreshTokenRepository
                                 .findByToken(java.util.Objects.requireNonNull(refreshTokenValue, "리프레시 토큰은 필수입니다."))
@@ -165,5 +184,14 @@ public class AuthService {
                 if (accountRepository.existsByEmail(email)) {
                         throw new IllegalArgumentException("Email already in use");
                 }
+        }
+
+        /**
+         * 로그아웃 - RefreshToken 삭제
+         */
+        @Transactional
+        public void logout(AppUser currentUser) {
+                Account account = currentUser.getAccount();
+                refreshTokenRepository.deleteByAccount(account);
         }
 }

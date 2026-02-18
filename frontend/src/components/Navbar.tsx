@@ -95,17 +95,9 @@ export default function Navbar() {
           {user ? (
             <div className="flex-center gap-md">
               {/* Common Links */}
-              <Link to="/community" className="nav-link">커뮤니티</Link>
               <Link to="/my-bookings" className="nav-link">내 예약</Link>
 
-              {/* Role Based Links */}
-              {(user.role === 'OPERATOR' || user.role === 'ADMIN') && (
-                <Link to="/operator" className="nav-link font-bold text-primary">운영자 대시보드</Link>
-              )}
 
-              {user.role === 'ADMIN' && (
-                <Link to="/admin" className="nav-link text-accent font-bold">관리자</Link>
-              )}
 
               <div className="separator mx-sm h-4 border-l border-gray-300"></div>
 

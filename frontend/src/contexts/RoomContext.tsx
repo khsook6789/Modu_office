@@ -1,75 +1,78 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { type Room } from '../features/rooms/RoomCard';
+import { type OfficeRoom } from '../features/rooms/RoomCard';
+import { roomApi } from '../features/rooms/api/room.api';
 
-const MOCK_ROOMS: Room[] = [
-    {
-        id: '1',
-        name: 'Galaxy Conference Hall',
-        location: 'Floor 10, East Wing',
-        capacity: 20,
-        equipment: ['Projector', 'Video Conf', 'Whiteboard'],
-        imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000',
-        isAvailable: true,
-    },
-    {
-        id: '2',
-        name: 'Nebula Meeting Room',
-        location: 'Floor 10, West Wing',
-        capacity: 8,
-        equipment: ['TV', 'Whiteboard'],
-        imageUrl: 'https://images.unsplash.com/photo-1577412647305-991150c7d163?auto=format&fit=crop&q=80&w=1000',
-        isAvailable: false,
-    },
-    {
-        id: '3',
-        name: 'Cosmos Focus Pod',
-        location: 'Floor 11, Central',
-        capacity: 4,
-        equipment: ['Display', 'Soundproofing'],
-        imageUrl: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&q=80&w=1000',
-        isAvailable: true,
-    },
-    {
-        id: '4',
-        name: 'Starlight Studio',
-        location: 'Floor 11, North Wing',
-        capacity: 12,
-        equipment: ['Projector', 'Green Screen', 'Mac Studio'],
-        imageUrl: 'https://images.unsplash.com/photo-1505409859467-3a796fd5798e?auto=format&fit=crop&q=80&w=1000',
-        isAvailable: true,
-    }
-];
+
 
 interface RoomContextType {
-    rooms: Room[];
-    addRoom: (room: Omit<Room, 'id' | 'isAvailable'>) => void;
+    rooms: OfficeRoom[];
+    addRoom: (officeId: number, room: Omit<OfficeRoom, 'id' | 'isAvailable' | 'officeId'>) => void;
     deleteRoom: (id: string) => void;
 }
 
 const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
 export function RoomProvider({ children }: { children: ReactNode }) {
-    const [rooms, setRooms] = useState<Room[]>(() => {
-        const storedRooms = localStorage.getItem('rooms');
-        if (storedRooms) {
-            return JSON.parse(storedRooms);
-        }
-        // Initialize with mock data if storage is empty
-        localStorage.setItem('rooms', JSON.stringify(MOCK_ROOMS));
-        return MOCK_ROOMS;
-    });
+    const [rooms, setRooms] = useState<OfficeRoom[]>([]);
+
+    useEffect(() => {
+        const fetchRooms = async () => {
+            try {
+                // Fetch from API (which uses its own localStorage/mock)
+                const apiRooms = await roomApi.getAllRooms();
+                // Map API response to UI model
+                // const mappedRooms = apiRooms.map(mapToRoom); // Already mapped in API
+                setRooms(apiRooms);
+            } catch (err) {
+                console.error("Failed to load rooms", err);
+            }
+        };
+        fetchRooms();
+    }, []);
 
     useEffect(() => {
         localStorage.setItem('rooms', JSON.stringify(rooms));
     }, [rooms]);
 
-    const addRoom = (roomData: Omit<Room, 'id' | 'isAvailable'>) => {
-        const newRoom: Room = {
-            ...roomData,
-            id: crypto.randomUUID(), // Generate unique ID
-            isAvailable: true, // Default to available
-        };
-        setRooms(prev => [...prev, newRoom]);
+
+
+    const addRoom = async (officeId: number, roomData: Omit<OfficeRoom, 'id' | 'isAvailable' | 'officeId'>) => {
+        try {
+            // 1. Map frontend input to backend request
+            const payload = {
+                name: roomData.name,
+                roomCode: roomData.location.slice(0, 50), 
+                floor: 1, 
+                capacity: roomData.capacity,
+                category: 'MEETING_ROOM',
+                status: 'AVAILABLE',
+                facilityIds: [] 
+            };
+
+            // 2. Call API with provided Office ID
+            const createdRoomDTO = await roomApi.createRoom(officeId, payload);
+
+            // 3. Map backend response back to frontend model
+            const newRoom: OfficeRoom = {
+                id: createdRoomDTO.id.toString(),
+                officeId: officeId,  // Include officeId for filtering
+                name: createdRoomDTO.name,
+                location: `${createdRoomDTO.floor}F - ${createdRoomDTO.roomCode}`,
+                capacity: createdRoomDTO.capacity,
+                equipment: roomData.equipment || [],
+                imageUrl: roomData.imageUrl,
+                isAvailable: createdRoomDTO.status === 'AVAILABLE',
+                rating: (roomData as any).rating
+            };
+
+            // 4. Update state
+            setRooms(prev => [...prev, newRoom]);
+            alert('회의실이 성공적으로 추가되었습니다! (DB 저장 완료)');
+        } catch (error: any) {
+            console.error("Failed to create room", error);
+            const msg = error.response?.data?.message || error.message || "서버 오류가 발생했습니다.";
+            alert(`회의실 추가 실패: ${msg}`);
+        }
     };
 
     const deleteRoom = (id: string) => {

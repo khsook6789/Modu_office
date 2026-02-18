@@ -105,7 +105,8 @@ body {
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-md);
-  transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  /* Removed cubic-bezier for simpler feel */
 }
 
 .card:hover {
@@ -128,25 +129,27 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.3);
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  box-shadow: 0 2px 4px rgba(27, 89, 248, 0.2); /* Subtle blue shadow */
 
 }
 
 .btn-primary:hover {
-  box-shadow: 0 0 15px rgba(217, 119, 6, 0.5);
+  background: var(--color-primary-dark);
+  box-shadow: 0 4px 8px rgba(27, 89, 248, 0.3);
   transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--color-text-main);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: white;
+  color: var(--color-text-sub);
+  border: 1px solid #cbd5e1; /* Slate-300 */
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-bg-hover);
+  color: var(--color-text-main);
 }
 
 /* Typography Utilities */
@@ -187,9 +190,11 @@ body {
 }
 
 .text-gradient {
+  background-image: linear-gradient(to right, var(--color-primary), var(--color-accent));
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: var(--color-primary); /* Fallback */
 }
 
 /* View Transitions - Circular Reveal Setup */

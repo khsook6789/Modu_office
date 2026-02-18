@@ -10,69 +10,35 @@ export interface Office {
     closeTime: string;
 }
 
-// LocalStorage Keys
-const OFFICE_STORAGE_KEY = 'modu_offices';
-
-// Initial Seed Data
-const INITIAL_OFFICES: Office[] = [
-    { id: 1, name: '강남 공유오피스', location: '서울시 강남구 테헤란로 123', latitude: 37.4979, longitude: 127.0276, openTime: '09:00', closeTime: '22:00' },
-    { id: 2, name: '판교 스타트업 허브', location: '성남시 분당구 판교역로 456', latitude: 37.3947, longitude: 127.1111, openTime: '08:00', closeTime: '20:00' },
-];
-
-// Helper to get offices from storage
-const getStoredOffices = (): Office[] => {
-    const stored = localStorage.getItem(OFFICE_STORAGE_KEY);
-    if (!stored) {
-        localStorage.setItem(OFFICE_STORAGE_KEY, JSON.stringify(INITIAL_OFFICES));
-        return INITIAL_OFFICES;
-    }
-    return JSON.parse(stored);
-};
+// API Response Wrappers
+interface ApiResponse<T> {
+    status: string;
+    message: string;
+    data: T;
+}
 
 export const officeApi = {
-    getAllOffices: () => {
-        // Simulate network delay
-        return new Promise<Office[]>((resolve) => {
-            setTimeout(() => {
-                resolve(getStoredOffices());
-            }, 300);
-        });
+    getAllOffices: async () => {
+        const response = await client.get<ApiResponse<Office[]>>('/offices');
+        return response.data;
     },
-    getOfficeById: (id: string | number) => {
-        return new Promise<Office>((resolve, reject) => {
-            setTimeout(() => {
-                const offices = getStoredOffices();
-                const office = offices.find(o => o.id === Number(id));
-                if (office) resolve(office);
-                else reject(new Error('Office not found'));
-            }, 300);
-        });
+    getMyOffices: async () => {
+        const response = await client.get<ApiResponse<Office[]>>('/offices/my-offices');
+        return response.data;
     },
-    createOffice: (data: Omit<Office, 'id'>) => {
-        return new Promise<Office>((resolve) => {
-            setTimeout(() => {
-                const offices = getStoredOffices();
-                const newId = offices.length > 0 ? Math.max(...offices.map(o => o.id)) + 1 : 1;
-                const newOffice = { id: newId, ...data };
-                localStorage.setItem(OFFICE_STORAGE_KEY, JSON.stringify([...offices, newOffice]));
-                resolve(newOffice);
-            }, 500);
-        });
+    getOfficeById: async (id: string | number) => {
+        const response = await client.get<ApiResponse<Office>>(`/offices/${id}`);
+        return response.data;
     },
-    updateOffice: (id: string | number, data: Partial<Office>) => {
-        return new Promise<Office>((resolve, reject) => {
-            setTimeout(() => {
-                const offices = getStoredOffices();
-                const index = offices.findIndex(o => o.id === Number(id));
-                if (index !== -1) {
-                    const updatedOffice = { ...offices[index], ...data };
-                    offices[index] = updatedOffice;
-                    localStorage.setItem(OFFICE_STORAGE_KEY, JSON.stringify(offices));
-                    resolve(updatedOffice);
-                } else {
-                    reject(new Error('Office not found'));
-                }
-            }, 500);
-        });
+    createOffice: async (data: Omit<Office, 'id'>) => {
+        const response = await client.post<ApiResponse<Office>>('/offices', data);
+        return response.data;
+    },
+    updateOffice: async (id: string | number, data: Partial<Office>) => {
+        const response = await client.put<ApiResponse<Office>>(`/offices/${id}`, data);
+        return response.data;
+    },
+    deleteOffice: async (id: string | number) => {
+        await client.delete<ApiResponse<void>>(`/offices/${id}`);
     }
 };

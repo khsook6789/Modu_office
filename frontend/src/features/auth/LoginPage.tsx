@@ -25,7 +25,8 @@ export default function LoginPage() {
             const userData = {
                 id: response.user.id,
                 name: response.user.name,
-                role: response.user.role as 'USER' | 'ADMIN'
+                email: response.user.email,
+                role: response.user.role as 'USER' | 'ADMIN' | 'OPERATOR'
             };
 
             login(userData, response.accessToken);

@@ -43,6 +43,13 @@ public class AppUser extends BaseEntity implements org.springframework.security.
     }
 
     /**
+     * 사용자 이름 변경
+     */
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    /**
      * 관리자가 Operator를 승인 처리
      */
     public void approve() {
