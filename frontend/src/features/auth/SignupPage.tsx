@@ -35,7 +35,11 @@ export default function SignupPage() {
     };
 
     return (
-        <div className="card signup-card">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '3rem' }}>
+            <Link to="/" style={{ textDecoration: 'none', marginBottom: '2rem' }}>
+                <span className="text-gradient font-bold" style={{ fontSize: '1.75rem', letterSpacing: '-0.5px' }}>Modu Office</span>
+            </Link>
+        <div className="card signup-card" style={{ width: '100%' }}>
             <div className="text-center mb-md">
                 <h1 className="signup-title font-bold mb-xs">회원가입</h1>
                 <p className="signup-subtitle text-muted text-sm">Modu Office와 함께하세요</p>
@@ -112,6 +116,7 @@ export default function SignupPage() {
                     로그인
                 </Link>
             </div>
+        </div>
         </div>
     );
 }
