@@ -42,7 +42,9 @@ function RoomsListPageContent() {
 
     const [newOfficeData, setNewOfficeData] = useState({
         name: '',
-        location: ''
+        location: '',
+        openTime: '09:00',
+        closeTime: '18:00'
     });
 
     // Filter rooms by selected office AND availability
@@ -60,15 +62,16 @@ function RoomsListPageContent() {
                 location: newOfficeData.location,
                 latitude: 37.5665,
                 longitude: 126.9780,
-                openTime: '09:00:00',
-                closeTime: '18:00:00'
+                openTime: newOfficeData.openTime || '09:00',
+                closeTime: newOfficeData.closeTime || '18:00',
+                openDays: [1, 2, 3, 4, 5]
             });
             setIsOfficeModalOpen(false);
-            setNewOfficeData({ name: '', location: '' });
+            setNewOfficeData({ name: '', location: '', openTime: '09:00', closeTime: '18:00' });
             alert('오피스가 성공적으로 생성되었습니다!');
-        } catch (err) {
-            console.error(err);
-            alert('오피스 생성에 실패했습니다.');
+        } catch (err: any) {
+            console.error('Office creation error:', err);
+            alert('오피스 생성에 실패했습니다.\n원인: ' + (err?.message || '알 수 없는 오류'));
         }
     };
 
@@ -99,7 +102,7 @@ function RoomsListPageContent() {
                     <p className="rooms-subtitle">회의에 적합한 공간을 찾아보세요</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    {(user?.role === 'ADMIN' || user?.role === 'OPERATOR') && (
+                    {(user?.role === 'PLATFORM_ADMIN' || user?.role === 'OPERATOR') && (
                         <>
                             <button 
                                 className="btn btn-secondary"
@@ -126,7 +129,7 @@ function RoomsListPageContent() {
                     <div style={{ flex: 1 }}>
                         <OfficeSelectorDropdown />
                     </div>
-                    {offices.length === 0 && (
+                    {offices.length === 0 && (user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN') && (
                         <button className="btn btn-primary" onClick={() => setIsOfficeModalOpen(true)}>
                             지금 오피스 만들기
                         </button>
@@ -161,7 +164,7 @@ function RoomsListPageContent() {
                 {filteredRooms.length === 0 && selectedOfficeId && (
                     <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
                         이 오피스에는 아직 회의실이 없습니다.<br />
-                        {(user?.role === 'ADMIN' || user?.role === 'OPERATOR') && '회의실을 추가해보세요!'}
+                        {(user?.role === 'PLATFORM_ADMIN' || user?.role === 'OPERATOR') && '회의실을 추가해보세요!'}
                     </p>
                 )}
                 {!selectedOfficeId && (

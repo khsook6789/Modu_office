@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 import '../../styles/animations.css';
 import './LandingPage.css';
@@ -19,6 +20,7 @@ function AnimatedSection({ children, className = '', delay = 0 }: { children: Re
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <div className="landing-page">
@@ -43,17 +45,19 @@ export default function LandingPage() {
           <AnimatedSection delay={400}>
             <div className="hero-buttons">
               <button 
-                onClick={() => navigate('/intro')}
+                onClick={() => navigate(user ? '/rooms' : '/signup')}
                 className="btn btn-primary btn-landing"
               >
-                무료로 시작하기
+                {user ? '공간 예약하기' : '무료로 시작하기'}
               </button>
-              <button 
-                onClick={() => navigate('/login')}
-                className="btn btn-secondary btn-landing"
-              >
-                로그인
-              </button>
+              {!user && (
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="btn btn-secondary btn-landing"
+                >
+                  로그인
+                </button>
+              )}
             </div>
           </AnimatedSection>
 
@@ -164,11 +168,11 @@ export default function LandingPage() {
                   초기 설정 비용 0원. 언제든지 해지 가능합니다.
                </p>
                <button 
-                onClick={() => navigate('/signup')} 
+                onClick={() => navigate(user ? '/rooms' : '/signup')} 
                 className="btn btn-secondary btn-landing"
                 style={{ backgroundColor: 'white', color: 'var(--color-text-main)', border: 'none' }}
                >
-                  무료로 시작하기
+                  {user ? '공간 예약하기' : '무료로 시작하기'}
                </button>
             </AnimatedSection>
          </div>

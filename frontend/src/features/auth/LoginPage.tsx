@@ -23,10 +23,10 @@ export default function LoginPage() {
             
             // Map backend response to AuthContext User type
             const userData = {
-                id: response.user.id,
+                id: String(response.user.id),
                 name: response.user.name,
                 email: response.user.email,
-                role: response.user.role as 'USER' | 'ADMIN' | 'OPERATOR'
+                role: response.user.role as 'CUSTOMER' | 'OPERATOR' | 'PLATFORM_ADMIN'
             };
 
             login(userData, response.accessToken);
@@ -44,7 +44,11 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="card login-card">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '3rem' }}>
+            <Link to="/" style={{ textDecoration: 'none', marginBottom: '2rem' }}>
+                <span className="text-gradient font-bold" style={{ fontSize: '1.75rem', letterSpacing: '-0.5px' }}>Modu Office</span>
+            </Link>
+        <div className="card login-card" style={{ width: '100%' }}>
             <div className="text-center mb-lg">
                 <p className="login-title font-bold mb-sm">환영합니다!</p>
                 <p className="login-subtitle text-muted text-sm">서비스 이용을 위해 로그인해주세요.</p>
@@ -97,6 +101,7 @@ export default function LoginPage() {
                     </Link>
                 </div>
             </div>
+        </div>
         </div>
     );
 }

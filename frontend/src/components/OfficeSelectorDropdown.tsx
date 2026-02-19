@@ -4,13 +4,13 @@ export const OfficeSelectorDropdown: React.FC = () => {
     const { offices, selectedOfficeId, selectOffice, isLoading } = useOfficeContext();
 
     if (isLoading) {
-        return <div className="office-selector" style={{ color: 'var(--color-text-muted)' }}>Loading offices...</div>;
+        return <div className="office-selector" style={{ color: 'var(--color-text-muted)' }}>오피스 목록 불러오는 중...</div>;
     }
 
     if (offices.length === 0) {
         return (
-            <div className="office-selector no-offices" style={{ padding: '10px', color: 'var(--color-warning)' }}>
-                <p>⚠️ You don't have any offices yet. Please create one first.</p>
+            <div className="office-selector no-offices" style={{ padding: '10px', color: 'var(--color-text-muted)' }}>
+                <p>등록된 오피스가 없습니다. 관리자에게 문의해주세요.</p>
             </div>
         );
     }
@@ -18,7 +18,7 @@ export const OfficeSelectorDropdown: React.FC = () => {
     return (
         <div className="office-selector">
             <label htmlFor="office-select" style={{ color: 'var(--color-text-main)', fontWeight: 'bold' }}>
-                Select Office:
+                오피스 선택:
             </label>
             <select
                 id="office-select"
@@ -35,7 +35,7 @@ export const OfficeSelectorDropdown: React.FC = () => {
                     outline: 'none'
                 }}
             >
-                <option value="" style={{ background: 'var(--color-bg-dark)' }}>-- Select an Office --</option>
+                <option value="" style={{ background: 'var(--color-bg-dark)' }}>-- 오피스를 선택하세요 --</option>
                 {offices.map((office) => (
                     <option key={office.id} value={office.id} style={{ background: 'var(--color-bg-dark)' }}>
                         {office.name} ({office.location})
@@ -45,3 +45,4 @@ export const OfficeSelectorDropdown: React.FC = () => {
         </div>
     );
 };
+
