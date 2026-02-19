@@ -303,6 +303,12 @@ frontend/
 - `PUT /users/me/password`: 비밀번호 변경
 - `DELETE /users/me`: 회원탈퇴 (소프트 삭제)
 
+### 11. 관리자 - 사용자 관리 (Admin User Management)
+
+- `GET /admin/users`: 전체 사용자 목록 조회 (PLATFORM_ADMIN 제외)
+- `PATCH /admin/users/{id}/suspend`: 사용자 계정 정지
+- `PATCH /admin/users/{id}/reactivate`: 사용자 계정 정지 해제
+
 ---
 
 ## 개발 가이드 - 커밋 메시지 (Commit Message Convention)
