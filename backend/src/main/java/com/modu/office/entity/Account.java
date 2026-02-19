@@ -62,4 +62,18 @@ public class Account extends BaseEntity {
     public void deactivate() {
         this.status = AccountStatus.DELETED;
     }
+
+    /**
+     * 계정 정지 (관리자에 의한 정지)
+     */
+    public void suspend() {
+        this.status = AccountStatus.SUSPENDED;
+    }
+
+    /**
+     * 계정 정지 해제 (관리자에 의한 복원)
+     */
+    public void reactivate() {
+        this.status = AccountStatus.ACTIVE;
+    }
 }
