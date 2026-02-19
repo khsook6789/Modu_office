@@ -6,9 +6,14 @@ import com.modu.office.entity.QOffice;
 import com.modu.office.entity.QOfficeRoom;
 import com.modu.office.entity.QOfficeRoomFacility;
 import com.modu.office.entity.QReservation;
+import com.modu.office.entity.QReview;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -18,7 +23,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -32,10 +36,7 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
         QOfficeRoom room = QOfficeRoom.officeRoom;
         QOffice office = QOffice.office;
         QReservation reservation = QReservation.reservation;
-        // QReview는 아직 Generated되지 않았을 수 있으므로 필요한 경우에만 import 및 사용
-        // 이 예시에서는 Review 엔티티와의 조인을 통한 평점 정렬 로직을 포함합니다.
-        // com.modu.office.entity.QReview review =
-        // com.modu.office.entity.QReview.review;
+        QReview review = QReview.review;
 
         // 동적 쿼리 빌더
         BooleanBuilder builder = new BooleanBuilder();
@@ -78,8 +79,18 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
                 .join(room.office, office).fetchJoin()
                 .where(builder);
 
+        // 정렬 조건에 따라 조인 추가 (평점 정렬 시 Review 조인 필요)
+        if ("RATING_DESC".equalsIgnoreCase(condition.getSortBy())) {
+            // 평점 정렬을 위해 Reservation과 Review를 조인
+            // 주의: 1:N 관계가 얽히므로 데이터 뻥튀기를 방지하거나 GroupBy를 사용해야 함.
+            // 여기서는 단순히 평점 평균을 구하기 위해 Left Join 사용
+            query.leftJoin(reservation).on(reservation.room.eq(room))
+                    .leftJoin(review).on(review.reservation.eq(reservation));
+            query.groupBy(room.id, office.id); // 그룹핑 추가
+        }
+
         // 6. 정렬 로직 적용
-        var orderSpecifier = getOrderSpecifier(condition, room, office);
+        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(condition, room, office, review);
         if (orderSpecifier != null) {
             query.orderBy(orderSpecifier);
         }
@@ -91,12 +102,15 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
                 .fetch();
 
         // 8. 카운트 쿼리
-        Long total = queryFactory
+        JPAQuery<Long> countQuery = queryFactory
                 .select(room.count())
                 .from(room)
                 .join(room.office, office)
-                .where(builder)
-                .fetchOne();
+                .where(builder);
+
+        // 평점 정렬 시에는 카운트 쿼리도 복잡해질 수 있으나, 여기서는 단순화
+        // (실제로는 GroupBy 된 결과의 개수를 세어야 함)
+        Long total = countQuery.fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0);
     }
@@ -120,20 +134,17 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
     /**
      * Haversine 공식을 이용한 거리 계산 Expression
      */
-    private com.querydsl.core.types.dsl.NumberExpression<Double> distance(double lat, double lng, QOffice office) {
-        // (6371 * acos(cos(radians(lat)) * cos(radians(office.latitude)) *
-        // cos(radians(office.longitude) - radians(lng)) + sin(radians(lat)) *
-        // sin(radians(office.latitude))))
-        return com.querydsl.core.types.dsl.Expressions.numberTemplate(Double.class,
+    private NumberTemplate<Double> distance(double lat, double lng, QOffice office) {
+        return Expressions.numberTemplate(Double.class,
                 "6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({0})) * sin(radians({1})))",
                 lat, office.latitude, office.longitude, lng);
     }
 
     /**
-     * 정렬 조건 처리 (Distance, Rating, Capacity, etc.)
+     * 정렬 조건 처리 (Distance, Price, Rating, Capacity)
      */
-    private com.querydsl.core.types.OrderSpecifier<?> getOrderSpecifier(OfficeRoomSearchCondition condition,
-            QOfficeRoom room, QOffice office) {
+    private OrderSpecifier<?> getOrderSpecifier(OfficeRoomSearchCondition condition,
+            QOfficeRoom room, QOffice office, QReview review) {
         String sortBy = condition.getSortBy();
         if (!StringUtils.hasText(sortBy)) {
             return room.id.desc(); // Default sort
@@ -145,13 +156,17 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
                     return distance(condition.getLat(), condition.getLng(), office).asc();
                 }
                 return room.id.desc();
+            case "PRICE_ASC":
+                return room.price.asc();
+            case "PRICE_DESC":
+                return room.price.desc();
             case "CAPACITY_ASC":
                 return room.capacity.asc();
             case "CAPACITY_DESC":
                 return room.capacity.desc();
-            // 추후 RATING 정렬 추가 예정 (Review 엔티티 조인 필요)
-            // case "RATING":
-            // return review.rating.avg().desc();
+            case "RATING_DESC":
+                // 평점 평균 내림차순 (NULLs Last)
+                return new OrderSpecifier<>(Order.DESC, review.rating.avg(), OrderSpecifier.NullHandling.NullsLast);
             default:
                 return room.id.desc();
         }
