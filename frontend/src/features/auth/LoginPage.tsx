@@ -23,10 +23,10 @@ export default function LoginPage() {
             
             // Map backend response to AuthContext User type
             const userData = {
-                id: response.user.id,
+                id: String(response.user.id),
                 name: response.user.name,
                 email: response.user.email,
-                role: response.user.role as 'USER' | 'ADMIN' | 'OPERATOR'
+                role: response.user.role as 'CUSTOMER' | 'OPERATOR' | 'PLATFORM_ADMIN'
             };
 
             login(userData, response.accessToken);

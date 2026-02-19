@@ -20,7 +20,7 @@ export default function OperatorDashboard() {
     const loadData = async () => {
         try {
             setLoading(true);
-            const officesData = await officeApi.getAllOffices();
+            const officesData = await officeApi.getMyOffices();
             const roomsData = await roomApi.getAllRooms();
 
             setOffices(officesData);

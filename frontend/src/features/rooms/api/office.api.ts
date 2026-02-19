@@ -8,6 +8,7 @@ export interface Office {
     longitude: number;
     openTime: string;
     closeTime: string;
+    openDays: number[];
 }
 
 // API Response Wrappers
@@ -18,27 +19,27 @@ interface ApiResponse<T> {
 }
 
 export const officeApi = {
-    getAllOffices: async () => {
+    getAllOffices: async (): Promise<Office[]> => {
         const response = await client.get<ApiResponse<Office[]>>('/offices');
         return response.data;
     },
-    getMyOffices: async () => {
+    getMyOffices: async (): Promise<Office[]> => {
         const response = await client.get<ApiResponse<Office[]>>('/offices/my-offices');
         return response.data;
     },
-    getOfficeById: async (id: string | number) => {
+    getOfficeById: async (id: string | number): Promise<Office> => {
         const response = await client.get<ApiResponse<Office>>(`/offices/${id}`);
         return response.data;
     },
-    createOffice: async (data: Omit<Office, 'id'>) => {
+    createOffice: async (data: Omit<Office, 'id'>): Promise<Office> => {
         const response = await client.post<ApiResponse<Office>>('/offices', data);
         return response.data;
     },
-    updateOffice: async (id: string | number, data: Partial<Office>) => {
+    updateOffice: async (id: string | number, data: Partial<Office>): Promise<Office> => {
         const response = await client.put<ApiResponse<Office>>(`/offices/${id}`, data);
         return response.data;
     },
-    deleteOffice: async (id: string | number) => {
+    deleteOffice: async (id: string | number): Promise<void> => {
         await client.delete<ApiResponse<void>>(`/offices/${id}`);
     }
 };

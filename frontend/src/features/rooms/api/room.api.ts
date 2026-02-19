@@ -41,6 +41,7 @@ interface RoomFilter {
 // Helper to map API response to Frontend Room type
 export const mapToRoom = (apiRoom: OfficeRoomResponse): OfficeRoom => ({
     id: apiRoom.id.toString(),
+    officeId: apiRoom.officeId,
     name: apiRoom.name,
     location: `${apiRoom.floor}F - ${apiRoom.roomCode}`, // Format location
     capacity: apiRoom.capacity,

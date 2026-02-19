@@ -43,7 +43,7 @@ export default function LandingPage() {
           <AnimatedSection delay={400}>
             <div className="hero-buttons">
               <button 
-                onClick={() => navigate('/intro')}
+                onClick={() => navigate('/signup')}
                 className="btn btn-primary btn-landing"
               >
                 무료로 시작하기
