@@ -240,7 +240,7 @@ frontend/
 ### 2. 관리자 - Operator 승인 관리 (Admin)
 
 - `GET /admin/operators/pending`: 승인 대기 중인 Operator 목록 조회
-- `PATCH /admin/operators/{id}/approve`: Operator 승인 처리
+- `PATCH /admin/operators/{id}/approve`: Operator 승인 처리 (승인 시 권한 부여)
 
 ### 3. 지점 관리 (Office)
 
@@ -275,6 +275,7 @@ frontend/
 
 - `POST /reservations`: 예약 생성
 - `GET /reservations`: 예약 목록 조회 (필터링 가능)
+- `GET /reservations/search`: 오퍼레이터용 예약 검색 (페이징 포함)
 - `GET /reservations/{id}`: 예약 상세 조회
 - `PUT /reservations/{id}`: 예약 수정
 - `PATCH /reservations/{id}/confirm`: 예약 확정
@@ -284,10 +285,12 @@ frontend/
 
 - `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (Operator/Admin)
 
-### 8. 감사 로그 (UpdateLog)
+### 8. 감사 로그 (Audit Log - Admin 전용)
 
-- `GET /logs`: 전체 로그 조회
-- `GET /logs/reservation/{reservationId}`: 특정 예약 로그 조회
+- `GET /logs`: 전체 로그 조회 (페이징 지원)
+- `GET /logs/reservation/{reservationId}`: 특정 예약 관련 로그 조회
+- `GET /admin/logs`: 전사 감사 로그 조회
+- `GET /admin/logs/search`: 감사 로그 정밀 검색 (PostgreSQL JSONB 기반)
 
 ### 9. 즐겨찾기 (RoomFavorite)
 
