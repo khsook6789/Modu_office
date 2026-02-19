@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
@@ -32,8 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReservationController.class)
-@MockBean(JpaMetamodelMappingContext.class)
+
 @Import(ReservationControllerTest.TestSecurityConfig.class)
+@SuppressWarnings("null")
 class ReservationControllerTest {
 
     @org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -44,6 +45,9 @@ class ReservationControllerTest {
 
     @org.springframework.test.context.bean.override.mockito.MockitoBean
     private com.modu.office.service.CustomUserDetailsService customUserDetailsService;
+
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @Autowired
     private MockMvc mockMvc;

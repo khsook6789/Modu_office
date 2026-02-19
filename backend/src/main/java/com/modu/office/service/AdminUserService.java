@@ -45,7 +45,7 @@ public class AdminUserService {
      */
     @Transactional
     public AdminUserResponse suspendUser(Long userId, AppUser currentAdmin) {
-        AppUser targetUser = appUserRepository.findById(userId)
+        AppUser targetUser = appUserRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
 
         validateSuspendable(targetUser, currentAdmin);
@@ -63,7 +63,7 @@ public class AdminUserService {
      */
     @Transactional
     public AdminUserResponse reactivateUser(Long userId) {
-        AppUser targetUser = appUserRepository.findById(userId)
+        AppUser targetUser = appUserRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
 
         validateReactivatable(targetUser);

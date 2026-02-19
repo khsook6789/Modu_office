@@ -1,6 +1,5 @@
 package com.modu.office.repository.custom;
 
-import com.modu.office.entity.QReservation;
 import com.modu.office.entity.Reservation;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -24,6 +23,7 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
     private final JPAQueryFactory queryFactory;
 
     @Override
+    @SuppressWarnings("null")
     public Page<Reservation> search(Long officeId, String guestName, ReservationStatus status, LocalDate startDate,
             LocalDate endDate, Pageable pageable) {
         List<Reservation> content = queryFactory
@@ -74,6 +74,6 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
         if (startDate != null) {
             return reservation.startAt.goe(startDate.atStartOfDay());
         }
-        return reservation.startAt.lt(endDate.plusDays(1).atStartOfDay());
+        return reservation.startAt.lt(java.util.Objects.requireNonNull(endDate).plusDays(1).atStartOfDay());
     }
 }

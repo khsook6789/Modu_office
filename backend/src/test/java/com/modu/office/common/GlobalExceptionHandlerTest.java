@@ -42,7 +42,7 @@ class GlobalExceptionHandlerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @org.springframework.boot.test.mock.mockito.MockBean
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     private com.modu.office.service.GeocodingService geocodingService;
 
     /**
@@ -163,6 +163,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Validation 실패 시 400과 필드별 에러 반환")
+    @SuppressWarnings("null")
     void Validation_실패_시_필드별_에러_반환() throws Exception {
         String invalidJson = """
                 {

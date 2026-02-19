@@ -24,7 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import({ QueryDslConfig.class, JpaConfig.class })
 @org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase(replace = org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE)
 @org.springframework.test.context.ActiveProfiles("test")
+@SuppressWarnings("null")
 class OfficeRoomRepositoryCustomTest {
 
         @Autowired

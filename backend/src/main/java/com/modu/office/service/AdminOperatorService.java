@@ -42,7 +42,7 @@ public class AdminOperatorService {
      */
     @Transactional
     public OperatorApprovalResponse approveOperator(Long userId) {
-        AppUser appUser = appUserRepository.findById(userId)
+        AppUser appUser = appUserRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
 
         validateOperatorPending(appUser);

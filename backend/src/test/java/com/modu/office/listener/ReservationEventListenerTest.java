@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@SuppressWarnings("null")
 class ReservationEventListenerTest {
 
         @Autowired
@@ -260,14 +261,14 @@ class ReservationEventListenerTest {
                 assertThat(log.getAfterData().get("status")).isEqualTo("CANCELED");
         }
 
-        @org.springframework.boot.test.mock.mockito.MockBean
+        @org.springframework.test.context.bean.override.mockito.MockitoBean
         private com.modu.office.service.WebSocketNotificationService notificationService;
 
         @Test
         @DisplayName("예약 생성 시 WebSocket 알림이 전송된다")
         void 예약_생성_시_WebSocket_알림이_전송된다() {
                 // given
-                Reservation reservations = transactionTemplate.execute(status -> {
+                transactionTemplate.execute(status -> {
                         Reservation res = Reservation.builder()
                                         .customer(customer)
                                         .office(office)

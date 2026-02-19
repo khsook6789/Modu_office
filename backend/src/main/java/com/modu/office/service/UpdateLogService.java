@@ -38,6 +38,7 @@ public class UpdateLogService {
      * @return 저장된 UpdateLog 엔티티
      */
     @Transactional
+    @SuppressWarnings("null")
     public UpdateLog createLog(
             Reservation reservation,
             LogAction action,

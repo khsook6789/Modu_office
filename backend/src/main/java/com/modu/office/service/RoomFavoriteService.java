@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@SuppressWarnings("null")
 public class RoomFavoriteService {
 
     private final RoomFavoriteRepository favoriteRepository;
@@ -40,11 +41,11 @@ public class RoomFavoriteService {
         }
 
         // 2. 사용자 존재 확인
-        AppUser user = userRepository.findById(userId)
+        AppUser user = userRepository.findById(java.util.Objects.requireNonNull(userId))
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
         // 3. 회의실 존재 확인
-        OfficeRoom room = roomRepository.findById(roomId)
+        OfficeRoom room = roomRepository.findById(java.util.Objects.requireNonNull(roomId))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // 4. 즐겨찾기 생성
@@ -65,7 +66,9 @@ public class RoomFavoriteService {
      */
     @Transactional
     public void removeFavorite(Long userId, Long roomId) {
-        RoomFavorite favorite = favoriteRepository.findByUserIdAndRoomId(userId, roomId)
+        RoomFavorite favorite = favoriteRepository
+                .findByUserIdAndRoomId(java.util.Objects.requireNonNull(userId),
+                        java.util.Objects.requireNonNull(roomId))
                 .orElseThrow(() -> new EntityNotFoundException("즐겨찾기를 찾을 수 없습니다."));
 
         favoriteRepository.delete(favorite);

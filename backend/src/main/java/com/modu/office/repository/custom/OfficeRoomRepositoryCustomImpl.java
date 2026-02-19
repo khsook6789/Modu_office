@@ -31,6 +31,7 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
     private final JPAQueryFactory queryFactory;
 
     @Override
+    @SuppressWarnings("null")
     public Page<OfficeRoom> searchRooms(OfficeRoomSearchCondition condition, Pageable pageable) {
 
         QOfficeRoom room = QOfficeRoom.officeRoom;

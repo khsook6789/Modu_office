@@ -33,7 +33,7 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public UserProfileResponse getProfile(AppUser currentUser) {
-        AppUser appUser = appUserRepository.findById(currentUser.getId())
+        AppUser appUser = appUserRepository.findById(java.util.Objects.requireNonNull(currentUser.getId()))
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return UserProfileResponse.from(appUser);
     }
@@ -43,7 +43,7 @@ public class UserService {
      */
     @Transactional
     public UserProfileResponse updateProfile(AppUser currentUser, UpdateProfileRequest request) {
-        AppUser appUser = appUserRepository.findById(currentUser.getId())
+        AppUser appUser = appUserRepository.findById(java.util.Objects.requireNonNull(currentUser.getId()))
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         appUser.updateName(request.getName());
@@ -57,7 +57,7 @@ public class UserService {
      */
     @Transactional
     public void changePassword(AppUser currentUser, ChangePasswordRequest request) {
-        AppUser appUser = appUserRepository.findById(currentUser.getId())
+        AppUser appUser = appUserRepository.findById(java.util.Objects.requireNonNull(currentUser.getId()))
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Account account = appUser.getAccount();
@@ -80,7 +80,7 @@ public class UserService {
      */
     @Transactional
     public void deleteAccount(AppUser currentUser, DeleteAccountRequest request) {
-        AppUser appUser = appUserRepository.findById(currentUser.getId())
+        AppUser appUser = appUserRepository.findById(java.util.Objects.requireNonNull(currentUser.getId()))
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Account account = appUser.getAccount();
