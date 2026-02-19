@@ -64,8 +64,8 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/rooms/**")
                         .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
 
-                        // operator 가입 승인 - PLATFORM_ADMIN only
-                        .requestMatchers("/api/admin/operators/**").hasRole("PLATFORM_ADMIN")
+                        // 관리자 전용 - PLATFORM_ADMIN only
+                        .requestMatchers("/api/admin/**").hasRole("PLATFORM_ADMIN")
 
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception
@@ -115,7 +115,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
