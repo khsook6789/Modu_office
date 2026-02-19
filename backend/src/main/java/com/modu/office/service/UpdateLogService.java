@@ -1,5 +1,6 @@
 package com.modu.office.service;
 
+import com.modu.office.dto.request.AuditLogSearchCondition;
 import com.modu.office.dto.response.UpdateLogResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Reservation;
@@ -59,7 +60,6 @@ public class UpdateLogService {
      * 전체 감사 로그 조회 (최신순, 페이징)
      */
     public Page<UpdateLogResponse> getAllLogs(Pageable pageable) {
-        // 최신순 정렬을 보장
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
@@ -73,13 +73,37 @@ public class UpdateLogService {
      * 특정 예약의 감사 로그 조회 (최신순, 페이징)
      */
     public Page<UpdateLogResponse> getLogsByReservation(Long reservationId, Pageable pageable) {
-        // 최신순 정렬을 보장
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "occurredAt"));
 
         Page<UpdateLog> logs = updateLogRepository.findByReservationId(reservationId, sortedPageable);
+        return logs.map(UpdateLogResponse::fromEntity);
+    }
+
+    /**
+     * 다중 조건 기반 감사 로그 정밀 검색 (PostgreSQL JSONB 활용)
+     *
+     * @param condition 검색 조건 DTO
+     * @param pageable  페이징 정보
+     * @return 검색된 감사 로그 페이지
+     */
+    public Page<UpdateLogResponse> searchLogs(AuditLogSearchCondition condition, Pageable pageable) {
+        // action enum을 문자열로 변환 (native query의 :action 파라미터)
+        String actionValue = condition.getAction() != null ? condition.getAction().getValue() : null;
+
+        Page<UpdateLog> logs = updateLogRepository.searchLogs(
+                condition.getReservationId(),
+                condition.getActorId(),
+                actionValue,
+                condition.getChangedField(),
+                condition.getChangedBefore(),
+                condition.getChangedAfter(),
+                condition.getOccurredFrom(),
+                condition.getOccurredTo(),
+                pageable);
+
         return logs.map(UpdateLogResponse::fromEntity);
     }
 }
