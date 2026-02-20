@@ -20,7 +20,7 @@
 
 | category         | Technology            | Description                                       |
 | :--------------- | :-------------------- | :------------------------------------------------ |
-| **Framework**    | Spring Boot 3.3       | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
+| **Framework**    | Spring Boot 3.5.10    | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
 | **Language**     | Java 21               | 현대적 자바 기능 기반의 안정적인 백엔드 코드      |
 | **Persistence**  | Spring Data JPA       | 객체 지향적 데이터 접근 및 관계 매핑 관리         |
 | **Database**     | PostgreSQL 15         | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재 |

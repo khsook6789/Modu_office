@@ -1,6 +1,6 @@
 # ==========================================
 # Modu_office Project .gitignore
-# Backend: Java 17, Spring Boot 3.3, Gradle
+# Backend: Java 21, Spring Boot 3.3, Gradle
 # Frontend: React (Node.js/npm)
 # IDE: IntelliJ IDEA, VS Code
 # DB: PostgreSQL
