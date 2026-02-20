@@ -61,6 +61,7 @@ public class OfficeRoomService {
                 .status(request.getStatus())
                 .capacity(request.getCapacity())
                 .category(request.getCategory())
+                .price(request.getPrice())
                 .build();
 
         OfficeRoom savedRoom = officeRoomRepository.save(java.util.Objects.requireNonNull(room));
@@ -157,6 +158,7 @@ public class OfficeRoomService {
         room.setStatus(request.getStatus());
         room.setCapacity(request.getCapacity());
         room.setCategory(request.getCategory());
+        room.setPrice(request.getPrice());
 
         // Facility 관계 재설정
         if (request.getFacilityIds() != null) {
@@ -297,8 +299,7 @@ public class OfficeRoomService {
      * 회의실 응답 DTO 생성 시 Facility 목록 포함
      */
     private OfficeRoomResponse buildRoomResponseWithFacilities(OfficeRoom room) {
-        List<OfficeRoomFacility> roomFacilities = officeRoomFacilityRepository.findByIdRoomId(room.getId());
-        List<FacilityResponse> facilities = roomFacilities.stream()
+        List<FacilityResponse> facilities = room.getRoomFacilities().stream()
                 .map(rf -> FacilityResponse.fromEntity(rf.getFacility()))
                 .collect(Collectors.toList());
 
@@ -311,6 +312,7 @@ public class OfficeRoomService {
                 .status(room.getStatus())
                 .capacity(room.getCapacity())
                 .category(room.getCategory())
+                .price(room.getPrice())
                 .facilities(facilities)
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
