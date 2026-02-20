@@ -23,11 +23,14 @@ public class Reservation extends BaseEntity {
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "office_id", nullable = false)
+    @JoinColumn(name = "office_id", nullable = false, insertable = false, updatable = false)
     private Office office;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "room_id", referencedColumnName = "id", nullable = false),
+            @JoinColumn(name = "office_id", referencedColumnName = "office_id", nullable = false)
+    })
     private OfficeRoom room;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
