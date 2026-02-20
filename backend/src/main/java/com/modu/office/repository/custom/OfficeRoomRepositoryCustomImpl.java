@@ -46,6 +46,17 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
         builder.and(minCapacityEq(condition.getMinCapacity()));
         builder.and(categoryEq(condition.getCategory()));
         builder.and(keywordLike(condition.getKeyword()));
+        builder.and(priceGoe(condition.getMinPrice()));
+        builder.and(priceLoe(condition.getMaxPrice()));
+
+        if (condition.getStartDate() != null) {
+            int dayOfWeek = condition.getStartDate().getDayOfWeek().getValue(); // 1=Mon ... 7=Sun
+            // Hibernate 6 array_contains function. Also handle null/empty as 'all days
+            // open' for robustness
+            builder.and(office.openDays.isNull()
+                    .or(Expressions.booleanTemplate("array_contains({0}, {1}) = true", office.openDays,
+                            (short) dayOfWeek)));
+        }
 
         // 2. 예약 가능 여부 (Availability Check)
         if (condition.getStartDate() != null && condition.getEndDate() != null) {
@@ -136,9 +147,18 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
      * Haversine 공식을 이용한 거리 계산 Expression
      */
     private NumberTemplate<Double> distance(double lat, double lng, QOffice office) {
+        // PI / 180 = 0.017453292519943295
         return Expressions.numberTemplate(Double.class,
-                "6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({0})) * sin(radians({1})))",
+                "6371 * acos(cos({0} * 0.017453292519943295) * cos({1} * 0.017453292519943295) * cos(({2} * 0.017453292519943295) - ({3} * 0.017453292519943295)) + sin({0} * 0.017453292519943295) * sin({1} * 0.017453292519943295))",
                 lat, office.latitude, office.longitude, lng);
+    }
+
+    private BooleanExpression priceGoe(java.math.BigDecimal minPrice) {
+        return minPrice != null ? QOfficeRoom.officeRoom.price.goe(minPrice) : null;
+    }
+
+    private BooleanExpression priceLoe(java.math.BigDecimal maxPrice) {
+        return maxPrice != null ? QOfficeRoom.officeRoom.price.loe(maxPrice) : null;
     }
 
     /**
