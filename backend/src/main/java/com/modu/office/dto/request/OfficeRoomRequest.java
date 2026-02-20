@@ -40,6 +40,10 @@ public class OfficeRoomRequest {
     @Size(max = 100, message = "카테고리는 100자 이내여야 합니다.")
     private String category;
 
+    @NotNull(message = "가격은 필수입니다.")
+    @Min(value = 0, message = "가격은 0원 이상이어야 합니다.")
+    private java.math.BigDecimal price;
+
     /**
      * 회의실에 연결할 부대시설 ID 목록
      * (선택적 필드, 비어있을 경우 시설 연결 없음)

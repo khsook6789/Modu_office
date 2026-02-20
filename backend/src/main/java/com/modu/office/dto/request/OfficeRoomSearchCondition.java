@@ -34,6 +34,9 @@ public class OfficeRoomSearchCondition {
     private String category; // 카테고리
     private String keyword; // 검색어 (지점명 or 회의실명)
 
+    private java.math.BigDecimal minPrice; // 최소 가격
+    private java.math.BigDecimal maxPrice; // 최대 가격
+
     // 4. 고급 필터링 (Optional)
     private List<String> facilityNames; // 편의시설 이름 목록 (AND 조건)
 
