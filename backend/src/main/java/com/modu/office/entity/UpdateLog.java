@@ -27,7 +27,7 @@ public class UpdateLog {
     @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
 
-    @Convert(converter = com.modu.office.entity.converter.LogActionConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "action", nullable = false)
     private LogAction action;
 
