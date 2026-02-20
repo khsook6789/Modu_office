@@ -35,4 +35,7 @@ public class OfficeRequest {
 
     @NotNull(message = "영업 종료 시간은 필수입니다.")
     private LocalTime closeTime;
+
+    @Size(min = 1, max = 7, message = "영업 요일은 최소 1일에서 최대 7일까지 선택 가능합니다.")
+    private java.util.List<Short> openDays;
 }

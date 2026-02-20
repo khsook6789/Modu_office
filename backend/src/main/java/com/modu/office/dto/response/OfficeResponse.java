@@ -25,6 +25,7 @@ public class OfficeResponse {
     private Double longitude;
     private LocalTime openTime;
     private LocalTime closeTime;
+    private Short[] openDays;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -40,6 +41,7 @@ public class OfficeResponse {
                 .longitude(office.getLongitude())
                 .openTime(office.getOpenTime())
                 .closeTime(office.getCloseTime())
+                .openDays(office.getOpenDays())
                 .createdAt(office.getCreatedAt())
                 .updatedAt(office.getUpdatedAt())
                 .build();
