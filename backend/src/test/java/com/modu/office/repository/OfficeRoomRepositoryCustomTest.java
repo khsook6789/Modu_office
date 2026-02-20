@@ -119,7 +119,7 @@ class OfficeRoomRepositoryCustomTest {
                 facilityProjector = Facility.builder().name("PROJECTOR").label("Projector").build();
                 facilityRepository.saveAll(List.of(facilityWifi, facilityProjector));
 
-                // OfficeRoom 1 생성 (Capacity 10, WIFI only)
+                // OfficeRoom 1 생성 (Capacity 10, WIFI only, Price 1000)
                 room1 = OfficeRoom.builder()
                                 .office(office)
                                 .name("Room A")
@@ -127,6 +127,7 @@ class OfficeRoomRepositoryCustomTest {
                                 .floor(1)
                                 .capacity(10)
                                 .category("MEETING")
+                                .price(new java.math.BigDecimal("1000"))
                                 .status(RoomStatus.AVAILABLE)
                                 .build();
                 officeRoomRepository.save(room1);
@@ -137,7 +138,7 @@ class OfficeRoomRepositoryCustomTest {
                                 .build();
                 officeRoomFacilityRepository.save(room1Wifi);
 
-                // OfficeRoom 2 생성 (Capacity 20, WIFI + PROJECTOR)
+                // OfficeRoom 2 생성 (Capacity 20, WIFI + PROJECTOR, Price 2000)
                 room2 = OfficeRoom.builder()
                                 .office(office)
                                 .name("Room B")
@@ -145,6 +146,7 @@ class OfficeRoomRepositoryCustomTest {
                                 .floor(1)
                                 .capacity(20)
                                 .category("CONFERENCE")
+                                .price(new java.math.BigDecimal("2000"))
                                 .status(RoomStatus.AVAILABLE)
                                 .build();
                 officeRoomRepository.save(room2);
@@ -161,6 +163,63 @@ class OfficeRoomRepositoryCustomTest {
 
                 em.flush();
                 em.clear();
+        }
+
+        @Test
+        @DisplayName("가격 범위 검색 - minPrice, maxPrice 필터링")
+        void searchByPriceRange() {
+                // Given: Room A(1000), Room B(2000)
+
+                // 1. minPrice 1500 -> Room B만 조회
+                OfficeRoomSearchCondition cond1 = OfficeRoomSearchCondition.builder()
+                                .minPrice(new java.math.BigDecimal("1500"))
+                                .build();
+                Page<OfficeRoom> res1 = officeRoomRepository.searchRooms(cond1, PageRequest.of(0, 10));
+                assertThat(res1.getContent()).extracting("name").containsOnly("Room B");
+
+                // 2. maxPrice 1500 -> Room A만 조회
+                OfficeRoomSearchCondition cond2 = OfficeRoomSearchCondition.builder()
+                                .maxPrice(new java.math.BigDecimal("1500"))
+                                .build();
+                Page<OfficeRoom> res2 = officeRoomRepository.searchRooms(cond2, PageRequest.of(0, 10));
+                assertThat(res2.getContent()).extracting("name").containsOnly("Room A");
+
+                // 3. 1500 ~ 2500 -> Room B만 조회
+                OfficeRoomSearchCondition cond3 = OfficeRoomSearchCondition.builder()
+                                .minPrice(new java.math.BigDecimal("1500"))
+                                .maxPrice(new java.math.BigDecimal("2500"))
+                                .build();
+                Page<OfficeRoom> res3 = officeRoomRepository.searchRooms(cond3, PageRequest.of(0, 10));
+                assertThat(res3.getContent()).extracting("name").containsOnly("Room B");
+        }
+
+        @Test
+        @DisplayName("휴무일 선제적 필터링 - 검색한 날짜가 지점 휴무일이면 결과에서 제외")
+        void searchWithOpenDaysProactiveCheck() {
+                // Given: office는 현재 모든 요일 오픈이나, 특정 요일만 가능하도록 수정
+                // 예: 월요일(1)만 오픈하도록 설정 (2026-02-23은 월요일)
+                Office updatedOffice = officeRepository.findById(office.getId()).get();
+                updatedOffice.setOpenDays(new Short[] { 1 }); // 월요일
+                officeRepository.saveAndFlush(updatedOffice);
+                em.clear();
+
+                // 1. 월요일(2026-02-23) 검색 -> 결과 나옴
+                LocalDateTime monday = LocalDateTime.of(2026, 2, 23, 10, 0);
+                OfficeRoomSearchCondition condMon = OfficeRoomSearchCondition.builder()
+                                .startDate(monday)
+                                .endDate(monday.plusHours(1))
+                                .build();
+                Page<OfficeRoom> resMon = officeRoomRepository.searchRooms(condMon, PageRequest.of(0, 10));
+                assertThat(resMon.getContent()).isNotEmpty();
+
+                // 2. 화요일(2026-02-24) 검색 -> 결과 없음 (휴무일)
+                LocalDateTime tuesday = LocalDateTime.of(2026, 2, 24, 10, 0);
+                OfficeRoomSearchCondition condTue = OfficeRoomSearchCondition.builder()
+                                .startDate(tuesday)
+                                .endDate(tuesday.plusHours(1))
+                                .build();
+                Page<OfficeRoom> resTue = officeRoomRepository.searchRooms(condTue, PageRequest.of(0, 10));
+                assertThat(resTue.getContent()).isEmpty();
         }
 
         // ... (tests)
