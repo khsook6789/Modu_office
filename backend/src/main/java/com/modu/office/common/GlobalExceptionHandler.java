@@ -2,6 +2,7 @@ package com.modu.office.common;
 
 import com.modu.office.exception.BusinessException;
 import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidTimeUnitException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -85,6 +86,16 @@ public class GlobalExceptionHandler {
                 log.error("Data integrity violation: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                                 .body(ApiResponse.error("E003", "데이터 무결성 제약 조건 위반입니다. 중복된 값이 존재하거나 필수 조건을 만족하지 않습니다."));
+        }
+
+        /**
+         * 예약 시간 단위 오류 처리 (400 Bad Request)
+         */
+        @ExceptionHandler(InvalidTimeUnitException.class)
+        public ResponseEntity<ApiResponse<Void>> handleInvalidTimeUnit(InvalidTimeUnitException e) {
+                log.error("Invalid time unit: {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(ApiResponse.error("E005", e.getMessage()));
         }
 
         /**
