@@ -25,6 +25,8 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          * @param officeId 지점 ID
          * @return 해당 지점의 회의실 목록
          */
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "roomFacilities",
+                        "roomFacilities.facility" })
         List<OfficeRoom> findByOfficeId(Long officeId);
 
         /**
@@ -43,6 +45,8 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          * @param status   회의실 상태
          * @return 해당 상태의 회의실 목록
          */
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "roomFacilities",
+                        "roomFacilities.facility" })
         List<OfficeRoom> findByOfficeIdAndStatus(Long officeId, RoomStatus status);
 
         /**
@@ -52,6 +56,8 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          * @param capacity 최소 수용 인원
          * @return 조건에 맞는 회의실 목록
          */
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "roomFacilities",
+                        "roomFacilities.facility" })
         List<OfficeRoom> findByOfficeIdAndCapacityGreaterThanEqual(Long officeId, Integer capacity);
 
         /**

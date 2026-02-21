@@ -29,6 +29,8 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
         List<Reservation> content = queryFactory
                 .selectFrom(reservation)
                 .leftJoin(reservation.customer, appUser).fetchJoin()
+                .leftJoin(reservation.room).fetchJoin()
+                .leftJoin(reservation.office).fetchJoin()
                 .where(
                         officeIdEq(officeId),
                         guestNameContains(guestName),

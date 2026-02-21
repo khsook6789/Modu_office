@@ -82,8 +82,9 @@ public class ReservationService {
                 throw new IllegalArgumentException("회의실이 해당 지점에 속하지 않습니다.");
             }
 
-            // 4. 영업시간 검증
+            // 4. 영업시간 및 휴무일 검증
             validateBusinessHours(office, request.getStartAt(), request.getEndAt());
+            validateOpenDays(office, request.getStartAt());
 
             // 5. 낙관적 락을 사용한 시간 충돌 확인
             List<ReservationStatus> activeStatuses = Arrays.asList(
@@ -227,8 +228,9 @@ public class ReservationService {
                 validateTimeRange(request.getStartAt(), request.getEndAt());
                 validateTimeUnit(request.getStartAt(), request.getEndAt());
 
-                // 영업시간 검증
+                // 영업시간 및 휴무일 검증
                 validateBusinessHours(reservation.getOffice(), request.getStartAt(), request.getEndAt());
+                validateOpenDays(reservation.getOffice(), request.getStartAt());
 
                 // 낙관적 락을 사용한 시간 충돌 확인 (현재 예약 제외)
                 List<ReservationStatus> activeStatuses = Arrays.asList(
@@ -281,7 +283,21 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
 
+        // 이미 확정된 경우 중복 처리 방지 (선택 사항이나 권장)
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            return ReservationResponse.fromEntity(reservation);
+        }
+
+        // 변경 전 데이터 캡처 (이벤트 발행용)
+        java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
+
         reservation.confirm();
+
+        // 예약 확정 이벤트 발행 (감사 로그 자동 기록)
+        eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
+                reservation, beforeData, com.modu.office.entity.enums.LogAction.UPDATE,
+                reservation.getCustomer(), null));
+
         return ReservationResponse.fromEntity(reservation);
     }
 
@@ -456,6 +472,35 @@ public class ReservationService {
         boolean isOwner = reservation.getCustomer().getId().equals(requester.getId());
         if (!isAdmin && !isOwner) {
             throw new AccessDeniedException("해당 예약에 접근할 권한이 없습니다.");
+        }
+    }
+
+    /**
+     * 휴무일 검증
+     * <p>
+     * 예약일이 지점의 영업 요일(open_days) 내에 있는지 검증합니다.
+     * </p>
+     *
+     * @param office  지점 정보
+     * @param startAt 예약 시작 시간
+     */
+    private void validateOpenDays(Office office, LocalDateTime startAt) {
+        if (office.getOpenDays() == null || office.getOpenDays().length == 0) {
+            return;
+        }
+
+        // 1=Mon ... 7=Sun (ISO-8601 day of week)
+        int dayOfWeek = startAt.getDayOfWeek().getValue();
+        boolean isOpen = false;
+        for (short openDay : office.getOpenDays()) {
+            if (openDay == dayOfWeek) {
+                isOpen = true;
+                break;
+            }
+        }
+
+        if (!isOpen) {
+            throw new IllegalArgumentException(String.format("해당 요일(%s)은 지점의 휴무일입니다.", startAt.getDayOfWeek()));
         }
     }
 }

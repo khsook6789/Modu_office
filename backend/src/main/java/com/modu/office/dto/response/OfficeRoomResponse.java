@@ -28,6 +28,7 @@ public class OfficeRoomResponse {
     private RoomStatus status;
     private Integer capacity;
     private String category;
+    private java.math.BigDecimal price;
     private List<FacilityResponse> facilities;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -45,6 +46,7 @@ public class OfficeRoomResponse {
                 .status(room.getStatus())
                 .capacity(room.getCapacity())
                 .category(room.getCategory())
+                .price(room.getPrice())
                 .facilities(List.of()) // 기본값: 빈 리스트 (Service 레이어에서 설정)
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())

@@ -37,10 +37,10 @@ public class OfficeService {
         Office.OfficeBuilder officeBuilder = Office.builder()
                 .name(request.getName())
                 .location(request.getLocation())
-                .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .openTime(request.getOpenTime())
                 .closeTime(request.getCloseTime())
+                .openDays(request.getOpenDays() != null ? request.getOpenDays().toArray(new Short[0]) : null)
                 .ownerUser(currentUser);
 
         // 좌표가 없고 주소가 있는 경우 지오코딩 시도
@@ -105,6 +105,11 @@ public class OfficeService {
         }
         if (request.getCloseTime() != null) {
             office.setCloseTime(request.getCloseTime());
+        }
+
+        // 영업요일 업데이트
+        if (request.getOpenDays() != null) {
+            office.setOpenDays(request.getOpenDays().toArray(new Short[0]));
         }
 
         return OfficeResponse.fromEntity(office);

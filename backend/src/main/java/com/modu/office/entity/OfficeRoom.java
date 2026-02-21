@@ -63,6 +63,9 @@ public class OfficeRoom extends BaseEntity {
     @Column(name = "version")
     private Long version;
 
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    private java.util.List<OfficeRoomFacility> roomFacilities = new java.util.ArrayList<>();
+
     @Builder
     public OfficeRoom(Office office, String name, String roomCode, Integer floor, RoomStatus status, Integer capacity,
             String category, BigDecimal price) {

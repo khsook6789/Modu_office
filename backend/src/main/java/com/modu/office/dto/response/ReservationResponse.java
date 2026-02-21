@@ -38,6 +38,7 @@ public class ReservationResponse {
     private LocalDateTime startAt;
     private LocalDateTime endAt;
     private ReservationStatus status;
+    private java.math.BigDecimal totalPrice;
 
     // Metadata
     private LocalDateTime createdAt;
@@ -48,6 +49,16 @@ public class ReservationResponse {
      * Entity를 DTO로 변환
      */
     public static ReservationResponse fromEntity(Reservation reservation) {
+        java.math.BigDecimal totalPrice = null;
+        if (reservation.getRoom() != null && reservation.getRoom().getPrice() != null
+                && reservation.getStartAt() != null && reservation.getEndAt() != null) {
+            long hours = java.time.Duration.between(reservation.getStartAt(), reservation.getEndAt()).toHours();
+            // 최소 1시간 단위로 가정 (또는 비즈니스 로직에 맞춰 조정 가능)
+            if (hours == 0)
+                hours = 1;
+            totalPrice = reservation.getRoom().getPrice().multiply(java.math.BigDecimal.valueOf(hours));
+        }
+
         return ReservationResponse.builder()
                 .id(reservation.getId())
                 .title(reservation.getTitle())
@@ -61,6 +72,7 @@ public class ReservationResponse {
                 .startAt(reservation.getStartAt())
                 .endAt(reservation.getEndAt())
                 .status(reservation.getStatus())
+                .totalPrice(totalPrice)
                 .createdAt(reservation.getCreatedAt())
                 .updatedAt(reservation.getUpdatedAt())
                 .version(reservation.getVersion())

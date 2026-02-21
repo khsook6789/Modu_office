@@ -22,16 +22,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         /**
          * 특정 사용자의 모든 예약 조회
          */
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
         List<Reservation> findByCustomerId(Long customerId);
 
         /**
          * 특정 회의실의 모든 예약 조회
          */
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
         List<Reservation> findByRoomId(Long roomId);
 
         /**
          * 특정 상태의 예약들 조회
          */
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
         List<Reservation> findByStatus(ReservationStatus status);
 
         /**
