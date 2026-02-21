@@ -59,6 +59,9 @@ app:
     secret: "dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXktdGVzdC1zZWNyZXQta2V5"
     access-token-expiration-milliseconds: 3600000
     refresh-token-expiration-milliseconds: 604800000
+  cors:
+    allowed-origins:
+      - "http://localhost:5173"
 
 google:
   maps:
