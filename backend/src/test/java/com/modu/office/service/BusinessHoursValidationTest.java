@@ -198,7 +198,7 @@ class BusinessHoursValidationTest {
 
                 // Then
                 assertThatThrownBy(() -> reservationService.updateReservation(
-                                createdReservation.getId(), updateRequest))
+                                createdReservation.getId(), updateRequest, customer))
                                 .isInstanceOf(IllegalArgumentException.class)
                                 .hasMessageContaining("영업시간")
                                 .hasMessageContaining("외 예약은 불가능합니다");
