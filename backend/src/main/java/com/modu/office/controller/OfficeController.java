@@ -29,6 +29,7 @@ public class OfficeController {
      * 새 지점 생성
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<OfficeResponse>> createOffice(
             @Valid @RequestBody OfficeRequest request,
             @AuthenticationPrincipal AppUser currentUser) {
@@ -59,6 +60,7 @@ public class OfficeController {
      * 지점 정보 수정
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<OfficeResponse>> updateOffice(
             @PathVariable Long id,
             @Valid @RequestBody OfficeRequest request,
@@ -71,6 +73,7 @@ public class OfficeController {
      * 지점 삭제
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteOffice(
             @PathVariable Long id,
             @AuthenticationPrincipal AppUser currentUser) {

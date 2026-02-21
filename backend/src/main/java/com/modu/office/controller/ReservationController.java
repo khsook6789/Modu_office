@@ -4,17 +4,20 @@ import com.modu.office.common.ApiResponse;
 import com.modu.office.dto.request.ReservationRequest;
 import com.modu.office.dto.request.ReservationUpdateRequest;
 import com.modu.office.dto.response.ReservationResponse;
+import com.modu.office.entity.AppUser;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -79,7 +82,7 @@ public class ReservationController {
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<ReservationResponse> results = reservationService.searchReservations(
                 officeId, guestName, status, startDate, endDate, pageable);
@@ -88,22 +91,25 @@ public class ReservationController {
     }
 
     /**
-     * ID로 특정 예약 조회
+     * ID로 특정 예약 조회 (IDOR 방어 포함)
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ReservationResponse>> getReservationById(@PathVariable Long id) {
-        ReservationResponse response = reservationService.getReservationById(id);
+    public ResponseEntity<ApiResponse<ReservationResponse>> getReservationById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUser currentUser) {
+        ReservationResponse response = reservationService.getReservationById(id, currentUser);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
-     * 예약 정보 수정 (시간 또는 상태)
+     * 예약 정보 수정 (시간 또는 상태, IDOR 방어 포함)
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ReservationResponse>> updateReservation(
             @PathVariable Long id,
-            @RequestBody ReservationUpdateRequest request) {
-        ReservationResponse response = reservationService.updateReservation(id, request);
+            @RequestBody ReservationUpdateRequest request,
+            @AuthenticationPrincipal AppUser currentUser) {
+        ReservationResponse response = reservationService.updateReservation(id, request, currentUser);
         return ResponseEntity.ok(ApiResponse.success("예약이 수정되었습니다.", response));
     }
 
@@ -117,11 +123,13 @@ public class ReservationController {
     }
 
     /**
-     * 예약 취소 (soft delete)
+     * 예약 취소 (soft delete, IDOR 방어 포함)
      */
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<Void>> cancelReservation(@PathVariable Long id) {
-        reservationService.cancelReservation(id);
+    public ResponseEntity<ApiResponse<Void>> cancelReservation(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUser currentUser) {
+        reservationService.cancelReservation(id, currentUser);
         return ResponseEntity.ok(ApiResponse.success("예약이 취소되었습니다.", null));
     }
 }
