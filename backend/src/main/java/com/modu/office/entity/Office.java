@@ -55,6 +55,7 @@ public class Office extends BaseEntity {
     @JoinColumn(name = "owner_user_id", nullable = false)
     private AppUser ownerUser;
 
+    @org.hibernate.annotations.BatchSize(size = 100)
     @OneToMany(mappedBy = "office", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OfficeRoom> rooms = new ArrayList<>();
 

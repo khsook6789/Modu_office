@@ -63,6 +63,7 @@ public class OfficeRoom extends BaseEntity {
     @Column(name = "version")
     private Long version;
 
+    @org.hibernate.annotations.BatchSize(size = 100)
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private java.util.List<OfficeRoomFacility> roomFacilities = new java.util.ArrayList<>();
 
