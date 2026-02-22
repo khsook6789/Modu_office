@@ -16,6 +16,7 @@ public interface RoomFavoriteRepository extends JpaRepository<RoomFavorite, Long
     /**
      * 특정 사용자의 모든 즐겨찾기 조회
      */
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "room.office" })
     List<RoomFavorite> findByUserId(Long userId);
 
     /**
