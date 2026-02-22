@@ -45,14 +45,15 @@ public class ReservationController {
     }
 
     /**
-     * 모든 예약 조회 또는 필터링 조회
+     * 모든 예약 조회 또는 필터링 조회 (페이징 적용)
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ReservationResponse>>> getReservations(
+    public ResponseEntity<ApiResponse<Page<ReservationResponse>>> getReservations(
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) Long roomId,
             @RequestParam(required = false) ReservationStatus status,
-            @AuthenticationPrincipal AppUser currentUser) {
+            @AuthenticationPrincipal AppUser currentUser,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         // 일반 사용자는 본인 예약만 조회 가능하도록 강제 필터링
         if (currentUser.getRole() == com.modu.office.entity.enums.UserRole.CUSTOMER) {
@@ -62,16 +63,16 @@ public class ReservationController {
             customerId = currentUser.getId();
         }
 
-        List<ReservationResponse> reservations;
+        Page<ReservationResponse> reservations;
 
         if (customerId != null) {
-            reservations = reservationService.getReservationsByCustomer(customerId);
+            reservations = reservationService.getReservationsByCustomer(customerId, pageable);
         } else if (roomId != null) {
-            reservations = reservationService.getReservationsByRoom(roomId);
+            reservations = reservationService.getReservationsByRoom(roomId, pageable);
         } else if (status != null) {
-            reservations = reservationService.getReservationsByStatus(status);
+            reservations = reservationService.getReservationsByStatus(status, pageable);
         } else {
-            reservations = reservationService.getAllReservations();
+            reservations = reservationService.getAllReservations(pageable);
         }
 
         return ResponseEntity.ok(ApiResponse.success(reservations));

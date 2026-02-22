@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,19 +25,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
          * 특정 사용자의 모든 예약 조회
          */
         @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
-        List<Reservation> findByCustomerId(Long customerId);
+        Page<Reservation> findByCustomerId(Long customerId, Pageable pageable);
 
         /**
          * 특정 회의실의 모든 예약 조회
          */
         @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
-        List<Reservation> findByRoomId(Long roomId);
+        Page<Reservation> findByRoomId(Long roomId, Pageable pageable);
 
         /**
          * 특정 상태의 예약들 조회
          */
         @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
-        List<Reservation> findByStatus(ReservationStatus status);
+        Page<Reservation> findByStatus(ReservationStatus status, Pageable pageable);
 
         /**
          * 특정 회의실에서 주어진 시간대와 충돌하는 예약 찾기

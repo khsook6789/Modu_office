@@ -152,37 +152,33 @@ public class ReservationService {
     /**
      * 모든 예약 조회
      */
-    public List<ReservationResponse> getAllReservations() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getAllReservations(Pageable pageable) {
+        return reservationRepository.findAll(pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
      * 특정 사용자의 예약 조회
      */
-    public List<ReservationResponse> getReservationsByCustomer(Long customerId) {
-        return reservationRepository.findByCustomerId(customerId).stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getReservationsByCustomer(Long customerId, Pageable pageable) {
+        return reservationRepository.findByCustomerId(customerId, pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
      * 특정 회의실의 예약 조회
      */
-    public List<ReservationResponse> getReservationsByRoom(Long roomId) {
-        return reservationRepository.findByRoomId(roomId).stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getReservationsByRoom(Long roomId, Pageable pageable) {
+        return reservationRepository.findByRoomId(roomId, pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
      * 상태별 예약 조회
      */
-    public List<ReservationResponse> getReservationsByStatus(ReservationStatus status) {
-        return reservationRepository.findByStatus(status).stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getReservationsByStatus(ReservationStatus status, Pageable pageable) {
+        return reservationRepository.findByStatus(status, pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
