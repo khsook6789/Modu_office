@@ -77,8 +77,8 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(room, "id", roomId);
                 ReflectionTestUtils.setField(customer, "id", customerId);
 
-                // 일요일 예약 시도 (2026-02-22)
-                LocalDateTime sunday = LocalDateTime.of(2026, 2, 22, 10, 0);
+                // 일요일 예약 시도 (2026-03-01)
+                LocalDateTime sunday = LocalDateTime.of(2026, 3, 1, 10, 0);
                 ReservationRequest request = ReservationRequest.builder()
                                 .title("Test Reservation")
                                 .officeId(officeId)
