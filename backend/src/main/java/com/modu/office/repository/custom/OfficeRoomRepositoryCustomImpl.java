@@ -82,6 +82,16 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
 
         // 4. 위치 기반 필터링 (반경 검색)
         if (condition.getLat() != null && condition.getLng() != null && condition.getRadius() != null) {
+            // 4.1. 1차 필터링: Bounding Box (Mbr Box) 사전 필터링으로 계산 대상 축소
+            // 위도 1도 = 약 111km
+            double latOffset = condition.getRadius() / 111.0;
+            // 경도 1도 = 약 111km * cos(위도)
+            double lngOffset = condition.getRadius() / (111.0 * Math.cos(Math.toRadians(condition.getLat())));
+
+            builder.and(office.latitude.between(condition.getLat() - latOffset, condition.getLat() + latOffset));
+            builder.and(office.longitude.between(condition.getLng() - lngOffset, condition.getLng() + lngOffset));
+
+            // 4.2. 2차 상세 필터링: Haversine distance
             builder.and(distance(condition.getLat(), condition.getLng(), office).loe(condition.getRadius()));
         }
 
