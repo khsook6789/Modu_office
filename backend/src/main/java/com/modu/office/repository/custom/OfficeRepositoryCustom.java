@@ -4,6 +4,8 @@ import com.modu.office.entity.Office;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.modu.office.dto.request.OfficeSearchCondition;
+
 public interface OfficeRepositoryCustom {
-    Page<Office> searchOffices(String keyword, Pageable pageable);
+    Page<Office> searchOffices(OfficeSearchCondition condition, Pageable pageable);
 }

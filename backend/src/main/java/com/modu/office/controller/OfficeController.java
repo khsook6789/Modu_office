@@ -82,29 +82,16 @@ public class OfficeController {
     }
 
     /**
-     * 지점 검색 (이름 또는 위치)
-     */
-    /**
      * 지점 검색 (이름 또는 위치, 또는 반경 검색)
      */
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<Object>> searchOffices(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Double lat,
-            @RequestParam(required = false) Double lng,
-            @RequestParam(required = false, defaultValue = "3.0") Double radius,
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<OfficeResponse>>> searchOffices(
+            @Valid @ModelAttribute com.modu.office.dto.request.OfficeSearchCondition condition,
             org.springframework.data.domain.Pageable pageable) {
 
-        if (lat != null && lng != null) {
-            // 위치 기반 검색 (반경) - 리스트 반환 (거리순)
-            List<OfficeResponse> offices = officeService.searchOfficesByDistance(lat, lng, radius);
-            return ResponseEntity.ok(ApiResponse.success(offices));
-        } else {
-            // 키워드 검색 (이름/위치) - 페이징 반환
-            org.springframework.data.domain.Page<OfficeResponse> offices = officeService.searchOffices(keyword,
-                    pageable);
-            return ResponseEntity.ok(ApiResponse.success(offices));
-        }
+        // 키워드, 위치 기반 모두 서비스의 searchOffices에 위임
+        org.springframework.data.domain.Page<OfficeResponse> offices = officeService.searchOffices(condition, pageable);
+        return ResponseEntity.ok(ApiResponse.success(offices));
     }
 
     /**

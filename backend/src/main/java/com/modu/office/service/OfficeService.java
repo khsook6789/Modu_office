@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import com.modu.office.dto.request.OfficeSearchCondition;
 
 /**
  * Office 비즈니스 로직 서비스
@@ -166,9 +166,10 @@ public class OfficeService {
     /**
      * 통합 키워드 검색 (이름 또는 위치)
      */
-    public org.springframework.data.domain.Page<OfficeResponse> searchOffices(String keyword,
+    public org.springframework.data.domain.Page<OfficeResponse> searchOffices(
+            com.modu.office.dto.request.OfficeSearchCondition condition,
             org.springframework.data.domain.Pageable pageable) {
-        return officeRepository.searchOffices(keyword, pageable)
+        return officeRepository.searchOffices(condition, pageable)
                 .map(OfficeResponse::fromEntity);
     }
 
