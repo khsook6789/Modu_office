@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class OfficeRoomController {
      * 특정 지점에 새 회의실 생성
      */
     @PostMapping("/offices/{officeId}/rooms")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<OfficeRoomResponse>> createRoom(
             @PathVariable Long officeId,
             @Valid @RequestBody OfficeRoomRequest request,
@@ -96,6 +98,7 @@ public class OfficeRoomController {
      * 회의실 정보 수정
      */
     @PutMapping("/rooms/{roomId}")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<OfficeRoomResponse>> updateRoom(
             @PathVariable Long roomId,
             @Valid @RequestBody OfficeRoomRequest request,
@@ -108,6 +111,7 @@ public class OfficeRoomController {
      * 회의실 삭제
      */
     @DeleteMapping("/rooms/{roomId}")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteRoom(
             @PathVariable Long roomId,
             @AuthenticationPrincipal AppUser currentUser) {

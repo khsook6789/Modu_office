@@ -279,9 +279,18 @@ public class ReservationService {
      * 예약 확정 (PENDING -> CONFIRMED)
      */
     @Transactional
-    public ReservationResponse confirmReservation(Long id) {
+    public ReservationResponse confirmReservation(Long id, AppUser requester) {
         Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
+
+        // 소유권 및 권한 검증 (OPERATOR는 자신의 지점 예약만 확정 가능)
+        if (requester.getRole() == UserRole.OPERATOR) {
+            if (!reservation.getOffice().getOwnerUser().getId().equals(requester.getId())) {
+                throw new AccessDeniedException("담당 지점의 예약이 아닙니다.");
+            }
+        } else if (requester.getRole() != UserRole.PLATFORM_ADMIN) {
+            throw new AccessDeniedException("예약을 확정할 권한이 없습니다.");
+        }
 
         // 이미 확정된 경우 중복 처리 방지 (선택 사항이나 권장)
         if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
