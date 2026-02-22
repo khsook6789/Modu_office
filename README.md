@@ -252,7 +252,7 @@ frontend/
 - `GET /offices/{id}`: 특정 지점 조회
 - `PUT /offices/{id}`: 지점 정보 수정 (본인 지점만)
 - `DELETE /offices/{id}`: 지점 삭제 (본인 지점만)
-- `GET /offices/search`: 지점 검색 (키워드 또는 위치 기반)
+- `GET /offices/search`: 지점 복합 검색 (키워드, 위치, 위경도 반경 거리 기반 통합)
 - `GET /offices/my-offices`: 내 담당 지점 목록 조회 (Operator/Admin)
 
 ### 4. 회의실 관리 (OfficeRoom)
@@ -314,6 +314,15 @@ frontend/
 - `GET /admin/users`: 전체 사용자 목록 조회 (PLATFORM_ADMIN 제외)
 - `PATCH /admin/users/{id}/suspend`: 사용자 계정 정지
 - `PATCH /admin/users/{id}/reactivate`: 사용자 계정 정지 해제
+
+### 12. 후기 관리 (Review)
+
+- `POST /reviews`: 공간 예약 후기 작성
+- `GET /reviews/room/{roomId}`: 특정 공간의 후기 목록 조회 (페이징)
+- `GET /reviews/room/{roomId}/summary`: 특정 공간의 후기 요약(평균 별점, 전체 리뷰 수) 통계 조회
+- `GET /reviews/me`: 내 후기 목록 조회
+- `PATCH /reviews/{reviewId}`: 후기 내용 및 평점 수정 (본인 소유만)
+- `DELETE /reviews/{reviewId}`: 후기 삭제 (본인 소유 권한 확인)
 
 ---
 
