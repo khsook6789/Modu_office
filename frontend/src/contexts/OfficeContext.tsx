@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { officeApi, type Office } from '../features/rooms/api/office.api';
+import { useAuth } from './AuthContext';
 
 interface OfficeContextType {
     offices: Office[];
@@ -10,6 +11,7 @@ interface OfficeContextType {
     selectOffice: (id: number) => void;
     refreshOffices: () => Promise<void>;
     createOffice: (data: Omit<Office, 'id'>) => Promise<Office>;
+    deleteOffice: (id: number) => Promise<void>;
 }
 
 const OfficeContext = createContext<OfficeContextType | undefined>(undefined);
@@ -27,6 +29,7 @@ interface OfficeProviderProps {
 }
 
 export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
+    const { user } = useAuth();
     const [offices, setOffices] = useState<Office[]>([]);
     const [selectedOfficeId, setSelectedOfficeId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +44,11 @@ export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
         try {
             setIsLoading(true);
             setError(null);
-            const data = await officeApi.getMyOffices();
+            // OPERATOR/ADMIN은 자신의 오피스만, CUSTOMER는 전체 오피스 조회
+            const isOperator = user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN';
+            const data = isOperator
+                ? await officeApi.getMyOffices()
+                : await officeApi.getAllOffices();
             setOffices(data);
             
             // Auto-select first office if available
@@ -76,6 +83,19 @@ export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
         }
     };
 
+    const deleteOffice = async (id: number): Promise<void> => {
+        try {
+            await officeApi.deleteOffice(id);
+            setOffices(prev => prev.filter(o => o.id !== id));
+            if (selectedOfficeId === id) {
+                setSelectedOfficeId(null);
+            }
+        } catch (err: any) {
+            console.error('Failed to delete office:', err);
+            throw err;
+        }
+    };
+
     const selectedOffice = offices.find(o => o.id === selectedOfficeId) || null;
 
     const value: OfficeContextType = {
@@ -87,6 +107,7 @@ export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
         selectOffice,
         refreshOffices,
         createOffice,
+        deleteOffice,
     };
 
     return (

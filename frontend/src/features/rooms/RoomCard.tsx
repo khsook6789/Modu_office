@@ -11,13 +11,24 @@ export interface OfficeRoom {
     imageUrl?: string;
     isAvailable: boolean;
     rating?: number; // Added rating
+    price?: number; // Added for backend OfficeRoomRequest
 }
 
 interface RoomCardProps {
     room: OfficeRoom;
+    isOperator?: boolean;
+    onDelete?: (id: string) => void;
 }
 
-export default function RoomCard({ room }: RoomCardProps) {
+export default function RoomCard({ room, isOperator, onDelete }: RoomCardProps) {
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (confirm(`"${room.name}" 회의실을 삭제하시겠습니까?`)) {
+            onDelete?.(room.id);
+        }
+    };
 
     return (
         <div className="card room-card" style={{ position: 'relative' }}>
@@ -39,6 +50,22 @@ export default function RoomCard({ room }: RoomCardProps) {
                     }}>
                         ⭐ {room.rating ? room.rating.toFixed(1) : 'New'}
                     </div>
+                    {/* Delete Button for Operators */}
+                    {isOperator && (
+                        <button
+                            onClick={handleDelete}
+                            style={{
+                                position: 'absolute', top: '10px', left: '10px',
+                                background: 'rgba(239,68,68,0.85)', color: 'white',
+                                border: 'none', borderRadius: '8px',
+                                padding: '4px 10px', fontSize: '0.75rem',
+                                cursor: 'pointer', backdropFilter: 'blur(4px)',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            🗑 삭제
+                        </button>
+                    )}
                 </div>
 
                 <div className="room-content">

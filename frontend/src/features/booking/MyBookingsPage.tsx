@@ -1,55 +1,105 @@
 import { useState, useEffect } from 'react';
+import { client } from '../../api/client';
+import { useAuth } from '../../contexts/AuthContext';
 
-const BOOKINGS_KEY = 'mock_bookings';
-
-interface MockBooking {
+interface ReservationResponse {
     id: number;
+    title: string;
+    officeId: number;
+    officeName: string;
     roomId: number;
     roomName: string;
-    date: string;
-    startTime: string;
-    endTime: string;
-    guestCount: number;
-    totalPrice: number;
-    paymentMethod: string;
-    status: 'CONFIRMED' | 'CANCELLED';
+    roomCode: string;
+    customerId: number;
+    customerName: string;
+    startAt: string;
+    endAt: string;
+    status: 'PENDING' | 'CONFIRMED' | 'CANCELED';
+    totalPrice: number | null;
     createdAt: string;
 }
 
-const PAYMENT_LABEL: Record<string, string> = {
-    card: '💳 신용/체크카드',
-    kakao: '💛 카카오페이',
-    naver: '💚 네이버페이',
-    bank: '🏦 계좌이체',
-};
+interface ApiResponse<T> {
+    status: string;
+    message: string;
+    data: T;
+}
 
 export default function MyBookingsPage() {
-    const [bookings, setBookings] = useState<MockBooking[]>([]);
+    const { user } = useAuth();
+    const [bookings, setBookings] = useState<ReservationResponse[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        loadBookings();
-    }, []);
+        if (user?.id) {
+            loadBookings();
+        }
+    }, [user]);
 
-    const loadBookings = () => {
-        const stored: MockBooking[] = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-        // 최신순 정렬
-        stored.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setBookings(stored);
+    const loadBookings = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const response = await client.get<ApiResponse<ReservationResponse[]>>(
+                `/reservations?customerId=${user!.id}`
+            );
+            const list: ReservationResponse[] = (response as any).data ?? [];
+            // 최신순 정렬
+            const sorted = [...list].sort(
+                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            setBookings(sorted);
+        } catch (err: any) {
+            console.error('Failed to load bookings:', err);
+            setError('예약 목록을 불러오는 데 실패했습니다.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleCancel = (bookingId: number) => {
-        if (window.confirm('정말로 이 예약을 취소하시겠습니까?')) {
-            const stored: MockBooking[] = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-            const updated = stored.map(b =>
-                b.id === bookingId ? { ...b, status: 'CANCELLED' as const } : b
-            );
-            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
+    const handleCancel = async (bookingId: number) => {
+        if (!window.confirm('정말로 이 예약을 취소하시겠습니까?')) return;
+        try {
+            await client.post(`/reservations/${bookingId}/cancel`, null);
             alert('예약이 취소되었습니다.');
             loadBookings();
+        } catch (err: any) {
+            alert('예약 취소 실패: ' + (err?.message || '서버 오류'));
         }
     };
 
     const today = new Date();
+
+    const statusLabel = (booking: ReservationResponse) => {
+        if (booking.status === 'CANCELED') return { text: '취소됨', color: '#6b7280', bg: '#f3f4f6' };
+        const end = new Date(booking.endAt);
+        if (end < today) return { text: '이용 완료', color: '#6b7280', bg: '#f3f4f6' };
+        if (booking.status === 'PENDING') return { text: '승인 대기', color: '#d97706', bg: '#fef3c7' };
+        return { text: '예약 확정', color: '#15803d', bg: '#dcfce7' };
+    };
+
+    const formatDateTime = (dt: string) => {
+        const d = new Date(dt);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    };
+
+    if (isLoading) {
+        return (
+            <div className="container mx-auto p-md max-w-4xl" style={{ textAlign: 'center', padding: '60px' }}>
+                <p>로딩 중...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container mx-auto p-md max-w-4xl" style={{ textAlign: 'center', padding: '60px', color: '#ef4444' }}>
+                <p>{error}</p>
+                <button className="btn btn-primary" style={{ marginTop: '16px' }} onClick={loadBookings}>다시 시도</button>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-md max-w-4xl">
@@ -69,9 +119,10 @@ export default function MyBookingsPage() {
             ) : (
                 <div className="grid gap-md">
                     {bookings.map((booking) => {
-                        const bookingDate = new Date(`${booking.date}T${booking.startTime}`);
-                        const isPast = bookingDate < today;
-                        const isCancelled = booking.status === 'CANCELLED';
+                        const label = statusLabel(booking);
+                        const isCancelled = booking.status === 'CANCELED';
+                        const isPast = new Date(booking.endAt) < today;
+                        const canCancel = !isCancelled && !isPast;
 
                         return (
                             <div
@@ -95,12 +146,10 @@ export default function MyBookingsPage() {
                                             borderRadius: '999px',
                                             fontSize: '12px',
                                             fontWeight: 600,
-                                            background: isCancelled ? '#e5e7eb' :
-                                                isPast ? '#f3f4f6' : '#dcfce7',
-                                            color: isCancelled ? '#6b7280' :
-                                                isPast ? '#6b7280' : '#15803d',
+                                            background: label.bg,
+                                            color: label.color,
                                         }}>
-                                            {isCancelled ? '취소됨' : isPast ? '이용 완료' : '예약 확정'}
+                                            {label.text}
                                         </span>
                                         <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
                                             {booking.createdAt.substring(0, 10)} 예약
@@ -109,22 +158,32 @@ export default function MyBookingsPage() {
 
                                     <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '4px' }}>
                                         {booking.roomName}
+                                        <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--color-text-muted)', marginLeft: '8px' }}>
+                                            ({booking.roomCode})
+                                        </span>
                                     </h3>
+                                    {booking.title && (
+                                        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginBottom: '6px' }}>
+                                            📝 {booking.title}
+                                        </p>
+                                    )}
 
                                     <div style={{ fontSize: '14px', color: 'var(--color-text-muted)', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
-                                        <span>📅 {booking.date}</span>
-                                        <span>⏰ {booking.startTime} ~ {booking.endTime}</span>
-                                        <span>👥 {booking.guestCount}명</span>
-                                        <span>{PAYMENT_LABEL[booking.paymentMethod] || booking.paymentMethod}</span>
+                                        <span>🏢 {booking.officeName}</span>
+                                        <span>🕐 {formatDateTime(booking.startAt)} ~ {formatDateTime(booking.endAt)}</span>
                                     </div>
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
-                                    <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-primary)' }}>
-                                        {booking.totalPrice.toLocaleString()}원
-                                    </span>
+                                    {booking.totalPrice != null ? (
+                                        <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-primary)' }}>
+                                            {Number(booking.totalPrice).toLocaleString()}원
+                                        </span>
+                                    ) : (
+                                        <span style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>가격 미정</span>
+                                    )}
 
-                                    {!isPast && !isCancelled && (
+                                    {canCancel && (
                                         <button
                                             onClick={() => handleCancel(booking.id)}
                                             style={{

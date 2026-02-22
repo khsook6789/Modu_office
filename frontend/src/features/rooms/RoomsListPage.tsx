@@ -24,8 +24,8 @@ export default function RoomsListPage() {
 // Main component that uses Office context
 function RoomsListPageContent() {
     const { user } = useAuth();
-    const { rooms, addRoom } = useRooms();
-    const { selectedOfficeId, selectedOffice, offices, createOffice } = useOfficeContext();
+    const { rooms, addRoom, deleteRoom } = useRooms();
+    const { selectedOfficeId, selectedOffice, offices, createOffice, deleteOffice } = useOfficeContext();
     const [filter, setFilter] = useState<'ALL' | 'AVAILABLE'>('ALL');
 
     
@@ -37,7 +37,8 @@ function RoomsListPageContent() {
         location: '',
         capacity: 4,
         equipment: '',
-        imageUrl: ''
+        imageUrl: '',
+        price: 0
     });
 
     const [newOfficeData, setNewOfficeData] = useState({
@@ -88,10 +89,11 @@ function RoomsListPageContent() {
             location: newRoom.location,
             capacity: Number(newRoom.capacity),
             equipment: newRoom.equipment.split(',').map(item => item.trim()).filter(Boolean),
-            imageUrl: newRoom.imageUrl || undefined
+            imageUrl: newRoom.imageUrl || undefined,
+            price: Number(newRoom.price) || 0
         });
         setIsModalOpen(false);
-        setNewRoom({ name: '', location: '', capacity: 4, equipment: '', imageUrl: '' });
+        setNewRoom({ name: '', location: '', capacity: 4, equipment: '', imageUrl: '', price: 0 });
     };
 
     return (
@@ -136,9 +138,32 @@ function RoomsListPageContent() {
                     )}
                 </div>
                 {selectedOffice && (
-                    <p style={{ marginTop: '10px', fontSize: '14px', color: 'var(--color-text-muted)' }}>
-                        📍 {selectedOffice.location} | 🕒 {selectedOffice.openTime} - {selectedOffice.closeTime}
-                    </p>
+                    <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <p style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
+                            📍 {selectedOffice.location} | 🕒 {selectedOffice.openTime} - {selectedOffice.closeTime}
+                        </p>
+                        {(user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN') && (
+                            <button
+                                onClick={async () => {
+                                    if (confirm(`"${selectedOffice.name}" 오피스를 삭제하시겠습니까?\n⚠️ 소속 회의실이 없어야 삭제 가능합니다.`)) {
+                                        try {
+                                            await deleteOffice(selectedOffice.id);
+                                            alert('오피스가 삭제되었습니다.');
+                                        } catch (err: any) {
+                                            alert('오피스 삭제 실패: ' + (err?.message || '서버 오류'));
+                                        }
+                                    }
+                                }}
+                                style={{
+                                    background: 'rgba(239,68,68,0.15)', color: '#fca5a5',
+                                    border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
+                                    padding: '4px 12px', fontSize: '13px', cursor: 'pointer'
+                                }}
+                            >
+                                🗑 오피스 삭제
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
 
@@ -159,7 +184,12 @@ function RoomsListPageContent() {
 
             <div className="rooms-grid">
                 {filteredRooms.map(room => (
-                    <RoomCard key={room.id} room={room} />
+                    <RoomCard
+                        key={room.id}
+                        room={room}
+                        isOperator={user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN'}
+                        onDelete={deleteRoom}
+                    />
                 ))}
                 {filteredRooms.length === 0 && selectedOfficeId && (
                     <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>

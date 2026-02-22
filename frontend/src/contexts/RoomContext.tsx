@@ -46,6 +46,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
                 capacity: roomData.capacity,
                 category: 'MEETING_ROOM',
                 status: 'AVAILABLE',
+                price: (roomData as any).price ?? 0,
                 facilityIds: [] 
             };
 
@@ -75,8 +76,15 @@ export function RoomProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const deleteRoom = (id: string) => {
-        setRooms(prev => prev.filter(room => room.id !== id));
+    const deleteRoom = async (id: string) => {
+        try {
+            await roomApi.deleteRoom(Number(id));
+            setRooms(prev => prev.filter(room => room.id !== id));
+        } catch (error: any) {
+            console.error("Failed to delete room", error);
+            const msg = error.response?.data?.message || error.message || "서버 오류가 발생했습니다.";
+            alert(`회의실 삭제 실패: ${msg}`);
+        }
     };
 
     return (
