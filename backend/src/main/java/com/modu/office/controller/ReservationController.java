@@ -51,7 +51,16 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<List<ReservationResponse>>> getReservations(
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) Long roomId,
-            @RequestParam(required = false) ReservationStatus status) {
+            @RequestParam(required = false) ReservationStatus status,
+            @AuthenticationPrincipal AppUser currentUser) {
+
+        // 일반 사용자는 본인 예약만 조회 가능하도록 강제 필터링
+        if (currentUser.getRole() == com.modu.office.entity.enums.UserRole.CUSTOMER) {
+            if (customerId != null && !customerId.equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException("본인의 예약만 조회할 수 있습니다.");
+            }
+            customerId = currentUser.getId();
+        }
 
         List<ReservationResponse> reservations;
 
@@ -117,8 +126,11 @@ public class ReservationController {
      * 예약 확정 (PENDING -> CONFIRMED)
      */
     @PatchMapping("/{id}/confirm")
-    public ResponseEntity<ApiResponse<ReservationResponse>> confirmReservation(@PathVariable Long id) {
-        ReservationResponse response = reservationService.confirmReservation(id);
+    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    public ResponseEntity<ApiResponse<ReservationResponse>> confirmReservation(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUser currentUser) {
+        ReservationResponse response = reservationService.confirmReservation(id, currentUser);
         return ResponseEntity.ok(ApiResponse.success("예약이 확정되었습니다.", response));
     }
 
