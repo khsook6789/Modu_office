@@ -143,13 +143,29 @@ public class AuthService {
                 }
 
                 Account account = refreshToken.getAccount();
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                                account.getEmail(), null, java.util.Collections.emptyList());
 
-                String accessToken = tokenProvider.generateAccessToken(authentication);
+                AppUser appUser = appUserRepository.findByAccount(account)
+                                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 일치하지 않습니다."));
+
+                java.util.List<org.springframework.security.core.GrantedAuthority> authorities = java.util.Collections
+                                .singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                                "ROLE_" + appUser.getRole().name()));
+
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                account.getEmail(), null, authorities);
+
+                // RTR (Refresh Token Rotation) 패턴 적용: 기존 리프레시 토큰 폐기 및 새 토큰 발급
+                String newAccessToken = tokenProvider.generateAccessToken(authentication);
+                String newRefreshTokenValue = tokenProvider.generateRefreshToken();
+                java.time.LocalDateTime expiryDate = java.time.LocalDateTime.now()
+                                .plusSeconds(tokenProvider.getRefreshTokenExpirationInMs() / 1000);
+
+                refreshToken.updateToken(newRefreshTokenValue, expiryDate);
+                refreshTokenRepository.save(refreshToken); // 명시적 저장 혹은 dirty checking. (기존 토큰은 무효화됨)
+
                 return TokenResponse.builder()
-                                .accessToken(accessToken)
-                                .refreshToken(refreshTokenValue)
+                                .accessToken(newAccessToken)
+                                .refreshToken(newRefreshTokenValue)
                                 .tokenType("Bearer")
                                 .build();
         }
