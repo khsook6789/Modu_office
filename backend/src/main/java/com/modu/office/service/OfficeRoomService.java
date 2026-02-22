@@ -331,6 +331,8 @@ public class OfficeRoomService {
             if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
                 throw new AccessDeniedException("담당 지점의 회의실이 아닙니다.");
             }
+        } else if (currentUser.getRole() != UserRole.PLATFORM_ADMIN) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
         }
     }
 }
