@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @org.springframework.boot.context.properties.ConfigurationPropertiesScan
+@org.springframework.cache.annotation.EnableCaching
 public class ModuOfficeApplication {
 
     public static void main(String[] args) {

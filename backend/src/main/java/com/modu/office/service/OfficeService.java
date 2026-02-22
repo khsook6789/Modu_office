@@ -33,6 +33,7 @@ public class OfficeService {
      * 새 지점 생성 — 현재 로그인한 사용자를 소유자로 설정
      */
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "offices", allEntries = true)
     public OfficeResponse createOffice(OfficeRequest request, AppUser currentUser) {
         Office.OfficeBuilder officeBuilder = Office.builder()
                 .name(request.getName())
@@ -67,6 +68,7 @@ public class OfficeService {
     /**
      * 모든 지점 조회
      */
+    @org.springframework.cache.annotation.Cacheable("offices")
     public List<OfficeResponse> getAllOffices() {
         return officeRepository.findAll().stream()
                 .map(OfficeResponse::fromEntity)
@@ -77,6 +79,7 @@ public class OfficeService {
      * 지점 정보 수정 — 소유권 검증 후 수정
      */
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "offices", allEntries = true)
     public OfficeResponse updateOffice(Long id, OfficeRequest request, AppUser currentUser) {
         Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
@@ -119,6 +122,7 @@ public class OfficeService {
      * 지점 삭제 — 소유권 검증 후 삭제
      */
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "offices", allEntries = true)
     public void deleteOffice(Long id, AppUser currentUser) {
         Office office = officeRepository.findById(java.util.Objects.requireNonNull(id, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
