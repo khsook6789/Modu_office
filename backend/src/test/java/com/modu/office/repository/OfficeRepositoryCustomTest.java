@@ -91,10 +91,11 @@ class OfficeRepositoryCustomTest {
     @DisplayName("오피스 키워드 검색 - 이름 포함")
     void searchByName() {
         // Given
-        String keyword = "Gangnam";
+        com.modu.office.dto.request.OfficeSearchCondition condition = new com.modu.office.dto.request.OfficeSearchCondition();
+        condition.setKeyword("Gangnam");
 
         // When
-        Page<Office> result = officeRepository.searchOffices(keyword, PageRequest.of(0, 10));
+        Page<Office> result = officeRepository.searchOffices(condition, PageRequest.of(0, 10));
 
         // Then
         assertThat(result.getContent()).hasSize(1);
@@ -136,10 +137,11 @@ class OfficeRepositoryCustomTest {
     @DisplayName("오피스 키워드 검색 - 위치 포함")
     void searchByLocation() {
         // Given
-        String keyword = "Seongnam";
+        com.modu.office.dto.request.OfficeSearchCondition condition = new com.modu.office.dto.request.OfficeSearchCondition();
+        condition.setKeyword("Seongnam");
 
         // When
-        Page<Office> result = officeRepository.searchOffices(keyword, PageRequest.of(0, 10));
+        Page<Office> result = officeRepository.searchOffices(condition, PageRequest.of(0, 10));
 
         // Then
         assertThat(result.getContent()).hasSize(1);
@@ -150,10 +152,11 @@ class OfficeRepositoryCustomTest {
     @DisplayName("오피스 키워드 검색 - 대소문자 무시")
     void searchIgnoreCase() {
         // Given
-        String keyword = "gangnam";
+        com.modu.office.dto.request.OfficeSearchCondition condition = new com.modu.office.dto.request.OfficeSearchCondition();
+        condition.setKeyword("gangnam");
 
         // When
-        Page<Office> result = officeRepository.searchOffices(keyword, PageRequest.of(0, 10));
+        Page<Office> result = officeRepository.searchOffices(condition, PageRequest.of(0, 10));
 
         // Then
         assertThat(result.getContent()).hasSize(1);
