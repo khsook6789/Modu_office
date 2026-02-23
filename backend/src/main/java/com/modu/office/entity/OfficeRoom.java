@@ -63,6 +63,22 @@ public class OfficeRoom extends BaseEntity {
     @Column(name = "version")
     private Long version;
 
+    @Setter
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Setter
+    @Column(name = "banner_image_url")
+    private String bannerImageUrl;
+
+    @Setter
+    @Column(name = "buffer_time", nullable = false)
+    private Integer bufferTime = 0;
+
+    @org.hibernate.annotations.BatchSize(size = 100)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<RoomImage> roomImages = new java.util.ArrayList<>();
+
     @org.hibernate.annotations.BatchSize(size = 100)
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private java.util.List<OfficeRoomFacility> roomFacilities = new java.util.ArrayList<>();

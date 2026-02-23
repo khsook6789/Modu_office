@@ -23,6 +23,9 @@ public class OfficeRoomResponse {
     private Long id;
     private Long officeId;
     private String name;
+    private String description;
+    private String bannerImageUrl;
+    private Integer bufferTime;
     private String roomCode;
     private Integer floor;
     private RoomStatus status;
@@ -41,6 +44,9 @@ public class OfficeRoomResponse {
                 .id(room.getId())
                 .officeId(room.getOffice().getId())
                 .name(room.getName())
+                .description(room.getDescription())
+                .bannerImageUrl(room.getBannerImageUrl())
+                .bufferTime(room.getBufferTime())
                 .roomCode(room.getRoomCode())
                 .floor(room.getFloor())
                 .status(room.getStatus())
