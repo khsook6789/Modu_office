@@ -49,7 +49,7 @@ class ReservationEventListenerTest {
         private OfficeRepository officeRepository;
 
         @Autowired
-        private OfficeRoomRepository officeRoomRepository;
+        private RoomRepository roomRepository;
 
         @Autowired
         private ReservationRepository reservationRepository;
@@ -57,14 +57,14 @@ class ReservationEventListenerTest {
         private AppUser customer;
         private AppUser operator;
         private Office office;
-        private OfficeRoom officeRoom;
+        private Room room;
 
         @BeforeEach
         void setUp() {
                 // 테스트 데이터 정리
                 updateLogRepository.deleteAll();
                 reservationRepository.deleteAll();
-                officeRoomRepository.deleteAll();
+                roomRepository.deleteAll();
                 officeRepository.deleteAll();
                 appUserRepository.deleteAll();
                 accountRepository.deleteAll();
@@ -80,7 +80,7 @@ class ReservationEventListenerTest {
                 customer = AppUser.builder()
                                 .account(customerAccount)
                                 .name("Test Customer")
-                                .role(UserRole.CUSTOMER)
+                                .role(UserRole.USER)
                                 .build();
                 appUserRepository.save(customer);
 
@@ -95,7 +95,7 @@ class ReservationEventListenerTest {
                 operator = AppUser.builder()
                                 .account(operatorAccount)
                                 .name("Test Operator")
-                                .role(UserRole.OPERATOR)
+                                .role(UserRole.MANAGER)
                                 .approvalStatus(OperatorApprovalStatus.APPROVED)
                                 .build();
                 appUserRepository.save(operator);
@@ -112,15 +112,15 @@ class ReservationEventListenerTest {
                                 .build();
                 officeRepository.save(office);
 
-                // OfficeRoom 생성
-                officeRoom = OfficeRoom.builder()
+                // Room 생성
+                room = Room.builder()
                                 .office(office)
                                 .name("Meeting Room A")
                                 .roomCode("ROOM-A")
                                 .capacity(10)
                                 .floor(1)
                                 .build();
-                officeRoomRepository.save(officeRoom);
+                roomRepository.save(room);
         }
 
         @AfterEach
@@ -128,7 +128,7 @@ class ReservationEventListenerTest {
                 // 테스트 데이터 정리
                 updateLogRepository.deleteAll();
                 reservationRepository.deleteAll();
-                officeRoomRepository.deleteAll();
+                roomRepository.deleteAll();
                 officeRepository.deleteAll();
                 appUserRepository.deleteAll();
                 accountRepository.deleteAll();
@@ -142,7 +142,7 @@ class ReservationEventListenerTest {
                         Reservation res = Reservation.builder()
                                         .customer(customer)
                                         .office(office)
-                                        .room(officeRoom)
+                                        .room(room)
                                         .title("테스트 예약")
                                         .startAt(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0))
                                         .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
@@ -179,7 +179,7 @@ class ReservationEventListenerTest {
                 Reservation reservation = Reservation.builder()
                                 .customer(customer)
                                 .office(office)
-                                .room(officeRoom)
+                                .room(room)
                                 .title("테스트 예약")
                                 .startAt(originalStart)
                                 .endAt(originalEnd)
@@ -223,7 +223,7 @@ class ReservationEventListenerTest {
                 Reservation reservation = Reservation.builder()
                                 .customer(customer)
                                 .office(office)
-                                .room(officeRoom)
+                                .room(room)
                                 .title("테스트 예약")
                                 .startAt(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0))
                                 .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
@@ -272,7 +272,7 @@ class ReservationEventListenerTest {
                         Reservation res = Reservation.builder()
                                         .customer(customer)
                                         .office(office)
-                                        .room(officeRoom)
+                                        .room(room)
                                         .title("WebSocket Test")
                                         .startAt(LocalDateTime.now().plusDays(1))
                                         .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
@@ -287,7 +287,7 @@ class ReservationEventListenerTest {
 
                 // then
                 org.mockito.Mockito.verify(notificationService).notifyReservationCreated(
-                                org.mockito.ArgumentMatchers.eq(officeRoom.getId()),
+                                org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.any(Reservation.class));
         }
 
@@ -299,7 +299,7 @@ class ReservationEventListenerTest {
                         Reservation res = Reservation.builder()
                                         .customer(customer)
                                         .office(office)
-                                        .room(officeRoom)
+                                        .room(room)
                                         .title("Cancel Test")
                                         .startAt(LocalDateTime.now().plusDays(1))
                                         .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
@@ -318,7 +318,7 @@ class ReservationEventListenerTest {
 
                 // then
                 org.mockito.Mockito.verify(notificationService).notifyReservationCancelled(
-                                org.mockito.ArgumentMatchers.eq(officeRoom.getId()),
+                                org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.eq(reservation.getId()));
         }
 }

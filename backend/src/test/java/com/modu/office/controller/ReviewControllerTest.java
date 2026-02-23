@@ -39,7 +39,7 @@ class ReviewControllerTest {
 
         @Test
         @DisplayName("후기 작성 API - 인증된 사용자 성공")
-        @WithMockUser(roles = "CUSTOMER") // Spring Security Mock
+        @WithMockUser(roles = "USER") // Spring Security Mock
         void createReview_success() throws Exception {
                 // given
                 ReviewRequest request = ReviewRequest.builder()

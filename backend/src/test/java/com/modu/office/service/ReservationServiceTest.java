@@ -4,11 +4,11 @@ import com.modu.office.dto.request.ReservationRequest;
 import com.modu.office.dto.response.ReservationResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Office;
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.Reservation;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
-import com.modu.office.repository.OfficeRoomRepository;
+import com.modu.office.repository.RoomRepository;
 import com.modu.office.repository.ReservationRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class ReservationServiceTest {
         private OfficeRepository officeRepository;
 
         @Mock
-        private OfficeRoomRepository officeRoomRepository;
+        private RoomRepository roomRepository;
 
         @Mock
         private AppUserRepository appUserRepository;
@@ -65,7 +65,7 @@ class ReservationServiceTest {
                                 .openDays(new Short[] { 1, 2, 3, 4, 5 }) // 월-금만 오픈
                                 .build();
 
-                OfficeRoom room = OfficeRoom.builder()
+                Room room = Room.builder()
                                 .office(office)
                                 .name("Test Room")
                                 .build();
@@ -89,7 +89,7 @@ class ReservationServiceTest {
                                 .build();
 
                 when(officeRepository.findById(officeId)).thenReturn(Optional.of(office));
-                when(officeRoomRepository.findById(roomId)).thenReturn(Optional.of(room));
+                when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
                 when(appUserRepository.findById(customerId)).thenReturn(Optional.of(customer));
 
                 // When & Then
@@ -106,7 +106,7 @@ class ReservationServiceTest {
                 BigDecimal pricePerHour = new BigDecimal("5000");
 
                 Office office = Office.builder().openDays(new Short[] { 1, 2, 3, 4, 5, 0, 6 }).build();
-                OfficeRoom room = OfficeRoom.builder().office(office).price(pricePerHour).build();
+                Room room = Room.builder().office(office).price(pricePerHour).build();
                 AppUser customer = AppUser.builder().build();
 
                 // 30분 예약 (10:00 ~ 10:30)
@@ -138,7 +138,7 @@ class ReservationServiceTest {
                                 .openDays(new Short[] { 1, 2, 3, 4, 5, 6, 0 })
                                 .build();
 
-                OfficeRoom room = OfficeRoom.builder()
+                Room room = Room.builder()
                                 .office(office)
                                 .build();
 
@@ -156,7 +156,7 @@ class ReservationServiceTest {
                                 .build();
 
                 when(officeRepository.findById(officeId)).thenReturn(Optional.of(office));
-                when(officeRoomRepository.findById(roomId)).thenReturn(Optional.of(room));
+                when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
                 when(appUserRepository.findById(customerId)).thenReturn(Optional.of(customer));
 
                 // When & Then

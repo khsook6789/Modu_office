@@ -4,13 +4,13 @@ import com.modu.office.dto.request.ReservationRequest;
 import com.modu.office.dto.request.ReservationUpdateRequest;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Office;
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.entity.enums.UserRole;
 import com.modu.office.repository.AccountRepository;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
-import com.modu.office.repository.OfficeRoomRepository;
+import com.modu.office.repository.RoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class BusinessHoursValidationTest {
         private OfficeRepository officeRepository;
 
         @Autowired
-        private OfficeRoomRepository officeRoomRepository;
+        private RoomRepository roomRepository;
 
         @Autowired
         private AppUserRepository appUserRepository;
@@ -51,7 +51,7 @@ class BusinessHoursValidationTest {
         private AccountRepository accountRepository;
 
         private Office office;
-        private OfficeRoom room;
+        private Room room;
         private AppUser customer;
 
         @BeforeEach
@@ -60,7 +60,7 @@ class BusinessHoursValidationTest {
                 customer = AppUser.builder()
                                 .account(createTestAccount("customer@test.com"))
                                 .name("고객1")
-                                .role(UserRole.CUSTOMER)
+                                .role(UserRole.USER)
                                 .build();
                 customer = appUserRepository.save(customer);
 
@@ -68,7 +68,7 @@ class BusinessHoursValidationTest {
                 AppUser operator = AppUser.builder()
                                 .account(createTestAccount("operator@test.com"))
                                 .name("운영자")
-                                .role(UserRole.OPERATOR)
+                                .role(UserRole.MANAGER)
                                 .build();
                 operator = appUserRepository.save(operator);
 
@@ -85,7 +85,7 @@ class BusinessHoursValidationTest {
                 office = officeRepository.save(office);
 
                 // 회의실 생성
-                room = OfficeRoom.builder()
+                room = Room.builder()
                                 .office(office)
                                 .name("회의실 A")
                                 .roomCode("A101")
@@ -94,7 +94,7 @@ class BusinessHoursValidationTest {
                                 .capacity(10)
                                 .category("CONFERENCE")
                                 .build();
-                room = officeRoomRepository.save(room);
+                room = roomRepository.save(room);
         }
 
         @Test

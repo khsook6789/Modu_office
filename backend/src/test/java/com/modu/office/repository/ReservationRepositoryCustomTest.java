@@ -36,7 +36,7 @@ class ReservationRepositoryCustomTest {
         private OfficeRepository officeRepository;
 
         @Autowired
-        private OfficeRoomRepository officeRoomRepository;
+        private RoomRepository roomRepository;
 
         @Autowired
         private AppUserRepository appUserRepository;
@@ -51,13 +51,13 @@ class ReservationRepositoryCustomTest {
         private Office officeB;
         private AppUser user1;
         private AppUser user2;
-        private OfficeRoom roomA;
-        private OfficeRoom roomB;
+        private Room roomA;
+        private Room roomB;
 
         @BeforeEach
         void setUp() {
                 reservationRepository.deleteAllInBatch();
-                officeRoomRepository.deleteAllInBatch();
+                roomRepository.deleteAllInBatch();
                 officeRepository.deleteAllInBatch();
                 appUserRepository.deleteAllInBatch();
                 accountRepository.deleteAllInBatch();
@@ -66,12 +66,12 @@ class ReservationRepositoryCustomTest {
                 Account account1 = accountRepository
                                 .save(Account.builder().email("user1@test.com").passwordHash("pw").build());
                 user1 = appUserRepository.save(
-                                AppUser.builder().account(account1).name("Alice").role(UserRole.CUSTOMER).build());
+                                AppUser.builder().account(account1).name("Alice").role(UserRole.USER).build());
 
                 Account account2 = accountRepository
                                 .save(Account.builder().email("user2@test.com").passwordHash("pw").build());
                 user2 = appUserRepository
-                                .save(AppUser.builder().account(account2).name("Bob").role(UserRole.CUSTOMER).build());
+                                .save(AppUser.builder().account(account2).name("Bob").role(UserRole.USER).build());
 
                 // 2. Offices
                 officeA = officeRepository.save(Office.builder().name("Office A").location("Loc A").ownerUser(user1)
@@ -80,9 +80,9 @@ class ReservationRepositoryCustomTest {
                                 .openTime(LocalTime.of(9, 0)).closeTime(LocalTime.of(18, 0)).build());
 
                 // 3. Rooms
-                roomA = officeRoomRepository.save(OfficeRoom.builder().office(officeA).name("Room A").roomCode("A1")
+                roomA = roomRepository.save(Room.builder().office(officeA).name("Room A").roomCode("A1")
                                 .capacity(10).status(RoomStatus.AVAILABLE).category("MEETING").floor(1).build());
-                roomB = officeRoomRepository.save(OfficeRoom.builder().office(officeB).name("Room B").roomCode("B1")
+                roomB = roomRepository.save(Room.builder().office(officeB).name("Room B").roomCode("B1")
                                 .capacity(10).status(RoomStatus.AVAILABLE).category("MEETING").floor(1).build());
 
                 // 4. Reservations

@@ -57,7 +57,7 @@ class OperatorAccessTest {
                 operator1 = AppUser.builder()
                                 .account(createTestAccount("operator1@test.com"))
                                 .name("운영자1")
-                                .role(UserRole.OPERATOR)
+                                .role(UserRole.MANAGER)
                                 .build();
                 operator1 = appUserRepository.save(operator1);
 
@@ -65,7 +65,7 @@ class OperatorAccessTest {
                 operator2 = AppUser.builder()
                                 .account(createTestAccount("operator2@test.com"))
                                 .name("운영자2")
-                                .role(UserRole.OPERATOR)
+                                .role(UserRole.MANAGER)
                                 .build();
                 operator2 = appUserRepository.save(operator2);
 
@@ -73,7 +73,7 @@ class OperatorAccessTest {
                 platformAdmin = AppUser.builder()
                                 .account(createTestAccount("admin@test.com"))
                                 .name("관리자")
-                                .role(UserRole.PLATFORM_ADMIN)
+                                .role(UserRole.ADMIN)
                                 .build();
                 platformAdmin = appUserRepository.save(platformAdmin);
 

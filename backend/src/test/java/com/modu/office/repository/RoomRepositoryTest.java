@@ -23,19 +23,19 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * OfficeRoomRepository 통합 테스트
+ * RoomRepository 통합 테스트
  * - 다중 시설 필터링 커스텀 쿼리 검증
  */
 @DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SecurityConfig.class,
                 WebSocketConfig.class }))
 @ActiveProfiles("test")
 @Import({ JpaConfig.class, QueryDslConfig.class })
-@DisplayName("OfficeRoomRepository 통합 테스트")
+@DisplayName("RoomRepository 통합 테스트")
 @SuppressWarnings("null")
-class OfficeRoomRepositoryTest {
+class RoomRepositoryTest {
 
         @Autowired
-        private OfficeRoomRepository officeRoomRepository;
+        private RoomRepository roomRepository;
 
         @Autowired
         private OfficeRepository officeRepository;
@@ -44,7 +44,7 @@ class OfficeRoomRepositoryTest {
         private FacilityRepository facilityRepository;
 
         @Autowired
-        private OfficeRoomFacilityRepository officeRoomFacilityRepository;
+        private RoomFacilityRepository roomFacilityRepository;
 
         @Autowired
         private AccountRepository accountRepository;
@@ -86,11 +86,13 @@ class OfficeRoomRepositoryTest {
 
                 // 테스트용 Facility 생성
                 wifiFacility = facilityRepository.save(
-                                Facility.builder().name("WIFI").label("무선 인터넷").isActive(true).build());
+                                Facility.builder().facilityCode("WIFI").facilityName("무선 인터넷").isActive(true).build());
                 projectorFacility = facilityRepository.save(
-                                Facility.builder().name("PROJECTOR").label("빔프로젝터").isActive(true).build());
+                                Facility.builder().facilityCode("PROJECTOR").facilityName("빔프로젝터").isActive(true)
+                                                .build());
                 whiteboardFacility = facilityRepository.save(
-                                Facility.builder().name("WHITEBOARD").label("화이트보드").isActive(true).build());
+                                Facility.builder().facilityCode("WHITEBOARD").facilityName("화이트보드").isActive(true)
+                                                .build());
         }
 
         @Test
@@ -98,25 +100,25 @@ class OfficeRoomRepositoryTest {
         void testFindByOfficeIdAndFacilityIdsContainingAll_Success() {
                 // Given - Room1: WIFI + PROJECTOR, Room2: WIFI + PROJECTOR + WHITEBOARD, Room3:
                 // WIFI만
-                OfficeRoom room1 = createRoom("Room 1", 101);
+                Room room1 = createRoom("Room 1", 101);
                 attachFacilities(room1, wifiFacility, projectorFacility);
 
-                OfficeRoom room2 = createRoom("Room 2", 102);
+                Room room2 = createRoom("Room 2", 102);
                 attachFacilities(room2, wifiFacility, projectorFacility, whiteboardFacility);
 
-                OfficeRoom room3 = createRoom("Room 3", 103);
+                Room room3 = createRoom("Room 3", 103);
                 attachFacilities(room3, wifiFacility);
 
                 // When - WIFI AND PROJECTOR 검색
                 List<Long> facilityIds = List.of(wifiFacility.getId(), projectorFacility.getId());
-                List<OfficeRoom> results = officeRoomRepository.findByOfficeIdAndFacilityIdsContainingAll(
+                List<Room> results = roomRepository.findByOfficeIdAndFacilityIdsContainingAll(
                                 testOffice.getId(),
                                 facilityIds,
                                 facilityIds.size());
 
                 // Then - Room1과 Room2만 반환 (Room3은 PROJECTOR가 없어서 제외)
                 assertThat(results).hasSize(2);
-                assertThat(results).extracting(OfficeRoom::getName)
+                assertThat(results).extracting(Room::getName)
                                 .containsExactlyInAnyOrder("Room 1", "Room 2");
         }
 
@@ -124,10 +126,10 @@ class OfficeRoomRepositoryTest {
         @DisplayName("다중 시설 AND 검색 - 일부 시설만 보유한 경우 제외")
         void testFindByOfficeIdAndFacilityIdsContainingAll_PartialMatch() {
                 // Given
-                OfficeRoom room1 = createRoom("Room 1", 101);
+                Room room1 = createRoom("Room 1", 101);
                 attachFacilities(room1, wifiFacility, projectorFacility);
 
-                OfficeRoom room2 = createRoom("Room 2", 102);
+                Room room2 = createRoom("Room 2", 102);
                 attachFacilities(room2, wifiFacility);
 
                 // When - WIFI AND PROJECTOR AND WHITEBOARD 검색
@@ -135,7 +137,7 @@ class OfficeRoomRepositoryTest {
                                 wifiFacility.getId(),
                                 projectorFacility.getId(),
                                 whiteboardFacility.getId());
-                List<OfficeRoom> results = officeRoomRepository.findByOfficeIdAndFacilityIdsContainingAll(
+                List<Room> results = roomRepository.findByOfficeIdAndFacilityIdsContainingAll(
                                 testOffice.getId(),
                                 facilityIds,
                                 facilityIds.size());
@@ -148,25 +150,25 @@ class OfficeRoomRepositoryTest {
         @DisplayName("다중 시설 AND 검색 - 단일 시설 검색")
         void testFindByOfficeIdAndFacilityIdsContainingAll_SingleFacility() {
                 // Given
-                OfficeRoom room1 = createRoom("Room 1", 101);
+                Room room1 = createRoom("Room 1", 101);
                 attachFacilities(room1, wifiFacility, projectorFacility);
 
-                OfficeRoom room2 = createRoom("Room 2", 102);
+                Room room2 = createRoom("Room 2", 102);
                 attachFacilities(room2, wifiFacility);
 
-                OfficeRoom room3 = createRoom("Room 3", 103);
+                Room room3 = createRoom("Room 3", 103);
                 attachFacilities(room3, projectorFacility);
 
                 // When - WIFI만 검색
                 List<Long> facilityIds = List.of(wifiFacility.getId());
-                List<OfficeRoom> results = officeRoomRepository.findByOfficeIdAndFacilityIdsContainingAll(
+                List<Room> results = roomRepository.findByOfficeIdAndFacilityIdsContainingAll(
                                 testOffice.getId(),
                                 facilityIds,
                                 facilityIds.size());
 
                 // Then - Room1과 Room2만 반환
                 assertThat(results).hasSize(2);
-                assertThat(results).extracting(OfficeRoom::getName)
+                assertThat(results).extracting(Room::getName)
                                 .containsExactlyInAnyOrder("Room 1", "Room 2");
         }
 
@@ -186,11 +188,11 @@ class OfficeRoomRepositoryTest {
                 anotherOffice = officeRepository.save(anotherOffice);
 
                 // testOffice의 방
-                OfficeRoom room1 = createRoom("Room 1", 101);
+                Room room1 = createRoom("Room 1", 101);
                 attachFacilities(room1, wifiFacility, projectorFacility);
 
                 // anotherOffice의 방
-                OfficeRoom room2 = OfficeRoom.builder()
+                Room room2 = Room.builder()
                                 .office(anotherOffice)
                                 .name("Room 2")
                                 .roomCode(String.valueOf(201))
@@ -198,12 +200,12 @@ class OfficeRoomRepositoryTest {
                                 .capacity(10)
                                 .status(RoomStatus.AVAILABLE)
                                 .build();
-                room2 = officeRoomRepository.save(room2);
+                room2 = roomRepository.save(room2);
                 attachFacilities(room2, wifiFacility, projectorFacility);
 
                 // When - testOffice에서 검색
                 List<Long> facilityIds = List.of(wifiFacility.getId(), projectorFacility.getId());
-                List<OfficeRoom> results = officeRoomRepository.findByOfficeIdAndFacilityIdsContainingAll(
+                List<Room> results = roomRepository.findByOfficeIdAndFacilityIdsContainingAll(
                                 testOffice.getId(),
                                 facilityIds,
                                 facilityIds.size());
@@ -215,10 +217,10 @@ class OfficeRoomRepositoryTest {
         }
 
         /**
-         * 테스트용 OfficeRoom 생성 헬퍼 메서드
+         * 테스트용 Room 생성 헬퍼 메서드
          */
-        private OfficeRoom createRoom(String name, int roomCode) {
-                OfficeRoom room = OfficeRoom.builder()
+        private Room createRoom(String name, int roomCode) {
+                Room room = Room.builder()
                                 .office(testOffice)
                                 .name(name)
                                 .roomCode(String.valueOf(roomCode))
@@ -226,19 +228,19 @@ class OfficeRoomRepositoryTest {
                                 .capacity(10)
                                 .status(RoomStatus.AVAILABLE)
                                 .build();
-                return officeRoomRepository.save(room);
+                return roomRepository.save(room);
         }
 
         /**
-         * OfficeRoom에 Facility 연결 헬퍼 메서드
+         * Room에 Facility 연결 헬퍼 메서드
          */
-        private void attachFacilities(OfficeRoom room, Facility... facilities) {
+        private void attachFacilities(Room room, Facility... facilities) {
                 for (Facility facility : facilities) {
-                        OfficeRoomFacility orf = OfficeRoomFacility.builder()
+                        RoomFacility orf = RoomFacility.builder()
                                         .room(room)
                                         .facility(facility)
                                         .build();
-                        officeRoomFacilityRepository.save(orf);
+                        roomFacilityRepository.save(orf);
                 }
         }
 }

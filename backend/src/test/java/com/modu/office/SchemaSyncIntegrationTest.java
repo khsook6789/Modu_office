@@ -51,7 +51,7 @@ class SchemaSyncIntegrationTest {
     private OfficeRepository officeRepository;
 
     @Autowired
-    private OfficeRoomRepository officeRoomRepository;
+    private RoomRepository roomRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -61,14 +61,14 @@ class SchemaSyncIntegrationTest {
 
     private AppUser testUser;
     private Office testOffice;
-    private OfficeRoom testRoom;
+    private Room testRoom;
 
     @BeforeEach
     void setUp() {
         // Clear all data (Reverse FK order)
         updateLogRepository.deleteAllInBatch();
         reservationRepository.deleteAllInBatch();
-        officeRoomRepository.deleteAllInBatch();
+        roomRepository.deleteAllInBatch();
         officeRepository.deleteAllInBatch();
         appUserRepository.deleteAllInBatch();
         accountRepository.deleteAllInBatch();
@@ -85,12 +85,12 @@ class SchemaSyncIntegrationTest {
         testUser = AppUser.builder()
                 .account(account)
                 .name("Sync Tester")
-                .role(UserRole.OPERATOR)
+                .role(UserRole.MANAGER)
                 .approvalStatus(OperatorApprovalStatus.APPROVED)
                 .build();
         appUserRepository.save(testUser);
 
-        // 2. Office & OfficeRoom
+        // 2. Office & Room
         testOffice = Office.builder()
                 .name("Sync Test Office")
                 .location("Seoul")
@@ -103,7 +103,7 @@ class SchemaSyncIntegrationTest {
                 .build();
         officeRepository.save(testOffice);
 
-        testRoom = OfficeRoom.builder()
+        testRoom = Room.builder()
                 .office(testOffice)
                 .name("Enum Test Room")
                 .roomCode("SYNC-101")
@@ -111,7 +111,7 @@ class SchemaSyncIntegrationTest {
                 .price(new BigDecimal("5000"))
                 .status(RoomStatus.AVAILABLE)
                 .build();
-        officeRoomRepository.save(testRoom);
+        roomRepository.save(testRoom);
 
         em.flush();
         em.clear();
@@ -122,11 +122,11 @@ class SchemaSyncIntegrationTest {
     void verifyEnumPersistence() {
         Account savedAccount = accountRepository.findAll().get(0);
         AppUser savedUser = appUserRepository.findAll().get(0);
-        OfficeRoom savedRoom = officeRoomRepository.findAll().get(0);
+        Room savedRoom = roomRepository.findAll().get(0);
 
         assertThat(savedAccount.getLoginType()).isEqualTo(LoginType.LOCAL);
         assertThat(savedAccount.getStatus()).isEqualTo(AccountStatus.ACTIVE);
-        assertThat(savedUser.getRole()).isEqualTo(UserRole.OPERATOR);
+        assertThat(savedUser.getRole()).isEqualTo(UserRole.MANAGER);
         assertThat(savedUser.getApprovalStatus()).isEqualTo(OperatorApprovalStatus.APPROVED);
         assertThat(savedRoom.getStatus()).isEqualTo(RoomStatus.AVAILABLE);
     }

@@ -58,7 +58,7 @@ class OfficeRepositoryCustomTest {
         AppUser user = AppUser.builder()
                 .account(account)
                 .name("Office Owner")
-                .role(UserRole.OPERATOR)
+                .role(UserRole.MANAGER)
                 .build();
         appUserRepository.save(user);
 

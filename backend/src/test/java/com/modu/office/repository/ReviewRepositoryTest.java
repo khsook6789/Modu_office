@@ -40,12 +40,12 @@ class ReviewRepositoryTest {
         @Autowired
         private AccountRepository accountRepository;
         @Autowired
-        private OfficeRoomRepository officeRoomRepository;
+        private RoomRepository roomRepository;
         @Autowired
         private OfficeRepository officeRepository;
 
         private AppUser user;
-        private OfficeRoom room;
+        private Room room;
         private Reservation reservation;
 
         @BeforeEach
@@ -60,7 +60,7 @@ class ReviewRepositoryTest {
                 user = appUserRepository.save(AppUser.builder()
                                 .account(account)
                                 .name("Tester")
-                                .role(UserRole.CUSTOMER)
+                                .role(UserRole.USER)
                                 .build());
 
                 Office office = officeRepository.save(Office.builder()
@@ -73,7 +73,7 @@ class ReviewRepositoryTest {
                                 .ownerUser(user)
                                 .build());
 
-                room = officeRoomRepository.save(OfficeRoom.builder()
+                room = roomRepository.save(Room.builder()
                                 .office(office)
                                 .name("Test Room")
                                 .roomCode("R001")

@@ -54,7 +54,7 @@ class MyOfficesApiTest {
         @BeforeEach
         void setUp() {
                 // 운영자 생성
-                operator = createTestUser("operator@test.com", "운영자", UserRole.OPERATOR);
+                operator = createTestUser("operator@test.com", "운영자", UserRole.MANAGER);
 
                 // 운영자 소유 지점1 생성
                 createTestOffice("강남지점", "서울시 강남구", operator);
@@ -84,7 +84,7 @@ class MyOfficesApiTest {
         @Test
         @DisplayName("GET /api/offices/my-offices - 다른 운영자는 해당 지점을 볼 수 없음 - 빈 배열 반환")
         void testGetMyOffices_AsOtherOperator_Empty() throws Exception {
-                AppUser otherOperator = createTestUser("other_op@test.com", "다른 운영자", UserRole.OPERATOR);
+                AppUser otherOperator = createTestUser("other_op@test.com", "다른 운영자", UserRole.MANAGER);
                 performLogin(otherOperator);
 
                 mockMvc.perform(get("/api/offices/my-offices"))
@@ -96,7 +96,7 @@ class MyOfficesApiTest {
         @Test
         @DisplayName("GET /api/offices/my-offices - 플랫폼 관리자가 자신의 지점 목록 조회 - 성공 (소유 지점 없음)")
         void testGetMyOffices_AsPlatformAdmin_Success() throws Exception {
-                AppUser admin = createTestUser("admin@test.com", "관리자", UserRole.PLATFORM_ADMIN);
+                AppUser admin = createTestUser("admin@test.com", "관리자", UserRole.ADMIN);
                 performLogin(admin);
 
                 mockMvc.perform(get("/api/offices/my-offices"))
@@ -109,7 +109,7 @@ class MyOfficesApiTest {
         @Test
         @DisplayName("GET /api/offices/my-offices - 고객이 조회 시도 - 실패 (403)")
         void testGetMyOffices_AsCustomer_Forbidden() throws Exception {
-                AppUser customer = createTestUser("customer@test.com", "고객", UserRole.CUSTOMER);
+                AppUser customer = createTestUser("customer@test.com", "고객", UserRole.USER);
                 performLogin(customer);
 
                 mockMvc.perform(get("/api/offices/my-offices"))
