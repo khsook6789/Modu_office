@@ -24,7 +24,7 @@ public class RoomImage {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_id", nullable = false)
-    private OfficeRoom room;
+    private Room room;
 
     @Setter
     @Column(name = "image_url", nullable = false, length = 255)
@@ -45,7 +45,7 @@ public class RoomImage {
     }
 
     @Builder
-    public RoomImage(OfficeRoom room, String imageUrl, Integer displayOrder) {
+    public RoomImage(Room room, String imageUrl, Integer displayOrder) {
         this.room = room;
         this.imageUrl = imageUrl;
         this.displayOrder = displayOrder != null ? displayOrder : 0;

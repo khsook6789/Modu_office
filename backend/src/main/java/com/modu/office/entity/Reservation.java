@@ -31,7 +31,7 @@ public class Reservation extends BaseEntity {
             @JoinColumn(name = "room_id", referencedColumnName = "id", nullable = false),
             @JoinColumn(name = "office_id", referencedColumnName = "office_id", nullable = false)
     })
-    private OfficeRoom room;
+    private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -55,7 +55,7 @@ public class Reservation extends BaseEntity {
     private Long version;
 
     @Builder
-    public Reservation(String title, Office office, OfficeRoom room, AppUser customer,
+    public Reservation(String title, Office office, Room room, AppUser customer,
             LocalDateTime startAt, LocalDateTime endAt, LocalDateTime endAtIncludeBufferTime,
             ReservationStatus status) {
         this.title = title;

@@ -1,6 +1,6 @@
 package com.modu.office.dto.response;
 
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.enums.RoomStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * OfficeRoom 응답 DTO
+ * Room 응답 DTO
  */
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OfficeRoomResponse {
+public class RoomResponse {
 
     private Long id;
     private Long officeId;
@@ -39,8 +39,8 @@ public class OfficeRoomResponse {
     /**
      * Entity를 DTO로 변환
      */
-    public static OfficeRoomResponse fromEntity(OfficeRoom room) {
-        return OfficeRoomResponse.builder()
+    public static RoomResponse fromEntity(Room room) {
+        return RoomResponse.builder()
                 .id(room.getId())
                 .officeId(room.getOffice().getId())
                 .name(room.getName())

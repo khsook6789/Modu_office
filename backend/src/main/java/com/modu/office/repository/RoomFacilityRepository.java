@@ -1,7 +1,7 @@
 package com.modu.office.repository;
 
-import com.modu.office.entity.OfficeRoomFacility;
-import com.modu.office.entity.OfficeRoomFacility.OfficeRoomFacilityId;
+import com.modu.office.entity.RoomFacility;
+import com.modu.office.entity.RoomFacility.RoomFacilityId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,17 +11,17 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * OfficeRoomFacility 엔티티에 대한 데이터 액세스 레이어
+ * RoomFacility 엔티티에 대한 데이터 액세스 레이어
  */
 @Repository
-public interface OfficeRoomFacilityRepository extends JpaRepository<OfficeRoomFacility, OfficeRoomFacilityId> {
+public interface RoomFacilityRepository extends JpaRepository<RoomFacility, RoomFacilityId> {
 
     /**
      * 특정 회의실의 모든 시설 연결 조회
      * 
      * @param roomId 회의실 ID
      */
-    List<OfficeRoomFacility> findByIdRoomId(Long roomId);
+    List<RoomFacility> findByIdRoomId(Long roomId);
 
     /**
      * 특정 회의실의 시설 연결 일괄 삭제
@@ -30,7 +30,7 @@ public interface OfficeRoomFacilityRepository extends JpaRepository<OfficeRoomFa
      */
     @Modifying
     @jakarta.transaction.Transactional
-    @Query("DELETE FROM OfficeRoomFacility orf WHERE orf.id.roomId = :roomId")
+    @Query("DELETE FROM RoomFacility orf WHERE orf.id.roomId = :roomId")
     void deleteByRoomId(@Param("roomId") Long roomId);
 
     /**

@@ -15,13 +15,13 @@ import lombok.Setter;
  */
 @Entity
 @Getter
-@Table(name = "office_room", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_room_office_roomcode", columnNames = { "office_id", "room_code" }),
+@Table(name = "room", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_room_roomcode", columnNames = { "office_id", "room_code" }),
         // ✅ A안 핵심: (id, office_id) 조합의 유일성을 보장하여 Reservation에서 이를 복합 FK로 참조할 수 있게 함
-        @UniqueConstraint(name = "uq_office_room_id_office", columnNames = { "id", "office_id" })
+        @UniqueConstraint(name = "uq_room_id_office", columnNames = { "id", "office_id" })
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OfficeRoom extends BaseEntity {
+public class Room extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +30,9 @@ public class OfficeRoom extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
+
+    @Column(name = "office_id", insertable = false, updatable = false)
+    private Long officeId;
 
     @Setter
     @Column(name = "name", nullable = false, length = 100)
@@ -81,10 +84,10 @@ public class OfficeRoom extends BaseEntity {
 
     @org.hibernate.annotations.BatchSize(size = 100)
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
-    private java.util.List<OfficeRoomFacility> roomFacilities = new java.util.ArrayList<>();
+    private java.util.List<RoomFacility> roomFacilities = new java.util.ArrayList<>();
 
     @Builder
-    public OfficeRoom(Office office, String name, String roomCode, Integer floor, RoomStatus status, Integer capacity,
+    public Room(Office office, String name, String roomCode, Integer floor, RoomStatus status, Integer capacity,
             String category, BigDecimal price) {
         this.office = office;
         this.name = name;

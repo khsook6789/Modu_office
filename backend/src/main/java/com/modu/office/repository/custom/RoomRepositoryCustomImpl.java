@@ -1,10 +1,10 @@
 package com.modu.office.repository.custom;
 
-import com.modu.office.dto.request.OfficeRoomSearchCondition;
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.dto.request.RoomSearchCondition;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.QOffice;
-import com.modu.office.entity.QOfficeRoom;
-import com.modu.office.entity.QOfficeRoomFacility;
+import com.modu.office.entity.QRoom;
+import com.modu.office.entity.QRoomFacility;
 import com.modu.office.entity.QReservation;
 import com.modu.office.entity.QReview;
 import com.modu.office.entity.enums.ReservationStatus;
@@ -26,15 +26,15 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCustom {
+public class RoomRepositoryCustomImpl implements RoomRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
     @Override
     @SuppressWarnings("null")
-    public Page<OfficeRoom> searchRooms(OfficeRoomSearchCondition condition, Pageable pageable) {
+    public Page<Room> searchRooms(RoomSearchCondition condition, Pageable pageable) {
 
-        QOfficeRoom room = QOfficeRoom.officeRoom;
+        QRoom room = QRoom.room;
         QOffice office = QOffice.office;
         QReservation reservation = QReservation.reservation;
         QReview review = QReview.review;
@@ -71,11 +71,11 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
 
         // 3. 편의시설 필터링 (AND 조건)
         if (condition.getFacilityNames() != null && !condition.getFacilityNames().isEmpty()) {
-            QOfficeRoomFacility roomFacility = QOfficeRoomFacility.officeRoomFacility;
+            QRoomFacility roomFacility = QRoomFacility.roomFacility;
             builder.and(room.id.in(
                     JPAExpressions.select(roomFacility.room.id)
                             .from(roomFacility)
-                            .where(roomFacility.facility.name.in(condition.getFacilityNames()))
+                            .where(roomFacility.facility.facilityCode.in(condition.getFacilityNames()))
                             .groupBy(roomFacility.room.id)
                             .having(roomFacility.facility.id.count().eq((long) condition.getFacilityNames().size()))));
         }
@@ -96,7 +96,7 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
         }
 
         // 5. 쿼리 생성
-        JPAQuery<OfficeRoom> query = queryFactory
+        JPAQuery<Room> query = queryFactory
                 .selectFrom(room)
                 .join(room.office, office).fetchJoin()
                 .where(builder);
@@ -118,7 +118,7 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
         }
 
         // 7. 페이징 적용
-        List<OfficeRoom> content = query
+        List<Room> content = query
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -138,19 +138,19 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
     }
 
     private BooleanExpression minCapacityEq(Integer minCapacity) {
-        return minCapacity != null ? QOfficeRoom.officeRoom.capacity.goe(minCapacity) : null;
+        return minCapacity != null ? QRoom.room.capacity.goe(minCapacity) : null;
     }
 
     private BooleanExpression categoryEq(String category) {
-        return StringUtils.hasText(category) ? QOfficeRoom.officeRoom.category.eq(category) : null;
+        return StringUtils.hasText(category) ? QRoom.room.category.eq(category) : null;
     }
 
     private BooleanExpression keywordLike(String keyword) {
         if (!StringUtils.hasText(keyword)) {
             return null;
         }
-        return QOfficeRoom.officeRoom.name.containsIgnoreCase(keyword)
-                .or(QOfficeRoom.officeRoom.office.name.containsIgnoreCase(keyword));
+        return QRoom.room.name.containsIgnoreCase(keyword)
+                .or(QRoom.room.office.name.containsIgnoreCase(keyword));
     }
 
     /**
@@ -164,18 +164,18 @@ public class OfficeRoomRepositoryCustomImpl implements OfficeRoomRepositoryCusto
     }
 
     private BooleanExpression priceGoe(java.math.BigDecimal minPrice) {
-        return minPrice != null ? QOfficeRoom.officeRoom.price.goe(minPrice) : null;
+        return minPrice != null ? QRoom.room.price.goe(minPrice) : null;
     }
 
     private BooleanExpression priceLoe(java.math.BigDecimal maxPrice) {
-        return maxPrice != null ? QOfficeRoom.officeRoom.price.loe(maxPrice) : null;
+        return maxPrice != null ? QRoom.room.price.loe(maxPrice) : null;
     }
 
     /**
      * 정렬 조건 처리 (Distance, Price, Rating, Capacity)
      */
-    private OrderSpecifier<?> getOrderSpecifier(OfficeRoomSearchCondition condition,
-            QOfficeRoom room, QOffice office, QReview review) {
+    private OrderSpecifier<?> getOrderSpecifier(RoomSearchCondition condition,
+            QRoom room, QOffice office, QReview review) {
         String sortBy = condition.getSortBy();
         if (!StringUtils.hasText(sortBy)) {
             return room.id.desc(); // Default sort

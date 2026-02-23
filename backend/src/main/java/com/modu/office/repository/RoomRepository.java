@@ -1,6 +1,6 @@
 package com.modu.office.repository;
 
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.enums.RoomStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * OfficeRoom 엔티티에 대한 데이터 액세스 레포지토리
+ * Room 엔티티에 대한 데이터 액세스 레포지토리
  */
-import com.modu.office.repository.custom.OfficeRoomRepositoryCustom;
+import com.modu.office.repository.custom.RoomRepositoryCustom;
 
 /**
- * OfficeRoom 엔티티에 대한 데이터 액세스 레포지토리
+ * Room 엔티티에 대한 데이터 액세스 레포지토리
  */
 @Repository
-public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, OfficeRoomRepositoryCustom {
+public interface RoomRepository extends JpaRepository<Room, Long>, RoomRepositoryCustom {
 
         /**
          * 특정 지점의 모든 회의실 조회
@@ -27,7 +27,7 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          */
         @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "roomFacilities",
                         "roomFacilities.facility" })
-        List<OfficeRoom> findByOfficeId(Long officeId);
+        List<Room> findByOfficeId(Long officeId);
 
         /**
          * 지점 ID와 회의실 코드로 회의실 찾기 (유니크 제약조건 활용)
@@ -36,7 +36,7 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          * @param roomCode 회의실 코드
          * @return 해당 회의실 (Optional)
          */
-        Optional<OfficeRoom> findByOfficeIdAndRoomCode(Long officeId, String roomCode);
+        Optional<Room> findByOfficeIdAndRoomCode(Long officeId, String roomCode);
 
         /**
          * 특정 지점에서 상태별로 회의실 조회
@@ -47,7 +47,7 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          */
         @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "roomFacilities",
                         "roomFacilities.facility" })
-        List<OfficeRoom> findByOfficeIdAndStatus(Long officeId, RoomStatus status);
+        List<Room> findByOfficeIdAndStatus(Long officeId, RoomStatus status);
 
         /**
          * 특정 지점에서 최소 수용 인원 이상인 회의실 조회
@@ -58,7 +58,7 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          */
         @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "roomFacilities",
                         "roomFacilities.facility" })
-        List<OfficeRoom> findByOfficeIdAndCapacityGreaterThanEqual(Long officeId, Integer capacity);
+        List<Room> findByOfficeIdAndCapacityGreaterThanEqual(Long officeId, Integer capacity);
 
         /**
          * 특정 지점에서 지정된 모든 시설을 보유한 회의실 조회 (AND 검색)
@@ -72,14 +72,14 @@ public interface OfficeRoomRepository extends JpaRepository<OfficeRoom, Long>, O
          * @return 모든 시설을 보유한 회의실 목록
          */
         @org.springframework.data.jpa.repository.Query("""
-                        SELECT DISTINCT r FROM OfficeRoom r
-                        JOIN OfficeRoomFacility orf ON orf.room.id = r.id
+                        SELECT DISTINCT r FROM Room r
+                        JOIN RoomFacility orf ON orf.room.id = r.id
                         WHERE r.office.id = :officeId
                         AND orf.facility.id IN :facilityIds
                         GROUP BY r.id
                         HAVING COUNT(DISTINCT orf.facility.id) = :facilityCount
                         """)
-        List<OfficeRoom> findByOfficeIdAndFacilityIdsContainingAll(
+        List<Room> findByOfficeIdAndFacilityIdsContainingAll(
                         @org.springframework.data.repository.query.Param("officeId") Long officeId,
                         @org.springframework.data.repository.query.Param("facilityIds") List<Long> facilityIds,
                         @org.springframework.data.repository.query.Param("facilityCount") long facilityCount);

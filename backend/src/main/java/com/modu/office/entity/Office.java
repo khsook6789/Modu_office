@@ -61,7 +61,7 @@ public class Office extends BaseEntity {
 
     @org.hibernate.annotations.BatchSize(size = 100)
     @OneToMany(mappedBy = "office", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OfficeRoom> rooms = new ArrayList<>();
+    private List<Room> rooms = new ArrayList<>();
 
     @Builder
     public Office(String name, String location, Double latitude, Double longitude, LocalTime openTime,
@@ -76,7 +76,7 @@ public class Office extends BaseEntity {
         this.ownerUser = ownerUser;
     }
 
-    public void addRoom(OfficeRoom room) {
+    public void addRoom(Room room) {
         this.rooms.add(room);
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Getter
 @Builder
-public class OfficeRoomSearchCondition {
+public class RoomSearchCondition {
 
     // 1. 위치 기반 검색 (Optional)
     private Double lat; // 사용자 위도
