@@ -29,7 +29,7 @@ public class FacilityReport extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_id", nullable = false)
-    private OfficeRoom room;
+    private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "facility_id", nullable = false)
@@ -46,7 +46,7 @@ public class FacilityReport extends BaseEntity {
     private ReportStatus status = ReportStatus.REPORTED;
 
     @Builder
-    public FacilityReport(Reservation reservation, OfficeRoom room, Facility facility, ReportIssueType issueType) {
+    public FacilityReport(Reservation reservation, Room room, Facility facility, ReportIssueType issueType) {
         this.reservation = reservation;
         this.room = room;
         this.facility = facility;

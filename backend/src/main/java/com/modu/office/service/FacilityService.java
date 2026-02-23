@@ -4,7 +4,7 @@ import com.modu.office.dto.request.FacilityRequest;
 import com.modu.office.dto.response.FacilityResponse;
 import com.modu.office.entity.Facility;
 import com.modu.office.repository.FacilityRepository;
-import com.modu.office.repository.OfficeRoomFacilityRepository;
+import com.modu.office.repository.RoomFacilityRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,27 +22,27 @@ import java.util.stream.Collectors;
 public class FacilityService {
 
     private final FacilityRepository facilityRepository;
-    private final OfficeRoomFacilityRepository officeRoomFacilityRepository;
+    private final RoomFacilityRepository roomFacilityRepository;
 
     /**
      * 새 시설 생성
      * 
      * @param request 시설 생성 요청
      * @return 생성된 시설 정보
-     * @throws IllegalArgumentException 중복된 시설 코드(name)인 경우
+     * @throws IllegalArgumentException 중복된 시설 코드인 경우
      */
     @Transactional
     public FacilityResponse createFacility(FacilityRequest request) {
         java.util.Objects.requireNonNull(request, "요청 정보는 필수입니다.");
 
         // 중복 검증
-        if (facilityRepository.existsByName(request.getName())) {
-            throw new IllegalArgumentException("이미 존재하는 시설 코드입니다: " + request.getName());
+        if (facilityRepository.existsByFacilityCode(request.getFacilityCode())) {
+            throw new IllegalArgumentException("이미 존재하는 시설 코드입니다: " + request.getFacilityCode());
         }
 
         Facility facility = Facility.builder()
-                .name(request.getName())
-                .label(request.getLabel())
+                .facilityCode(request.getFacilityCode())
+                .facilityName(request.getFacilityName())
                 .isActive(request.getIsActive())
                 .build();
 
@@ -85,12 +85,13 @@ public class FacilityService {
         Facility facility = facilityRepository.findById(java.util.Objects.requireNonNull(id, "시설 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
 
-        // 다른 시설이 동일한 name을 사용하는지 확인
-        if (!facility.getName().equals(request.getName()) && facilityRepository.existsByName(request.getName())) {
-            throw new IllegalArgumentException("이미 존재하는 시설 코드입니다: " + request.getName());
+        // 다른 시설이 동일한 facilityCode를 사용하는지 확인
+        if (!facility.getFacilityCode().equals(request.getFacilityCode())
+                && facilityRepository.existsByFacilityCode(request.getFacilityCode())) {
+            throw new IllegalArgumentException("이미 존재하는 시설 코드입니다: " + request.getFacilityCode());
         }
 
-        facility.update(request.getName(), request.getLabel(), request.getIsActive());
+        facility.update(request.getFacilityCode(), request.getFacilityName(), request.getIsActive());
 
         return FacilityResponse.fromEntity(facility);
     }
@@ -98,7 +99,7 @@ public class FacilityService {
     /**
      * 시설 삭제
      * <p>
-     * 사용 중인 시설(OfficeRoomFacility에 연결된 경우)은 논리적 삭제(비활성화)를 수행하고,
+     * 사용 중인 시설(RoomFacility에 연결된 경우)은 논리적 삭제(비활성화)를 수행하고,
      * 미사용 시설은 물리적 삭제를 허용합니다.
      * </p>
      * 
@@ -112,7 +113,7 @@ public class FacilityService {
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
 
         // 사용 중인지 확인
-        boolean inUse = officeRoomFacilityRepository.existsByFacilityId(id);
+        boolean inUse = roomFacilityRepository.existsByFacilityId(id);
 
         if (inUse) {
             // 사용 중인 시설은 비활성화 처리

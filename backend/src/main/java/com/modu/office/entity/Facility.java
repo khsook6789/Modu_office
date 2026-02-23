@@ -24,14 +24,14 @@ public class Facility extends BaseEntity {
      * 시설 식별 코드 (예: "wifi", "projector")
      * DB에서 UNIQUE 제약이 설정되어 있음
      */
-    @Column(name = "name", nullable = false, length = 50, unique = true)
-    private String name;
+    @Column(name = "facility_code", nullable = false, length = 50, unique = true)
+    private String facilityCode;
 
     /**
      * 사용자에게 표시할 시설명 (예: "무선 인터넷", "빔 프로젝터")
      */
-    @Column(name = "label", nullable = false, length = 100)
-    private String label;
+    @Column(name = "facility_name", nullable = false, length = 100)
+    private String facilityName;
 
     /**
      * 시설 활성화 여부
@@ -41,9 +41,9 @@ public class Facility extends BaseEntity {
     private Boolean isActive = true;
 
     @Builder
-    public Facility(String name, String label, Boolean isActive) {
-        this.name = name;
-        this.label = label;
+    public Facility(String facilityCode, String facilityName, Boolean isActive) {
+        this.facilityCode = facilityCode;
+        this.facilityName = facilityName;
         this.isActive = isActive != null ? isActive : true;
     }
 
@@ -64,13 +64,13 @@ public class Facility extends BaseEntity {
     /**
      * 시설 정보 수정
      * 
-     * @param name     시설 식별 코드
-     * @param label    표시명
-     * @param isActive 활성화 여부
+     * @param facilityCode 시설 식별 코드
+     * @param facilityName 표시명
+     * @param isActive     활성화 여부
      */
-    public void update(String name, String label, Boolean isActive) {
-        this.name = name;
-        this.label = label;
+    public void update(String facilityCode, String facilityName, Boolean isActive) {
+        this.facilityCode = facilityCode;
+        this.facilityName = facilityName;
         this.isActive = isActive;
     }
 }
