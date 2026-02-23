@@ -48,6 +48,10 @@ public class Office extends BaseEntity {
     private LocalTime closeTime;
 
     @Setter
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Setter
     @Column(name = "open_days")
     private Short[] openDays;
 

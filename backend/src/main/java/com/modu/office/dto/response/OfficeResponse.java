@@ -20,6 +20,7 @@ public class OfficeResponse {
 
     private Long id;
     private String name;
+    private String description;
     private String location;
     private Double latitude;
     private Double longitude;
@@ -36,6 +37,7 @@ public class OfficeResponse {
         return OfficeResponse.builder()
                 .id(office.getId())
                 .name(office.getName())
+                .description(office.getDescription())
                 .location(office.getLocation())
                 .latitude(office.getLatitude())
                 .longitude(office.getLongitude())
