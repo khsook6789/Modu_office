@@ -28,7 +28,7 @@ public class AppUser extends BaseEntity implements org.springframework.security.
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private UserRole role = UserRole.CUSTOMER;
+    private UserRole role = UserRole.USER;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "approval_status")
@@ -38,7 +38,7 @@ public class AppUser extends BaseEntity implements org.springframework.security.
     public AppUser(Account account, String name, UserRole role, OperatorApprovalStatus approvalStatus) {
         this.account = account;
         this.name = name;
-        this.role = role != null ? role : UserRole.CUSTOMER;
+        this.role = role != null ? role : UserRole.USER;
         this.approvalStatus = approvalStatus;
     }
 

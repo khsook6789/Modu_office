@@ -15,20 +15,20 @@ import java.util.List;
 /**
  * 관리자 전용 사용자 관리 컨트롤러
  * <p>
- * PLATFORM_ADMIN 권한만 접근 가능합니다.
+ * ADMIN 권한만 접근 가능합니다.
  * 사용자 목록 조회, 계정 정지/해제를 처리할 수 있습니다.
  * </p>
  */
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('PLATFORM_ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
     /**
-     * 전체 사용자 목록 조회 (PLATFORM_ADMIN 제외)
+     * 전체 사용자 목록 조회 (ADMIN 제외)
      *
      * @return 사용자 목록
      */

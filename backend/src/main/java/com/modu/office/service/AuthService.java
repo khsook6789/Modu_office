@@ -48,7 +48,7 @@ public class AuthService {
                 AppUser appUser = AppUser.builder()
                                 .account(account)
                                 .name(request.getName())
-                                .role(UserRole.CUSTOMER)
+                                .role(UserRole.USER)
                                 .build();
                 appUserRepository.save(java.util.Objects.requireNonNull(appUser));
         }
@@ -67,7 +67,7 @@ public class AuthService {
                 AppUser appUser = AppUser.builder()
                                 .account(account)
                                 .name(request.getName())
-                                .role(UserRole.OPERATOR)
+                                .role(UserRole.MANAGER)
                                 .approvalStatus(OperatorApprovalStatus.PENDING)
                                 .build();
                 appUserRepository.save(java.util.Objects.requireNonNull(appUser));
@@ -84,7 +84,7 @@ public class AuthService {
                 AppUser appUser = appUserRepository.findByAccount(account)
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
-                if (appUser.getRole() != UserRole.CUSTOMER) {
+                if (appUser.getRole() != UserRole.USER) {
                         throw new IllegalArgumentException("Not authorized as Customer");
                 }
 
@@ -102,7 +102,7 @@ public class AuthService {
                 AppUser appUser = appUserRepository.findByAccount(account)
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
-                if (appUser.getRole() != UserRole.OPERATOR) {
+                if (appUser.getRole() != UserRole.MANAGER) {
                         throw new IllegalArgumentException("Not authorized as Operator");
                 }
 
@@ -124,7 +124,7 @@ public class AuthService {
                 AppUser appUser = appUserRepository.findByAccount(account)
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
-                if (appUser.getRole() != UserRole.PLATFORM_ADMIN) {
+                if (appUser.getRole() != UserRole.ADMIN) {
                         throw new IllegalArgumentException("Not authorized as Admin");
                 }
 

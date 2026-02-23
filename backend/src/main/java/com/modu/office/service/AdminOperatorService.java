@@ -27,7 +27,7 @@ public class AdminOperatorService {
     @Transactional(readOnly = true)
     public List<OperatorApprovalResponse> getPendingOperators() {
         List<AppUser> pendingOperators = appUserRepository
-                .findByRoleAndApprovalStatus(UserRole.OPERATOR, OperatorApprovalStatus.PENDING);
+                .findByRoleAndApprovalStatus(UserRole.MANAGER, OperatorApprovalStatus.PENDING);
 
         return pendingOperators.stream()
                 .map(OperatorApprovalResponse::from)
@@ -52,7 +52,7 @@ public class AdminOperatorService {
     }
 
     private void validateOperatorPending(AppUser appUser) {
-        if (appUser.getRole() != UserRole.OPERATOR) {
+        if (appUser.getRole() != UserRole.MANAGER) {
             throw new IllegalArgumentException("Operator 역할의 사용자만 승인할 수 있습니다.");
         }
         if (appUser.getApprovalStatus() != OperatorApprovalStatus.PENDING) {

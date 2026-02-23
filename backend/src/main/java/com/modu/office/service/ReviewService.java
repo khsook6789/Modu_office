@@ -92,7 +92,7 @@ public class ReviewService {
 
         // 작성자 본인 확인 또는 관리자 확인 (유해 리뷰 등 강제 삭제 용도)
         boolean isOwner = review.getAuthorUser().getId().equals(user.getId());
-        boolean isAdmin = user.getRole() == com.modu.office.entity.enums.UserRole.PLATFORM_ADMIN;
+        boolean isAdmin = user.getRole() == com.modu.office.entity.enums.UserRole.ADMIN;
 
         if (!isOwner && !isAdmin) {
             throw new AccessDeniedException("본인이 작성한 후기만 삭제할 수 있습니다. (또는 관리자 권한 필요)");

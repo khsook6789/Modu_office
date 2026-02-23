@@ -13,14 +13,14 @@ import java.util.List;
 /**
  * 관리자 전용 Operator 승인 관리 컨트롤러
  * <p>
- * PLATFORM_ADMIN 권한만 접근 가능합니다.
+ * ADMIN 권한만 접근 가능합니다.
  * Operator 가입 신청을 조회하고 승인 처리할 수 있습니다.
  * </p>
  */
 @RestController
 @RequestMapping("/api/admin/operators")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('PLATFORM_ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminOperatorController {
 
     private final AdminOperatorService adminOperatorService;

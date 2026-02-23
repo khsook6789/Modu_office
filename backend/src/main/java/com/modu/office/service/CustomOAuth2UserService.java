@@ -72,12 +72,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
      */
     private UserRole determineUserRole(String registrationId) {
         if (registrationId.endsWith("-operator")) {
-            return UserRole.OPERATOR;
+            return UserRole.MANAGER;
         } else if (registrationId.endsWith("-customer")) {
-            return UserRole.CUSTOMER;
+            return UserRole.USER;
         } else {
             // 기존 사용자 호환성 유지 (naver만 사용하는 경우 CUSTOMER로 간주)
-            return UserRole.CUSTOMER;
+            return UserRole.USER;
         }
     }
 
@@ -117,7 +117,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .account(savedAccount)
                             .name(oAuth2UserInfo.getName())
                             .role(userRole)
-                            .approvalStatus(userRole == UserRole.OPERATOR
+                            .approvalStatus(userRole == UserRole.MANAGER
                                     ? com.modu.office.entity.enums.OperatorApprovalStatus.PENDING
                                     : null)
                             .build();

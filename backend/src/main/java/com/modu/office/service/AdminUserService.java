@@ -24,14 +24,14 @@ public class AdminUserService {
     private final AppUserRepository appUserRepository;
 
     /**
-     * 전체 사용자 목록 조회 (PLATFORM_ADMIN 제외)
+     * 전체 사용자 목록 조회 (ADMIN 제외)
      */
     @Transactional(readOnly = true)
     public List<AdminUserResponse> getAllUsers() {
         List<AppUser> users = appUserRepository.findAll();
 
         return users.stream()
-                .filter(user -> user.getRole() != UserRole.PLATFORM_ADMIN)
+                .filter(user -> user.getRole() != UserRole.ADMIN)
                 .map(AdminUserResponse::from)
                 .collect(Collectors.toList());
     }
@@ -77,8 +77,8 @@ public class AdminUserService {
         if (targetUser.getId().equals(currentAdmin.getId())) {
             throw new IllegalArgumentException("자기 자신의 계정은 정지할 수 없습니다.");
         }
-        if (targetUser.getRole() == UserRole.PLATFORM_ADMIN) {
-            throw new IllegalArgumentException("PLATFORM_ADMIN 계정은 정지할 수 없습니다.");
+        if (targetUser.getRole() == UserRole.ADMIN) {
+            throw new IllegalArgumentException("ADMIN 계정은 정지할 수 없습니다.");
         }
         Account account = targetUser.getAccount();
         if (account.getStatus() == AccountStatus.SUSPENDED) {

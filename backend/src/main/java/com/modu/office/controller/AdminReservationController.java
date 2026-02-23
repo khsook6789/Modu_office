@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 관리자 전용 예약 관리 컨트롤러
  * <p>
- * OPERATOR 및 PLATFORM_ADMIN 권한만 접근 가능합니다.
+ * MANAGER 및 ADMIN 권한만 접근 가능합니다.
  * 다른 사용자의 예약에 대한 강제 조치를 수행할 수 있습니다.
  * </p>
  */
 @RestController
 @RequestMapping("/api/admin/reservations")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+@PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
 public class AdminReservationController {
 
     private final ReservationService reservationService;

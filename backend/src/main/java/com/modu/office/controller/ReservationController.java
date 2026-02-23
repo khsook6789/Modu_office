@@ -56,7 +56,7 @@ public class ReservationController {
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         // 일반 사용자는 본인 예약만 조회 가능하도록 강제 필터링
-        if (currentUser.getRole() == com.modu.office.entity.enums.UserRole.CUSTOMER) {
+        if (currentUser.getRole() == com.modu.office.entity.enums.UserRole.USER) {
             if (customerId != null && !customerId.equals(currentUser.getId())) {
                 throw new org.springframework.security.access.AccessDeniedException("본인의 예약만 조회할 수 있습니다.");
             }
@@ -81,11 +81,11 @@ public class ReservationController {
     /**
      * 오퍼레이터용 예약 검색 (페이징 포함)
      * <p>
-     * OPERATOR 또는 PLATFORM_ADMIN 권한 필요
+     * MANAGER 또는 ADMIN 권한 필요
      * </p>
      */
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ApiResponse<Page<ReservationResponse>>> searchReservations(
             @RequestParam(required = false) Long officeId,
             @RequestParam(required = false) String guestName,
@@ -127,7 +127,7 @@ public class ReservationController {
      * 예약 확정 (PENDING -> CONFIRMED)
      */
     @PatchMapping("/{id}/confirm")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ApiResponse<ReservationResponse>> confirmReservation(
             @PathVariable Long id,
             @AuthenticationPrincipal AppUser currentUser) {
