@@ -43,6 +43,9 @@ public class Reservation extends BaseEntity {
     @Column(name = "end_at", nullable = false)
     private LocalDateTime endAt;
 
+    @Column(name = "end_at_include_buffer_time", nullable = false)
+    private LocalDateTime endAtIncludeBufferTime;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ReservationStatus status = ReservationStatus.PENDING;
@@ -52,14 +55,16 @@ public class Reservation extends BaseEntity {
     private Long version;
 
     @Builder
-    public Reservation(String title, Office office, OfficeRoom room, AppUser customer, LocalDateTime startAt,
-            LocalDateTime endAt, ReservationStatus status) {
+    public Reservation(String title, Office office, OfficeRoom room, AppUser customer,
+            LocalDateTime startAt, LocalDateTime endAt, LocalDateTime endAtIncludeBufferTime,
+            ReservationStatus status) {
         this.title = title;
         this.office = office;
         this.room = room;
         this.customer = customer;
         this.startAt = startAt;
         this.endAt = endAt;
+        this.endAtIncludeBufferTime = endAtIncludeBufferTime;
         this.status = status != null ? status : ReservationStatus.PENDING;
     }
 
@@ -82,6 +87,13 @@ public class Reservation extends BaseEntity {
         }
         this.startAt = startAt;
         this.endAt = endAt;
+    }
+
+    /**
+     * 버퍼 타임이 포함된 종료 시간 설정 (수정용)
+     */
+    public void setEndAtIncludeBufferTime(LocalDateTime endAtIncludeBufferTime) {
+        this.endAtIncludeBufferTime = endAtIncludeBufferTime;
     }
 
     /**

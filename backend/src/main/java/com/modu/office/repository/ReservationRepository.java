@@ -86,11 +86,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Lock(LockModeType.OPTIMISTIC)
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
                         "AND r.status IN :statuses " +
-                        "AND r.endAt > :startAt AND r.startAt < :endAt")
+                        "AND r.endAtIncludeBufferTime > :startAt AND r.startAt < :endAtIncludeBufferTime")
         List<Reservation> findConflictingReservationsWithOptimisticLock(
                         @Param("roomId") Long roomId,
                         @Param("startAt") LocalDateTime startAt,
-                        @Param("endAt") LocalDateTime endAt,
+                        @Param("endAtIncludeBufferTime") LocalDateTime endAtIncludeBufferTime,
                         @Param("statuses") List<ReservationStatus> statuses);
 
         /**
@@ -100,12 +100,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
                         "AND r.id != :excludeId " +
                         "AND r.status IN :statuses " +
-                        "AND r.endAt > :startAt AND r.startAt < :endAt")
+                        "AND r.endAtIncludeBufferTime > :startAt AND r.startAt < :endAtIncludeBufferTime")
         List<Reservation> findConflictingReservationsExcludingWithOptimisticLock(
                         @Param("roomId") Long roomId,
                         @Param("excludeId") Long excludeId,
                         @Param("startAt") LocalDateTime startAt,
-                        @Param("endAt") LocalDateTime endAt,
+                        @Param("endAtIncludeBufferTime") LocalDateTime endAtIncludeBufferTime,
                         @Param("statuses") List<ReservationStatus> statuses);
 
         /**

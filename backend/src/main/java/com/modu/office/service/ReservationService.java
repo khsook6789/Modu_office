@@ -77,30 +77,33 @@ public class ReservationService {
                     .findById(java.util.Objects.requireNonNull(request.getCustomerId(), "사용자 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + request.getCustomerId()));
 
-            // 3. 회의실이 해당 지점에 속하는지 확인
-            if (!room.getOffice().getId().equals(office.getId())) {
-                throw new IllegalArgumentException("회의실이 해당 지점에 속하지 않습니다.");
-            }
-
-            // 4. 영업시간 및 휴무일 검증
+            // 3. 영업시간 및 휴무일 검증 (기존 내부 메서드 활용)
             validateBusinessHours(office, request.getStartAt(), request.getEndAt());
             validateOpenDays(office, request.getStartAt());
 
-            // 5. 낙관적 락을 사용한 시간 충돌 확인
+            // 4. 예약자 확인 및 권한 검증 (여기서는 customerRole만 확인)
+            if (customer.getRole() != UserRole.CUSTOMER) {
+                throw new IllegalArgumentException("일반 사용자만 예약할 수 있습니다.");
+            }
+
+            // 5. 정비 시간(bufferTime)을 포함한 실제 점유 종료 시간 계산
+            LocalDateTime endAtIncludeBufferTime = request.getEndAt().plusMinutes(room.getBufferTime());
+
+            // 6. 낙관적 락을 사용한 시간 충돌 확인 (bufferTime 포함 시간으로 확인)
             List<ReservationStatus> activeStatuses = Arrays.asList(
                     ReservationStatus.PENDING,
                     ReservationStatus.CONFIRMED);
             List<Reservation> conflicts = reservationRepository.findConflictingReservationsWithOptimisticLock(
                     room.getId(),
                     request.getStartAt(),
-                    request.getEndAt(),
+                    endAtIncludeBufferTime,
                     activeStatuses);
 
             if (!conflicts.isEmpty()) {
                 throw new IllegalStateException("해당 시간대에 이미 예약이 존재합니다.");
             }
 
-            // 6. 예약 생성
+            // 7. 예약 생성
             Reservation reservation = Reservation.builder()
                     .title(request.getTitle())
                     .office(office)
@@ -108,6 +111,7 @@ public class ReservationService {
                     .customer(customer)
                     .startAt(request.getStartAt())
                     .endAt(request.getEndAt())
+                    .endAtIncludeBufferTime(endAtIncludeBufferTime)
                     .status(ReservationStatus.PENDING)
                     .build();
 
@@ -228,7 +232,11 @@ public class ReservationService {
                 validateBusinessHours(reservation.getOffice(), request.getStartAt(), request.getEndAt());
                 validateOpenDays(reservation.getOffice(), request.getStartAt());
 
-                // 낙관적 락을 사용한 시간 충돌 확인 (현재 예약 제외)
+                // 정비 시간(bufferTime)을 포함한 실제 점유 종료 시간 계산
+                LocalDateTime endAtIncludeBufferTime = request.getEndAt()
+                        .plusMinutes(reservation.getRoom().getBufferTime());
+
+                // 낙관적 락을 사용한 시간 충돌 확인 (현재 예약 제외, bufferTime 포함 시간)
                 List<ReservationStatus> activeStatuses = Arrays.asList(
                         ReservationStatus.PENDING,
                         ReservationStatus.CONFIRMED);
@@ -237,7 +245,7 @@ public class ReservationService {
                                 reservation.getRoom().getId(),
                                 id,
                                 request.getStartAt(),
-                                request.getEndAt(),
+                                endAtIncludeBufferTime,
                                 activeStatuses);
 
                 if (!conflicts.isEmpty()) {
@@ -245,6 +253,7 @@ public class ReservationService {
                 }
 
                 reservation.updateTimeRange(request.getStartAt(), request.getEndAt());
+                reservation.setEndAtIncludeBufferTime(endAtIncludeBufferTime);
             }
 
             // 상태 수정 (직접 setter 사용 - 일반적인 업데이트용)
