@@ -339,6 +339,7 @@ public class ReservationService {
 
     /**
      * 예약 취소 (soft delete)
+     * dead code : 목요일 회의 후 삭제 요망
      */
     @Transactional
     public void cancelReservation(Long id) {
@@ -384,6 +385,13 @@ public class ReservationService {
 
         if (reservation.isCancelled()) {
             throw new IllegalStateException("이미 취소된 예약입니다.");
+        }
+
+        // MANAGER는 자신이 소유한 지점의 예약만 취소 가능 (confirmReservation과 동일한 기준)
+        if (adminUser.getRole() == UserRole.MANAGER) {
+            if (!reservation.getOffice().getOwnerUser().getId().equals(adminUser.getId())) {
+                throw new AccessDeniedException("담당 지점의 예약만 취소할 수 있습니다.");
+            }
         }
 
         // 변경 전 데이터 캡처
