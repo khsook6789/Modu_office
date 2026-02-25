@@ -38,6 +38,7 @@ public class OfficeService {
         Office.OfficeBuilder officeBuilder = Office.builder()
                 .name(request.getName())
                 .location(request.getLocation())
+                .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .openTime(request.getOpenTime())
                 .closeTime(request.getCloseTime())
