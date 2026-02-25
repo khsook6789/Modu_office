@@ -65,7 +65,9 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/rooms/**")
                         .hasAnyRole("ADMIN", "MANAGER")
 
-                        // 관리자 전용 - ADMIN only
+                        // 예약 관리 - MANAGER도 force-cancel 가능 (AdminReservationController 설계 반영)
+                        .requestMatchers("/api/admin/reservations/**").hasAnyRole("ADMIN", "MANAGER")
+                        // 나머지 관리자 전용 - ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated())
