@@ -103,6 +103,11 @@ export default function AppRouter() {
                 <OfficeFormPage />
               </ProtectedRoute>
             } />
+            <Route path="/office/:id/edit" element={
+              <ProtectedRoute role="MANAGER">
+                <OfficeFormPage />
+              </ProtectedRoute>
+            } />
             <Route path="/office/:id/manage" element={
               <ProtectedRoute role="MANAGER">
                 <RoomManagementPage />

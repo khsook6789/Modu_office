@@ -26,13 +26,13 @@ export default function LoginPage() {
                 id: String(response.user.id),
                 name: response.user.name,
                 email: response.user.email,
-                role: response.user.role as 'USER' | 'MANAGER' | 'ADMIN'
+                role: response.user.role
             };
 
             login(userData, response.accessToken);
-            
-            // Store refresh token if needed, or handle it in client.ts interceptors
-            localStorage.setItem('refreshToken', response.refreshToken);
+            if (response.refreshToken) {
+                localStorage.setItem('refreshToken', response.refreshToken);
+            }
 
             navigate('/rooms');
         } catch (err: any) {

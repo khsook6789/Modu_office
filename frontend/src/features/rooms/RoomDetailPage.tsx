@@ -1,4 +1,5 @@
 import { roomApi } from './api/room.api';
+import { client } from '../../api/client';
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { reviewApi, type Review } from '../reviews/api/review.api';
@@ -21,6 +22,7 @@ export default function RoomDetailPage() {
 
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loadingReviews, setLoadingReviews] = useState(false);
+    const [completedReservationId, setCompletedReservationId] = useState<number | null>(null);
 
     const loadReviews = async () => {
         setLoadingReviews(true);
@@ -59,6 +61,16 @@ export default function RoomDetailPage() {
 
         fetchRoom();
         loadReviews();
+        // 해당 방의 완료된 예약 조회 (리뷰 작성용)
+        if (user?.id) {
+            client.get<any>(`/reservations?customerId=${user.id}&roomId=${roomId}`)
+                .then((res: any) => {
+                    const list = res.data?.content ?? res.data ?? [];
+                    const completed = list.find((r: any) => r.roomId === roomId && r.status === 'CONFIRMED');
+                    if (completed) setCompletedReservationId(completed.id);
+                })
+                .catch(() => {});
+        }
     }, [roomId, user]);
 
     if (loadingRoom) {
@@ -78,20 +90,18 @@ export default function RoomDetailPage() {
 
         try {
             await reviewApi.createReview({
-                roomId,
-                userId: user.id,
-                userName: user.name,
+                reservationId: completedReservationId!,
                 rating,
-                comment,
+                content: comment,
             });
-            await loadReviews(); // Reload to show new review
+            await loadReviews();
         } catch (error) {
             console.error("Failed to submit review", error);
             alert('리뷰 등록에 실패했습니다.');
         }
     };
 
-    const handleDeleteReview = async (reviewId: string) => {
+    const handleDeleteReview = async (reviewId: number) => {
         if (window.confirm('리뷰를 삭제하시겠습니까?')) {
             try {
                 await reviewApi.deleteReview(reviewId);
@@ -144,7 +154,7 @@ export default function RoomDetailPage() {
                     <div className="info-section">
                         <h2 className="section-title">시설 및 장비</h2>
                         <div className="equipment-list">
-                            {room.equipment.map((item, idx) => (
+                            {room.equipment.map((item: string, idx: number) => (
                                 <span key={idx} className="badge" style={{ padding: '0.5rem 0.75rem', fontSize: '0.9rem' }}>
                                     ✅ {item}
                                 </span>
@@ -157,7 +167,13 @@ export default function RoomDetailPage() {
                         <h2 className="section-title mb-md">이용 후기</h2>
 
                         {user ? (
-                            <ReviewForm onSubmit={handleReviewSubmit} />
+                            completedReservationId ? (
+                                <ReviewForm onSubmit={handleReviewSubmit} />
+                            ) : (
+                                <div className="bg-gray-50 p-md rounded mb-lg text-center text-sm">
+                                    <p className="text-muted">이 회의실을 이용한 예약(확정 완료)이 있어야 리뷰를 작성할 수 있습니다.</p>
+                                </div>
+                            )
                         ) : (
                             <div className="bg-gray-50 p-md rounded mb-lg text-center text-sm">
                                 <p className="text-muted mb-xs">후기를 작성하려면 로그인이 필요합니다.</p>

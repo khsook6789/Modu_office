@@ -49,8 +49,8 @@ function RoomsListPageContent() {
     });
 
     // Filter rooms by selected office AND availability
-    const filteredRooms = rooms.filter(room => {
-        const matchesOffice = selectedOfficeId ? room.officeId === selectedOfficeId : true;
+    const filteredRooms = !selectedOfficeId ? [] : rooms.filter(room => {
+        const matchesOffice = room.officeId === selectedOfficeId;
         const matchesAvailability = filter === 'ALL' ? true : room.isAvailable;
         return matchesOffice && matchesAvailability;
     });
@@ -167,20 +167,22 @@ function RoomsListPageContent() {
                 )}
             </div>
 
-            <div className="filters-bar">
-                <button
-                    className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-                    onClick={() => setFilter('ALL')}
-                >
-                    전체
-                </button>
-                <button
-                    className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
-                    onClick={() => setFilter('AVAILABLE')}
-                >
-                    예약 가능
-                </button>
-            </div>
+            {!!selectedOfficeId && (
+                <div className="filters-bar">
+                    <button
+                        className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
+                        onClick={() => setFilter('ALL')}
+                    >
+                        전체
+                    </button>
+                    <button
+                        className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
+                        onClick={() => setFilter('AVAILABLE')}
+                    >
+                        예약 가능
+                    </button>
+                </div>
+            )}
 
             <div className="rooms-grid">
                 {filteredRooms.map(room => (
@@ -191,7 +193,7 @@ function RoomsListPageContent() {
                         onDelete={deleteRoom}
                     />
                 ))}
-                {filteredRooms.length === 0 && selectedOfficeId && (
+                {filteredRooms.length === 0 && !!selectedOfficeId && (
                     <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
                         이 오피스에는 아직 회의실이 없습니다.<br />
                         {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && '회의실을 추가해보세요!'}

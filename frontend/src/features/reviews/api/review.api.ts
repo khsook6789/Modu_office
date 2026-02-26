@@ -1,57 +1,50 @@
+import { client } from '../../../api/client';
 
 export interface Review {
-    id: string;
+    id: number;
     roomId: number;
-    userId: string;
+    userId: number;
     userName: string;
     rating: number; // 1-5
     comment: string;
     createdAt: string;
 }
 
-const REVIEW_STORAGE_KEY = 'reviews';
-
-const getStoredReviews = (): Review[] => {
-    const stored = localStorage.getItem(REVIEW_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-};
+export interface CreateReviewRequest {
+    reservationId: number;
+    rating: number;
+    content: string;  // 백엔드 필드명: content (comment 아님)
+}
 
 export const reviewApi = {
-    getReviewsByRoomId: (roomId: number): Promise<Review[]> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const reviews = getStoredReviews();
-                const roomReviews = reviews.filter(r => r.roomId === roomId);
-                // Sort by date desc
-                roomReviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-                resolve(roomReviews);
-            }, 300);
-        });
+    // 특정 회의실 리뷰 목록 조회
+    getReviewsByRoomId: async (roomId: number): Promise<Review[]> => {
+        const response = await client.get<any>(`/reviews/room/${roomId}?size=100`);
+        // 페이지 응답 또는 리스트 응답 모두 처리
+        const raw = response.data;
+        if (Array.isArray(raw)) return raw;
+        if (raw?.content) return raw.content;
+        return [];
     },
 
-    createReview: (data: Omit<Review, 'id' | 'createdAt'>): Promise<Review> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const reviews = getStoredReviews();
-                const newReview = {
-                    ...data,
-                    id: Date.now().toString(),
-                    createdAt: new Date().toISOString()
-                };
-                localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify([...reviews, newReview]));
-                resolve(newReview);
-            }, 500);
+    // 리뷰 작성
+    createReview: async (data: CreateReviewRequest): Promise<Review> => {
+        const response = await client.post<Review>(`/reviews`, {
+            reservationId: data.reservationId,
+            rating: data.rating,
+            content: data.content,
         });
+        return response as any;
     },
 
-    deleteReview: (reviewId: string): Promise<void> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const reviews = getStoredReviews();
-                const newReviews = reviews.filter(r => r.id !== reviewId);
-                localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(newReviews));
-                resolve();
-            }, 300);
-        });
-    }
+    // 내 리뷰 목록
+    getMyReviews: async (): Promise<Review[]> => {
+        const response = await client.get<Review[]>('/reviews/me');
+        return response as any;
+    },
+
+    // 리뷰 삭제
+    deleteReview: async (reviewId: number): Promise<void> => {
+        await client.delete(`/reviews/${reviewId}`);
+    },
 };
