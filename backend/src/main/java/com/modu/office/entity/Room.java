@@ -90,6 +90,7 @@ public class Room extends BaseEntity {
     public Room(Office office, String name, String roomCode, Integer floor, RoomStatus status, Integer capacity,
             String category, BigDecimal price) {
         this.office = office;
+        this.officeId = office != null ? office.getId() : null;
         this.name = name;
         this.roomCode = roomCode;
         this.floor = floor;

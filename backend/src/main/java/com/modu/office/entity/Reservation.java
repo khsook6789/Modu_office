@@ -34,8 +34,8 @@ public class Reservation extends BaseEntity {
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private AppUser customer;
+    @JoinColumn(name = "customer_id", nullable = false) // Reverted from user_id
+    private AppUser user;
 
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt;
@@ -55,13 +55,13 @@ public class Reservation extends BaseEntity {
     private Long version;
 
     @Builder
-    public Reservation(String title, Office office, Room room, AppUser customer,
+    public Reservation(String title, Office office, Room room, AppUser user,
             LocalDateTime startAt, LocalDateTime endAt, LocalDateTime endAtIncludeBufferTime,
             ReservationStatus status) {
         this.title = title;
         this.office = office;
         this.room = room;
-        this.customer = customer;
+        this.user = user;
         this.startAt = startAt;
         this.endAt = endAt;
         this.endAtIncludeBufferTime = endAtIncludeBufferTime;

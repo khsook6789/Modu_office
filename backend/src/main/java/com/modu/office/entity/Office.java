@@ -56,8 +56,8 @@ public class Office extends BaseEntity {
     private Short[] openDays;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_user_id", nullable = false)
-    private AppUser ownerUser;
+    @JoinColumn(name = "owner_user_id", nullable = false) // Reverted from manager_id
+    private AppUser manager;
 
     @org.hibernate.annotations.BatchSize(size = 100)
     @OneToMany(mappedBy = "office", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -65,7 +65,7 @@ public class Office extends BaseEntity {
 
     @Builder
     public Office(String name, String location, Double latitude, Double longitude, LocalTime openTime,
-            LocalTime closeTime, Short[] openDays, AppUser ownerUser) {
+            LocalTime closeTime, Short[] openDays, AppUser manager) {
         this.name = name;
         this.location = location;
         this.latitude = latitude;
@@ -73,7 +73,7 @@ public class Office extends BaseEntity {
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.openDays = openDays;
-        this.ownerUser = ownerUser;
+        this.manager = manager;
     }
 
     public void addRoom(Room room) {

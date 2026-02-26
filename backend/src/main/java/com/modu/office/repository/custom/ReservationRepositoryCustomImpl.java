@@ -28,7 +28,7 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
             LocalDate endDate, Pageable pageable) {
         List<Reservation> content = queryFactory
                 .selectFrom(reservation)
-                .leftJoin(reservation.customer, appUser).fetchJoin()
+                .leftJoin(reservation.user, appUser).fetchJoin()
                 .leftJoin(reservation.room).fetchJoin()
                 .leftJoin(reservation.office).fetchJoin()
                 .where(
@@ -44,7 +44,7 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
         JPAQuery<Long> countQuery = queryFactory
                 .select(reservation.count())
                 .from(reservation)
-                .leftJoin(reservation.customer, appUser)
+                .leftJoin(reservation.user, appUser)
                 .where(
                         officeIdEq(officeId),
                         guestNameContains(guestName),
@@ -59,7 +59,7 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
     }
 
     private BooleanExpression guestNameContains(String guestName) {
-        return StringUtils.hasText(guestName) ? reservation.customer.name.contains(guestName) : null;
+        return StringUtils.hasText(guestName) ? reservation.user.name.contains(guestName) : null;
     }
 
     private BooleanExpression statusEq(ReservationStatus status) {
