@@ -25,7 +25,7 @@ public enum ErrorCode {
 
     // 비즈니스 로직 에러 - 오피스
     OFFICE_NOT_AVAILABLE(400, "O001", "이용 불가능한 오피스입니다"),
-    OFFICE_ROOM_NOT_AVAILABLE(400, "O002", "이용 불가능한 회의실입니다"),
+    ROOM_NOT_AVAILABLE(400, "O002", "이용 불가능한 회의실입니다"),
 
     // 서버 에러 (5xx)
     INTERNAL_SERVER_ERROR(500, "S001", "서버 내부 오류가 발생했습니다");

@@ -33,8 +33,8 @@ public class ReservationLogConverter {
         data.put("officeName", reservation.getOffice().getName());
         data.put("roomId", reservation.getRoom().getId());
         data.put("roomCode", reservation.getRoom().getRoomCode());
-        data.put("customerId", reservation.getCustomer().getId());
-        data.put("customerName", reservation.getCustomer().getName());
+        data.put("userId", reservation.getUser().getId());
+        data.put("userName", reservation.getUser().getName());
         data.put("startAt", reservation.getStartAt().toString());
         data.put("endAt", reservation.getEndAt().toString());
         data.put("status", reservation.getStatus().name());

@@ -71,12 +71,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
      * registrationId로부터 사용자 역할 판단
      */
     private UserRole determineUserRole(String registrationId) {
-        if (registrationId.endsWith("-operator")) {
+        if (registrationId.endsWith("-manager")) {
             return UserRole.MANAGER;
-        } else if (registrationId.endsWith("-customer")) {
+        } else if (registrationId.endsWith("-user")) {
             return UserRole.USER;
         } else {
-            // 기존 사용자 호환성 유지 (naver만 사용하는 경우 CUSTOMER로 간주)
+            // 기존 사용자 호환성 유지 (naver만 사용하는 경우 USER로 간주)
             return UserRole.USER;
         }
     }
@@ -85,8 +85,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
      * OAuth2 제공자별 사용자 정보 객체 생성
      */
     private OAuth2UserInfo getOAuth2UserInfo(String registrationId, java.util.Map<String, Object> attributes) {
-        // registrationId에서 role 접미사 제거 (naver-customer, naver-operator -> naver)
-        String provider = registrationId.replace("-customer", "").replace("-operator", "");
+        // registrationId에서 role 접미사 제거 (naver-user, naver-manager -> naver)
+        String provider = registrationId.replace("-user", "").replace("-manager", "");
 
         if ("naver".equals(provider)) {
             return new NaverOAuth2UserInfo(attributes);
@@ -118,7 +118,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .name(oAuth2UserInfo.getName())
                             .role(userRole)
                             .approvalStatus(userRole == UserRole.MANAGER
-                                    ? com.modu.office.entity.enums.OperatorApprovalStatus.PENDING
+                                    ? com.modu.office.entity.enums.ManagerApprovalStatus.PENDING
                                     : null)
                             .build();
                     appUserRepository.save(java.util.Objects.requireNonNull(newAppUser));

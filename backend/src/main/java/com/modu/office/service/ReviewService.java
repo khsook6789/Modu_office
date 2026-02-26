@@ -35,7 +35,7 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
 
         // 예약자 본인 확인
-        if (!reservation.getCustomer().getId().equals(user.getId())) {
+        if (!reservation.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("본인의 예약에만 후기를 작성할 수 있습니다.");
         }
 
@@ -56,7 +56,7 @@ public class ReviewService {
 
         Review review = Review.builder()
                 .reservation(reservation)
-                .authorUser(user)
+                .author(user)
                 .rating(request.getRating())
                 .content(request.getContent())
                 .build();
@@ -71,7 +71,7 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 후기입니다."));
 
         // 작성자 본인 확인
-        if (!review.getAuthorUser().getId().equals(user.getId())) {
+        if (!review.getAuthor().getId().equals(user.getId())) {
             throw new AccessDeniedException("본인이 작성한 후기만 수정할 수 있습니다.");
         }
 
@@ -91,7 +91,7 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 후기입니다."));
 
         // 작성자 본인 확인 또는 관리자 확인 (유해 리뷰 등 강제 삭제 용도)
-        boolean isOwner = review.getAuthorUser().getId().equals(user.getId());
+        boolean isOwner = review.getAuthor().getId().equals(user.getId());
         boolean isAdmin = user.getRole() == com.modu.office.entity.enums.UserRole.ADMIN;
 
         if (!isOwner && !isAdmin) {
@@ -107,7 +107,7 @@ public class ReviewService {
     }
 
     public List<ReviewResponse> getMyReviews(AppUser user) {
-        return reviewRepository.findByAuthorUserId(user.getId()).stream()
+        return reviewRepository.findByAuthorId(user.getId()).stream()
                 .map(ReviewResponse::fromEntity)
                 .collect(Collectors.toList());
     }

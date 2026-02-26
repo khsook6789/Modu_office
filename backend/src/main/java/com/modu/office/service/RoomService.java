@@ -51,7 +51,7 @@ public class RoomService {
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, office);
+        validateManagerAccess(currentUser, office);
 
         Room room = Room.builder()
                 .office(office)
@@ -149,7 +149,7 @@ public class RoomService {
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, room.getOffice());
+        validateManagerAccess(currentUser, room.getOffice());
 
         // Service 레이어에서 직접 필드 업데이트
         room.setName(request.getName());
@@ -181,7 +181,7 @@ public class RoomService {
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, room.getOffice());
+        validateManagerAccess(currentUser, room.getOffice());
 
         // 활성 예약이 있는지 확인
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
@@ -233,7 +233,7 @@ public class RoomService {
         // 1. 지점 존재 및 소유권 확인
         Office office = officeRepository.findById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId));
-        validateOperatorAccess(currentUser, office);
+        validateManagerAccess(currentUser, office);
 
         // 2. 필터 조건에 맞는 회의실 조회
         List<Room> targetRooms;
@@ -322,13 +322,13 @@ public class RoomService {
     /**
      * 운영자 권한 검증
      * <p>
-     * OPERATOR는 자신이 소유한 지점의 회의실만 수정/삭제 가능.
-     * PLATFORM_ADMIN은 모든 회의실 접근 가능.
+     * MANAGER는 자신이 소유한 지점의 회의실만 수정/삭제 가능.
+     * ADMIN은 모든 회의실 접근 가능.
      * </p>
      */
-    private void validateOperatorAccess(AppUser currentUser, Office office) {
+    private void validateManagerAccess(AppUser currentUser, Office office) {
         if (currentUser.getRole() == UserRole.MANAGER) {
-            if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
+            if (!office.getManager().getId().equals(currentUser.getId())) {
                 throw new AccessDeniedException("담당 지점의 회의실이 아닙니다.");
             }
         } else if (currentUser.getRole() != UserRole.ADMIN) {

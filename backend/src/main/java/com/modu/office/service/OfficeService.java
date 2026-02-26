@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.modu.office.dto.request.OfficeSearchCondition;
 
 /**
  * Office 비즈니스 로직 서비스
@@ -43,7 +42,7 @@ public class OfficeService {
                 .openTime(request.getOpenTime())
                 .closeTime(request.getCloseTime())
                 .openDays(request.getOpenDays() != null ? request.getOpenDays().toArray(new Short[0]) : null)
-                .ownerUser(currentUser);
+                .manager(currentUser);
 
         // 좌표가 없고 주소가 있는 경우 지오코딩 시도
         if (request.getLatitude() == null && request.getLongitude() == null && request.getLocation() != null) {
@@ -86,7 +85,7 @@ public class OfficeService {
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, office);
+        validateManagerAccess(currentUser, office);
 
         // Service 레이어에서 직접 필드 업데이트
         office.setName(request.getName());
@@ -129,7 +128,7 @@ public class OfficeService {
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + id));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, office);
+        validateManagerAccess(currentUser, office);
 
         // 활성 예약이 있는지 확인
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
@@ -181,13 +180,13 @@ public class OfficeService {
     /**
      * 운영자 권한 검증
      * <p>
-     * OPERATOR는 자신이 소유한 지점만 수정/삭제 가능.
-     * PLATFORM_ADMIN은 모든 지점 접근 가능.
+     * MANAGER는 자신이 소유한 지점만 수정/삭제 가능.
+     * ADMIN은 모든 지점 접근 가능.
      * </p>
      */
-    private void validateOperatorAccess(AppUser currentUser, Office office) {
+    private void validateManagerAccess(AppUser currentUser, Office office) {
         if (currentUser.getRole() == UserRole.MANAGER) {
-            if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
+            if (!office.getManager().getId().equals(currentUser.getId())) {
                 throw new AccessDeniedException("담당 지점이 아닙니다.");
             }
         } else if (currentUser.getRole() != UserRole.ADMIN) {
@@ -205,7 +204,7 @@ public class OfficeService {
      * @return 담당 지점 목록
      */
     public List<OfficeResponse> getMyOffices(AppUser currentUser) {
-        List<Office> offices = officeRepository.findAllByOwnerUser(currentUser);
+        List<Office> offices = officeRepository.findAllByManager(currentUser);
         return offices.stream()
                 .map(OfficeResponse::fromEntity)
                 .collect(Collectors.toList());

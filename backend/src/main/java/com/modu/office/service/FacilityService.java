@@ -69,7 +69,7 @@ public class FacilityService {
     }
 
     /**
-     * 활성 시설만 조회 (Operator/User용)
+     * 활성 시설만 조회 (MANAGER/USER용)
      */
     public List<FacilityResponse> getActiveFacilities() {
         return facilityRepository.findByIsActiveTrue().stream()

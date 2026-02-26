@@ -26,7 +26,6 @@ import java.time.LocalTime;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,16 +72,16 @@ public class ReservationService {
                     .findById(java.util.Objects.requireNonNull(request.getRoomId(), "회의실 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + request.getRoomId()));
 
-            AppUser customer = appUserRepository
-                    .findById(java.util.Objects.requireNonNull(request.getCustomerId(), "사용자 ID는 필수입니다."))
-                    .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + request.getCustomerId()));
+            Long userId = request.getUserId();
+            AppUser user = appUserRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
             // 3. 영업시간 및 휴무일 검증 (기존 내부 메서드 활용)
             validateBusinessHours(office, request.getStartAt(), request.getEndAt());
             validateOpenDays(office, request.getStartAt());
 
-            // 4. 예약자 확인 및 권한 검증 (여기서는 customerRole만 확인)
-            if (customer.getRole() != UserRole.USER) {
+            // 4. 예약자 확인 및 권한 검증 (여기서는 userRole만 확인)
+            if (user.getRole() != UserRole.USER) {
                 throw new IllegalArgumentException("일반 사용자만 예약할 수 있습니다.");
             }
 
@@ -108,7 +107,7 @@ public class ReservationService {
                     .title(request.getTitle())
                     .office(office)
                     .room(room)
-                    .customer(customer)
+                    .user(user)
                     .startAt(request.getStartAt())
                     .endAt(request.getEndAt())
                     .endAtIncludeBufferTime(endAtIncludeBufferTime)
@@ -119,7 +118,7 @@ public class ReservationService {
 
             // 예약 생성 이벤트 발행 (감사 로그 자동 기록)
             eventPublisher.publishEvent(new com.modu.office.event.ReservationCreatedEvent(
-                    savedReservation, customer));
+                    savedReservation, user));
 
             return ReservationResponse.fromEntity(savedReservation);
 
@@ -132,7 +131,7 @@ public class ReservationService {
     /**
      * ID로 예약 조회 (소유자 검증 포함)
      * Why: 로그인한 타인이 /api/reservations/{id}로 다른 사람 예약 조회 가능한 IDOR 방어.
-     * PLATFORM_ADMIN은 모든 예약 조회 허용.
+     * ADMIN은 모든 예약 조회 허용.
      */
     public ReservationResponse getReservationById(Long id, AppUser requester) {
         Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
@@ -164,8 +163,8 @@ public class ReservationService {
     /**
      * 특정 사용자의 예약 조회
      */
-    public Page<ReservationResponse> getReservationsByCustomer(Long customerId, Pageable pageable) {
-        return reservationRepository.findByCustomerId(customerId, pageable)
+    public Page<ReservationResponse> getReservationsByUser(Long userId, Pageable pageable) {
+        return reservationRepository.findByUserId(userId, pageable)
                 .map(ReservationResponse::fromEntity);
     }
 
@@ -186,7 +185,7 @@ public class ReservationService {
     }
 
     /**
-     * 오퍼레이터용 예약 검색 (동적 쿼리)
+     * 관리자/운영자용 예약 검색 (동적 쿼리)
      * 
      * @param officeId  지점 ID (Optional)
      * @param guestName 예약자 이름 (Optional, contains)
@@ -271,7 +270,7 @@ public class ReservationService {
             // 예약 수정 이벤트 발행 (감사 로그 자동 기록)
             eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                     reservation, beforeData, com.modu.office.entity.enums.LogAction.UPDATE,
-                    reservation.getCustomer(), null));
+                    reservation.getUser(), null));
 
             return ReservationResponse.fromEntity(reservation);
 
@@ -288,9 +287,9 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
 
-        // 소유권 및 권한 검증 (OPERATOR는 자신의 지점 예약만 확정 가능)
+        // 소유권 및 권한 검증 (MANAGER는 자신의 지점 예약만 확정 가능)
         if (requester.getRole() == UserRole.MANAGER) {
-            if (!reservation.getOffice().getOwnerUser().getId().equals(requester.getId())) {
+            if (!reservation.getOffice().getManager().getId().equals(requester.getId())) {
                 throw new AccessDeniedException("담당 지점의 예약이 아닙니다.");
             }
         } else if (requester.getRole() != UserRole.ADMIN) {
@@ -310,7 +309,7 @@ public class ReservationService {
         // 예약 확정 이벤트 발행 (감사 로그 자동 기록)
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.UPDATE,
-                reservation.getCustomer(), null));
+                reservation.getUser(), null));
 
         return ReservationResponse.fromEntity(reservation);
     }
@@ -334,7 +333,7 @@ public class ReservationService {
 
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getCustomer(), null));
+                reservation.getUser(), null));
     }
 
     /**
@@ -358,13 +357,13 @@ public class ReservationService {
         // 예약 취소 이벤트 발행 (감사 로그 자동 기록)
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getCustomer(), null));
+                reservation.getUser(), null));
     }
 
     /**
      * 관리자 권한 예약 강제 취소 (adminReason 포함)
      * <p>
-     * MANAGER 또는 PLATFORM_ADMIN이 다른 사용자의 예약을 취소할 때 사용합니다.
+     * MANAGER 또는 ADMIN이 다른 사용자의 예약을 취소할 때 사용합니다.
      * 취소 사유는 UpdateLog의 JSONB after_data 필드에 "adminReason" 키로 저장됩니다.
      * </p>
      *
@@ -389,7 +388,7 @@ public class ReservationService {
 
         // MANAGER는 자신이 소유한 지점의 예약만 취소 가능 (confirmReservation과 동일한 기준)
         if (adminUser.getRole() == UserRole.MANAGER) {
-            if (!reservation.getOffice().getOwnerUser().getId().equals(adminUser.getId())) {
+            if (!reservation.getOffice().getManager().getId().equals(adminUser.getId())) {
                 throw new AccessDeniedException("담당 지점의 예약만 취소할 수 있습니다.");
             }
         }
@@ -410,7 +409,7 @@ public class ReservationService {
 
         return new com.modu.office.dto.response.AdminCancelResponse(
                 reservationId,
-                reservation.getCustomer().getAccount().getEmail(),
+                reservation.getUser().getAccount().getEmail(),
                 java.time.LocalDateTime.now(),
                 adminReason);
     }
@@ -487,11 +486,12 @@ public class ReservationService {
     /**
      * 예약 소유권 검증 (IDOR 방어)
      * Why: .authenticated()만으로는 로그인한 타인이 다른 사람의 예약 조회/수정/취소 가능.
-     * PLATFORM_ADMIN은 운영 목적상 모든 예약에 접근 허용.
+     * ADMIN은 운영 목적상 모든 예약에 접근 허용.
+     * </p>
      */
     private void validateOwnership(Reservation reservation, AppUser requester) {
         boolean isAdmin = requester.getRole() == UserRole.ADMIN;
-        boolean isOwner = reservation.getCustomer().getId().equals(requester.getId());
+        boolean isOwner = reservation.getUser().getId().equals(requester.getId());
         if (!isAdmin && !isOwner) {
             throw new AccessDeniedException("해당 예약에 접근할 권한이 없습니다.");
         }
