@@ -32,7 +32,7 @@ public class ReservationRequest {
     private Long roomId;
 
     @NotNull(message = "예약자 ID는 필수입니다.")
-    private Long customerId;
+    private Long userId;
 
     @NotNull(message = "시작 시간은 필수입니다.")
     @Future(message = "시작 시간은 미래여야 합니다.")
