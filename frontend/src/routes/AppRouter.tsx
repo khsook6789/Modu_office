@@ -25,13 +25,13 @@ import AdminDashboard from "../features/admin/AdminDashboard";
 import MyPage from "../features/user/MyPage";
 import LandingPage from "../features/landing/LandingPage";
 
-function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 'CUSTOMER' | 'PLATFORM_ADMIN' | 'OPERATOR' }) {
+function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 'USER' | 'ADMIN' | 'MANAGER' }) {
   const { user } = useAuth();
 
   if (!user) return <Navigate to="/login" replace />;
 
   if (role && user.role !== role) {
-    if (user.role === 'PLATFORM_ADMIN') return children;
+    if (user.role === 'ADMIN') return children;
     return <Navigate to="/" replace />;
   }
 
@@ -94,33 +94,33 @@ export default function AppRouter() {
 
             {/* Operator Routes */}
             <Route path="/operator" element={
-              <ProtectedRoute role="OPERATOR">
+              <ProtectedRoute role="MANAGER">
                 <OperatorDashboard />
               </ProtectedRoute>
             } />
             <Route path="/office/new" element={
-              <ProtectedRoute role="OPERATOR">
+              <ProtectedRoute role="MANAGER">
                 <OfficeFormPage />
               </ProtectedRoute>
             } />
             <Route path="/office/:id/manage" element={
-              <ProtectedRoute role="OPERATOR">
+              <ProtectedRoute role="MANAGER">
                 <RoomManagementPage />
               </ProtectedRoute>
             } />
             <Route path="/office/:officeId/rooms/new" element={
-              <ProtectedRoute role="OPERATOR">
+              <ProtectedRoute role="MANAGER">
                 <RoomFormPage />
               </ProtectedRoute>
             } />
             <Route path="/rooms/:roomId/edit" element={
-              <ProtectedRoute role="OPERATOR">
+              <ProtectedRoute role="MANAGER">
                 <RoomFormPage />
               </ProtectedRoute>
             } />
 
             <Route path="/admin" element={
-              <ProtectedRoute role="PLATFORM_ADMIN">
+              <ProtectedRoute role="ADMIN">
                 <AdminDashboard />
               </ProtectedRoute>
             } />

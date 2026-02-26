@@ -94,7 +94,7 @@ export default function AdminDashboard() {
                                         <td className="p-md">{user.email}</td>
                                         <td className="p-md">
                                             <span className={`px-2 py-1 rounded text-xs font-bold ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
-                                                    user.role === 'OPERATOR' ? 'bg-blue-100 text-blue-700' :
+                                                    user.role === 'MANAGER' ? 'bg-blue-100 text-blue-700' :
                                                         'bg-green-100 text-green-700'
                                                 }`}>
                                                 {user.role || 'USER'}
@@ -105,11 +105,11 @@ export default function AdminDashboard() {
                                                 {user.role !== 'ADMIN' && (
                                                     <>
                                                         <button
-                                                            onClick={() => handleChangeRole(user.email, 'OPERATOR')}
+                                                            onClick={() => handleChangeRole(user.email, 'MANAGER')}
                                                             className="btn btn-sm btn-outline px-2 text-xs"
-                                                            title="운영자로 변경"
+                                                            title="매니저로 변경"
                                                         >
-                                                            운영자
+                                                            매니저
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteUser(user.email)}

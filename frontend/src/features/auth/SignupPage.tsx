@@ -6,7 +6,7 @@ import { authApi } from './api/auth.api';
 import './SignupPage.css';
 
 export default function SignupPage() {
-    const [userType, setUserType] = useState<'USER' | 'OPERATOR'>('USER');
+    const [userType, setUserType] = useState<'USER' | 'MANAGER'>('USER');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -59,11 +59,11 @@ export default function SignupPage() {
                     </button>
                     <button
                         type="button"
-                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'OPERATOR'
+                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'MANAGER'
                                 ? 'bg-white shadow text-primary font-bold'
                                 : 'text-muted hover:text-gray-700'
                             }`}
-                        onClick={() => setUserType('OPERATOR')}
+                        onClick={() => setUserType('MANAGER')}
                     >
                         오피스 운영자
                     </button>

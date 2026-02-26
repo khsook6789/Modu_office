@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import './RoomCard.css';
 
-export interface OfficeRoom {
+export interface Room {
     id: string;
     officeId: number;  // Added to support office-room relationship
     name: string;
@@ -15,12 +15,12 @@ export interface OfficeRoom {
 }
 
 interface RoomCardProps {
-    room: OfficeRoom;
-    isOperator?: boolean;
+    room: Room;
+    isManager?: boolean;
     onDelete?: (id: string) => void;
 }
 
-export default function RoomCard({ room, isOperator, onDelete }: RoomCardProps) {
+export default function RoomCard({ room, isManager, onDelete }: RoomCardProps) {
 
     const handleDelete = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -51,7 +51,7 @@ export default function RoomCard({ room, isOperator, onDelete }: RoomCardProps) 
                         ⭐ {room.rating ? room.rating.toFixed(1) : 'New'}
                     </div>
                     {/* Delete Button for Operators */}
-                    {isOperator && (
+                    {isManager && (
                         <button
                             onClick={handleDelete}
                             style={{

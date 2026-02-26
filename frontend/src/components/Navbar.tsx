@@ -25,7 +25,7 @@ export default function Navbar() {
               {/* Common Links */}
               <Link to="/rooms" className="nav-link">공간 예약</Link>
               <Link to="/my-bookings" className="nav-link">내 예약</Link>
-              {(user.role === 'OPERATOR' || user.role === 'PLATFORM_ADMIN') && (
+              {(user.role === 'MANAGER' || user.role === 'ADMIN') && (
                 <Link to="/operator" className="nav-link">운영자 대시보드</Link>
               )}
 

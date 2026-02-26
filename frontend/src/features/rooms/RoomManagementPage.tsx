@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { roomApi, type OfficeRoomResponse } from './api/room.api';
+import { roomApi, type RoomResponse } from './api/room.api';
 import { officeApi } from './api/office.api';
 
 export default function RoomManagementPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [rooms, setRooms] = useState<OfficeRoomResponse[]>([]);
+    const [rooms, setRooms] = useState<RoomResponse[]>([]);
     const [officeName, setOfficeName] = useState('');
     const [loading, setLoading] = useState(true);
 

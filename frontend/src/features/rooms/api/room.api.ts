@@ -1,7 +1,7 @@
-import { type OfficeRoom } from '../RoomCard';
+import { type Room } from '../RoomCard';
 
 // Backend Room Response Structure
-export interface OfficeRoomResponse {
+export interface RoomResponse {
     id: number;
     officeId: number;
     name: string;
@@ -39,7 +39,7 @@ interface RoomFilter {
 }
 
 // Helper to map API response to Frontend Room type
-export const mapToRoom = (apiRoom: OfficeRoomResponse): OfficeRoom => ({
+export const mapToRoom = (apiRoom: RoomResponse): Room => ({
     id: apiRoom.id.toString(),
     officeId: apiRoom.officeId,
     name: apiRoom.name,
@@ -51,7 +51,7 @@ export const mapToRoom = (apiRoom: OfficeRoomResponse): OfficeRoom => ({
 });
 
 export const roomApi = {
-    getAllRooms: async (filter?: RoomFilter): Promise<OfficeRoom[]> => { 
+    getAllRooms: async (filter?: RoomFilter): Promise<Room[]> => { 
         const params = new URLSearchParams();
         
         if (filter?.capacity) params.append('capacity', filter.capacity.toString());
@@ -60,7 +60,7 @@ export const roomApi = {
         // Use real backend search endpoint
         // Backend default page size might be 20. We use 100 to get "all".
         try {
-            const response = await client.get<ApiResponse<PageResponse<OfficeRoomResponse>>>('/rooms/search?size=100');
+            const response = await client.get<ApiResponse<PageResponse<RoomResponse>>>('/rooms/search?size=100');
             
             // Check if response.data.content exists (PageResponse structure)
             if (response.data && response.data.content) {
@@ -73,19 +73,19 @@ export const roomApi = {
         }
     },
     getRoomsByOffice: async (officeId: number) => {
-        const response = await client.get<ApiResponse<OfficeRoomResponse[]>>(`/offices/${officeId}/rooms`);
+        const response = await client.get<ApiResponse<RoomResponse[]>>(`/offices/${officeId}/rooms`);
         return response.data;
     },
     getRoomById: async (roomId: number | string) => {
-        const response = await client.get<ApiResponse<OfficeRoomResponse>>(`/rooms/${roomId}`);
+        const response = await client.get<ApiResponse<RoomResponse>>(`/rooms/${roomId}`);
         return response.data;
     },
     createRoom: async (officeId: number, data: any) => {
-        const response = await client.post<ApiResponse<OfficeRoomResponse>>(`/offices/${officeId}/rooms`, data);
+        const response = await client.post<ApiResponse<RoomResponse>>(`/offices/${officeId}/rooms`, data);
         return response.data;
     },
     updateRoom: async (roomId: number, data: any) => {
-        const response = await client.put<ApiResponse<OfficeRoomResponse>>(`/rooms/${roomId}`, data);
+        const response = await client.put<ApiResponse<RoomResponse>>(`/rooms/${roomId}`, data);
         return response.data;
     },
     deleteRoom: async (roomId: number) => {

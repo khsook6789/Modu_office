@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { type OfficeRoomResponse, roomApi } from '../rooms/api/room.api';
+import { type RoomResponse, roomApi } from '../rooms/api/room.api';
 import Input from '../../components/Input';
 
 // 임시 예약 저장소 (localStorage)
@@ -42,7 +42,7 @@ const PAYMENT_METHODS = [
 export default function BookingPage() {
     const { roomId } = useParams();
     const navigate = useNavigate();
-    const [room, setRoom] = useState<OfficeRoomResponse | null>(null);
+    const [room, setRoom] = useState<RoomResponse | null>(null);
 
     // 예약 폼 상태
     const [date, setDate] = useState('');

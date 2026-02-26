@@ -26,7 +26,7 @@ export default function LoginPage() {
                 id: String(response.user.id),
                 name: response.user.name,
                 email: response.user.email,
-                role: response.user.role as 'CUSTOMER' | 'OPERATOR' | 'PLATFORM_ADMIN'
+                role: response.user.role as 'USER' | 'MANAGER' | 'ADMIN'
             };
 
             login(userData, response.accessToken);

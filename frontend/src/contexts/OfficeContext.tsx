@@ -44,9 +44,9 @@ export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
         try {
             setIsLoading(true);
             setError(null);
-            // OPERATOR/ADMIN은 자신의 오피스만, CUSTOMER는 전체 오피스 조회
-            const isOperator = user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN';
-            const data = isOperator
+            // MANAGER/ADMIN은 자신의 오피스만, USER는 전체 오피스 조회
+            const isManager = user?.role === 'MANAGER' || user?.role === 'ADMIN';
+            const data = isManager
                 ? await officeApi.getMyOffices()
                 : await officeApi.getAllOffices();
             setOffices(data);

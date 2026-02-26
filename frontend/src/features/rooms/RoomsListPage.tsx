@@ -104,7 +104,7 @@ function RoomsListPageContent() {
                     <p className="rooms-subtitle">회의에 적합한 공간을 찾아보세요</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    {(user?.role === 'PLATFORM_ADMIN' || user?.role === 'OPERATOR') && (
+                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
                         <>
                             <button 
                                 className="btn btn-secondary"
@@ -131,7 +131,7 @@ function RoomsListPageContent() {
                     <div style={{ flex: 1 }}>
                         <OfficeSelectorDropdown />
                     </div>
-                    {offices.length === 0 && (user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN') && (
+                    {offices.length === 0 && (user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
                         <button className="btn btn-primary" onClick={() => setIsOfficeModalOpen(true)}>
                             지금 오피스 만들기
                         </button>
@@ -142,7 +142,7 @@ function RoomsListPageContent() {
                         <p style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
                             📍 {selectedOffice.location} | 🕒 {selectedOffice.openTime} - {selectedOffice.closeTime}
                         </p>
-                        {(user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN') && (
+                        {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
                             <button
                                 onClick={async () => {
                                     if (confirm(`"${selectedOffice.name}" 오피스를 삭제하시겠습니까?\n⚠️ 소속 회의실이 없어야 삭제 가능합니다.`)) {
@@ -187,14 +187,14 @@ function RoomsListPageContent() {
                     <RoomCard
                         key={room.id}
                         room={room}
-                        isOperator={user?.role === 'OPERATOR' || user?.role === 'PLATFORM_ADMIN'}
+                        isManager={user?.role === 'MANAGER' || user?.role === 'ADMIN'}
                         onDelete={deleteRoom}
                     />
                 ))}
                 {filteredRooms.length === 0 && selectedOfficeId && (
                     <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
                         이 오피스에는 아직 회의실이 없습니다.<br />
-                        {(user?.role === 'PLATFORM_ADMIN' || user?.role === 'OPERATOR') && '회의실을 추가해보세요!'}
+                        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && '회의실을 추가해보세요!'}
                     </p>
                 )}
                 {!selectedOfficeId && (

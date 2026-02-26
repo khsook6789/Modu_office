@@ -27,37 +27,37 @@ export interface LoginRequest {
 
 export const authApi = {
     login: async (data: LoginRequest) => {
-        // 1. CUSTOMER 로그인 시도
+        // 1. USER 로그인 시도
         try {
-            const response = await client.post<LoginResponse>('/auth/customer/login', data);
+            const response = await client.post<LoginResponse>('/auth/user/login', data);
             if (!response.user) {
                 // @ts-ignore
                 response.user = {
                     id: data.email,
                     email: data.email,
                     name: data.email.split('@')[0],
-                    role: 'CUSTOMER'
+                    role: 'USER'
                 };
             }
             return response;
         } catch { /* fall through */ }
 
-        // 2. OPERATOR 로그인 시도
+        // 2. MANAGER 로그인 시도
         try {
-            const response = await client.post<LoginResponse>('/auth/operator/login', data);
+            const response = await client.post<LoginResponse>('/auth/manager/login', data);
             if (!response.user) {
                 // @ts-ignore
                 response.user = {
                     id: data.email,
                     email: data.email,
                     name: data.email.split('@')[0],
-                    role: 'OPERATOR'
+                    role: 'MANAGER'
                 };
             }
             return response;
         } catch { /* fall through */ }
 
-        // 3. PLATFORM_ADMIN 로그인 시도
+        // 3. ADMIN 로그인 시도
         try {
             const response = await client.post<LoginResponse>('/auth/admin/login', data);
             if (!response.user) {
@@ -66,7 +66,7 @@ export const authApi = {
                     id: data.email,
                     email: data.email,
                     name: data.email.split('@')[0],
-                    role: 'PLATFORM_ADMIN'
+                    role: 'ADMIN'
                 };
             }
             return response;
@@ -76,7 +76,7 @@ export const authApi = {
     },
 
     signup: async (data: SignupData) => {
-        return await client.post<string>('/auth/customer/signup', {
+        return await client.post<string>('/auth/user/signup', {
             email: data.email,
             password: data.password,
             name: data.name,
@@ -85,7 +85,7 @@ export const authApi = {
     },
 
     signupOperator: async (data: SignupData) => {
-        return await client.post<string>('/auth/operator/signup', {
+        return await client.post<string>('/auth/manager/signup', {
             email: data.email,
             password: data.password,
             name: data.name,
@@ -93,8 +93,6 @@ export const authApi = {
     },
 
     adminLogin: (data: LoginRequest) => {
-        // Explicitly call logic or just alias login if user wants to use same flow
-        // But if adminLogin is called explicitly, maybe direct to operator?
-        return client.post<LoginResponse>('/auth/operator/login', data);
+        return client.post<LoginResponse>('/auth/manager/login', data);
     }
 };

@@ -1,19 +1,19 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { type OfficeRoom } from '../features/rooms/RoomCard';
+import { type Room } from '../features/rooms/RoomCard';
 import { roomApi } from '../features/rooms/api/room.api';
 
 
 
 interface RoomContextType {
-    rooms: OfficeRoom[];
-    addRoom: (officeId: number, room: Omit<OfficeRoom, 'id' | 'isAvailable' | 'officeId'>) => void;
+    rooms: Room[];
+    addRoom: (officeId: number, room: Omit<Room, 'id' | 'isAvailable' | 'officeId'>) => void;
     deleteRoom: (id: string) => void;
 }
 
 const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
 export function RoomProvider({ children }: { children: ReactNode }) {
-    const [rooms, setRooms] = useState<OfficeRoom[]>([]);
+    const [rooms, setRooms] = useState<Room[]>([]);
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -36,7 +36,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
 
 
 
-    const addRoom = async (officeId: number, roomData: Omit<OfficeRoom, 'id' | 'isAvailable' | 'officeId'>) => {
+    const addRoom = async (officeId: number, roomData: Omit<Room, 'id' | 'isAvailable' | 'officeId'>) => {
         try {
             // 1. Map frontend input to backend request
             const payload = {
@@ -54,7 +54,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
             const createdRoomDTO = await roomApi.createRoom(officeId, payload);
 
             // 3. Map backend response back to frontend model
-            const newRoom: OfficeRoom = {
+            const newRoom: Room = {
                 id: createdRoomDTO.id.toString(),
                 officeId: officeId,  // Include officeId for filtering
                 name: createdRoomDTO.name,

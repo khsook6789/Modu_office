@@ -10,8 +10,8 @@ interface ReservationResponse {
     roomId: number;
     roomName: string;
     roomCode: string;
-    customerId: number;
-    customerName: string;
+    userId: number;
+    userName: string;
     startAt: string;
     endAt: string;
     status: 'PENDING' | 'CONFIRMED' | 'CANCELED';
