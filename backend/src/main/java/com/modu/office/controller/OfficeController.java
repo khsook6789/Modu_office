@@ -29,7 +29,7 @@ public class OfficeController {
      * 새 지점 생성
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ApiResponse<OfficeResponse>> createOffice(
             @Valid @RequestBody OfficeRequest request,
             @AuthenticationPrincipal AppUser currentUser) {
@@ -60,7 +60,7 @@ public class OfficeController {
      * 지점 정보 수정
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ApiResponse<OfficeResponse>> updateOffice(
             @PathVariable Long id,
             @Valid @RequestBody OfficeRequest request,
@@ -73,7 +73,7 @@ public class OfficeController {
      * 지점 삭제
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteOffice(
             @PathVariable Long id,
             @AuthenticationPrincipal AppUser currentUser) {
@@ -98,7 +98,7 @@ public class OfficeController {
      * 내 담당 지점 목록 조회
      */
     @GetMapping("/my-offices")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ApiResponse<List<OfficeResponse>>> getMyOffices(
             @AuthenticationPrincipal AppUser currentUser) {
         List<OfficeResponse> offices = officeService.getMyOffices(currentUser);

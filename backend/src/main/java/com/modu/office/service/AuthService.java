@@ -1,15 +1,15 @@
 package com.modu.office.service;
 
-import com.modu.office.dto.request.customer.CustomerLoginRequest;
-import com.modu.office.dto.request.customer.CustomerSignupRequest;
+import com.modu.office.dto.request.user.UserLoginRequest;
+import com.modu.office.dto.request.user.UserSignupRequest;
 import com.modu.office.dto.request.admin.AdminLoginRequest;
-import com.modu.office.dto.request.operator.OperatorLoginRequest;
-import com.modu.office.dto.request.operator.OperatorSignupRequest;
+import com.modu.office.dto.request.manager.ManagerLoginRequest;
+import com.modu.office.dto.request.manager.ManagerSignupRequest;
 import com.modu.office.dto.response.TokenResponse;
 import com.modu.office.entity.Account;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.RefreshToken;
-import com.modu.office.entity.enums.OperatorApprovalStatus;
+import com.modu.office.entity.enums.ManagerApprovalStatus;
 import com.modu.office.entity.enums.UserRole;
 import com.modu.office.repository.AccountRepository;
 import com.modu.office.repository.AppUserRepository;
@@ -35,7 +35,7 @@ public class AuthService {
         private final JwtTokenProvider tokenProvider;
 
         @Transactional
-        public void signupCustomer(CustomerSignupRequest request) {
+        public void signupUser(UserSignupRequest request) {
                 java.util.Objects.requireNonNull(request, "회원가입 요청 정보는 필수입니다.");
                 validateEmail(request.getEmail());
 
@@ -48,13 +48,13 @@ public class AuthService {
                 AppUser appUser = AppUser.builder()
                                 .account(account)
                                 .name(request.getName())
-                                .role(UserRole.CUSTOMER)
+                                .role(UserRole.USER)
                                 .build();
                 appUserRepository.save(java.util.Objects.requireNonNull(appUser));
         }
 
         @Transactional
-        public void signupOperator(OperatorSignupRequest request) {
+        public void signupManager(ManagerSignupRequest request) {
                 java.util.Objects.requireNonNull(request, "회원가입 요청 정보는 필수입니다.");
                 validateEmail(request.getEmail());
 
@@ -67,14 +67,14 @@ public class AuthService {
                 AppUser appUser = AppUser.builder()
                                 .account(account)
                                 .name(request.getName())
-                                .role(UserRole.OPERATOR)
-                                .approvalStatus(OperatorApprovalStatus.PENDING)
+                                .role(UserRole.MANAGER)
+                                .approvalStatus(ManagerApprovalStatus.PENDING)
                                 .build();
                 appUserRepository.save(java.util.Objects.requireNonNull(appUser));
         }
 
         @Transactional
-        public TokenResponse loginCustomer(CustomerLoginRequest request) {
+        public TokenResponse loginUser(UserLoginRequest request) {
                 Authentication authentication = authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
@@ -84,15 +84,15 @@ public class AuthService {
                 AppUser appUser = appUserRepository.findByAccount(account)
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
-                if (appUser.getRole() != UserRole.CUSTOMER) {
-                        throw new IllegalArgumentException("Not authorized as Customer");
+                if (appUser.getRole() != UserRole.USER) {
+                        throw new IllegalArgumentException("Not authorized as User");
                 }
 
                 return createTokenResponse(authentication, account);
         }
 
         @Transactional
-        public TokenResponse loginOperator(OperatorLoginRequest request) {
+        public TokenResponse loginManager(ManagerLoginRequest request) {
                 Authentication authentication = authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
@@ -102,11 +102,11 @@ public class AuthService {
                 AppUser appUser = appUserRepository.findByAccount(account)
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
-                if (appUser.getRole() != UserRole.OPERATOR) {
-                        throw new IllegalArgumentException("Not authorized as Operator");
+                if (appUser.getRole() != UserRole.MANAGER) {
+                        throw new IllegalArgumentException("Not authorized as Manager");
                 }
 
-                if (appUser.getApprovalStatus() != OperatorApprovalStatus.APPROVED) {
+                if (appUser.getApprovalStatus() != ManagerApprovalStatus.APPROVED) {
                         throw new IllegalArgumentException("관리자 승인 대기 중입니다. 승인 후 로그인할 수 있습니다.");
                 }
 
@@ -124,7 +124,7 @@ public class AuthService {
                 AppUser appUser = appUserRepository.findByAccount(account)
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
-                if (appUser.getRole() != UserRole.PLATFORM_ADMIN) {
+                if (appUser.getRole() != UserRole.ADMIN) {
                         throw new IllegalArgumentException("Not authorized as Admin");
                 }
 
@@ -143,13 +143,29 @@ public class AuthService {
                 }
 
                 Account account = refreshToken.getAccount();
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                                account.getEmail(), null, java.util.Collections.emptyList());
 
-                String accessToken = tokenProvider.generateAccessToken(authentication);
+                AppUser appUser = appUserRepository.findByAccount(account)
+                                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 일치하지 않습니다."));
+
+                java.util.List<org.springframework.security.core.GrantedAuthority> authorities = java.util.Collections
+                                .singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                                "ROLE_" + appUser.getRole().name()));
+
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                account.getEmail(), null, authorities);
+
+                // RTR (Refresh Token Rotation) 패턴 적용: 기존 리프레시 토큰 폐기 및 새 토큰 발급
+                String newAccessToken = tokenProvider.generateAccessToken(authentication);
+                String newRefreshTokenValue = tokenProvider.generateRefreshToken();
+                java.time.LocalDateTime expiryDate = java.time.LocalDateTime.now()
+                                .plusSeconds(tokenProvider.getRefreshTokenExpirationInMs() / 1000);
+
+                refreshToken.updateToken(newRefreshTokenValue, expiryDate);
+                refreshTokenRepository.save(refreshToken); // 명시적 저장 혹은 dirty checking. (기존 토큰은 무효화됨)
+
                 return TokenResponse.builder()
-                                .accessToken(accessToken)
-                                .refreshToken(refreshTokenValue)
+                                .accessToken(newAccessToken)
+                                .refreshToken(newRefreshTokenValue)
                                 .tokenType("Bearer")
                                 .build();
         }

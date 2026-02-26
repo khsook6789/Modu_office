@@ -20,21 +20,21 @@ spring:
     oauth2:
       client:
         registration:
-          naver-customer:
+          naver-user:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
             # {baseUrl}은 현재 실행 중인 도메인으로 자동 치환됩니다. (도커/배포 시 유용)
-            redirect-uri: "{baseUrl}/login/oauth2/code/naver-customer"
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-user"
             authorization-grant-type: authorization_code
             scope: name,email
-            client-name: Naver (Customer)
-          naver-operator:
+            client-name: Naver (USER)
+          naver-manager:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
-            redirect-uri: "{baseUrl}/login/oauth2/code/naver-operator"
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-manager"
             authorization-grant-type: authorization_code
             scope: name,email
-            client-name: Naver (Operator)
+            client-name: Naver (MANAGER)
 
 app:
   jwt:

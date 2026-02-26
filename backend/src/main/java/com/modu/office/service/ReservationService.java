@@ -5,14 +5,14 @@ import com.modu.office.dto.request.ReservationUpdateRequest;
 import com.modu.office.dto.response.ReservationResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Office;
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.Reservation;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.UserRole;
 import com.modu.office.exception.InvalidTimeUnitException;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
-import com.modu.office.repository.OfficeRoomRepository;
+import com.modu.office.repository.RoomRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,6 @@ import java.time.LocalTime;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +42,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final OfficeRepository officeRepository;
-    private final OfficeRoomRepository officeRoomRepository;
+    private final RoomRepository roomRepository;
     private final AppUserRepository appUserRepository;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
@@ -69,45 +68,49 @@ public class ReservationService {
                     .findById(java.util.Objects.requireNonNull(request.getOfficeId(), "지점 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + request.getOfficeId()));
 
-            OfficeRoom room = officeRoomRepository
+            Room room = roomRepository
                     .findById(java.util.Objects.requireNonNull(request.getRoomId(), "회의실 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + request.getRoomId()));
 
-            AppUser customer = appUserRepository
-                    .findById(java.util.Objects.requireNonNull(request.getCustomerId(), "사용자 ID는 필수입니다."))
-                    .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + request.getCustomerId()));
+            Long userId = request.getUserId();
+            AppUser user = appUserRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
-            // 3. 회의실이 해당 지점에 속하는지 확인
-            if (!room.getOffice().getId().equals(office.getId())) {
-                throw new IllegalArgumentException("회의실이 해당 지점에 속하지 않습니다.");
-            }
-
-            // 4. 영업시간 및 휴무일 검증
+            // 3. 영업시간 및 휴무일 검증 (기존 내부 메서드 활용)
             validateBusinessHours(office, request.getStartAt(), request.getEndAt());
             validateOpenDays(office, request.getStartAt());
 
-            // 5. 낙관적 락을 사용한 시간 충돌 확인
+            // 4. 예약자 확인 및 권한 검증 (여기서는 userRole만 확인)
+            if (user.getRole() != UserRole.USER) {
+                throw new IllegalArgumentException("일반 사용자만 예약할 수 있습니다.");
+            }
+
+            // 5. 정비 시간(bufferTime)을 포함한 실제 점유 종료 시간 계산
+            LocalDateTime endAtIncludeBufferTime = request.getEndAt().plusMinutes(room.getBufferTime());
+
+            // 6. 낙관적 락을 사용한 시간 충돌 확인 (bufferTime 포함 시간으로 확인)
             List<ReservationStatus> activeStatuses = Arrays.asList(
                     ReservationStatus.PENDING,
                     ReservationStatus.CONFIRMED);
             List<Reservation> conflicts = reservationRepository.findConflictingReservationsWithOptimisticLock(
                     room.getId(),
                     request.getStartAt(),
-                    request.getEndAt(),
+                    endAtIncludeBufferTime,
                     activeStatuses);
 
             if (!conflicts.isEmpty()) {
                 throw new IllegalStateException("해당 시간대에 이미 예약이 존재합니다.");
             }
 
-            // 6. 예약 생성
+            // 7. 예약 생성
             Reservation reservation = Reservation.builder()
                     .title(request.getTitle())
                     .office(office)
                     .room(room)
-                    .customer(customer)
+                    .user(user)
                     .startAt(request.getStartAt())
                     .endAt(request.getEndAt())
+                    .endAtIncludeBufferTime(endAtIncludeBufferTime)
                     .status(ReservationStatus.PENDING)
                     .build();
 
@@ -115,7 +118,7 @@ public class ReservationService {
 
             // 예약 생성 이벤트 발행 (감사 로그 자동 기록)
             eventPublisher.publishEvent(new com.modu.office.event.ReservationCreatedEvent(
-                    savedReservation, customer));
+                    savedReservation, user));
 
             return ReservationResponse.fromEntity(savedReservation);
 
@@ -128,7 +131,7 @@ public class ReservationService {
     /**
      * ID로 예약 조회 (소유자 검증 포함)
      * Why: 로그인한 타인이 /api/reservations/{id}로 다른 사람 예약 조회 가능한 IDOR 방어.
-     * PLATFORM_ADMIN은 모든 예약 조회 허용.
+     * ADMIN은 모든 예약 조회 허용.
      */
     public ReservationResponse getReservationById(Long id, AppUser requester) {
         Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
@@ -152,41 +155,37 @@ public class ReservationService {
     /**
      * 모든 예약 조회
      */
-    public List<ReservationResponse> getAllReservations() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getAllReservations(Pageable pageable) {
+        return reservationRepository.findAll(pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
      * 특정 사용자의 예약 조회
      */
-    public List<ReservationResponse> getReservationsByCustomer(Long customerId) {
-        return reservationRepository.findByCustomerId(customerId).stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getReservationsByUser(Long userId, Pageable pageable) {
+        return reservationRepository.findByUserId(userId, pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
      * 특정 회의실의 예약 조회
      */
-    public List<ReservationResponse> getReservationsByRoom(Long roomId) {
-        return reservationRepository.findByRoomId(roomId).stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getReservationsByRoom(Long roomId, Pageable pageable) {
+        return reservationRepository.findByRoomId(roomId, pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
      * 상태별 예약 조회
      */
-    public List<ReservationResponse> getReservationsByStatus(ReservationStatus status) {
-        return reservationRepository.findByStatus(status).stream()
-                .map(ReservationResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<ReservationResponse> getReservationsByStatus(ReservationStatus status, Pageable pageable) {
+        return reservationRepository.findByStatus(status, pageable)
+                .map(ReservationResponse::fromEntity);
     }
 
     /**
-     * 오퍼레이터용 예약 검색 (동적 쿼리)
+     * 관리자/운영자용 예약 검색 (동적 쿼리)
      * 
      * @param officeId  지점 ID (Optional)
      * @param guestName 예약자 이름 (Optional, contains)
@@ -232,7 +231,11 @@ public class ReservationService {
                 validateBusinessHours(reservation.getOffice(), request.getStartAt(), request.getEndAt());
                 validateOpenDays(reservation.getOffice(), request.getStartAt());
 
-                // 낙관적 락을 사용한 시간 충돌 확인 (현재 예약 제외)
+                // 정비 시간(bufferTime)을 포함한 실제 점유 종료 시간 계산
+                LocalDateTime endAtIncludeBufferTime = request.getEndAt()
+                        .plusMinutes(reservation.getRoom().getBufferTime());
+
+                // 낙관적 락을 사용한 시간 충돌 확인 (현재 예약 제외, bufferTime 포함 시간)
                 List<ReservationStatus> activeStatuses = Arrays.asList(
                         ReservationStatus.PENDING,
                         ReservationStatus.CONFIRMED);
@@ -241,7 +244,7 @@ public class ReservationService {
                                 reservation.getRoom().getId(),
                                 id,
                                 request.getStartAt(),
-                                request.getEndAt(),
+                                endAtIncludeBufferTime,
                                 activeStatuses);
 
                 if (!conflicts.isEmpty()) {
@@ -249,6 +252,7 @@ public class ReservationService {
                 }
 
                 reservation.updateTimeRange(request.getStartAt(), request.getEndAt());
+                reservation.setEndAtIncludeBufferTime(endAtIncludeBufferTime);
             }
 
             // 상태 수정 (직접 setter 사용 - 일반적인 업데이트용)
@@ -266,7 +270,7 @@ public class ReservationService {
             // 예약 수정 이벤트 발행 (감사 로그 자동 기록)
             eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                     reservation, beforeData, com.modu.office.entity.enums.LogAction.UPDATE,
-                    reservation.getCustomer(), null));
+                    reservation.getUser(), null));
 
             return ReservationResponse.fromEntity(reservation);
 
@@ -279,9 +283,18 @@ public class ReservationService {
      * 예약 확정 (PENDING -> CONFIRMED)
      */
     @Transactional
-    public ReservationResponse confirmReservation(Long id) {
+    public ReservationResponse confirmReservation(Long id, AppUser requester) {
         Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
+
+        // 소유권 및 권한 검증 (MANAGER는 자신의 지점 예약만 확정 가능)
+        if (requester.getRole() == UserRole.MANAGER) {
+            if (!reservation.getOffice().getManager().getId().equals(requester.getId())) {
+                throw new AccessDeniedException("담당 지점의 예약이 아닙니다.");
+            }
+        } else if (requester.getRole() != UserRole.ADMIN) {
+            throw new AccessDeniedException("예약을 확정할 권한이 없습니다.");
+        }
 
         // 이미 확정된 경우 중복 처리 방지 (선택 사항이나 권장)
         if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
@@ -296,7 +309,7 @@ public class ReservationService {
         // 예약 확정 이벤트 발행 (감사 로그 자동 기록)
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.UPDATE,
-                reservation.getCustomer(), null));
+                reservation.getUser(), null));
 
         return ReservationResponse.fromEntity(reservation);
     }
@@ -320,11 +333,12 @@ public class ReservationService {
 
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getCustomer(), null));
+                reservation.getUser(), null));
     }
 
     /**
      * 예약 취소 (soft delete)
+     * dead code : 목요일 회의 후 삭제 요망
      */
     @Transactional
     public void cancelReservation(Long id) {
@@ -343,13 +357,13 @@ public class ReservationService {
         // 예약 취소 이벤트 발행 (감사 로그 자동 기록)
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getCustomer(), null));
+                reservation.getUser(), null));
     }
 
     /**
      * 관리자 권한 예약 강제 취소 (adminReason 포함)
      * <p>
-     * OPERATOR 또는 PLATFORM_ADMIN이 다른 사용자의 예약을 취소할 때 사용합니다.
+     * MANAGER 또는 ADMIN이 다른 사용자의 예약을 취소할 때 사용합니다.
      * 취소 사유는 UpdateLog의 JSONB after_data 필드에 "adminReason" 키로 저장됩니다.
      * </p>
      *
@@ -372,6 +386,13 @@ public class ReservationService {
             throw new IllegalStateException("이미 취소된 예약입니다.");
         }
 
+        // MANAGER는 자신이 소유한 지점의 예약만 취소 가능 (confirmReservation과 동일한 기준)
+        if (adminUser.getRole() == UserRole.MANAGER) {
+            if (!reservation.getOffice().getManager().getId().equals(adminUser.getId())) {
+                throw new AccessDeniedException("담당 지점의 예약만 취소할 수 있습니다.");
+            }
+        }
+
         // 변경 전 데이터 캡처
         java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
 
@@ -388,7 +409,7 @@ public class ReservationService {
 
         return new com.modu.office.dto.response.AdminCancelResponse(
                 reservationId,
-                reservation.getCustomer().getAccount().getEmail(),
+                reservation.getUser().getAccount().getEmail(),
                 java.time.LocalDateTime.now(),
                 adminReason);
     }
@@ -465,11 +486,12 @@ public class ReservationService {
     /**
      * 예약 소유권 검증 (IDOR 방어)
      * Why: .authenticated()만으로는 로그인한 타인이 다른 사람의 예약 조회/수정/취소 가능.
-     * PLATFORM_ADMIN은 운영 목적상 모든 예약에 접근 허용.
+     * ADMIN은 운영 목적상 모든 예약에 접근 허용.
+     * </p>
      */
     private void validateOwnership(Reservation reservation, AppUser requester) {
-        boolean isAdmin = requester.getRole() == UserRole.PLATFORM_ADMIN;
-        boolean isOwner = reservation.getCustomer().getId().equals(requester.getId());
+        boolean isAdmin = requester.getRole() == UserRole.ADMIN;
+        boolean isOwner = reservation.getUser().getId().equals(requester.getId());
         if (!isAdmin && !isOwner) {
             throw new AccessDeniedException("해당 예약에 접근할 권한이 없습니다.");
         }

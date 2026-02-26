@@ -49,60 +49,60 @@ class ReservationEventListenerTest {
         private OfficeRepository officeRepository;
 
         @Autowired
-        private OfficeRoomRepository officeRoomRepository;
+        private RoomRepository roomRepository;
 
         @Autowired
         private ReservationRepository reservationRepository;
 
-        private AppUser customer;
-        private AppUser operator;
+        private AppUser user;
+        private AppUser manager;
         private Office office;
-        private OfficeRoom officeRoom;
+        private Room room;
 
         @BeforeEach
         void setUp() {
                 // 테스트 데이터 정리
                 updateLogRepository.deleteAll();
                 reservationRepository.deleteAll();
-                officeRoomRepository.deleteAll();
+                roomRepository.deleteAll();
                 officeRepository.deleteAll();
                 appUserRepository.deleteAll();
                 accountRepository.deleteAll();
 
-                // Customer Account & User 생성
-                Account customerAccount = Account.builder()
-                                .email("customer@test.com")
+                // User Account & User 생성
+                Account userAccount = Account.builder()
+                                .email("user@test.com")
                                 .passwordHash("hashed-password")
                                 .loginType(LoginType.LOCAL)
                                 .build();
-                accountRepository.save(customerAccount);
+                accountRepository.save(userAccount);
 
-                customer = AppUser.builder()
-                                .account(customerAccount)
-                                .name("Test Customer")
-                                .role(UserRole.CUSTOMER)
+                user = AppUser.builder()
+                                .account(userAccount)
+                                .name("Test User")
+                                .role(UserRole.USER)
                                 .build();
-                appUserRepository.save(customer);
+                appUserRepository.save(user);
 
-                // Operator Account & User 생성
-                Account operatorAccount = Account.builder()
-                                .email("operator@test.com")
+                // Manager Account & User 생성
+                Account managerAccount = Account.builder()
+                                .email("manager@test.com")
                                 .passwordHash("hashed-password")
                                 .loginType(LoginType.LOCAL)
                                 .build();
-                accountRepository.save(operatorAccount);
+                accountRepository.save(managerAccount);
 
-                operator = AppUser.builder()
-                                .account(operatorAccount)
-                                .name("Test Operator")
-                                .role(UserRole.OPERATOR)
-                                .approvalStatus(OperatorApprovalStatus.APPROVED)
+                manager = AppUser.builder()
+                                .account(managerAccount)
+                                .name("Test Manager")
+                                .role(UserRole.MANAGER)
+                                .approvalStatus(ManagerApprovalStatus.APPROVED)
                                 .build();
-                appUserRepository.save(operator);
+                appUserRepository.save(manager);
 
                 // Office 생성
                 office = Office.builder()
-                                .ownerUser(operator)
+                                .manager(manager)
                                 .name("Test Office")
                                 .location("Seoul, Korea")
                                 .latitude(37.5665)
@@ -112,15 +112,15 @@ class ReservationEventListenerTest {
                                 .build();
                 officeRepository.save(office);
 
-                // OfficeRoom 생성
-                officeRoom = OfficeRoom.builder()
+                // Room 생성
+                room = Room.builder()
                                 .office(office)
                                 .name("Meeting Room A")
                                 .roomCode("ROOM-A")
                                 .capacity(10)
                                 .floor(1)
                                 .build();
-                officeRoomRepository.save(officeRoom);
+                roomRepository.save(room);
         }
 
         @AfterEach
@@ -128,7 +128,7 @@ class ReservationEventListenerTest {
                 // 테스트 데이터 정리
                 updateLogRepository.deleteAll();
                 reservationRepository.deleteAll();
-                officeRoomRepository.deleteAll();
+                roomRepository.deleteAll();
                 officeRepository.deleteAll();
                 appUserRepository.deleteAll();
                 accountRepository.deleteAll();
@@ -140,18 +140,20 @@ class ReservationEventListenerTest {
                 // given & when - 트랜잭션 내에서 예약 저장 및 이벤트 발행
                 Reservation reservation = transactionTemplate.execute(status -> {
                         Reservation res = Reservation.builder()
-                                        .customer(customer)
+                                        .user(user)
                                         .office(office)
-                                        .room(officeRoom)
+                                        .room(room)
                                         .title("테스트 예약")
                                         .startAt(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0))
                                         .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
+                                        .endAtIncludeBufferTime(
+                                                        LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
                                         .status(ReservationStatus.PENDING)
                                         .build();
                         reservationRepository.save(res);
 
                         // 트랜잭션 내에서 이벤트 발행
-                        eventPublisher.publishEvent(new ReservationCreatedEvent(res, customer));
+                        eventPublisher.publishEvent(new ReservationCreatedEvent(res, user));
                         return res;
                 });
 
@@ -162,7 +164,7 @@ class ReservationEventListenerTest {
                 UpdateLog log = logs.get(0);
                 assertThat(log.getReservation().getId()).isEqualTo(reservation.getId());
                 assertThat(log.getAction()).isEqualTo(LogAction.CREATE);
-                assertThat(log.getActor().getId()).isEqualTo(customer.getId());
+                assertThat(log.getActor().getId()).isEqualTo(user.getId());
                 assertThat(log.getBeforeData()).isNull();
                 assertThat(log.getAfterData()).isNotNull();
                 assertThat(log.getAfterData()).containsKey("id");
@@ -177,12 +179,13 @@ class ReservationEventListenerTest {
                 LocalDateTime originalEnd = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0);
 
                 Reservation reservation = Reservation.builder()
-                                .customer(customer)
+                                .user(user)
                                 .office(office)
-                                .room(officeRoom)
+                                .room(room)
                                 .title("테스트 예약")
                                 .startAt(originalStart)
                                 .endAt(originalEnd)
+                                .endAtIncludeBufferTime(originalEnd)
                                 .status(ReservationStatus.PENDING)
                                 .build();
                 reservationRepository.save(reservation);
@@ -201,7 +204,7 @@ class ReservationEventListenerTest {
                         reservationRepository.save(reservation);
 
                         eventPublisher.publishEvent(new ReservationChangedEvent(
-                                        reservation, beforeData, LogAction.UPDATE, customer, null));
+                                        reservation, beforeData, LogAction.UPDATE, user, null));
                         return null;
                 });
 
@@ -221,12 +224,13 @@ class ReservationEventListenerTest {
         void 관리자_취소_시_adminReason이_기록된다() {
                 // given
                 Reservation reservation = Reservation.builder()
-                                .customer(customer)
+                                .user(user)
                                 .office(office)
-                                .room(officeRoom)
+                                .room(room)
                                 .title("테스트 예약")
                                 .startAt(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0))
                                 .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
+                                .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
                                 .status(ReservationStatus.CONFIRMED)
                                 .build();
                 reservationRepository.save(reservation);
@@ -245,7 +249,7 @@ class ReservationEventListenerTest {
                         reservationRepository.save(reservation);
 
                         eventPublisher.publishEvent(new ReservationChangedEvent(
-                                        reservation, beforeData, LogAction.CANCEL, operator, customData));
+                                        reservation, beforeData, LogAction.CANCEL, manager, customData));
                         return null;
                 });
 
@@ -255,7 +259,7 @@ class ReservationEventListenerTest {
 
                 UpdateLog log = logs.get(0);
                 assertThat(log.getAction()).isEqualTo(LogAction.CANCEL);
-                assertThat(log.getActor().getId()).isEqualTo(operator.getId());
+                assertThat(log.getActor().getId()).isEqualTo(manager.getId());
                 assertThat(log.getAfterData()).containsKey("adminReason");
                 assertThat(log.getAfterData().get("adminReason")).isEqualTo("고객 요청에 의한 취소");
                 assertThat(log.getAfterData().get("status")).isEqualTo("CANCELED");
@@ -270,24 +274,25 @@ class ReservationEventListenerTest {
                 // given
                 transactionTemplate.execute(status -> {
                         Reservation res = Reservation.builder()
-                                        .customer(customer)
+                                        .user(user)
                                         .office(office)
-                                        .room(officeRoom)
+                                        .room(room)
                                         .title("WebSocket Test")
                                         .startAt(LocalDateTime.now().plusDays(1))
                                         .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
+                                        .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(2))
                                         .status(ReservationStatus.PENDING)
                                         .build();
                         reservationRepository.save(res);
 
                         // when
-                        eventPublisher.publishEvent(new ReservationCreatedEvent(res, customer));
+                        eventPublisher.publishEvent(new ReservationCreatedEvent(res, user));
                         return res;
                 });
 
                 // then
                 org.mockito.Mockito.verify(notificationService).notifyReservationCreated(
-                                org.mockito.ArgumentMatchers.eq(officeRoom.getId()),
+                                org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.any(Reservation.class));
         }
 
@@ -297,12 +302,13 @@ class ReservationEventListenerTest {
                 // given
                 Reservation reservation = transactionTemplate.execute(status -> {
                         Reservation res = Reservation.builder()
-                                        .customer(customer)
+                                        .user(user)
                                         .office(office)
-                                        .room(officeRoom)
+                                        .room(room)
                                         .title("Cancel Test")
                                         .startAt(LocalDateTime.now().plusDays(1))
                                         .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
+                                        .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(2))
                                         .status(ReservationStatus.CONFIRMED)
                                         .build();
                         reservationRepository.save(res);
@@ -312,13 +318,13 @@ class ReservationEventListenerTest {
                 // when
                 transactionTemplate.execute(status -> {
                         eventPublisher.publishEvent(new ReservationChangedEvent(
-                                        reservation, new HashMap<>(), LogAction.CANCEL, operator, null));
+                                        reservation, new HashMap<>(), LogAction.CANCEL, manager, null));
                         return null;
                 });
 
                 // then
                 org.mockito.Mockito.verify(notificationService).notifyReservationCancelled(
-                                org.mockito.ArgumentMatchers.eq(officeRoom.getId()),
+                                org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.eq(reservation.getId()));
         }
 }

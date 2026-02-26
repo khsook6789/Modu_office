@@ -65,9 +65,9 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("오퍼레이터는 예약 검색을 수행할 수 있다")
-    @WithMockUser(roles = "OPERATOR")
-    void searchReservations_Operator_Success() throws Exception {
+    @DisplayName("MANAGER는 예약 검색을 수행할 수 있다")
+    @WithMockUser(roles = "MANAGER")
+    void searchReservations_Manager_Success() throws Exception {
         // Given
         Page<ReservationResponse> emptyPage = new PageImpl<>(Collections.emptyList());
         given(reservationService.searchReservations(any(), any(), any(), any(), any(), any(Pageable.class)))
@@ -86,15 +86,9 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("일반 사용자는 예약 검색에 접근할 수 없다")
-    @WithMockUser(roles = "USER") // CUSTOMER role in Enum, usually mapped to ROLE_CUSTOMER or ROLE_USER depending
-                                  // on security config. Assuming ROLE_USER based on previous context.
-                                  // AppUser.getAuthorities() creates "ROLE_" + role.name(). UserRole has
-                                  // CUSTOMER. So it should be ROLE_CUSTOMER. But wait,
-                                  // @WithMockUser(roles="USER") adds "ROLE_USER". Check SecurityConfig?
-    // UserRole defined: CUSTOMER, OPERATOR, PLATFORM_ADMIN.
-    // So role should be "CUSTOMER".
-    void searchReservations_Customer_Forbidden() throws Exception {
+    @DisplayName("USER는 예약 검색에 접근할 수 없다")
+    @WithMockUser(roles = "USER")
+    void searchReservations_User_Forbidden() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/reservations/search")
                 .param("guestName", "Alice")
@@ -105,8 +99,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("관리자는 예약 검색을 수행할 수 있다")
-    @WithMockUser(roles = "PLATFORM_ADMIN")
+    @DisplayName("ADMIN은 예약 검색을 수행할 수 있다")
+    @WithMockUser(roles = "ADMIN")
     void searchReservations_Admin_Success() throws Exception {
         // Given
         Page<ReservationResponse> emptyPage = new PageImpl<>(Collections.emptyList());

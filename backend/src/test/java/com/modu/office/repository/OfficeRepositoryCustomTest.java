@@ -58,7 +58,7 @@ class OfficeRepositoryCustomTest {
         AppUser user = AppUser.builder()
                 .account(account)
                 .name("Office Owner")
-                .role(UserRole.OPERATOR)
+                .role(UserRole.MANAGER)
                 .build();
         appUserRepository.save(user);
 
@@ -66,7 +66,7 @@ class OfficeRepositoryCustomTest {
         Office office1 = Office.builder()
                 .name("Gangnam Branch")
                 .location("Gangnam-gu, Seoul")
-                .ownerUser(user)
+                .manager(user)
                 .openTime(LocalTime.of(9, 0))
                 .closeTime(LocalTime.of(18, 0))
                 .latitude(37.4979) // Gangnam Station
@@ -78,7 +78,7 @@ class OfficeRepositoryCustomTest {
         Office office2 = Office.builder()
                 .name("Pangyo Branch")
                 .location("Bundang-gu, Seongnam")
-                .ownerUser(user)
+                .manager(user)
                 .openTime(LocalTime.of(9, 0))
                 .closeTime(LocalTime.of(18, 0))
                 .latitude(37.3947) // Pangyo Station

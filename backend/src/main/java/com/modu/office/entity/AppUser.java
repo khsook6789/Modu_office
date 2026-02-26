@@ -1,6 +1,6 @@
 package com.modu.office.entity;
 
-import com.modu.office.entity.enums.OperatorApprovalStatus;
+import com.modu.office.entity.enums.ManagerApprovalStatus;
 import com.modu.office.entity.enums.UserRole;
 
 import jakarta.persistence.*;
@@ -28,17 +28,17 @@ public class AppUser extends BaseEntity implements org.springframework.security.
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private UserRole role = UserRole.CUSTOMER;
+    private UserRole role = UserRole.USER;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "approval_status")
-    private OperatorApprovalStatus approvalStatus;
+    private ManagerApprovalStatus approvalStatus;
 
     @Builder
-    public AppUser(Account account, String name, UserRole role, OperatorApprovalStatus approvalStatus) {
+    public AppUser(Account account, String name, UserRole role, ManagerApprovalStatus approvalStatus) {
         this.account = account;
         this.name = name;
-        this.role = role != null ? role : UserRole.CUSTOMER;
+        this.role = role != null ? role : UserRole.USER;
         this.approvalStatus = approvalStatus;
     }
 
@@ -50,10 +50,10 @@ public class AppUser extends BaseEntity implements org.springframework.security.
     }
 
     /**
-     * 관리자가 Operator를 승인 처리
+     * 관리자가 Manager를 승인 처리
      */
     public void approve() {
-        this.approvalStatus = OperatorApprovalStatus.APPROVED;
+        this.approvalStatus = ManagerApprovalStatus.APPROVED;
     }
 
     // UserDetails Implementation

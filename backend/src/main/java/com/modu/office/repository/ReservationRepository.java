@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,20 +24,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         /**
          * 특정 사용자의 모든 예약 조회
          */
-        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
-        List<Reservation> findByCustomerId(Long customerId);
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "user" })
+        Page<Reservation> findByUserId(Long userId, Pageable pageable);
 
         /**
          * 특정 회의실의 모든 예약 조회
          */
-        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
-        List<Reservation> findByRoomId(Long roomId);
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "user" })
+        Page<Reservation> findByRoomId(Long roomId, Pageable pageable);
 
         /**
          * 특정 상태의 예약들 조회
          */
-        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "customer" })
-        List<Reservation> findByStatus(ReservationStatus status);
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "office", "room", "user" })
+        Page<Reservation> findByStatus(ReservationStatus status, Pageable pageable);
 
         /**
          * 특정 회의실에서 주어진 시간대와 충돌하는 예약 찾기
@@ -84,11 +86,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Lock(LockModeType.OPTIMISTIC)
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
                         "AND r.status IN :statuses " +
-                        "AND r.endAt > :startAt AND r.startAt < :endAt")
+                        "AND r.endAtIncludeBufferTime > :startAt AND r.startAt < :endAtIncludeBufferTime")
         List<Reservation> findConflictingReservationsWithOptimisticLock(
                         @Param("roomId") Long roomId,
                         @Param("startAt") LocalDateTime startAt,
-                        @Param("endAt") LocalDateTime endAt,
+                        @Param("endAtIncludeBufferTime") LocalDateTime endAtIncludeBufferTime,
                         @Param("statuses") List<ReservationStatus> statuses);
 
         /**
@@ -98,12 +100,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
                         "AND r.id != :excludeId " +
                         "AND r.status IN :statuses " +
-                        "AND r.endAt > :startAt AND r.startAt < :endAt")
+                        "AND r.endAtIncludeBufferTime > :startAt AND r.startAt < :endAtIncludeBufferTime")
         List<Reservation> findConflictingReservationsExcludingWithOptimisticLock(
                         @Param("roomId") Long roomId,
                         @Param("excludeId") Long excludeId,
                         @Param("startAt") LocalDateTime startAt,
-                        @Param("endAt") LocalDateTime endAt,
+                        @Param("endAtIncludeBufferTime") LocalDateTime endAtIncludeBufferTime,
                         @Param("statuses") List<ReservationStatus> statuses);
 
         /**

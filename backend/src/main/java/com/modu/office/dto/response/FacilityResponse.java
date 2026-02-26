@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 public class FacilityResponse {
 
     private Long id;
-    private String name;
-    private String label;
+    private String facilityCode;
+    private String facilityName;
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -30,8 +30,8 @@ public class FacilityResponse {
     public static FacilityResponse fromEntity(Facility facility) {
         return FacilityResponse.builder()
                 .id(facility.getId())
-                .name(facility.getName())
-                .label(facility.getLabel())
+                .facilityCode(facility.getFacilityCode())
+                .facilityName(facility.getFacilityName())
                 .isActive(facility.getIsActive())
                 .createdAt(facility.getCreatedAt())
                 .updatedAt(facility.getUpdatedAt())

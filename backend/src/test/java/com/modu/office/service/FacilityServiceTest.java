@@ -4,7 +4,7 @@ import com.modu.office.dto.request.FacilityRequest;
 import com.modu.office.dto.response.FacilityResponse;
 import com.modu.office.entity.Facility;
 import com.modu.office.repository.FacilityRepository;
-import com.modu.office.repository.OfficeRoomFacilityRepository;
+import com.modu.office.repository.RoomFacilityRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class FacilityServiceTest {
         private FacilityRepository facilityRepository;
 
         @Mock
-        private OfficeRoomFacilityRepository officeRoomFacilityRepository;
+        private RoomFacilityRepository roomFacilityRepository;
 
         @InjectMocks
         private FacilityService facilityService;
@@ -49,8 +49,8 @@ class FacilityServiceTest {
                 FacilityRequest request = new FacilityRequest("WIFI", "무선 인터넷", true);
 
                 Facility savedFacility = Facility.builder()
-                                .name("WIFI")
-                                .label("무선 인터넷")
+                                .facilityCode("WIFI")
+                                .facilityName("무선 인터넷")
                                 .isActive(true)
                                 .build();
                 // ID는 엔티티에서 직접 설정할 수 없으므로, Mock을 통해 저장 후 반환되는 엔티티에
@@ -64,7 +64,7 @@ class FacilityServiceTest {
                         throw new RuntimeException(e);
                 }
 
-                when(facilityRepository.existsByName("WIFI")).thenReturn(false);
+                when(facilityRepository.existsByFacilityCode("WIFI")).thenReturn(false);
                 when(facilityRepository.save(any(Facility.class))).thenReturn(savedFacility);
 
                 // When
@@ -73,11 +73,11 @@ class FacilityServiceTest {
                 // Then
                 assertThat(response).isNotNull();
                 assertThat(response.getId()).isEqualTo(1L);
-                assertThat(response.getName()).isEqualTo("WIFI");
-                assertThat(response.getLabel()).isEqualTo("무선 인터넷");
+                assertThat(response.getFacilityCode()).isEqualTo("WIFI");
+                assertThat(response.getFacilityName()).isEqualTo("무선 인터넷");
                 assertThat(response.getIsActive()).isTrue();
 
-                verify(facilityRepository).existsByName("WIFI");
+                verify(facilityRepository).existsByFacilityCode("WIFI");
                 verify(facilityRepository).save(any(Facility.class));
         }
 
@@ -86,14 +86,14 @@ class FacilityServiceTest {
         void testCreateFacility_DuplicateName() {
                 // Given
                 FacilityRequest request = new FacilityRequest("WIFI", "무선 인터넷", true);
-                when(facilityRepository.existsByName("WIFI")).thenReturn(true);
+                when(facilityRepository.existsByFacilityCode("WIFI")).thenReturn(true);
 
                 // When & Then
                 assertThatThrownBy(() -> facilityService.createFacility(request))
                                 .isInstanceOf(IllegalArgumentException.class)
                                 .hasMessageContaining("이미 존재하는 시설 코드입니다");
 
-                verify(facilityRepository).existsByName("WIFI");
+                verify(facilityRepository).existsByFacilityCode("WIFI");
                 verify(facilityRepository, never()).save(any(Facility.class));
         }
 
@@ -105,8 +105,8 @@ class FacilityServiceTest {
                 FacilityRequest request = new FacilityRequest("UPDATED_WIFI", "Updated Label", true);
 
                 Facility existingFacility = Facility.builder()
-                                .name("WIFI")
-                                .label("무선 인터넷")
+                                .facilityCode("WIFI")
+                                .facilityName("무선 인터넷")
                                 .isActive(true)
                                 .build();
                 // ID 설정
@@ -119,18 +119,18 @@ class FacilityServiceTest {
                 }
 
                 when(facilityRepository.findById(facilityId)).thenReturn(Optional.of(existingFacility));
-                when(facilityRepository.existsByName("UPDATED_WIFI")).thenReturn(false);
+                when(facilityRepository.existsByFacilityCode("UPDATED_WIFI")).thenReturn(false);
 
                 // When
                 FacilityResponse response = facilityService.updateFacility(facilityId, request);
 
                 // Then
                 assertThat(response).isNotNull();
-                assertThat(response.getName()).isEqualTo("UPDATED_WIFI");
-                assertThat(response.getLabel()).isEqualTo("Updated Label");
+                assertThat(response.getFacilityCode()).isEqualTo("UPDATED_WIFI");
+                assertThat(response.getFacilityName()).isEqualTo("Updated Label");
 
                 verify(facilityRepository).findById(facilityId);
-                verify(facilityRepository).existsByName("UPDATED_WIFI");
+                verify(facilityRepository).existsByFacilityCode("UPDATED_WIFI");
         }
 
         @Test
@@ -158,13 +158,13 @@ class FacilityServiceTest {
                 FacilityRequest request = new FacilityRequest("PROJECTOR", "빔프로젝터", true);
 
                 Facility existingFacility = Facility.builder()
-                                .name("WIFI")
-                                .label("무선 인터넷")
+                                .facilityCode("WIFI")
+                                .facilityName("무선 인터넷")
                                 .isActive(true)
                                 .build();
 
                 when(facilityRepository.findById(facilityId)).thenReturn(Optional.of(existingFacility));
-                when(facilityRepository.existsByName("PROJECTOR")).thenReturn(true);
+                when(facilityRepository.existsByFacilityCode("PROJECTOR")).thenReturn(true);
 
                 // When & Then
                 assertThatThrownBy(() -> facilityService.updateFacility(facilityId, request))
@@ -172,7 +172,7 @@ class FacilityServiceTest {
                                 .hasMessageContaining("이미 존재하는 시설 코드입니다");
 
                 verify(facilityRepository).findById(facilityId);
-                verify(facilityRepository).existsByName("PROJECTOR");
+                verify(facilityRepository).existsByFacilityCode("PROJECTOR");
         }
 
         @Test
@@ -181,20 +181,20 @@ class FacilityServiceTest {
                 // Given
                 Long facilityId = 1L;
                 Facility facility = Facility.builder()
-                                .name("WIFI")
-                                .label("무선 인터넷")
+                                .facilityCode("WIFI")
+                                .facilityName("무선 인터넷")
                                 .isActive(true)
                                 .build();
 
                 when(facilityRepository.findById(facilityId)).thenReturn(Optional.of(facility));
-                when(officeRoomFacilityRepository.existsByFacilityId(facilityId)).thenReturn(false);
+                when(roomFacilityRepository.existsByFacilityId(facilityId)).thenReturn(false);
 
                 // When
                 facilityService.deleteFacility(facilityId);
 
                 // Then
                 verify(facilityRepository).findById(facilityId);
-                verify(officeRoomFacilityRepository).existsByFacilityId(facilityId);
+                verify(roomFacilityRepository).existsByFacilityId(facilityId);
                 verify(facilityRepository).deleteById(facilityId);
         }
 
@@ -204,13 +204,13 @@ class FacilityServiceTest {
                 // Given
                 Long facilityId = 1L;
                 Facility facility = Facility.builder()
-                                .name("WIFI")
-                                .label("무선 인터넷")
+                                .facilityCode("WIFI")
+                                .facilityName("무선 인터넷")
                                 .isActive(true)
                                 .build();
 
                 when(facilityRepository.findById(facilityId)).thenReturn(Optional.of(facility));
-                when(officeRoomFacilityRepository.existsByFacilityId(facilityId)).thenReturn(true);
+                when(roomFacilityRepository.existsByFacilityId(facilityId)).thenReturn(true);
 
                 // When
                 facilityService.deleteFacility(facilityId);
@@ -219,7 +219,7 @@ class FacilityServiceTest {
                 assertThat(facility.getIsActive()).isFalse();
 
                 verify(facilityRepository).findById(facilityId);
-                verify(officeRoomFacilityRepository).existsByFacilityId(facilityId);
+                verify(roomFacilityRepository).existsByFacilityId(facilityId);
                 verify(facilityRepository, never()).deleteById(anyLong());
         }
 
@@ -243,8 +243,9 @@ class FacilityServiceTest {
         void testGetAllFacilities() {
                 // Given
                 List<Facility> facilities = List.of(
-                                Facility.builder().name("WIFI").label("무선 인터넷").isActive(true).build(),
-                                Facility.builder().name("PROJECTOR").label("빔프로젝터").isActive(false).build());
+                                Facility.builder().facilityCode("WIFI").facilityName("무선 인터넷").isActive(true).build(),
+                                Facility.builder().facilityCode("PROJECTOR").facilityName("빔프로젝터").isActive(false)
+                                                .build());
 
                 when(facilityRepository.findAll()).thenReturn(facilities);
 
@@ -253,7 +254,7 @@ class FacilityServiceTest {
 
                 // Then
                 assertThat(responses).hasSize(2);
-                assertThat(responses).extracting(FacilityResponse::getName)
+                assertThat(responses).extracting(FacilityResponse::getFacilityCode)
                                 .containsExactlyInAnyOrder("WIFI", "PROJECTOR");
 
                 verify(facilityRepository).findAll();
@@ -264,8 +265,9 @@ class FacilityServiceTest {
         void testGetActiveFacilities() {
                 // Given
                 List<Facility> activeFacilities = List.of(
-                                Facility.builder().name("WIFI").label("무선 인터넷").isActive(true).build(),
-                                Facility.builder().name("WHITEBOARD").label("화이트보드").isActive(true).build());
+                                Facility.builder().facilityCode("WIFI").facilityName("무선 인터넷").isActive(true).build(),
+                                Facility.builder().facilityCode("WHITEBOARD").facilityName("화이트보드").isActive(true)
+                                                .build());
 
                 when(facilityRepository.findByIsActiveTrue()).thenReturn(activeFacilities);
 
@@ -275,7 +277,7 @@ class FacilityServiceTest {
                 // Then
                 assertThat(responses).hasSize(2);
                 assertThat(responses).allMatch(FacilityResponse::getIsActive);
-                assertThat(responses).extracting(FacilityResponse::getName)
+                assertThat(responses).extracting(FacilityResponse::getFacilityCode)
                                 .containsExactlyInAnyOrder("WIFI", "WHITEBOARD");
 
                 verify(facilityRepository).findByIsActiveTrue();

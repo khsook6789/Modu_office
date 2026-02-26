@@ -1,7 +1,7 @@
 package com.modu.office.dto.response;
 
 import com.modu.office.entity.Office;
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.RoomFavorite;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,7 +42,7 @@ public class RoomFavoriteResponse {
      * Entity를 DTO로 변환
      */
     public static RoomFavoriteResponse fromEntity(RoomFavorite favorite) {
-        OfficeRoom room = favorite.getRoom();
+        Room room = favorite.getRoom();
         Office office = room.getOffice();
 
         return RoomFavoriteResponse.builder()

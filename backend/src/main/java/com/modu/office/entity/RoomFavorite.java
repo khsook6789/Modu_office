@@ -27,10 +27,10 @@ public class RoomFavorite extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_id", nullable = false)
-    private OfficeRoom room;
+    private Room room;
 
     @Builder
-    public RoomFavorite(AppUser user, OfficeRoom room) {
+    public RoomFavorite(AppUser user, Room room) {
         this.user = user;
         this.room = room;
     }

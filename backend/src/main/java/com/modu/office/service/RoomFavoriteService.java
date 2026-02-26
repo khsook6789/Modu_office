@@ -2,10 +2,10 @@ package com.modu.office.service;
 
 import com.modu.office.dto.response.RoomFavoriteResponse;
 import com.modu.office.entity.AppUser;
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.entity.Room;
 import com.modu.office.entity.RoomFavorite;
 import com.modu.office.repository.AppUserRepository;
-import com.modu.office.repository.OfficeRoomRepository;
+import com.modu.office.repository.RoomRepository;
 import com.modu.office.repository.RoomFavoriteRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class RoomFavoriteService {
 
     private final RoomFavoriteRepository favoriteRepository;
-    private final OfficeRoomRepository roomRepository;
+    private final RoomRepository roomRepository;
     private final AppUserRepository userRepository;
 
     /**
@@ -45,7 +45,7 @@ public class RoomFavoriteService {
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
         // 3. 회의실 존재 확인
-        OfficeRoom room = roomRepository.findById(java.util.Objects.requireNonNull(roomId))
+        Room room = roomRepository.findById(java.util.Objects.requireNonNull(roomId))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // 4. 즐겨찾기 생성

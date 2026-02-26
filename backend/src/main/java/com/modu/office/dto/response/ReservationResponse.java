@@ -30,9 +30,9 @@ public class ReservationResponse {
     private String roomName;
     private String roomCode;
 
-    // Customer info
-    private Long customerId;
-    private String customerName;
+    // User info
+    private Long userId;
+    private String userName;
 
     // Reservation details
     private LocalDateTime startAt;
@@ -67,8 +67,8 @@ public class ReservationResponse {
                 .roomId(reservation.getRoom().getId())
                 .roomName(reservation.getRoom().getName())
                 .roomCode(reservation.getRoom().getRoomCode())
-                .customerId(reservation.getCustomer().getId())
-                .customerName(reservation.getCustomer().getName())
+                .userId(reservation.getUser().getId())
+                .userName(reservation.getUser().getName())
                 .startAt(reservation.getStartAt())
                 .endAt(reservation.getEndAt())
                 .status(reservation.getStatus())

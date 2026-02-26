@@ -11,17 +11,17 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
-@Table(name = "office_room_facility")
+@Table(name = "room_facility")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OfficeRoomFacility {
+public class RoomFacility {
 
     @EmbeddedId
-    private OfficeRoomFacilityId id;
+    private RoomFacilityId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("roomId")
     @JoinColumn(name = "room_id", nullable = false)
-    private OfficeRoom room;
+    private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("facilityId")
@@ -32,8 +32,8 @@ public class OfficeRoomFacility {
     private LocalDateTime createdAt;
 
     @Builder
-    public OfficeRoomFacility(OfficeRoom room, Facility facility) {
-        this.id = new OfficeRoomFacilityId(room.getId(), facility.getId());
+    public RoomFacility(Room room, Facility facility) {
+        this.id = new RoomFacilityId(room.getId(), facility.getId());
         this.room = room;
         this.facility = facility;
         this.createdAt = LocalDateTime.now();
@@ -48,7 +48,7 @@ public class OfficeRoomFacility {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
     @EqualsAndHashCode
-    public static class OfficeRoomFacilityId implements Serializable {
+    public static class RoomFacilityId implements Serializable {
 
         @Column(name = "room_id")
         private Long roomId;

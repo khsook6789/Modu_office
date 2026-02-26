@@ -13,17 +13,24 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * OfficeRoom 생성/수정 요청 DTO
+ * Room 생성/수정 요청 DTO
  */
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OfficeRoomRequest {
+public class RoomRequest {
 
     @NotBlank(message = "회의실 이름은 필수입니다.")
     @Size(min = 1, max = 100, message = "회의실 이름은 1~100자 이내여야 합니다.")
     private String name;
+
+    private String description;
+
+    private String bannerImageUrl;
+
+    @Min(value = 0, message = "정비 시간은 0분 이상이어야 합니다.")
+    private Integer bufferTime;
 
     @NotBlank(message = "회의실 코드는 필수입니다.")
     @Size(min = 1, max = 50, message = "회의실 코드는 1~50자 이내여야 합니다.")

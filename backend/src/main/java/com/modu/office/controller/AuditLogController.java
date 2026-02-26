@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * 관리자 전용 감사 로그(Audit Log) 검색 컨트롤러
  *
  * <p>
- * PLATFORM_ADMIN 권한만 접근 가능합니다.
+ * ADMIN 권한만 접근 가능합니다.
  * </p>
  * <p>
  * PostgreSQL JSONB 연산자를 사용하는 정밀 검색을 지원합니다.
@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/logs")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('PLATFORM_ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AuditLogController {
 
     private final UpdateLogService updateLogService;

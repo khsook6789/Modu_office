@@ -53,10 +53,10 @@ public interface OfficeRepository extends JpaRepository<Office, Long>, OfficeRep
     List<Office> findNearBy(@Param("lat") double lat, @Param("lng") double lng, @Param("radius") double radius);
 
     /**
-     * 특정 운영자가 소유한 지점 목록 조회
+     * 특정 매니저(MANAGER)가 소유한 지점 목록 조회
      * 
-     * @param ownerUser 지점 소유자(운영자)
-     * @return 해당 운영자가 소유한 지점 목록
+     * @param manager 지점 소유자(운영자)
+     * @return 해당 매니저가 소유한 지점 목록
      */
-    List<Office> findAllByOwnerUser(com.modu.office.entity.AppUser ownerUser);
+    List<Office> findAllByManager(com.modu.office.entity.AppUser manager);
 }

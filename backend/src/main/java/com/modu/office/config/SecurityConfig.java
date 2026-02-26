@@ -47,26 +47,28 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/*/logout").authenticated()
                         .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
 
-                        // Office management - PLATFORM_ADMIN or OPERATOR only for write operations
+                        // Office management - ADMIN or MANAGER only for write operations
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/offices/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/offices/**")
-                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/offices/**")
-                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/offices/**")
-                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .hasAnyRole("ADMIN", "MANAGER")
 
-                        // Room management - PLATFORM_ADMIN or OPERATOR only for write operations
+                        // Room management - ADMIN or MANAGER only for write operations
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/rooms/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/rooms/**")
-                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/rooms/**")
-                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/rooms/**")
-                        .hasAnyRole("PLATFORM_ADMIN", "OPERATOR")
+                        .hasAnyRole("ADMIN", "MANAGER")
 
-                        // 관리자 전용 - PLATFORM_ADMIN only
-                        .requestMatchers("/api/admin/**").hasRole("PLATFORM_ADMIN")
+                        // 예약 관리 - MANAGER도 force-cancel 가능 (AdminReservationController 설계 반영)
+                        .requestMatchers("/api/admin/reservations/**").hasAnyRole("ADMIN", "MANAGER")
+                        // 나머지 관리자 전용 - ADMIN only
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception

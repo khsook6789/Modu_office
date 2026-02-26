@@ -15,8 +15,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Optional<Review> findByReservationId(Long reservationId);
 
-    List<Review> findByAuthorUserId(Long authorUserId);
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "reservation", "author" })
+    List<Review> findByAuthorId(Long authorId);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "reservation", "author" })
     Page<Review> findByReservationRoomId(Long roomId, Pageable pageable);
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.reservation.room.id = :roomId")

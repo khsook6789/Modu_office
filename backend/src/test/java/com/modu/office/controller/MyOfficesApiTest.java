@@ -26,8 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * 내 담당 지점 조회 API 통합 테스트
- * - 운영자가 자신의 담당 지점 목록 조회
- * - 고객은 접근 불가 (403)
+ * - MANAGER가 자신의 담당 지점 목록 조회
+ * - USER는 접근 불가 (403)
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -49,17 +49,17 @@ class MyOfficesApiTest {
         @Autowired
         private AccountRepository accountRepository;
 
-        private AppUser operator;
+        private AppUser manager;
 
         @BeforeEach
         void setUp() {
-                // 운영자 생성
-                operator = createTestUser("operator@test.com", "운영자", UserRole.OPERATOR);
+                // MANAGER 생성
+                manager = createTestUser("manager@test.com", "MANAGER", UserRole.MANAGER);
 
-                // 운영자 소유 지점1 생성
-                createTestOffice("강남지점", "서울시 강남구", operator);
-                // 운영자 소유 지점2 생성
-                createTestOffice("판교지점", "경기도 성남시", operator);
+                // MANAGER 소유 지점1 생성
+                createTestOffice("강남지점", "서울시 강남구", manager);
+                // MANAGER 소유 지점2 생성
+                createTestOffice("판교지점", "경기도 성남시", manager);
         }
 
         private void performLogin(AppUser user) {
@@ -69,9 +69,9 @@ class MyOfficesApiTest {
         }
 
         @Test
-        @DisplayName("GET /api/offices/my-offices - 운영자가 자신의 지점 목록 조회 - 성공")
-        void testGetMyOffices_AsOperator_Success() throws Exception {
-                performLogin(operator);
+        @DisplayName("GET /api/offices/my-offices - MANAGER가 자신의 지점 목록 조회 - 성공")
+        void testGetMyOffices_AsManager_Success() throws Exception {
+                performLogin(manager);
 
                 mockMvc.perform(get("/api/offices/my-offices"))
                                 .andExpect(status().isOk())
@@ -82,10 +82,10 @@ class MyOfficesApiTest {
         }
 
         @Test
-        @DisplayName("GET /api/offices/my-offices - 다른 운영자는 해당 지점을 볼 수 없음 - 빈 배열 반환")
-        void testGetMyOffices_AsOtherOperator_Empty() throws Exception {
-                AppUser otherOperator = createTestUser("other_op@test.com", "다른 운영자", UserRole.OPERATOR);
-                performLogin(otherOperator);
+        @DisplayName("GET /api/offices/my-offices - 다른 MANAGER는 해당 지점을 볼 수 없음 - 빈 배열 반환")
+        void testGetMyOffices_AsOtherManager_Empty() throws Exception {
+                AppUser otherManager = createTestUser("other_op@test.com", "다른 MANAGER", UserRole.MANAGER);
+                performLogin(otherManager);
 
                 mockMvc.perform(get("/api/offices/my-offices"))
                                 .andExpect(status().isOk()) // 성공적으로 빈 배열 반환
@@ -94,9 +94,9 @@ class MyOfficesApiTest {
         }
 
         @Test
-        @DisplayName("GET /api/offices/my-offices - 플랫폼 관리자가 자신의 지점 목록 조회 - 성공 (소유 지점 없음)")
-        void testGetMyOffices_AsPlatformAdmin_Success() throws Exception {
-                AppUser admin = createTestUser("admin@test.com", "관리자", UserRole.PLATFORM_ADMIN);
+        @DisplayName("GET /api/offices/my-offices - ADMIN이 자신의 지점 목록 조회 - 성공 (소유 지점 없음)")
+        void testGetMyOffices_AsAdmin_Success() throws Exception {
+                AppUser admin = createTestUser("admin@test.com", "ADMIN", UserRole.ADMIN);
                 performLogin(admin);
 
                 mockMvc.perform(get("/api/offices/my-offices"))
@@ -107,10 +107,10 @@ class MyOfficesApiTest {
         }
 
         @Test
-        @DisplayName("GET /api/offices/my-offices - 고객이 조회 시도 - 실패 (403)")
-        void testGetMyOffices_AsCustomer_Forbidden() throws Exception {
-                AppUser customer = createTestUser("customer@test.com", "고객", UserRole.CUSTOMER);
-                performLogin(customer);
+        @DisplayName("GET /api/offices/my-offices - USER가 조회 시도 - 실패 (403)")
+        void testGetMyOffices_AsUser_Forbidden() throws Exception {
+                AppUser user = createTestUser("user@test.com", "USER", UserRole.USER);
+                performLogin(user);
 
                 mockMvc.perform(get("/api/offices/my-offices"))
                                 .andExpect(status().isForbidden());
@@ -150,7 +150,7 @@ class MyOfficesApiTest {
                                 .longitude(127.0)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
-                                .ownerUser(owner)
+                                .manager(owner)
                                 .build();
                 officeRepository.save(office);
         }

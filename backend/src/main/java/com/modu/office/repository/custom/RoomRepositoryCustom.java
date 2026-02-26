@@ -1,11 +1,11 @@
 package com.modu.office.repository.custom;
 
-import com.modu.office.dto.request.OfficeRoomSearchCondition;
-import com.modu.office.entity.OfficeRoom;
+import com.modu.office.dto.request.RoomSearchCondition;
+import com.modu.office.entity.Room;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface OfficeRoomRepositoryCustom {
+public interface RoomRepositoryCustom {
 
     /**
      * 예약 가능 여부, 편의시설 등복잡한 조건으로 회의실을 검색합니다.
@@ -17,5 +17,5 @@ public interface OfficeRoomRepositoryCustom {
      * @param pageable  페이징 정보
      * @return 검색된 회의실 목록 (페이징)
      */
-    Page<OfficeRoom> searchRooms(OfficeRoomSearchCondition condition, Pageable pageable);
+    Page<Room> searchRooms(RoomSearchCondition condition, Pageable pageable);
 }

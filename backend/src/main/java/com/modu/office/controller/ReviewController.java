@@ -26,7 +26,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<ReviewResponse> createReview(
             @AuthenticationPrincipal AppUser user,
@@ -42,7 +42,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByRoom(roomId, pageable));
     }
 
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @GetMapping("/me")
     public ResponseEntity<List<ReviewResponse>> getMyReviews(@AuthenticationPrincipal AppUser user) {
         return ResponseEntity.ok(reviewService.getMyReviews(user));
@@ -53,7 +53,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getRoomReviewSummary(roomId));
     }
 
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @PatchMapping("/{reviewId}")
     public ResponseEntity<ReviewResponse> updateReview(
             @PathVariable Long reviewId,
@@ -62,7 +62,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.updateReview(reviewId, user, request));
     }
 
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> deleteReview(
             @PathVariable Long reviewId,

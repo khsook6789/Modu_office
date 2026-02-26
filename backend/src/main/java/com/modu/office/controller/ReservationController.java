@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Reservation 관리 REST API Controller
@@ -45,24 +44,34 @@ public class ReservationController {
     }
 
     /**
-     * 모든 예약 조회 또는 필터링 조회
+     * 모든 예약 조회 또는 필터링 조회 (페이징 적용)
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ReservationResponse>>> getReservations(
+    public ResponseEntity<ApiResponse<Page<ReservationResponse>>> getReservations(
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) Long roomId,
-            @RequestParam(required = false) ReservationStatus status) {
+            @RequestParam(required = false) ReservationStatus status,
+            @AuthenticationPrincipal AppUser currentUser,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<ReservationResponse> reservations;
+        // 일반 사용자는 본인 예약만 조회 가능하도록 강제 필터링
+        if (currentUser.getRole() == com.modu.office.entity.enums.UserRole.USER) {
+            if (customerId != null && !customerId.equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException("본인의 예약만 조회할 수 있습니다.");
+            }
+            customerId = currentUser.getId();
+        }
+
+        Page<ReservationResponse> reservations;
 
         if (customerId != null) {
-            reservations = reservationService.getReservationsByCustomer(customerId);
+            reservations = reservationService.getReservationsByUser(customerId, pageable);
         } else if (roomId != null) {
-            reservations = reservationService.getReservationsByRoom(roomId);
+            reservations = reservationService.getReservationsByRoom(roomId, pageable);
         } else if (status != null) {
-            reservations = reservationService.getReservationsByStatus(status);
+            reservations = reservationService.getReservationsByStatus(status, pageable);
         } else {
-            reservations = reservationService.getAllReservations();
+            reservations = reservationService.getAllReservations(pageable);
         }
 
         return ResponseEntity.ok(ApiResponse.success(reservations));
@@ -71,11 +80,11 @@ public class ReservationController {
     /**
      * 오퍼레이터용 예약 검색 (페이징 포함)
      * <p>
-     * OPERATOR 또는 PLATFORM_ADMIN 권한 필요
+     * MANAGER 또는 ADMIN 권한 필요
      * </p>
      */
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'PLATFORM_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ApiResponse<Page<ReservationResponse>>> searchReservations(
             @RequestParam(required = false) Long officeId,
             @RequestParam(required = false) String guestName,
@@ -117,8 +126,11 @@ public class ReservationController {
      * 예약 확정 (PENDING -> CONFIRMED)
      */
     @PatchMapping("/{id}/confirm")
-    public ResponseEntity<ApiResponse<ReservationResponse>> confirmReservation(@PathVariable Long id) {
-        ReservationResponse response = reservationService.confirmReservation(id);
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<ReservationResponse>> confirmReservation(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUser currentUser) {
+        ReservationResponse response = reservationService.confirmReservation(id, currentUser);
         return ResponseEntity.ok(ApiResponse.success("예약이 확정되었습니다.", response));
     }
 

@@ -1,20 +1,20 @@
 package com.modu.office.service;
 
-import com.modu.office.dto.request.OfficeRoomRequest;
+import com.modu.office.dto.request.RoomRequest;
 import com.modu.office.dto.response.FacilityResponse;
-import com.modu.office.dto.response.OfficeRoomResponse;
+import com.modu.office.dto.response.RoomResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Facility;
 import com.modu.office.entity.Office;
-import com.modu.office.entity.OfficeRoom;
-import com.modu.office.entity.OfficeRoomFacility;
+import com.modu.office.entity.Room;
+import com.modu.office.entity.RoomFacility;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.entity.enums.UserRole;
 import com.modu.office.repository.FacilityRepository;
 import com.modu.office.repository.OfficeRepository;
-import com.modu.office.repository.OfficeRoomFacilityRepository;
-import com.modu.office.repository.OfficeRoomRepository;
+import com.modu.office.repository.RoomFacilityRepository;
+import com.modu.office.repository.RoomRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,24 +26,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * OfficeRoom 비즈니스 로직 서비스
+ * Room 비즈니스 로직 서비스
  */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class OfficeRoomService {
+public class RoomService {
 
-    private final OfficeRoomRepository officeRoomRepository;
+    private final RoomRepository roomRepository;
     private final OfficeRepository officeRepository;
     private final ReservationRepository reservationRepository;
     private final FacilityRepository facilityRepository;
-    private final OfficeRoomFacilityRepository officeRoomFacilityRepository;
+    private final RoomFacilityRepository roomFacilityRepository;
 
     /**
      * 새 회의실 생성
      */
     @Transactional
-    public OfficeRoomResponse createRoom(Long officeId, OfficeRoomRequest request, AppUser currentUser) {
+    public RoomResponse createRoom(Long officeId, RoomRequest request, AppUser currentUser) {
         java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다.");
         java.util.Objects.requireNonNull(request, "요청 정보는 필수입니다.");
 
@@ -51,9 +51,9 @@ public class OfficeRoomService {
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, office);
+        validateManagerAccess(currentUser, office);
 
-        OfficeRoom room = OfficeRoom.builder()
+        Room room = Room.builder()
                 .office(office)
                 .name(request.getName())
                 .roomCode(request.getRoomCode())
@@ -64,7 +64,7 @@ public class OfficeRoomService {
                 .price(request.getPrice())
                 .build();
 
-        OfficeRoom savedRoom = officeRoomRepository.save(java.util.Objects.requireNonNull(room));
+        Room savedRoom = roomRepository.save(java.util.Objects.requireNonNull(room));
 
         // Facility 관계 매핑
         if (request.getFacilityIds() != null && !request.getFacilityIds().isEmpty()) {
@@ -77,8 +77,8 @@ public class OfficeRoomService {
     /**
      * ID로 회의실 조회
      */
-    public OfficeRoomResponse getRoomById(Long roomId) {
-        OfficeRoom room = officeRoomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
+    public RoomResponse getRoomById(Long roomId) {
+        Room room = roomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
         return buildRoomResponseWithFacilities(room);
     }
@@ -86,13 +86,13 @@ public class OfficeRoomService {
     /**
      * 특정 지점의 모든 회의실 조회
      */
-    public List<OfficeRoomResponse> getRoomsByOfficeId(Long officeId) {
+    public List<RoomResponse> getRoomsByOfficeId(Long officeId) {
         // 지점 존재 여부 확인
         if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
             throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
         }
 
-        return officeRoomRepository.findByOfficeId(officeId).stream()
+        return roomRepository.findByOfficeId(officeId).stream()
                 .map(this::buildRoomResponseWithFacilities)
                 .collect(Collectors.toList());
     }
@@ -104,7 +104,7 @@ public class OfficeRoomService {
      * @param facilityIds 필요한 시설 ID 목록
      * @return 모든 시설을 보유한 회의실 목록
      */
-    public List<OfficeRoomResponse> searchRoomsByFacilities(Long officeId, List<Long> facilityIds) {
+    public List<RoomResponse> searchRoomsByFacilities(Long officeId, List<Long> facilityIds) {
         // 지점 존재 여부 확인
         if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
             throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
@@ -116,7 +116,7 @@ public class OfficeRoomService {
         }
 
         // 다중 시설 AND 검색
-        return officeRoomRepository.findByOfficeIdAndFacilityIdsContainingAll(
+        return roomRepository.findByOfficeIdAndFacilityIdsContainingAll(
                 officeId,
                 facilityIds,
                 facilityIds.size()).stream()
@@ -131,11 +131,11 @@ public class OfficeRoomService {
      * @param pageable  페이징 정보
      * @return 검색된 회의실 목록 (페이징)
      */
-    public org.springframework.data.domain.Page<OfficeRoomResponse> searchRooms(
-            com.modu.office.dto.request.OfficeRoomSearchCondition condition,
+    public org.springframework.data.domain.Page<RoomResponse> searchRooms(
+            com.modu.office.dto.request.RoomSearchCondition condition,
             org.springframework.data.domain.Pageable pageable) {
 
-        return officeRoomRepository
+        return roomRepository
                 .searchRooms(condition, pageable)
                 .map(this::buildRoomResponseWithFacilities);
     }
@@ -144,12 +144,12 @@ public class OfficeRoomService {
      * 회의실 정보 수정
      */
     @Transactional
-    public OfficeRoomResponse updateRoom(Long roomId, OfficeRoomRequest request, AppUser currentUser) {
-        OfficeRoom room = officeRoomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
+    public RoomResponse updateRoom(Long roomId, RoomRequest request, AppUser currentUser) {
+        Room room = roomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, room.getOffice());
+        validateManagerAccess(currentUser, room.getOffice());
 
         // Service 레이어에서 직접 필드 업데이트
         room.setName(request.getName());
@@ -163,7 +163,7 @@ public class OfficeRoomService {
         // Facility 관계 재설정
         if (request.getFacilityIds() != null) {
             // 기존 관계 삭제 후 새로 추가
-            officeRoomFacilityRepository.deleteByRoomId(roomId);
+            roomFacilityRepository.deleteByRoomId(roomId);
             if (!request.getFacilityIds().isEmpty()) {
                 attachFacilitiesToRoom(room, request.getFacilityIds());
             }
@@ -177,11 +177,11 @@ public class OfficeRoomService {
      */
     @Transactional
     public void deleteRoom(Long roomId, AppUser currentUser) {
-        OfficeRoom room = officeRoomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
+        Room room = roomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // 운영자 권한 검증
-        validateOperatorAccess(currentUser, room.getOffice());
+        validateManagerAccess(currentUser, room.getOffice());
 
         // 활성 예약이 있는지 확인
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
@@ -192,24 +192,24 @@ public class OfficeRoomService {
         // 활성 예약이 없다면, 나머지(취소된/완료된) 예약은 모두 삭제 (Cascade Delete)
         reservationRepository.deleteAllByRoomId(roomId);
 
-        officeRoomRepository.deleteById(roomId);
+        roomRepository.deleteById(roomId);
     }
 
     /**
      * 특정 지점에서 상태별로 회의실 조회
      */
-    public List<OfficeRoomResponse> getRoomsByStatus(Long officeId, RoomStatus status) {
-        return officeRoomRepository.findByOfficeIdAndStatus(officeId, status).stream()
-                .map(OfficeRoomResponse::fromEntity)
+    public List<RoomResponse> getRoomsByStatus(Long officeId, RoomStatus status) {
+        return roomRepository.findByOfficeIdAndStatus(officeId, status).stream()
+                .map(RoomResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
     /**
      * 특정 지점에서 최소 수용 인원 이상인 회의실 조회
      */
-    public List<OfficeRoomResponse> getRoomsByMinCapacity(Long officeId, Integer minCapacity) {
-        return officeRoomRepository.findByOfficeIdAndCapacityGreaterThanEqual(officeId, minCapacity).stream()
-                .map(OfficeRoomResponse::fromEntity)
+    public List<RoomResponse> getRoomsByMinCapacity(Long officeId, Integer minCapacity) {
+        return roomRepository.findByOfficeIdAndCapacityGreaterThanEqual(officeId, minCapacity).stream()
+                .map(RoomResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -233,30 +233,30 @@ public class OfficeRoomService {
         // 1. 지점 존재 및 소유권 확인
         Office office = officeRepository.findById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId));
-        validateOperatorAccess(currentUser, office);
+        validateManagerAccess(currentUser, office);
 
         // 2. 필터 조건에 맞는 회의실 조회
-        List<OfficeRoom> targetRooms;
+        List<Room> targetRooms;
 
         if (request.floor() != null && request.category() != null) {
             // 층과 카테고리 모두 필터링
-            targetRooms = officeRoomRepository.findByOfficeId(officeId).stream()
+            targetRooms = roomRepository.findByOfficeId(officeId).stream()
                     .filter(room -> room.getFloor().equals(request.floor()))
                     .filter(room -> request.category().equals(room.getCategory()))
                     .collect(Collectors.toList());
         } else if (request.floor() != null) {
             // 층만 필터링
-            targetRooms = officeRoomRepository.findByOfficeId(officeId).stream()
+            targetRooms = roomRepository.findByOfficeId(officeId).stream()
                     .filter(room -> room.getFloor().equals(request.floor()))
                     .collect(Collectors.toList());
         } else if (request.category() != null) {
             // 카테고리만 필터링
-            targetRooms = officeRoomRepository.findByOfficeId(officeId).stream()
+            targetRooms = roomRepository.findByOfficeId(officeId).stream()
                     .filter(room -> request.category().equals(room.getCategory()))
                     .collect(Collectors.toList());
         } else {
             // 필터 없음 - 전체 회의실
-            targetRooms = officeRoomRepository.findByOfficeId(officeId);
+            targetRooms = roomRepository.findByOfficeId(officeId);
         }
 
         // 3. 각 회의실의 상태 변경 (JPA Dirty Checking)
@@ -277,7 +277,7 @@ public class OfficeRoomService {
     /**
      * 회의실에 부대시설 연결
      */
-    private void attachFacilitiesToRoom(OfficeRoom room, List<Long> facilityIds) {
+    private void attachFacilitiesToRoom(Room room, List<Long> facilityIds) {
         List<Facility> facilities = facilityRepository
                 .findAllById(java.util.Objects.requireNonNull(facilityIds, "시설 ID 목록은 필수입니다."));
 
@@ -285,25 +285,25 @@ public class OfficeRoomService {
             throw new EntityNotFoundException("일부 시설을 찾을 수 없습니다.");
         }
 
-        List<OfficeRoomFacility> roomFacilities = facilities.stream()
-                .map(facility -> OfficeRoomFacility.builder()
+        List<RoomFacility> roomFacilities = facilities.stream()
+                .map(facility -> RoomFacility.builder()
                         .room(room)
                         .facility(facility)
                         .build())
                 .collect(Collectors.toList());
 
-        officeRoomFacilityRepository.saveAll(java.util.Objects.requireNonNull(roomFacilities));
+        roomFacilityRepository.saveAll(java.util.Objects.requireNonNull(roomFacilities));
     }
 
     /**
      * 회의실 응답 DTO 생성 시 Facility 목록 포함
      */
-    private OfficeRoomResponse buildRoomResponseWithFacilities(OfficeRoom room) {
+    private RoomResponse buildRoomResponseWithFacilities(Room room) {
         List<FacilityResponse> facilities = room.getRoomFacilities().stream()
                 .map(rf -> FacilityResponse.fromEntity(rf.getFacility()))
                 .collect(Collectors.toList());
 
-        return OfficeRoomResponse.builder()
+        return RoomResponse.builder()
                 .id(room.getId())
                 .officeId(room.getOffice().getId())
                 .name(room.getName())
@@ -322,15 +322,17 @@ public class OfficeRoomService {
     /**
      * 운영자 권한 검증
      * <p>
-     * OPERATOR는 자신이 소유한 지점의 회의실만 수정/삭제 가능.
-     * PLATFORM_ADMIN은 모든 회의실 접근 가능.
+     * MANAGER는 자신이 소유한 지점의 회의실만 수정/삭제 가능.
+     * ADMIN은 모든 회의실 접근 가능.
      * </p>
      */
-    private void validateOperatorAccess(AppUser currentUser, Office office) {
-        if (currentUser.getRole() == UserRole.OPERATOR) {
-            if (!office.getOwnerUser().getId().equals(currentUser.getId())) {
+    private void validateManagerAccess(AppUser currentUser, Office office) {
+        if (currentUser.getRole() == UserRole.MANAGER) {
+            if (!office.getManager().getId().equals(currentUser.getId())) {
                 throw new AccessDeniedException("담당 지점의 회의실이 아닙니다.");
             }
+        } else if (currentUser.getRole() != UserRole.ADMIN) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
         }
     }
 }

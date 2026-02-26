@@ -41,8 +41,8 @@ class FacilityRepositoryTest {
         void testCreateAndFindFacility() {
                 // Given
                 Facility wifi = Facility.builder()
-                                .name("wifi")
-                                .label("Wi-Fi")
+                                .facilityCode("wifi")
+                                .facilityName("Wi-Fi")
                                 .isActive(true)
                                 .build();
 
@@ -51,8 +51,8 @@ class FacilityRepositoryTest {
 
                 // Then
                 assertThat(saved.getId()).isNotNull();
-                assertThat(saved.getName()).isEqualTo("wifi");
-                assertThat(saved.getLabel()).isEqualTo("Wi-Fi");
+                assertThat(saved.getFacilityCode()).isEqualTo("wifi");
+                assertThat(saved.getFacilityName()).isEqualTo("Wi-Fi");
                 assertThat(saved.getIsActive()).isTrue();
                 assertThat(saved.getCreatedAt()).isNotNull();
         }
@@ -62,20 +62,20 @@ class FacilityRepositoryTest {
         void testFindAllByIsActiveTrue() {
                 // Given
                 facilityRepository.save(Facility.builder()
-                                .name("wifi")
-                                .label("Wi-Fi")
+                                .facilityCode("wifi")
+                                .facilityName("Wi-Fi")
                                 .isActive(true)
                                 .build());
 
                 facilityRepository.save(Facility.builder()
-                                .name("projector")
-                                .label("Projector")
+                                .facilityCode("projector")
+                                .facilityName("Projector")
                                 .isActive(true)
                                 .build());
 
                 facilityRepository.save(Facility.builder()
-                                .name("deprecated")
-                                .label("Old Facility")
+                                .facilityCode("deprecated")
+                                .facilityName("Old Facility")
                                 .isActive(false)
                                 .build());
 
@@ -85,7 +85,7 @@ class FacilityRepositoryTest {
                 // Then
                 assertThat(activeFacilities).hasSize(2);
                 assertThat(activeFacilities)
-                                .extracting(Facility::getName)
+                                .extracting(Facility::getFacilityCode)
                                 .containsExactlyInAnyOrder("wifi", "projector");
         }
 
@@ -94,17 +94,17 @@ class FacilityRepositoryTest {
         void testFindByName() {
                 // Given
                 facilityRepository.save(Facility.builder()
-                                .name("whiteboard")
-                                .label("화이트보드")
+                                .facilityCode("whiteboard")
+                                .facilityName("화이트보드")
                                 .isActive(true)
                                 .build());
 
                 // When
-                Optional<Facility> found = facilityRepository.findByName("whiteboard");
+                Optional<Facility> found = facilityRepository.findByFacilityCode("whiteboard");
 
                 // Then
                 assertThat(found).isPresent();
-                assertThat(found.get().getLabel()).isEqualTo("화이트보드");
+                assertThat(found.get().getFacilityName()).isEqualTo("화이트보드");
         }
 
         @Test
@@ -112,17 +112,17 @@ class FacilityRepositoryTest {
         void testUniqueNameConstraint() {
                 // Given
                 facilityRepository.save(Facility.builder()
-                                .name("wifi")
-                                .label("Wi-Fi 1")
+                                .facilityCode("wifi")
+                                .facilityName("Wi-Fi 1")
                                 .isActive(true)
                                 .build());
 
                 // When & Then
-                // 동일한 name으로 저장 시도 시 예외 발생
+                // 동일한 facilityCode로 저장 시도 시 예외 발생
                 org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
                         facilityRepository.save(Facility.builder()
-                                        .name("wifi")
-                                        .label("Wi-Fi 2")
+                                        .facilityCode("wifi")
+                                        .facilityName("Wi-Fi 2")
                                         .isActive(true)
                                         .build());
                         facilityRepository.flush(); // 즉시 DB 반영
