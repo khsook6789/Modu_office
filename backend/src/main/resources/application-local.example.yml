@@ -22,26 +22,24 @@ spring:
     oauth2:
       client:
         registration:
-          # Customer 전용 OAuth2 로그인
-          naver-customer:
+          naver-user:
             provider: naver
             client-id: "{ naver_client_id }"
             client-secret: "{ naver_client_secret }"
             # {baseUrl}을 사용하면 http://localhost:8080 등으로 자동 매핑됩니다.
-            redirect-uri: "{baseUrl}/login/oauth2/code/naver-customer"
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-user"
             authorization-grant-type: authorization_code
             scope: name,email
-            client-name: Naver (Customer)
+            client-name: Naver (USER)
 
-          # Operator 전용 OAuth2 로그인
-          naver-operator:
+          naver-manager:
             provider: naver
             client-id: "{ naver_client_id }"
             client-secret: "{ naver_client_secret }"
-            redirect-uri: "{baseUrl}/login/oauth2/code/naver-operator"
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-manager"
             authorization-grant-type: authorization_code
             scope: name,email
-            client-name: Naver (Operator)
+            client-name: Naver (MANAGER)
 
 app:
   jwt:
