@@ -104,9 +104,9 @@ frontend/
 
 - **사용자 중심 보안 설계**: 인증 계정(Account)과 프로필(AppUser)을 분리 설계하여 개인정보 보호를 강화하고 계정 탈취 시에도 핵심 데이터에 대한 피해를 최소화합니다.
 - **맥락 인지형 역할 제어**:
-  - **CUSTOMER**: 불필요한 기능 노출 없이 본인의 예약 내역과 예약 생성에만 집중할 수 있는 환경을 제공합니다.
-  - **OPERATOR**(오피스 운영자): 담당 지점의 실시간 점유율 조회부터 효율적인 공간 관리까지, 운영의 효율성을 높여주는 관리 도구를 제공합니다.
-  - **PLATFORM_ADMIN**(플랫폼 관리자): 전사 자원 설정부터 시스템 전반의 로그 모니터링까지, 통합 관제 기능을 통한 아키텍처 거버넌스를 실현합니다.
+  - **USER**: 불필요한 기능 노출 없이 본인의 예약 내역과 예약 생성에만 집중할 수 있는 환경을 제공합니다.
+  - **MANAGER**(오피스 운영자): 담당 지점의 실시간 점유율 조회부터 효율적인 공간 관리까지, 운영의 효율성을 높여주는 관리 도구를 제공합니다.
+  - **ADMIN**(플랫폼 관리자): 전사 자원 설정부터 시스템 전반의 로그 모니터링까지, 통합 관제 기능을 통한 아키텍처 거버넌스를 실현합니다.
 
 ### 감사 로그 및 대시보드 (Audit & Dashboard)
 
@@ -129,13 +129,16 @@ frontend/
 - **login_type**: 로그인 타입 (LOCAL, NAVER 등)
 - **oauth_id**: OAuth 제공자 사용자 식별자 (NAVER user id )
 - **status**: 계정 상태 (ACTIVE, SUSPENDED, DELETED)
+- **created_at / updated_at**: 생성 / 수정 시각
 
 ### 2. AppUser (사용자 프로필)
 
 - **id**: PK, Auto Increment
 - **account_id**: Account 테이블 FK (1:1 관계)
 - **name**: 사용자 이름
-- **role**: 사용자 권한 (CUSTOMER, OPERATOR, PLATFORM_ADMIN)
+- **role**: 사용자 권한 (USER, MANAGER, ADMIN)
+- **approval_status**: 운영자 승인 상태 (PENDING, APPROVED)
+- **created_at / updated_at**: 생성 / 수정 시각
 
 ### 3. Office (지점)
 
@@ -146,33 +149,49 @@ frontend/
 - **latitude / longitude**: 위도 / 경도
 - **open_time / close_time**: 영업 시간
 - **open_days**: 영업 요일 배열 (1=월요일, 7=일요일)
+- **description**: 지점 상세 설명 (TEXT)
+- **created_at / updated_at**: 생성 / 수정 시각
 
-### 4. OfficeRoom (회의실/공간)
+### 4. Room (공간)
 
 - **id**: PK, Auto Increment
 - **office_id**: 소속 지점 ID (FK)
 - **name**: 공간 이름
 - **room_code**: 공간 코드 (지점 내 Unique)
+- **description**: 공간 상세 설명 (TEXT)
+- **banner_image_url**: 메인 배너 이미지 URL
 - **floor**: 층수
 - **capacity**: 수용 인원
 - **category**: 공간 카테고리
 - **price**: 시간당 가격
+- **buffer_time**: 정비 시간 (분 단위)
 - **status**: 공간 상태 (AVAILABLE, INACTIVE)
 - **version**: 낙관적 락(Optimistic Lock) 버전 관리
+- **created_at / updated_at**: 생성 / 수정 시각
 
-### 5. Facility (설비)
+### 5. RoomImage (공간 이미지)
 
 - **id**: PK, Auto Increment
-- **name**: 시설 코드/키 (Unique)
-- **label**: 표시 이름(설명)
+- **room_id**: Room FK
+- **image_url**: 이미지 경로
+- **display_order**: 노출 순서
+- **created_at**: 등록 시각
+
+### 6. Facility (설비)
+
+- **id**: PK, Auto Increment
+- **facility_code**: 시설 고유 코드 (Unique)
+- **facility_name**: 사용자에게 표시될 시설명
 - **is_active**: 활성 여부
+- **created_at / updated_at**: 생성 / 수정 시각
 
-### 6. Office_Room_Facility
+### 7. Room_Facility (공간-설비 매핑)
 
-- **room_id**: OfficeRoom FK
+- **room_id**: Room FK
 - **facility_id**: Facility FK
+- **created_at**: 매핑 등록 시각
 
-### 7. Reservation (예약)
+### 8. Reservation (예약)
 
 - **id**: PK, Auto Increment
 - **title**: 예약 제목
@@ -181,18 +200,31 @@ frontend/
 - **customer_id**: 예약자(사용자) ID (FK)
 - **start_at**: 시작 시간
 - **end_at**: 종료 시간
+- **end_at_include_buffer_time**: 정비 시간을 포함한 종료 시간
 - **status**: 예약 상태 (PENDING, CONFIRMED, CANCELED 등)
 - **version**: 낙관적 락 버전 관리
+- **created_at / updated_at**: 생성 / 수정 시각
 
-### 8. Review (후기)
+### 9. Review (후기)
 
 - **id**: PK, Auto Increment
 - **reservation_id**: Reservation FK (Unique → 예약 1건당 후기 1개)
 - **author_user_id**: 작성자 AppUser FK
 - **rating**: 평점 (1~5)
 - **content**: 후기 내용
+- **created_at / updated_at**: 생성 / 수정 시각
 
-### 9. UpdateLog (변경 로그)
+### 10. FacilityReport (시설 신고)
+
+- **id**: PK, Auto Increment
+- **reservation_id**: 예약 ID (FK)
+- **room_id**: 공간 ID (FK)
+- **facility_id**: 설비 ID (FK)
+- **issue_type**: 이슈 유형 (BROKEN, MISSING, OTHER)
+- **status**: 처리 상태 (REPORTED, IN_PROGRESS, RESOLVED)
+- **created_at / updated_at**: 생성 / 수정 시각
+
+### 11. UpdateLog (변경 로그)
 
 - **id**: PK, Auto Increment
 - **reservation_id**: 관련 예약 ID (FK)
@@ -202,20 +234,36 @@ frontend/
 - **after_data**: 변경 후 데이터 (JSONB)
 - **occurred_at**: 발생 시각
 
-### 10. RefreshToken (JWT 토큰)
+### 12. Notification (알림)
+
+- **id**: PK, Auto Increment
+- **user_id**: 알림 수신자 ID (FK)
+- **content**: 알림 메시지 내용
+- **is_read**: 읽음 여부
+- **created_at**: 생성 시각
+
+### 13. CancellationPolicy (취소 정책)
+
+- **id**: PK, Auto Increment
+- **office_id**: 지점 ID (FK)
+- **days_before**: 취소 기준일
+- **refund_rate**: 환불 비율 (0~100)
+- **created_at / updated_at**: 생성 / 수정 시각
+
+### 14. RefreshToken ( JWT 토큰)
 
 - **id**: PK, Auto Increment
 - **token**: RefreshToken (Unique)
 - **account_id**: Account FK (Unique → 계정당 Refresh Token 1개 보장)
 - **expiry_date**: 만료 시각
+- **created_at**: 생성 시각
 
-### 11. RoomFavorite (즐겨찾기)
+### 15. RoomFavorite (즐겨찾기)
 
 - **id**: PK, Auto Increment
 - **user_id**: 사용자 ID (AppUser FK)
-- **room_id**: 회의실 ID (OfficeRoom FK)
-- **created_at**: 등록 시각
-- **Unique Constraint**: (user_id, room_id) - 중복 즐겨찾기 방지
+- **room_id**: 공간 ID (Room FK)
+- **created_at / updated_at**: 생성 / 수정 시각
 
 ---
 
@@ -225,45 +273,45 @@ frontend/
 
 ### 1. 인증 (Auth)
 
-- **Customer**
-  - `POST /auth/customer/signup`: 고객 회원가입
-  - `POST /auth/customer/login`: 고객 로그인
-  - `POST /auth/customer/refresh`: 토큰 갱신
-  - `POST /auth/customer/logout`: 고객 로그아웃
-- **Operator**
-  - `POST /auth/operator/signup`: 운영자 회원가입 (Admin 승인 필요)
-  - `POST /auth/operator/login`: 운영자 로그인
-  - `POST /auth/operator/refresh`: 토큰 갱신
-  - `POST /auth/operator/logout`: 운영자 로그아웃
+- **User**
+  - `POST /auth/user/signup`: 고객 회원가입
+  - `POST /auth/user/login`: 고객 로그인
+  - `POST /auth/user/refresh`: 토큰 갱신
+  - `POST /auth/user/logout`: 고객 로그아웃
+- **Manager**
+  - `POST /auth/manager/signup`: 운영자 회원가입 (Admin 승인 필요)
+  - `POST /auth/manager/login`: 운영자 로그인
+  - `POST /auth/manager/refresh`: 토큰 갱신
+  - `POST /auth/manager/logout`: 운영자 로그아웃
 - **Admin**
   - `POST /auth/admin/login`: 관리자 로그인
   - `POST /auth/admin/refresh`: 토큰 갱신
   - `POST /auth/admin/logout`: 관리자 로그아웃
 
-### 2. 관리자 - Operator 승인 관리 (Admin)
+### 2. 관리자 - Manager 승인 관리 (Admin)
 
-- `GET /admin/operators/pending`: 승인 대기 중인 Operator 목록 조회
-- `PATCH /admin/operators/{id}/approve`: Operator 승인 처리 (승인 시 권한 부여)
+- `GET /admin/managers/pending`: 승인 대기 중인 Manager 목록 조회
+- `PATCH /admin/managers/{id}/approve`: Manager 승인 처리 (승인 시 권한 부여)
 
 ### 3. 지점 관리 (Office)
 
-- `POST /offices`: 지점 생성 (Operator/Admin)
+- `POST /offices`: 지점 생성 (Manager/Admin)
 - `GET /offices`: 전체 지점 조회
 - `GET /offices/{id}`: 특정 지점 조회
 - `PUT /offices/{id}`: 지점 정보 수정 (본인 지점만)
 - `DELETE /offices/{id}`: 지점 삭제 (본인 지점만)
 - `GET /offices/search`: 지점 복합 검색 (키워드, 위치, 위경도 반경 거리 기반 통합)
-- `GET /offices/my-offices`: 내 담당 지점 목록 조회 (Operator/Admin)
+- `GET /offices/my-offices`: 내 담당 지점 목록 조회 (Manager/Admin)
 
-### 4. 회의실 관리 (OfficeRoom)
+### 4. 회의실 관리 (Room)
 
-- `POST /offices/{officeId}/rooms`: 공간 생성 (Operator/Admin)
+- `POST /offices/{officeId}/rooms`: 공간 생성 (Manager/Admin)
 - `GET /offices/{officeId}/rooms`: 지점별 공간 조회 (필터링 가능)
 - `GET /rooms/{roomId}`: 특정 공간 조회
 - `GET /rooms/search`: 고급 공간 검색 (위치, 예약 가능 여부, 편의시설 등)
 - `PUT /rooms/{roomId}`: 공간 정보 수정
 - `DELETE /rooms/{roomId}`: 공간 삭제
-- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (Operator/Admin)
+- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (Manager/Admin)
 
 ### 5. 편의시설 관리 (Facility)
 
@@ -278,7 +326,7 @@ frontend/
 
 - `POST /reservations`: 예약 생성
 - `GET /reservations`: 예약 목록 조회 (필터링 가능)
-- `GET /reservations/search`: 오퍼레이터용 예약 검색 (페이징 포함)
+- `GET /reservations/search`: 관리자/운영자용 예약 검색 (페이징 포함)
 - `GET /reservations/{id}`: 예약 상세 조회
 - `PUT /reservations/{id}`: 예약 수정
 - `PATCH /reservations/{id}/confirm`: 예약 확정
@@ -286,7 +334,7 @@ frontend/
 
 ### 7. 관리자 - 예약 관리 (Admin Reservation)
 
-- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (Operator/Admin)
+- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (Manager/Admin)
 
 ### 8. 감사 로그 (Audit Log - Admin 전용)
 
@@ -311,7 +359,7 @@ frontend/
 
 ### 11. 관리자 - 사용자 관리 (Admin User Management)
 
-- `GET /admin/users`: 전체 사용자 목록 조회 (PLATFORM_ADMIN 제외)
+- `GET /admin/users`: 전체 사용자 목록 조회 (ADMIN 제외)
 - `PATCH /admin/users/{id}/suspend`: 사용자 계정 정지
 - `PATCH /admin/users/{id}/reactivate`: 사용자 계정 정지 해제
 
