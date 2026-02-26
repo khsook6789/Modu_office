@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Reservation 관리 REST API Controller
@@ -66,7 +65,7 @@ public class ReservationController {
         Page<ReservationResponse> reservations;
 
         if (customerId != null) {
-            reservations = reservationService.getReservationsByCustomer(customerId, pageable);
+            reservations = reservationService.getReservationsByUser(customerId, pageable);
         } else if (roomId != null) {
             reservations = reservationService.getReservationsByRoom(roomId, pageable);
         } else if (status != null) {

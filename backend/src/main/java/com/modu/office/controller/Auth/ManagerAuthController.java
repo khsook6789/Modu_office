@@ -1,8 +1,8 @@
 package com.modu.office.controller.Auth;
 
 import com.modu.office.dto.request.RefreshTokenRequest;
-import com.modu.office.dto.request.customer.CustomerLoginRequest;
-import com.modu.office.dto.request.customer.CustomerSignupRequest;
+import com.modu.office.dto.request.manager.ManagerLoginRequest;
+import com.modu.office.dto.request.manager.ManagerSignupRequest;
 import com.modu.office.dto.response.TokenResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.service.AuthService;
@@ -16,21 +16,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth/customer")
+@RequestMapping("/api/auth/manager")
 @RequiredArgsConstructor
-public class CustomerAuthController {
+public class ManagerAuthController {
 
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody CustomerSignupRequest request) {
-        authService.signupCustomer(request);
-        return ResponseEntity.ok("사용자 등록 완료");
+    public ResponseEntity<String> signup(@Valid @RequestBody ManagerSignupRequest request) {
+        authService.signupManager(request);
+        return ResponseEntity.ok("가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody CustomerLoginRequest request) {
-        return ResponseEntity.ok(authService.loginCustomer(request));
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody ManagerLoginRequest request) {
+        return ResponseEntity.ok(authService.loginManager(request));
     }
 
     @PostMapping("/refresh")
@@ -40,7 +40,7 @@ public class CustomerAuthController {
 
     /**
      * 로그아웃 - RefreshToken 삭제
-     * POST /api/auth/customer/logout
+     * POST /api/auth/manager/logout
      */
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@AuthenticationPrincipal AppUser currentUser) {

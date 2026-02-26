@@ -123,7 +123,7 @@ public class RoomController {
      * 회의실 상태 일괄 변경
      * <p>
      * 특정 지점의 회의실 상태를 필터 조건(층, 카테고리)에 따라 일괄 변경합니다.
-     * OPERATOR와 PLATFORM_ADMIN만 접근 가능합니다.
+     * MANAGER와 ADMIN만 접근 가능합니다.
      * </p>
      */
     @PatchMapping("/offices/{id}/rooms/status")

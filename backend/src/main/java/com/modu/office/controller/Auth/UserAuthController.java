@@ -1,8 +1,8 @@
 package com.modu.office.controller.Auth;
 
 import com.modu.office.dto.request.RefreshTokenRequest;
-import com.modu.office.dto.request.operator.OperatorLoginRequest;
-import com.modu.office.dto.request.operator.OperatorSignupRequest;
+import com.modu.office.dto.request.user.UserLoginRequest;
+import com.modu.office.dto.request.user.UserSignupRequest;
 import com.modu.office.dto.response.TokenResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.service.AuthService;
@@ -16,21 +16,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth/operator")
+@RequestMapping("/api/auth/user")
 @RequiredArgsConstructor
-public class OperatorAuthController {
+public class UserAuthController {
 
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody OperatorSignupRequest request) {
-        authService.signupOperator(request);
-        return ResponseEntity.ok("가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
+    public ResponseEntity<String> signup(@Valid @RequestBody UserSignupRequest request) {
+        authService.signupUser(request);
+        return ResponseEntity.ok("가입이 완료되었습니다.");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody OperatorLoginRequest request) {
-        return ResponseEntity.ok(authService.loginOperator(request));
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody UserLoginRequest request) {
+        return ResponseEntity.ok(authService.loginUser(request));
     }
 
     @PostMapping("/refresh")
@@ -40,7 +40,7 @@ public class OperatorAuthController {
 
     /**
      * 로그아웃 - RefreshToken 삭제
-     * POST /api/auth/operator/logout
+     * POST /api/auth/user/logout
      */
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@AuthenticationPrincipal AppUser currentUser) {
