@@ -16,7 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
+
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +70,7 @@ class ReviewRepositoryTest {
                                 .longitude(127.0)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
-                                .ownerUser(user)
+                                .manager(user)
                                 .build());
 
                 room = roomRepository.save(Room.builder()
@@ -82,10 +82,11 @@ class ReviewRepositoryTest {
                                 .build());
 
                 reservation = reservationRepository.save(Reservation.builder()
-                                .customer(user)
+                                .user(user)
                                 .room(room)
                                 .startAt(LocalDateTime.now().minusHours(2))
                                 .endAt(LocalDateTime.now().minusHours(1))
+                                .endAtIncludeBufferTime(LocalDateTime.now().minusHours(1))
                                 .status(ReservationStatus.CONFIRMED)
                                 .build());
         }
@@ -94,7 +95,7 @@ class ReviewRepositoryTest {
         @DisplayName("예약 ID로 후기 조회")
         void findByReservationId() {
                 // given
-                Review review = Review.builder().reservation(reservation).authorUser(user).rating((short) 5)
+                Review review = Review.builder().reservation(reservation).author(user).rating((short) 5)
                                 .content("Great!")
                                 .build();
                 reviewRepository.save(review);
@@ -111,17 +112,18 @@ class ReviewRepositoryTest {
         @DisplayName("특정 회의실의 후기 목록 페이징 및 평점 통계 테스트")
         void roomReviewStatistics() {
                 // given
-                Review review1 = Review.builder().reservation(reservation).authorUser(user).rating((short) 5)
+                Review review1 = Review.builder().reservation(reservation).author(user).rating((short) 5)
                                 .content("Good")
                                 .build();
                 reviewRepository.save(review1);
 
                 Reservation res2 = reservationRepository.save(Reservation.builder()
-                                .customer(user).room(room)
+                                .user(user).room(room)
                                 .startAt(LocalDateTime.now().minusDays(1))
                                 .endAt(LocalDateTime.now().minusDays(1).plusHours(1))
+                                .endAtIncludeBufferTime(LocalDateTime.now().minusDays(1).plusHours(1))
                                 .status(ReservationStatus.CONFIRMED).build());
-                Review review2 = Review.builder().reservation(res2).authorUser(user).rating((short) 4).content("Nice")
+                Review review2 = Review.builder().reservation(res2).author(user).rating((short) 4).content("Nice")
                                 .build();
                 reviewRepository.save(review2);
 

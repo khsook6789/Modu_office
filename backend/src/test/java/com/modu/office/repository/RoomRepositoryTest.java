@@ -80,7 +80,7 @@ class RoomRepositoryTest {
                                 .longitude(126.9780)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
-                                .ownerUser(testUser)
+                                .manager(testUser)
                                 .build();
                 testOffice = officeRepository.save(testOffice);
 
@@ -183,7 +183,7 @@ class RoomRepositoryTest {
                                 .longitude(129.0756)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
-                                .ownerUser(testUser)
+                                .manager(testUser)
                                 .build();
                 anotherOffice = officeRepository.save(anotherOffice);
 

@@ -48,7 +48,7 @@ class ReviewServiceTest {
 
         Reservation reservation = mock(Reservation.class);
         given(reservation.getId()).willReturn(10L);
-        given(reservation.getCustomer()).willReturn(user);
+        given(reservation.getUser()).willReturn(user);
         given(reservation.getStatus()).willReturn(ReservationStatus.CONFIRMED);
         given(reservation.getEndAt()).willReturn(LocalDateTime.now().minusHours(1)); // 이용 시간 경과 필수
 
@@ -64,7 +64,7 @@ class ReviewServiceTest {
         Review savedReview = mock(Review.class);
         given(savedReview.getId()).willReturn(100L);
         given(savedReview.getReservation()).willReturn(reservation);
-        given(savedReview.getAuthorUser()).willReturn(user);
+        given(savedReview.getAuthor()).willReturn(user);
         given(savedReview.getRating()).willReturn((short) 5);
         given(savedReview.getContent()).willReturn("완벽한 회의실입니다.");
         given(savedReview.getCreatedAt()).willReturn(LocalDateTime.now());
@@ -89,7 +89,7 @@ class ReviewServiceTest {
         given(user.getId()).willReturn(1L);
 
         Reservation reservation = mock(Reservation.class);
-        given(reservation.getCustomer()).willReturn(user);
+        given(reservation.getUser()).willReturn(user);
         given(reservation.getStatus()).willReturn(ReservationStatus.PENDING); // 에러 원인
 
         ReviewRequest request = ReviewRequest.builder().reservationId(10L).rating((short) 5).content("Test").build();
@@ -110,7 +110,7 @@ class ReviewServiceTest {
         given(user.getId()).willReturn(1L);
 
         Reservation reservation = mock(Reservation.class);
-        given(reservation.getCustomer()).willReturn(user);
+        given(reservation.getUser()).willReturn(user);
         given(reservation.getStatus()).willReturn(ReservationStatus.CONFIRMED);
         given(reservation.getEndAt()).willReturn(LocalDateTime.now().plusHours(1)); // 미래 시간
 
@@ -135,7 +135,7 @@ class ReviewServiceTest {
         given(anotherUser.getId()).willReturn(2L);
 
         Review review = mock(Review.class);
-        given(review.getAuthorUser()).willReturn(author);
+        given(review.getAuthor()).willReturn(author);
 
         given(reviewRepository.findById(100L)).willReturn(Optional.of(review));
 
@@ -158,7 +158,7 @@ class ReviewServiceTest {
 
         Review review = spy(Review.builder()
                 .reservation(reservation)
-                .authorUser(author)
+                .author(author)
                 .rating((short) 4)
                 .content("Good")
                 .build());

@@ -91,7 +91,7 @@ class RoomFacilityRepositoryTest {
                                 .longitude(126.9780)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(22, 0))
-                                .ownerUser(owner)
+                                .manager(owner)
                                 .build();
                 office = officeRepository.save(office);
 

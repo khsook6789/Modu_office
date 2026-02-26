@@ -70,12 +70,12 @@ class ReservationServiceTest {
                                 .name("Test Room")
                                 .build();
 
-                AppUser customer = AppUser.builder()
-                                .name("Customer")
+                AppUser user = AppUser.builder()
+                                .name("User")
                                 .build();
                 ReflectionTestUtils.setField(office, "id", officeId);
                 ReflectionTestUtils.setField(room, "id", roomId);
-                ReflectionTestUtils.setField(customer, "id", customerId);
+                ReflectionTestUtils.setField(user, "id", customerId);
 
                 // 일요일 예약 시도 (2026-03-01)
                 LocalDateTime sunday = LocalDateTime.of(2026, 3, 1, 10, 0);
@@ -83,14 +83,14 @@ class ReservationServiceTest {
                                 .title("Test Reservation")
                                 .officeId(officeId)
                                 .roomId(roomId)
-                                .customerId(customerId)
+                                .userId(customerId)
                                 .startAt(sunday)
                                 .endAt(sunday.plusHours(1))
                                 .build();
 
                 when(officeRepository.findById(officeId)).thenReturn(Optional.of(office));
                 when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
-                when(appUserRepository.findById(customerId)).thenReturn(Optional.of(customer));
+                when(appUserRepository.findById(customerId)).thenReturn(Optional.of(user));
 
                 // When & Then
                 IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -107,15 +107,15 @@ class ReservationServiceTest {
 
                 Office office = Office.builder().openDays(new Short[] { 1, 2, 3, 4, 5, 0, 6 }).build();
                 Room room = Room.builder().office(office).price(pricePerHour).build();
-                AppUser customer = AppUser.builder().build();
+                AppUser user = AppUser.builder().build();
 
                 // 30분 예약 (10:00 ~ 10:30)
                 LocalDateTime start = LocalDateTime.now().withHour(10).withMinute(0).plusDays(1);
                 LocalDateTime end = start.plusMinutes(30);
 
                 Reservation reservation = Reservation.builder()
-                                .office(office).room(room).customer(customer)
-                                .startAt(start).endAt(end).build();
+                                .office(office).room(room).user(user)
+                                .startAt(start).endAt(end).endAtIncludeBufferTime(end).build();
 
                 // When
                 ReservationResponse response = ReservationResponse.fromEntity(reservation);
@@ -142,22 +142,22 @@ class ReservationServiceTest {
                                 .office(office)
                                 .build();
 
-                AppUser customer = AppUser.builder().build();
+                AppUser user = AppUser.builder().build();
                 ReflectionTestUtils.setField(office, "id", officeId);
                 ReflectionTestUtils.setField(room, "id", roomId);
-                ReflectionTestUtils.setField(customer, "id", customerId);
+                ReflectionTestUtils.setField(user, "id", customerId);
 
                 ReservationRequest request = ReservationRequest.builder()
                                 .officeId(officeId)
                                 .roomId(roomId)
-                                .customerId(customerId)
+                                .userId(customerId)
                                 .startAt(LocalDateTime.now().withHour(20).withMinute(0).plusDays(1)) // 밤 8시
                                 .endAt(LocalDateTime.now().withHour(21).withMinute(0).plusDays(1))
                                 .build();
 
                 when(officeRepository.findById(officeId)).thenReturn(Optional.of(office));
                 when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
-                when(appUserRepository.findById(customerId)).thenReturn(Optional.of(customer));
+                when(appUserRepository.findById(customerId)).thenReturn(Optional.of(user));
 
                 // When & Then
                 IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {

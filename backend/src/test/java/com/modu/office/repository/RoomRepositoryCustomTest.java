@@ -106,7 +106,7 @@ class RoomRepositoryCustomTest {
                 office = Office.builder()
                                 .name("Gangnam Branch")
                                 .location("Gangnam-gu")
-                                .ownerUser(user)
+                                .manager(user)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
                                 .latitude(37.4979) // Gangnam Station
@@ -233,9 +233,10 @@ class RoomRepositoryCustomTest {
                 Reservation reservation = Reservation.builder()
                                 .room(room1)
                                 .office(office)
-                                .customer(user)
+                                .user(user)
                                 .startAt(now)
                                 .endAt(now.plusHours(2))
+                                .endAtIncludeBufferTime(now.plusHours(2))
                                 .status(ReservationStatus.CONFIRMED)
                                 .build();
                 reservationRepository.save(reservation);
@@ -332,7 +333,7 @@ class RoomRepositoryCustomTest {
                 Office officeBusan = Office.builder()
                                 .name("Busan Branch")
                                 .location("Busan")
-                                .ownerUser(office.getOwnerUser()) // 같은 유저 사용
+                                .manager(office.getManager()) // 같은 유저 사용
                                 .latitude(35.1796)
                                 .longitude(129.0756)
                                 .openTime(LocalTime.of(9, 0))

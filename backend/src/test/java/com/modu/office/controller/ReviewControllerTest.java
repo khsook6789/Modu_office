@@ -3,7 +3,7 @@ package com.modu.office.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modu.office.dto.request.ReviewRequest;
 import com.modu.office.dto.response.ReviewResponse;
-import com.modu.office.entity.AppUser;
+
 import com.modu.office.service.ReviewService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

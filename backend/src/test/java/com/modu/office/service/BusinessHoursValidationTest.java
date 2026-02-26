@@ -52,25 +52,25 @@ class BusinessHoursValidationTest {
 
         private Office office;
         private Room room;
-        private AppUser customer;
+        private AppUser user;
 
         @BeforeEach
         void setUp() {
-                // 고객 생성
-                customer = AppUser.builder()
-                                .account(createTestAccount("customer@test.com"))
-                                .name("고객1")
+                // 사용자 생성
+                user = AppUser.builder()
+                                .account(createTestAccount("user@test.com"))
+                                .name("USER1")
                                 .role(UserRole.USER)
                                 .build();
-                customer = appUserRepository.save(customer);
+                user = appUserRepository.save(user);
 
-                // 운영자 생성
-                AppUser operator = AppUser.builder()
-                                .account(createTestAccount("operator@test.com"))
-                                .name("운영자")
+                // 매니저 생성
+                AppUser manager = AppUser.builder()
+                                .account(createTestAccount("manager@test.com"))
+                                .name("MANAGER")
                                 .role(UserRole.MANAGER)
                                 .build();
-                operator = appUserRepository.save(operator);
+                manager = appUserRepository.save(manager);
 
                 // 지점 생성 (영업시간: 09:00 ~ 18:00)
                 office = Office.builder()
@@ -80,7 +80,7 @@ class BusinessHoursValidationTest {
                                 .longitude(127.0)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
-                                .ownerUser(operator)
+                                .manager(manager)
                                 .build();
                 office = officeRepository.save(office);
 
@@ -109,7 +109,7 @@ class BusinessHoursValidationTest {
                                 .title("정상 예약")
                                 .officeId(office.getId())
                                 .roomId(room.getId())
-                                .customerId(customer.getId())
+                                .userId(user.getId())
                                 .startAt(startAt)
                                 .endAt(endAt)
                                 .build();
@@ -131,7 +131,7 @@ class BusinessHoursValidationTest {
                                 .title("영업시간 전 예약")
                                 .officeId(office.getId())
                                 .roomId(room.getId())
-                                .customerId(customer.getId())
+                                .userId(user.getId())
                                 .startAt(startAt)
                                 .endAt(endAt)
                                 .build();
@@ -155,7 +155,7 @@ class BusinessHoursValidationTest {
                                 .title("영업시간 후 예약")
                                 .officeId(office.getId())
                                 .roomId(room.getId())
-                                .customerId(customer.getId())
+                                .userId(user.getId())
                                 .startAt(startAt)
                                 .endAt(endAt)
                                 .build();
@@ -179,7 +179,7 @@ class BusinessHoursValidationTest {
                                 .title("초기 예약")
                                 .officeId(office.getId())
                                 .roomId(room.getId())
-                                .customerId(customer.getId())
+                                .userId(user.getId())
                                 .startAt(initialStartAt)
                                 .endAt(initialEndAt)
                                 .build();
@@ -198,7 +198,7 @@ class BusinessHoursValidationTest {
 
                 // Then
                 assertThatThrownBy(() -> reservationService.updateReservation(
-                                createdReservation.getId(), updateRequest, customer))
+                                createdReservation.getId(), updateRequest, user))
                                 .isInstanceOf(IllegalArgumentException.class)
                                 .hasMessageContaining("영업시간")
                                 .hasMessageContaining("외 예약은 불가능합니다");
@@ -216,7 +216,7 @@ class BusinessHoursValidationTest {
                                 .title("오픈 시간 예약")
                                 .officeId(office.getId())
                                 .roomId(room.getId())
-                                .customerId(customer.getId())
+                                .userId(user.getId())
                                 .startAt(startAt)
                                 .endAt(endAt)
                                 .build();
@@ -239,7 +239,7 @@ class BusinessHoursValidationTest {
                                 .title("마감 시간 예약")
                                 .officeId(office.getId())
                                 .roomId(room.getId())
-                                .customerId(customer.getId())
+                                .userId(user.getId())
                                 .startAt(startAt)
                                 .endAt(endAt)
                                 .build();

@@ -74,9 +74,9 @@ class ReservationRepositoryCustomTest {
                                 .save(AppUser.builder().account(account2).name("Bob").role(UserRole.USER).build());
 
                 // 2. Offices
-                officeA = officeRepository.save(Office.builder().name("Office A").location("Loc A").ownerUser(user1)
+                officeA = officeRepository.save(Office.builder().name("Office A").location("Loc A").manager(user1)
                                 .openTime(LocalTime.of(9, 0)).closeTime(LocalTime.of(18, 0)).build());
-                officeB = officeRepository.save(Office.builder().name("Office B").location("Loc B").ownerUser(user1)
+                officeB = officeRepository.save(Office.builder().name("Office B").location("Loc B").manager(user1)
                                 .openTime(LocalTime.of(9, 0)).closeTime(LocalTime.of(18, 0)).build());
 
                 // 3. Rooms
@@ -90,20 +90,23 @@ class ReservationRepositoryCustomTest {
 
                 // Res 1: Office A, User Alice, CONFIRMED, Today
                 reservationRepository.save(Reservation.builder()
-                                .office(officeA).room(roomA).customer(user1).title("Meeting 1")
+                                .office(officeA).room(roomA).user(user1).title("Meeting 1")
                                 .startAt(today).endAt(today.plusHours(2))
+                                .endAtIncludeBufferTime(today.plusHours(2))
                                 .status(ReservationStatus.CONFIRMED).build());
 
                 // Res 2: Office A, User Bob, PENDING, Tomorrow
                 reservationRepository.save(Reservation.builder()
-                                .office(officeA).room(roomA).customer(user2).title("Meeting 2")
+                                .office(officeA).room(roomA).user(user2).title("Meeting 2")
                                 .startAt(today.plusDays(1)).endAt(today.plusDays(1).plusHours(2))
+                                .endAtIncludeBufferTime(today.plusDays(1).plusHours(2))
                                 .status(ReservationStatus.PENDING).build());
 
                 // Res 3: Office B, User Alice, CANCELED, Day after tomorrow
                 reservationRepository.save(Reservation.builder()
-                                .office(officeB).room(roomB).customer(user1).title("Meeting 3")
+                                .office(officeB).room(roomB).user(user1).title("Meeting 3")
                                 .startAt(today.plusDays(2)).endAt(today.plusDays(2).plusHours(2))
+                                .endAtIncludeBufferTime(today.plusDays(2).plusHours(2))
                                 .status(ReservationStatus.CANCELED).build());
 
                 em.flush();
@@ -132,7 +135,7 @@ class ReservationRepositoryCustomTest {
 
                 // Then (Alice reserves Res 1 and Res 3)
                 assertThat(result.getContent()).hasSize(2)
-                                .extracting(r -> r.getCustomer().getName())
+                                .extracting(r -> r.getUser().getName())
                                 .containsOnly("Alice");
         }
 
