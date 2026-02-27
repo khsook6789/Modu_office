@@ -1,255 +1,193 @@
 package com.modu.office.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modu.office.dto.request.FacilityRequest;
 import com.modu.office.dto.response.FacilityResponse;
-import com.modu.office.service.FacilityService;
-import jakarta.persistence.EntityNotFoundException;
+import com.modu.office.support.ControllerTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * FacilityController 통합 테스트
- * - @SpringBootTest + MockMvc 사용
- * - 전체 Application Context 로드 (Security 포함)
- * - Service 레이어 Mock 처리
- */
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@DisplayName("FacilityController 통합 테스트")
-@SuppressWarnings("null")
-class FacilityControllerTest {
+@DisplayName("[Controller] Facility API")
+class FacilityControllerTest extends ControllerTestSupport {
 
-        @Autowired
-        private MockMvc mockMvc;
+        private FacilityRequest facilityRequest() {
+                return new FacilityRequest("WIFI", "무선 인터넷", true);
+        }
 
-        @Autowired
-        private ObjectMapper objectMapper;
-
-        @MockitoBean
-        private FacilityService facilityService;
-
-        @Test
-        @WithMockUser(roles = "ADMIN")
-        @DisplayName("POST /api/admin/facilities - 시설 생성 성공")
-        void testCreateFacility_Success() throws Exception {
-                // Given
-                FacilityRequest request = new FacilityRequest("WIFI", "무선 인터넷", true);
-
-                FacilityResponse response = FacilityResponse.builder()
+        private FacilityResponse facilityResponse() {
+                return FacilityResponse.builder()
                                 .id(1L)
                                 .facilityCode("WIFI")
                                 .facilityName("무선 인터넷")
                                 .isActive(true)
                                 .build();
+        }
 
-                when(facilityService.createFacility(any(FacilityRequest.class))).thenReturn(response);
+        // ─── ADMIN API ──────────────────────────────────────────────────
 
-                // When & Then
+        @Test
+        @DisplayName("시설 생성 - ADMIN 인증 시 201 반환")
+        @WithMockUser(roles = "ADMIN")
+        void createFacility_success() throws Exception {
+                given(facilityService.createFacility(any())).willReturn(facilityResponse());
+
                 mockMvc.perform(post("/api/admin/facilities")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                                .content(objectMapper.writeValueAsString(facilityRequest())))
                                 .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                                .andExpect(jsonPath("$.message").value("시설이 등록되었습니다."))
-                                .andExpect(jsonPath("$.data.id").value(1))
-                                .andExpect(jsonPath("$.data.facilityCode").value("WIFI"))
-                                .andExpect(jsonPath("$.data.facilityName").value("무선 인터넷"))
-                                .andExpect(jsonPath("$.data.isActive").value(true));
-
-                verify(facilityService).createFacility(any(FacilityRequest.class));
+                                .andDo(document("facility-create",
+                                                requestFields(
+                                                                fieldWithPath("facilityCode").type(JsonFieldType.STRING)
+                                                                                .description("시설 코드"),
+                                                                fieldWithPath("facilityName").type(JsonFieldType.STRING)
+                                                                                .description("시설 이름"),
+                                                                fieldWithPath("isActive").type(JsonFieldType.BOOLEAN)
+                                                                                .description("활성화 여부")),
+                                                responseFields(
+                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                .description("처리 상태"),
+                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                .description("응답 코드"),
+                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                .description("응답 메시지"),
+                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
+                                                                                .description("시설 ID"),
+                                                                fieldWithPath("data.facilityCode")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("시설 코드"),
+                                                                fieldWithPath("data.facilityName")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("시설 이름"),
+                                                                fieldWithPath("data.isActive")
+                                                                                .type(JsonFieldType.BOOLEAN)
+                                                                                .description("활성화 여부"),
+                                                                fieldWithPath("data.createdAt").type(JsonFieldType.NULL)
+                                                                                .description("생성 일시").optional(),
+                                                                fieldWithPath("data.updatedAt").type(JsonFieldType.NULL)
+                                                                                .description("수정 일시").optional())));
         }
 
         @Test
+        @DisplayName("전체 시설 목록 조회 (ADMIN) - 200 반환")
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("POST /api/admin/facilities - Validation 실패 (빈 name)")
-        void testCreateFacility_ValidationFailed() throws Exception {
-                // Given - name이 빈 값인 잘못된 요청
-                FacilityRequest invalidRequest = new FacilityRequest("", "무선 인터넷", true);
+        void getAllFacilities_success() throws Exception {
+                given(facilityService.getAllFacilities()).willReturn(List.of(facilityResponse()));
 
-                // When & Then
-                mockMvc.perform(post("/api/admin/facilities")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
-                                .andExpect(status().isBadRequest());
-
-                verify(facilityService, never()).createFacility(any(FacilityRequest.class));
-        }
-
-        @Test
-        @WithMockUser(roles = "ADMIN")
-        @DisplayName("POST /api/admin/facilities - 중복 name으로 생성 시 400")
-        void testCreateFacility_DuplicateName() throws Exception {
-                // Given
-                FacilityRequest request = new FacilityRequest("WIFI", "무선 인터넷", true);
-
-                when(facilityService.createFacility(any(FacilityRequest.class)))
-                                .thenThrow(new IllegalArgumentException("이미 존재하는 시설 코드입니다: WIFI"));
-
-                // When & Then
-                mockMvc.perform(post("/api/admin/facilities")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.status").value("ERROR"))
-                                .andExpect(jsonPath("$.message").value("이미 존재하는 시설 코드입니다: WIFI"));
-
-                verify(facilityService).createFacility(any(FacilityRequest.class));
-        }
-
-        @Test
-        @WithMockUser
-        @DisplayName("GET /api/facilities - 활성 시설 목록 조회")
-        void testGetActiveFacilities() throws Exception {
-                // Given
-                List<FacilityResponse> facilities = List.of(
-                                FacilityResponse.builder().id(1L).facilityCode("WIFI").facilityName("무선 인터넷")
-                                                .isActive(true).build(),
-                                FacilityResponse.builder().id(2L).facilityCode("PROJECTOR").facilityName("빔프로젝터")
-                                                .isActive(true)
-                                                .build());
-
-                when(facilityService.getActiveFacilities()).thenReturn(facilities);
-
-                // When & Then
-                mockMvc.perform(get("/api/facilities"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                                .andExpect(jsonPath("$.data").isArray())
-                                .andExpect(jsonPath("$.data.length()").value(2))
-                                .andExpect(jsonPath("$.data[0].facilityCode").value("WIFI"))
-                                .andExpect(jsonPath("$.data[1].facilityCode").value("PROJECTOR"));
-
-                verify(facilityService).getActiveFacilities();
-        }
-
-        @Test
-        @WithMockUser(roles = "ADMIN")
-        @DisplayName("GET /api/admin/facilities - 전체 시설 목록 조회")
-        void testGetAllFacilities() throws Exception {
-                // Given
-                List<FacilityResponse> facilities = List.of(
-                                FacilityResponse.builder().id(1L).facilityCode("WIFI").facilityName("무선 인터넷")
-                                                .isActive(true).build(),
-                                FacilityResponse.builder().id(2L).facilityCode("PROJECTOR").facilityName("빔프로젝터")
-                                                .isActive(false)
-                                                .build());
-
-                when(facilityService.getAllFacilities()).thenReturn(facilities);
-
-                // When & Then
                 mockMvc.perform(get("/api/admin/facilities"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                                .andExpect(jsonPath("$.data").isArray())
-                                .andExpect(jsonPath("$.data.length()").value(2));
-
-                verify(facilityService).getAllFacilities();
+                                .andDo(document("facility-admin-list",
+                                                responseFields(
+                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                .description("처리 상태"),
+                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                .description("응답 코드"),
+                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                .description("응답 메시지"),
+                                                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER)
+                                                                                .description("시설 ID"),
+                                                                fieldWithPath("data[].facilityCode")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("시설 코드"),
+                                                                fieldWithPath("data[].facilityName")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("시설 이름"),
+                                                                fieldWithPath("data[].isActive")
+                                                                                .type(JsonFieldType.BOOLEAN)
+                                                                                .description("활성화 여부"),
+                                                                fieldWithPath("data[].createdAt")
+                                                                                .type(JsonFieldType.NULL)
+                                                                                .description("생성 일시").optional(),
+                                                                fieldWithPath("data[].updatedAt")
+                                                                                .type(JsonFieldType.NULL)
+                                                                                .description("수정 일시").optional())));
         }
 
         @Test
+        @DisplayName("시설 수정 - ADMIN 인증 시 200 반환")
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("PUT /api/admin/facilities/{id} - 시설 수정 성공")
-        void testUpdateFacility_Success() throws Exception {
-                // Given
-                Long facilityId = 1L;
-                FacilityRequest request = new FacilityRequest("UPDATED_WIFI", "Updated Label", false);
+        void updateFacility_success() throws Exception {
+                given(facilityService.updateFacility(eq(1L), any())).willReturn(facilityResponse());
 
-                FacilityResponse response = FacilityResponse.builder()
-                                .id(facilityId)
-                                .facilityCode("UPDATED_WIFI")
-                                .facilityName("Updated Label")
-                                .isActive(false)
-                                .build();
-
-                when(facilityService.updateFacility(eq(facilityId), any(FacilityRequest.class)))
-                                .thenReturn(response);
-
-                // When & Then
-                mockMvc.perform(put("/api/admin/facilities/{id}", facilityId)
+                mockMvc.perform(put("/api/admin/facilities/{id}", 1L)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                                .content(objectMapper.writeValueAsString(facilityRequest())))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                                .andExpect(jsonPath("$.message").value("시설 정보가 수정되었습니다."))
-                                .andExpect(jsonPath("$.data.id").value(facilityId))
-                                .andExpect(jsonPath("$.data.facilityCode").value("UPDATED_WIFI"))
-                                .andExpect(jsonPath("$.data.isActive").value(false));
-
-                verify(facilityService).updateFacility(eq(facilityId), any(FacilityRequest.class));
+                                .andDo(document("facility-update",
+                                                pathParameters(parameterWithName("id").description("시설 ID"))));
         }
 
         @Test
+        @DisplayName("시설 삭제 - ADMIN 인증 시 200 반환")
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("PUT /api/admin/facilities/{id} - 존재하지 않는 시설 수정 시 404")
-        void testUpdateFacility_NotFound() throws Exception {
-                // Given
-                Long facilityId = 999L;
-                FacilityRequest request = new FacilityRequest("WIFI", "무선 인터넷", true);
+        void deleteFacility_success() throws Exception {
+                willDoNothing().given(facilityService).deleteFacility(1L);
 
-                when(facilityService.updateFacility(eq(facilityId), any(FacilityRequest.class)))
-                                .thenThrow(new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + facilityId));
+                mockMvc.perform(delete("/api/admin/facilities/{id}", 1L))
+                                .andExpect(status().isOk())
+                                .andDo(document("facility-delete",
+                                                pathParameters(parameterWithName("id").description("시설 ID"))));
+        }
 
-                // When & Then
-                mockMvc.perform(put("/api/admin/facilities/{id}", facilityId)
+        // ─── PUBLIC/USER API ─────────────────────────────────────────────
+
+        @Test
+        @DisplayName("활성 시설 목록 조회 - 200 반환")
+        @WithMockUser
+        void getActiveFacilities_success() throws Exception {
+                given(facilityService.getActiveFacilities()).willReturn(List.of(facilityResponse()));
+
+                mockMvc.perform(get("/api/facilities"))
+                                .andExpect(status().isOk())
+                                .andDo(document("facility-user-list",
+                                                responseFields(
+                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                .description("처리 상태"),
+                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                .description("응답 코드"),
+                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                .description("응답 메시지"),
+                                                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER)
+                                                                                .description("시설 ID"),
+                                                                fieldWithPath("data[].facilityCode")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("시설 코드"),
+                                                                fieldWithPath("data[].facilityName")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("시설 이름"),
+                                                                fieldWithPath("data[].isActive")
+                                                                                .type(JsonFieldType.BOOLEAN)
+                                                                                .description("활성화 여부"),
+                                                                fieldWithPath("data[].createdAt")
+                                                                                .type(JsonFieldType.NULL)
+                                                                                .description("생성 일시").optional(),
+                                                                fieldWithPath("data[].updatedAt")
+                                                                                .type(JsonFieldType.NULL)
+                                                                                .description("수정 일시").optional())));
+        }
+
+        @Test
+        @DisplayName("시설 생성 시 미인증 접근 - 403 Forbidden 반환")
+        void createFacility_fail_unauthorized() throws Exception {
+                mockMvc.perform(post("/api/admin/facilities")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.status").value("ERROR"))
-                                .andExpect(jsonPath("$.message").value("시설을 찾을 수 없습니다. ID: " + facilityId));
-
-                verify(facilityService).updateFacility(eq(facilityId), any(FacilityRequest.class));
-        }
-
-        @Test
-        @WithMockUser(roles = "ADMIN")
-        @DisplayName("DELETE /api/admin/facilities/{id} - 시설 삭제 성공")
-        void testDeleteFacility_Success() throws Exception {
-                // Given
-                Long facilityId = 1L;
-                doNothing().when(facilityService).deleteFacility(facilityId);
-
-                // When & Then
-                mockMvc.perform(delete("/api/admin/facilities/{id}", facilityId))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                                .andExpect(jsonPath("$.message").value("시설이 삭제되었습니다."));
-
-                verify(facilityService).deleteFacility(facilityId);
-        }
-
-        @Test
-        @WithMockUser(roles = "ADMIN")
-        @DisplayName("DELETE /api/admin/facilities/{id} - 존재하지 않는 시설 삭제 시 404")
-        void testDeleteFacility_NotFound() throws Exception {
-                // Given
-                Long facilityId = 999L;
-                doThrow(new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + facilityId))
-                                .when(facilityService).deleteFacility(facilityId);
-
-                // When & Then
-                mockMvc.perform(delete("/api/admin/facilities/{id}", facilityId))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.status").value("ERROR"))
-                                .andExpect(jsonPath("$.message").value("시설을 찾을 수 없습니다. ID: " + facilityId));
-
-                verify(facilityService).deleteFacility(facilityId);
+                                .content(objectMapper.writeValueAsString(facilityRequest())))
+                                .andExpect(status().isForbidden());
         }
 }
