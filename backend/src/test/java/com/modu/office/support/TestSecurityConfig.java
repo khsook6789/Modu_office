@@ -3,6 +3,7 @@ package com.modu.office.support;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * </p>
  */
 @TestConfiguration
+@EnableMethodSecurity // @PreAuthorize, @PostAuthorize 등 메서드 레벨 보안 활성화
 public class TestSecurityConfig {
 
     @Bean
@@ -34,7 +36,10 @@ public class TestSecurityConfig {
                         .requestMatchers("/api/admin/reservations/**").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // GET 공개 허용
-                        .requestMatchers(HttpMethod.GET, "/api/offices/**", "/api/rooms/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/offices/**", "/api/rooms/**",
+                                "/api/reviews/room/**")
+                        .permitAll()
                         // 나머지 - 인증 필요
                         .anyRequest().authenticated());
 

@@ -3,6 +3,10 @@ package com.modu.office.support;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modu.office.controller.*;
 import com.modu.office.controller.Auth.AdminAuthController;
+import com.modu.office.entity.AppUser;
+import com.modu.office.entity.enums.UserRole;
+import org.mockito.Mockito;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import com.modu.office.controller.Auth.ManagerAuthController;
 import com.modu.office.controller.Auth.UserAuthController;
 import com.modu.office.security.JwtAuthenticationFilter;
@@ -100,4 +104,31 @@ public abstract class ControllerTestSupport extends RestDocsSupport {
 
     @MockitoBean
     protected CustomUserDetailsService customUserDetailsService;
+
+    /**
+     * @AuthenticationPrincipal AppUser 주입을 위한 테스트용 AppUser Mock 생성.
+     *
+     *                          <p>
+     *                          Why: AppUser는 Account FK 종속성이 있어 @Builder로 직접 생성이
+     *                          어렵다.
+     *                          Mockito.mock()으로 필요한 동작만 stub하여 슬라이스 테스트에 사용한다.
+     *                          </p>
+     *
+     * @param roleName "USER", "MANAGER", "ADMIN" 등 UserRole 이름
+     */
+    protected AppUser createTestUser(String roleName) {
+        AppUser mockUser = Mockito.mock(AppUser.class);
+        UserRole userRole = UserRole.valueOf(roleName);
+        Mockito.when(mockUser.getId()).thenReturn(1L);
+        Mockito.when(mockUser.getRole()).thenReturn(userRole);
+        Mockito.when(mockUser.getUsername()).thenReturn("test@example.com");
+        java.util.List<org.springframework.security.core.GrantedAuthority> authorities = java.util.Collections
+                .singletonList(new SimpleGrantedAuthority("ROLE_" + roleName));
+        Mockito.doReturn(authorities).when(mockUser).getAuthorities();
+        Mockito.when(mockUser.isEnabled()).thenReturn(true);
+        Mockito.when(mockUser.isAccountNonExpired()).thenReturn(true);
+        Mockito.when(mockUser.isAccountNonLocked()).thenReturn(true);
+        Mockito.when(mockUser.isCredentialsNonExpired()).thenReturn(true);
+        return mockUser;
+    }
 }
