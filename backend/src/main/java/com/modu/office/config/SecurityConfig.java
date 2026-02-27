@@ -45,7 +45,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/*/logout").authenticated()
-                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**", "/swagger-ui/**",
+                                "/v3/api-docs/**", "/openapi3.yaml")
+                        .permitAll()
 
                         // Office management - ADMIN or MANAGER only for write operations
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/offices/**").authenticated()

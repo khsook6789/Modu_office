@@ -47,3 +47,10 @@ app:
   cors:
     allowed-origins:
       - "http://localhost:5173"
+# Swagger / OpenAPI 설정
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /openapi3.yaml
+  api-docs:
+    enabled: true # Swagger UI를 사용하기 위해 필수 (대신 자체 yaml 파일 주입)
