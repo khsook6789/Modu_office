@@ -24,7 +24,8 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
 
     @Override
     @SuppressWarnings("null")
-    public Page<Reservation> search(Long officeId, String guestName, ReservationStatus status, LocalDate startDate,
+    public Page<Reservation> search(Long userId, Long roomId, Long officeId, String guestName, ReservationStatus status,
+            LocalDate startDate,
             LocalDate endDate, Pageable pageable) {
         List<Reservation> content = queryFactory
                 .selectFrom(reservation)
@@ -32,6 +33,8 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
                 .leftJoin(reservation.room).fetchJoin()
                 .leftJoin(reservation.office).fetchJoin()
                 .where(
+                        userIdEq(userId),
+                        roomIdEq(roomId),
                         officeIdEq(officeId),
                         guestNameContains(guestName),
                         statusEq(status),
@@ -46,12 +49,22 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
                 .from(reservation)
                 .leftJoin(reservation.user, appUser)
                 .where(
+                        userIdEq(userId),
+                        roomIdEq(roomId),
                         officeIdEq(officeId),
                         guestNameContains(guestName),
                         statusEq(status),
                         dateBetween(startDate, endDate));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    private BooleanExpression userIdEq(Long userId) {
+        return userId != null ? reservation.user.id.eq(userId) : null;
+    }
+
+    private BooleanExpression roomIdEq(Long roomId) {
+        return roomId != null ? reservation.room.id.eq(roomId) : null;
     }
 
     private BooleanExpression officeIdEq(Long officeId) {

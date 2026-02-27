@@ -141,52 +141,10 @@ public class ReservationService {
     }
 
     /**
-     * ID로 예약 조회 (레거시 — 관리자 내부 호출용)
-     * 
-     * @deprecated IDOR 방어가 필요한 경우 getReservationById(id, requester)를 사용하세요.
-     */
-    @Deprecated
-    public ReservationResponse getReservationById(Long id) {
-        Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
-                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
-        return ReservationResponse.fromEntity(reservation);
-    }
-
-    /**
-     * 모든 예약 조회
-     */
-    public Page<ReservationResponse> getAllReservations(Pageable pageable) {
-        return reservationRepository.findAll(java.util.Objects.requireNonNull(pageable, "Pageable은 필수입니다."))
-                .map(ReservationResponse::fromEntity);
-    }
-
-    /**
-     * 특정 사용자의 예약 조회
-     */
-    public Page<ReservationResponse> getReservationsByUser(Long userId, Pageable pageable) {
-        return reservationRepository.findByUserId(userId, pageable)
-                .map(ReservationResponse::fromEntity);
-    }
-
-    /**
-     * 특정 회의실의 예약 조회
-     */
-    public Page<ReservationResponse> getReservationsByRoom(Long roomId, Pageable pageable) {
-        return reservationRepository.findByRoomId(roomId, pageable)
-                .map(ReservationResponse::fromEntity);
-    }
-
-    /**
-     * 상태별 예약 조회
-     */
-    public Page<ReservationResponse> getReservationsByStatus(ReservationStatus status, Pageable pageable) {
-        return reservationRepository.findByStatus(status, pageable)
-                .map(ReservationResponse::fromEntity);
-    }
-
-    /**
-     * 관리자/운영자용 예약 검색 (동적 쿼리)
-     * 
+     * 예약 검색 (동적 쿼리)
+     *
+     * @param userId    사용자 ID (Optional)
+     * @param roomId    회의실 ID (Optional)
      * @param officeId  지점 ID (Optional)
      * @param guestName 예약자 이름 (Optional, contains)
      * @param status    예약 상태 (Optional)
@@ -195,9 +153,9 @@ public class ReservationService {
      * @param pageable  페이징 정보
      * @return 검색된 예약 목록 (Page)
      */
-    public Page<ReservationResponse> searchReservations(Long officeId, String guestName, ReservationStatus status,
-            LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        return reservationRepository.search(officeId, guestName, status, startDate, endDate, pageable)
+    public Page<ReservationResponse> searchReservations(Long userId, Long roomId, Long officeId, String guestName,
+            ReservationStatus status, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        return reservationRepository.search(userId, roomId, officeId, guestName, status, startDate, endDate, pageable)
                 .map(ReservationResponse::fromEntity);
     }
 
@@ -337,30 +295,6 @@ public class ReservationService {
     }
 
     /**
-     * 예약 취소 (soft delete)
-     * dead code : 목요일 회의 후 삭제 요망
-     */
-    @Transactional
-    public void cancelReservation(Long id) {
-        Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
-                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
-
-        if (reservation.isCancelled()) {
-            throw new IllegalStateException("이미 취소된 예약입니다.");
-        }
-
-        // 변경 전 데이터 캡처 (취소 전 상태)
-        java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
-
-        reservation.cancel();
-
-        // 예약 취소 이벤트 발행 (감사 로그 자동 기록)
-        eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
-                reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getUser(), null));
-    }
-
-    /**
      * 관리자 권한 예약 강제 취소 (adminReason 포함)
      * <p>
      * MANAGER 또는 ADMIN이 다른 사용자의 예약을 취소할 때 사용합니다.
@@ -412,23 +346,6 @@ public class ReservationService {
                 reservation.getUser().getAccount().getEmail(),
                 java.time.LocalDateTime.now(),
                 adminReason);
-    }
-
-    /**
-     * 예약 삭제 (hard delete)
-     * <p>
-     * WARNING: 이 메서드는 감사 로그 무결성을 해칠 수 있으므로 사용을 지양합니다.
-     * Phase 4에서 제거될 예정입니다.
-     * </p>
-     */
-    @Deprecated
-    @Transactional
-    public void deleteReservation(Long id) {
-        java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다.");
-        if (!reservationRepository.existsById(id)) {
-            throw new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id);
-        }
-        reservationRepository.deleteById(id);
     }
 
     /**

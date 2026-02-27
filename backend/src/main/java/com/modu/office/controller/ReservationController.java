@@ -43,9 +43,6 @@ public class ReservationController {
                 .body(ApiResponse.success("예약이 생성되었습니다.", response));
     }
 
-    /**
-     * 모든 예약 조회 또는 필터링 조회 (페이징 적용)
-     */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ReservationResponse>>> getReservations(
             @RequestParam(required = false) Long customerId,
@@ -62,17 +59,8 @@ public class ReservationController {
             customerId = currentUser.getId();
         }
 
-        Page<ReservationResponse> reservations;
-
-        if (customerId != null) {
-            reservations = reservationService.getReservationsByUser(customerId, pageable);
-        } else if (roomId != null) {
-            reservations = reservationService.getReservationsByRoom(roomId, pageable);
-        } else if (status != null) {
-            reservations = reservationService.getReservationsByStatus(status, pageable);
-        } else {
-            reservations = reservationService.getAllReservations(pageable);
-        }
+        Page<ReservationResponse> reservations = reservationService.searchReservations(
+                customerId, roomId, null, null, status, null, null, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(reservations));
     }
@@ -94,7 +82,7 @@ public class ReservationController {
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<ReservationResponse> results = reservationService.searchReservations(
-                officeId, guestName, status, startDate, endDate, pageable);
+                null, null, officeId, guestName, status, startDate, endDate, pageable);
 
         return ResponseEntity.ok(ApiResponse.success("예약 검색 결과", results));
     }
