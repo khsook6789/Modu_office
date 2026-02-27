@@ -118,7 +118,7 @@ class ReservationRepositoryCustomTest {
         void searchByOfficeId() {
                 // When
                 Page<Reservation> result = reservationRepository.search(
-                                officeA.getId(), null, null, null, null, PageRequest.of(0, 10));
+                                null, null, officeA.getId(), null, null, null, null, PageRequest.of(0, 10));
 
                 // Then
                 assertThat(result.getContent()).hasSize(2)
@@ -131,7 +131,7 @@ class ReservationRepositoryCustomTest {
         void searchByGuestName() {
                 // When
                 Page<Reservation> result = reservationRepository.search(
-                                null, "Ali", null, null, null, PageRequest.of(0, 10));
+                                null, null, null, "Ali", null, null, null, PageRequest.of(0, 10));
 
                 // Then (Alice reserves Res 1 and Res 3)
                 assertThat(result.getContent()).hasSize(2)
@@ -144,7 +144,7 @@ class ReservationRepositoryCustomTest {
         void searchByStatus() {
                 // When
                 Page<Reservation> result = reservationRepository.search(
-                                null, null, ReservationStatus.PENDING, null, null, PageRequest.of(0, 10));
+                                null, null, null, null, ReservationStatus.PENDING, null, null, PageRequest.of(0, 10));
 
                 // Then (Res 2 is PENDING)
                 assertThat(result.getContent()).hasSize(1)
@@ -159,7 +159,7 @@ class ReservationRepositoryCustomTest {
 
                 // When: Search for Today only
                 Page<Reservation> result = reservationRepository.search(
-                                null, null, null, todayDate, todayDate, PageRequest.of(0, 10));
+                                null, null, null, null, null, todayDate, todayDate, PageRequest.of(0, 10));
 
                 // Then (Res 1 is Today)
                 assertThat(result.getContent()).hasSize(1)
@@ -172,7 +172,7 @@ class ReservationRepositoryCustomTest {
         void searchByComplexConditions() {
                 // When: Office A AND Guest=Bob
                 Page<Reservation> result = reservationRepository.search(
-                                officeA.getId(), "Bob", null, null, null, PageRequest.of(0, 10));
+                                null, null, officeA.getId(), "Bob", null, null, null, PageRequest.of(0, 10));
 
                 // Then (Res 2)
                 assertThat(result.getContent()).hasSize(1)

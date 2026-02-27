@@ -70,7 +70,8 @@ class ReservationControllerTest {
     void searchReservations_Manager_Success() throws Exception {
         // Given
         Page<ReservationResponse> emptyPage = new PageImpl<>(Collections.emptyList());
-        given(reservationService.searchReservations(any(), any(), any(), any(), any(), any(Pageable.class)))
+        given(reservationService.searchReservations(any(), any(), any(), any(), any(), any(), any(),
+                any(Pageable.class)))
                 .willReturn(emptyPage);
 
         // When & Then
@@ -104,7 +105,8 @@ class ReservationControllerTest {
     void searchReservations_Admin_Success() throws Exception {
         // Given
         Page<ReservationResponse> emptyPage = new PageImpl<>(Collections.emptyList());
-        given(reservationService.searchReservations(any(), any(), any(), any(), any(), any(Pageable.class)))
+        given(reservationService.searchReservations(any(), any(), any(), any(), any(), any(), any(),
+                any(Pageable.class)))
                 .willReturn(emptyPage);
 
         // When & Then
