@@ -72,7 +72,7 @@ public class ReservationService {
                     .findById(java.util.Objects.requireNonNull(request.getRoomId(), "회의실 ID는 필수입니다."))
                     .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + request.getRoomId()));
 
-            Long userId = request.getUserId();
+            Long userId = java.util.Objects.requireNonNull(request.getUserId(), "사용자 ID는 필수입니다.");
             AppUser user = appUserRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
@@ -156,7 +156,7 @@ public class ReservationService {
      * 모든 예약 조회
      */
     public Page<ReservationResponse> getAllReservations(Pageable pageable) {
-        return reservationRepository.findAll(pageable)
+        return reservationRepository.findAll(java.util.Objects.requireNonNull(pageable, "Pageable은 필수입니다."))
                 .map(ReservationResponse::fromEntity);
     }
 

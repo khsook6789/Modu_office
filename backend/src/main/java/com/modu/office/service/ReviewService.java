@@ -31,7 +31,8 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse createReview(AppUser user, ReviewRequest request) {
-        Reservation reservation = reservationRepository.findById(request.getReservationId())
+        Reservation reservation = reservationRepository
+                .findById(java.util.Objects.requireNonNull(request.getReservationId(), "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
 
         // 예약자 본인 확인
@@ -61,13 +62,13 @@ public class ReviewService {
                 .content(request.getContent())
                 .build();
 
-        Review savedReview = reviewRepository.save(review);
+        Review savedReview = reviewRepository.save(java.util.Objects.requireNonNull(review, "리뷰는 필수입니다."));
         return ReviewResponse.fromEntity(savedReview);
     }
 
     @Transactional
     public ReviewResponse updateReview(Long reviewId, AppUser user, ReviewUpdateRequest request) {
-        Review review = reviewRepository.findById(reviewId)
+        Review review = reviewRepository.findById(java.util.Objects.requireNonNull(reviewId, "후기 ID는 필수입니다."))
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 후기입니다."));
 
         // 작성자 본인 확인
@@ -87,7 +88,7 @@ public class ReviewService {
 
     @Transactional
     public void deleteReview(Long reviewId, AppUser user) {
-        Review review = reviewRepository.findById(reviewId)
+        Review review = reviewRepository.findById(java.util.Objects.requireNonNull(reviewId, "후기 ID는 필수입니다."))
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 후기입니다."));
 
         // 작성자 본인 확인 또는 관리자 확인 (유해 리뷰 등 강제 삭제 용도)

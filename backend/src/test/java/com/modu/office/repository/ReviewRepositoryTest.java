@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Import;
 import com.modu.office.config.QueryDslConfig;
 import com.modu.office.config.JpaConfig;
 
+@SuppressWarnings("null")
 @DataJpaTest
 @ActiveProfiles("test")
 @Import({ QueryDslConfig.class, JpaConfig.class })
