@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import org.springframework.context.annotation.Import;
+
 /**
  * 모든 Controller 테스트의 공통 기반 클래스.
  *
@@ -24,6 +26,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
  * 주의: AuditLogController는 UpdateLogService를 사용함 (AuditLogService 없음).
  * </p>
  */
+@Import(TestSecurityConfig.class)
 @WebMvcTest(controllers = {
         // Auth
         UserAuthController.class,
