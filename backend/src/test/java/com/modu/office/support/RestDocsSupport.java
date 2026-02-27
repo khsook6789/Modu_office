@@ -22,22 +22,23 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
  * 각 테스트 클래스가 문서화 로직에만 집중할 수 있도록 분리.
  * </p>
  */
+@SuppressWarnings("null")
 @ExtendWith(RestDocumentationExtension.class)
 public abstract class RestDocsSupport {
 
-    @Autowired
-    protected MockMvc mockMvc;
+        @Autowired
+        protected MockMvc mockMvc;
 
-    @BeforeEach
-    void setUpRestDocs(WebApplicationContext webApplicationContext,
-            RestDocumentationContextProvider provider) {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(springSecurity())
-                .apply(MockMvcRestDocumentation.documentationConfiguration(provider)
-                        .operationPreprocessors()
-                        .withRequestDefaults(prettyPrint())
-                        .withResponseDefaults(prettyPrint()))
-                .addFilters(new CharacterEncodingFilter("UTF-8", true))
-                .build();
-    }
+        @BeforeEach
+        void setUpRestDocs(WebApplicationContext webApplicationContext,
+                        RestDocumentationContextProvider provider) {
+                this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                                .apply(springSecurity())
+                                .apply(MockMvcRestDocumentation.documentationConfiguration(provider)
+                                                .operationPreprocessors()
+                                                .withRequestDefaults(prettyPrint())
+                                                .withResponseDefaults(prettyPrint()))
+                                .addFilters(new CharacterEncodingFilter("UTF-8", true))
+                                .build();
+        }
 }

@@ -26,6 +26,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("null")
 @DisplayName("[Controller] Reservation API")
 class ReservationControllerTest extends ControllerTestSupport {
 

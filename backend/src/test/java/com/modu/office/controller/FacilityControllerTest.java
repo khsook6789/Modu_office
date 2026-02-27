@@ -24,6 +24,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("null")
 @DisplayName("[Controller] Facility API")
 class FacilityControllerTest extends ControllerTestSupport {
 

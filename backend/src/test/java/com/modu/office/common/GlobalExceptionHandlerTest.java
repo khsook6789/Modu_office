@@ -6,10 +6,7 @@ import com.modu.office.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,41 +24,36 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.modu.office.security.JwtAuthenticationFilter;
+import com.modu.office.config.SecurityConfig;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 /**
- * GlobalExceptionHandler 통합 테스트
- * 
- * addFilters = false로 Spring Security Filter를 비활성화하여
- * 인증 없이 예외 처리 메커니즘만 검증합니다.
+ * GlobalExceptionHandler 슬라이스 테스트
+ *
+ * @WebMvcTest를 사용하여 Controller 레이어(TestController)와 Advice 레이어만 격리하여 검증합니다.
+ *              excludeFilters 속성을 통해 Security 관련 필터가 스캔되지 않도록 제외했습니다.
  */
-@SpringBootTest
+@WebMvcTest(controllers = GlobalExceptionHandlerTest.TestController.class, excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { JwtAuthenticationFilter.class,
+                SecurityConfig.class })
+})
 @AutoConfigureMockMvc(addFilters = false)
-@org.springframework.test.context.ActiveProfiles("test")
-@org.springframework.boot.context.properties.EnableConfigurationProperties(com.modu.office.config.GoogleProperties.class)
+@Import(GlobalExceptionHandlerTest.TestController.class)
 class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @org.springframework.test.context.bean.override.mockito.MockitoBean
-    private com.modu.office.service.GeocodingService geocodingService;
-
-    /**
-     * 테스트용 Bean Configuration
-     */
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public TestController testController() {
-            return new TestController();
-        }
-    }
 
     /**
      * 테스트용 컨트롤러
      * 각종 예외를 발생시키는 엔드포인트 제공
      */
     @RestController
-    static class TestController {
+    public static class TestController {
 
         @GetMapping("/test/resource-not-found")
         public String throwResourceNotFoundException() {
