@@ -1,7 +1,7 @@
 /* ===== Admin Dashboard ===== */
 .admin-dashboard {
     min-height: 100vh;
-    background: #f0f2f8;
+    background: var(--color-bg-main);
     padding: 2rem;
 }
 

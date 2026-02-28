@@ -1,0 +1,360 @@
+/* ===== Booking Page Premium Styles ===== */
+.booking-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Page Header */
+.booking-header {
+    margin-bottom: 1rem;
+}
+
+.booking-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    margin-bottom: 0.5rem;
+}
+
+.booking-subtitle {
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+/* Room Info Banner */
+.booking-room-banner {
+    display: flex;
+    gap: 2rem;
+    background: var(--color-bg-card);
+    border: 1px solid #e2e8f0;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    align-items: center;
+}
+
+.booking-room-img {
+    width: 180px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.booking-room-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.booking-room-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+}
+
+.booking-room-info {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.booking-room-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-top: 0.25rem;
+}
+
+/* Split Layout for Form and Summary */
+.booking-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .booking-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Left: Form Area */
+.booking-form-section {
+    background: var(--color-bg-card);
+    border: 1px solid #e2e8f0;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.booking-section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Custom Input Wrapper for Booking form */
+.booking-input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .booking-input-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Form Inputs Customization */
+.booking-form-section .input-field,
+.booking-custom-select {
+    background: var(--color-bg-main);
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0 1.25rem;
+    height: 60px;
+    color: var(--color-text-main);
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.booking-form-section .input-field:focus,
+.booking-custom-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(27, 89, 248, 0.15);
+    outline: none;
+    background: var(--color-bg-card);
+}
+
+.booking-form-section .booking-label {
+    color: var(--color-text-main);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    display: block;
+    font-size: 0.95rem;
+}
+
+/* Custom Select Arrow */
+.booking-custom-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.25rem top 50%;
+    background-size: 0.65rem auto;
+    padding-right: 2.5rem;
+}
+
+/* Make standard date/time pickers look better */
+.booking-form-section input[type="date"]::-webkit-calendar-picker-indicator,
+.booking-form-section input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: 0.2s;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.booking-form-section input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.booking-form-section input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background: rgba(148, 163, 184, 0.2);
+}
+
+/* Guest Counter */
+.guest-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-bg-main);
+    padding: 0 0.5rem;
+    height: 60px;
+    border-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    width: 100%;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.btn-counter {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    background: var(--color-bg-card);
+    color: var(--color-text-main);
+    font-size: 1.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Premium physical button feel */
+}
+
+.btn-counter:hover:not(:disabled) {
+    border-color: #94a3b8;
+    color: var(--color-primary);
+    background: var(--color-bg-hover);
+}
+
+.btn-counter:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.guest-count-display {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    text-align: center;
+    flex: 1;
+}
+
+/* Right: Summary Widget (Sticky) */
+.booking-summary-widget {
+    background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    position: sticky;
+    top: 6rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--color-text-sub);
+    font-size: 0.95rem;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.summary-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 1.5rem 0;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+}
+
+.total-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.total-amount {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    line-height: 1;
+}
+
+.btn-book-submit {
+    width: 100%;
+    padding: 1.25rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    border-radius: 1rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(27, 89, 248, 0.25);
+}
+
+.btn-book-submit:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(27, 89, 248, 0.35);
+}
+
+/* Modal Enhancements */
+.payment-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.payment-modal-card {
+    background: var(--color-bg-card);
+    border: 1px solid #e2e8f0;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+}
+
+.payment-method-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid #cbd5e1;
+    background: var(--color-bg-main);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.payment-method-btn:hover {
+    background: var(--color-bg-hover);
+}
+
+.payment-method-btn.selected {
+    border-color: var(--color-primary);
+    background: rgba(27, 89, 248, 0.1);
+}
+
+.payment-method-icon {
+    font-size: 1.5rem;
+}
+
+.payment-method-info {
+    flex: 1;
+}
+
+.payment-method-name {
+    font-weight: 700;
+    color: var(--color-text-main);
+    font-size: 1rem;
+    margin-bottom: 0.125rem;
+}
+
+.payment-method-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+}

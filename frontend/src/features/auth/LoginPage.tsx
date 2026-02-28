@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Input from '../../components/Input';
 import { authApi } from './api/auth.api';
-import './LoginPage.css';
+import './AuthStyles.css';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -20,20 +20,16 @@ export default function LoginPage() {
 
         try {
             const response = await authApi.login({ email, password });
-            
-            // Map backend response to AuthContext User type
             const userData = {
                 id: String(response.user.id),
                 name: response.user.name,
                 email: response.user.email,
                 role: response.user.role
             };
-
             login(userData, response.accessToken);
             if (response.refreshToken) {
                 localStorage.setItem('refreshToken', response.refreshToken);
             }
-
             navigate('/rooms');
         } catch (err: any) {
             console.error('Login error:', err);
@@ -44,64 +40,68 @@ export default function LoginPage() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '3rem' }}>
-            <Link to="/" style={{ textDecoration: 'none', marginBottom: '2rem' }}>
-                <span className="text-gradient font-bold" style={{ fontSize: '1.75rem', letterSpacing: '-0.5px' }}>Modu Office</span>
-            </Link>
-        <div className="card login-card" style={{ width: '100%' }}>
-            <div className="text-center mb-lg">
-                <p className="login-title font-bold mb-sm">환영합니다!</p>
-                <p className="login-subtitle text-muted text-sm">서비스 이용을 위해 로그인해주세요.</p>
+        <div className="auth-card">
+            {/* Logo Area */}
+            <div className="auth-logo-area">
+                <Link to="/" className="auth-logo-link">
+                    <span className="auth-logo-dot" />
+                    <span className="auth-logo-text">Modu Office</span>
+                </Link>
+                <p className="auth-logo-tagline">스마트한 공간 예약 플랫폼</p>
             </div>
 
+            <div className="auth-heading">
+                <h2 className="auth-title">로그인</h2>
+                <p className="auth-subtitle">계정에 로그인하여 서비스를 이용하세요</p>
+            </div>
+
+            {/* Error Message */}
             {error && (
-                <div className="alert-error mb-md text-sm p-sm rounded-md">
-                    {error}
+                <div className="auth-error">
+                    ⚠ {error}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-                <Input
-                    label="이메일 주소"
-                    type="email"
-                    placeholder="이메일을 입력하세요"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    fullWidth
-                />
-
-                <Input
-                    label="비밀번호"
-                    type="password"
-                    placeholder="비밀번호를 입력하세요"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    fullWidth
-                />
-
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="auth-form">
+                <div className="input-wrapper" style={{ width: '100%' }}>
+                    <Input
+                        label="이메일 주소"
+                        type="email"
+                        placeholder="example@company.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        fullWidth
+                    />
+                </div>
+                <div className="input-wrapper" style={{ width: '100%' }}>
+                    <Input
+                        label="비밀번호"
+                        type="password"
+                        placeholder="비밀번호를 입력하세요"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        fullWidth
+                    />
+                </div>
                 <button
                     type="submit"
-                    className="btn btn-primary login-btn w-full mt-md text-md py-3"
+                    className="auth-btn-submit"
                     disabled={loading}
                 >
                     {loading ? '로그인 중...' : '로그인'}
                 </button>
             </form>
 
-            <div className="text-center mt-lg text-sm login-footer">
-                <span className="text-muted">계정이 없으신가요? </span>
-                <Link to="/signup" className="text-primary hover:underline">
-                    회원가입
-                </Link>
-                <div className="mt-sm">
-                    <Link to="/admin/signup" className="text-xs text-muted hover:text-primary">
-                        관리자 회원가입
-                    </Link>
-                </div>
+            {/* Footer Links */}
+            <div className="auth-footer">
+                계정이 없으신가요?
+                <Link to="/signup" className="auth-footer-link">회원가입</Link>
             </div>
-        </div>
+            
+            <Link to="/admin/signup" className="auth-admin-link">관리자 회원가입 (테스트용)</Link>
         </div>
     );
 }

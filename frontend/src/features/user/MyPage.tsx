@@ -1,63 +1,76 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import './MyPage.css';
 
 export default function MyPage() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     const handleWithdrawal = () => {
-        if (window.confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-            // Call API to delete user
+        if (window.confirm('정말로 탈퇴하시겠습니까? 관련 데이터가 모두 삭제됩니다.')) {
+            // TODO: Call API to delete user
             alert('회원 탈퇴가 완료되었습니다.');
             logout();
             navigate('/login');
         }
     };
 
-    if (!user) return <div>로그인이 필요합니다.</div>;
+    if (!user) return <div className="mypage-container"><p>로딩 중이거나 로그인이 필요합니다.</p></div>;
+
+    const initial = user.name ? user.name.charAt(0).toUpperCase() : '?';
 
     return (
-        <div className="container mx-auto p-md max-w-4xl">
-            <h1 className="text-3xl font-bold mb-xl">마이페이지</h1>
+        <div className="mypage-container">
+            <div className="mypage-content">
+                <div className="mypage-header">
+                    <h1 className="mypage-title">마이<span>페이지</span></h1>
+                </div>
 
-            {/* Content simplified to just profile info since wishlist is gone */}
-            <div className="max-w-2xl mx-auto">
-                <div className="card bg-white shadow-sm p-xl mb-lg">
-                    <div className="flex items-center mb-lg">
-                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-2xl mr-md font-bold text-gray-600">
-                            {user.name.charAt(0).toUpperCase()}
+                <div className="mypage-card">
+                    {/* Profile Section */}
+                    <div className="profile-header">
+                        <div className="profile-avatar">
+                            {initial}
                         </div>
-                        <div>
-                            <h2 className="text-xl font-bold">{user.name}</h2>
-                            <p className="text-muted">{user.email}</p>
-                            <span className="inline-block mt-xs px-2 py-0.5 bg-gray-100 text-xs rounded text-gray-600 font-medium">
-                                {user.role}
+                        <div className="profile-info">
+                            <h2 className="profile-name">{user.name}</h2>
+                            <p className="profile-email">{user.email}</p>
+                            <span className={`profile-role-badge ${user.role}`}>
+                                {user.role === 'USER' ? '일반 사용자' : user.role === 'MANAGER' ? '운영자' : '관리자'}
                             </span>
                         </div>
                     </div>
 
-                    <hr className="my-lg border-gray-100" />
+                    <hr className="mypage-divider" />
 
-                    <h3 className="font-bold mb-md text-lg">계정 설정</h3>
-                    <div className="space-y-sm">
-                        <button className="w-full text-left p-sm hover:bg-gray-50 rounded flex justify-between items-center transition-colors">
-                            <span>비밀번호 변경</span>
-                            <span className="text-xs text-muted bg-gray-100 px-2 py-1 rounded">준비중</span>
+                    {/* Settings Section */}
+                    <h3 className="settings-section-title">계정 및 알림 설정</h3>
+                    <div className="settings-list">
+                        <button className="settings-btn" onClick={() => alert('비밀번호 변경 기능은 준비 중입니다.')}>
+                            <span>🔒 비밀번호 변경</span>
+                            <span className="settings-badge gray">준비중</span>
                         </button>
-                        <button className="w-full text-left p-sm hover:bg-gray-50 rounded flex justify-between items-center transition-colors">
-                            <span>알림 설정</span>
-                            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded font-bold">ON</span>
+                        <button className="settings-btn">
+                            <span>🔔 알림 수신 동의</span>
+                            <span className="settings-badge green">ON</span>
+                        </button>
+                        {user.role === 'USER' && (
+                            <button className="settings-btn" onClick={() => navigate('/my-bookings')}>
+                                <span>📋 내 예약 내역 보기</span>
+                                <span style={{ color: 'var(--color-primary)' }}>→</span>
+                            </button>
+                        )}
+                        <button className="settings-btn" onClick={logout} style={{ color: '#ef4444' }}>
+                            <span>🚪 로그아웃</span>
                         </button>
                     </div>
-                </div>
 
-                <div className="text-right mt-lg">
-                    <button
-                        onClick={handleWithdrawal}
-                        className="text-red-500 text-sm hover:underline hover:text-red-700 transition-colors"
-                    >
-                        회원 탈퇴하기
-                    </button>
+                    {/* Danger Zone */}
+                    <div className="danger-zone">
+                        <button onClick={handleWithdrawal} className="btn-withdraw">
+                            회원 탈퇴하기
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

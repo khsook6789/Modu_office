@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// import { useAuth } from '../../contexts/AuthContext'; // Removed unused import
 import Input from '../../components/Input';
 import { authApi } from './api/auth.api';
-import './SignupPage.css';
+import './AuthStyles.css';
 
 export default function SignupPage() {
     const [userType, setUserType] = useState<'USER' | 'MANAGER'>('USER');
@@ -11,10 +10,12 @@ export default function SignupPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        setError('');
         setLoading(true);
 
         try {
@@ -27,96 +28,107 @@ export default function SignupPage() {
                 alert('파트너(운영자) 가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.');
                 navigate('/login');
             }
-        } catch (error: any) {
-            console.error('Signup error:', error);
-            alert(error.message || '회원가입에 실패했습니다.');
+        } catch (err: any) {
+            console.error('Signup error:', err);
+            setError(err.message || '회원가입에 실패했습니다.');
+        } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '3rem' }}>
-            <Link to="/" style={{ textDecoration: 'none', marginBottom: '2rem' }}>
-                <span className="text-gradient font-bold" style={{ fontSize: '1.75rem', letterSpacing: '-0.5px' }}>Modu Office</span>
-            </Link>
-        <div className="card signup-card" style={{ width: '100%' }}>
-            <div className="text-center mb-md">
-                <h1 className="signup-title font-bold mb-xs">회원가입</h1>
-                <p className="signup-subtitle text-muted text-sm">Modu Office와 함께하세요</p>
+        <div className="auth-card wide">
+            {/* Logo Area */}
+            <div className="auth-logo-area">
+                <Link to="/" className="auth-logo-link">
+                    <span className="auth-logo-dot" />
+                    <span className="auth-logo-text">Modu Office</span>
+                </Link>
+                <p className="auth-logo-tagline">무료 가입으로 시작해보세요</p>
+            </div>
+
+            <div className="auth-heading">
+                <h2 className="auth-title">회원가입</h2>
+                <p className="auth-subtitle">Modu Office와 함께 새로운 공간 경험을 시작하세요</p>
             </div>
 
             {/* User Type Toggle */}
-            <div className="flex justify-center mb-md">
-                <div className="flex bg-gray-100 p-1 rounded-lg" style={{ background: '#f5f5f5', display: 'inline-flex' }}>
-                    <button
-                        type="button"
-                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'USER'
-                            ? 'bg-primary text-white shadow-md'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                        onClick={() => setUserType('USER')}
-                    >
-                        일반 회원
-                    </button>
-                    <button
-                        type="button"
-                        className={`px-4 py-2 text-sm rounded-md transition-all ${userType === 'MANAGER'
-                                ? 'bg-white shadow text-primary font-bold'
-                                : 'text-muted hover:text-gray-700'
-                            }`}
-                        onClick={() => setUserType('MANAGER')}
-                    >
-                        오피스 운영자
-                    </button>
-                </div>
+            <div className="auth-type-toggle">
+                <button
+                    type="button"
+                    className={`auth-type-btn ${userType === 'USER' ? 'active' : ''}`}
+                    onClick={() => setUserType('USER')}
+                >
+                    일반 회원
+                </button>
+                <button
+                    type="button"
+                    className={`auth-type-btn ${userType === 'MANAGER' ? 'active' : ''}`}
+                    onClick={() => setUserType('MANAGER')}
+                >
+                    오피스 운영자
+                </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-                <Input
-                    label={userType === 'USER' ? "이름" : "대표자명"}
-                    type="text"
-                    placeholder={userType === 'USER' ? "홍길동" : "사업자명 또는 대표자명"}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    fullWidth
-                />
+            {/* Error Message */}
+            {error && (
+                <div className="auth-error">
+                    ⚠ {error}
+                </div>
+            )}
 
-                <Input
-                    label="이메일 주소"
-                    type="email"
-                    placeholder="name@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    fullWidth
-                />
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="auth-form">
+                <div className="input-wrapper" style={{ width: '100%' }}>
+                    <Input
+                        label={userType === 'USER' ? "이름" : "사업자명 (또는 대표자명)"}
+                        type="text"
+                        placeholder={userType === 'USER' ? "홍길동" : "모두컴퍼니"}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        fullWidth
+                    />
+                </div>
 
-                <Input
-                    label="비밀번호"
-                    type="password"
-                    placeholder="비밀번호를 입력해주세요"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    fullWidth
-                />
+                <div className="input-wrapper" style={{ width: '100%' }}>
+                    <Input
+                        label="이메일 주소"
+                        type="email"
+                        placeholder="name@company.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        fullWidth
+                    />
+                </div>
+
+                <div className="input-wrapper" style={{ width: '100%' }}>
+                    <Input
+                        label="비밀번호"
+                        type="password"
+                        placeholder="비밀번호를 입력해주세요"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        fullWidth
+                    />
+                </div>
 
                 <button
                     type="submit"
-                    className="btn btn-primary signup-btn w-full mt-md text-md py-3"
+                    className="auth-btn-submit"
                     disabled={loading}
                 >
-                    {loading ? '가입 처리 중...' : (userType === 'USER' ? '회원가입 하기' : '파트너 가입 신청')}
+                    {loading ? '가입 처리 중...' : (userType === 'USER' ? '가입하기' : '파트너 신청')}
                 </button>
             </form>
 
-            <div className="text-center mt-lg text-sm signup-footer">
-                <span className="text-muted">이미 계정이 있으신가요? </span>
-                <Link to="/login" className="text-primary hover:underline">
-                    로그인
-                </Link>
+            {/* Footer Links */}
+            <div className="auth-footer">
+                이미 계정이 있으신가요?
+                <Link to="/login" className="auth-footer-link">로그인</Link>
             </div>
-        </div>
         </div>
     );
 }

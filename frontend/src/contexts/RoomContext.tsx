@@ -30,9 +30,8 @@ export function RoomProvider({ children }: { children: ReactNode }) {
         fetchRooms();
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem('rooms', JSON.stringify(rooms));
-    }, [rooms]);
+    // rooms 변경 시 localStorage 저장을 제거함
+    // (초기 mount 시 빈 배열로 덮어쓰는 버그 방지 - API fetch가 비동기라 완료 전에 저장됨)
 
 
 

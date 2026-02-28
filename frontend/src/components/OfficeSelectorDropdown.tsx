@@ -35,9 +35,9 @@ export const OfficeSelectorDropdown: React.FC = () => {
                     outline: 'none'
                 }}
             >
-                <option value="" style={{ background: 'var(--color-bg-dark)' }}>-- 오피스를 선택하세요 --</option>
+                <option value="" style={{ background: '#ffffff', color: '#0f172a' }}>-- 오피스를 선택하세요 --</option>
                 {offices.map((office) => (
-                    <option key={office.id} value={office.id} style={{ background: 'var(--color-bg-dark)' }}>
+                    <option key={office.id} value={office.id} style={{ background: '#ffffff', color: '#0f172a' }}>
                         {office.name} ({office.location})
                     </option>
                 ))}

@@ -99,21 +99,21 @@ function RoomsListPageContent() {
     return (
         <div className="rooms-page">
             <div className="rooms-page-header">
-                <div>
+                <div className="rooms-title-area">
                     <h1 className="text-3xl font-bold text-gradient">공간 예약</h1>
-                    <p className="rooms-subtitle">회의에 적합한 공간을 찾아보세요</p>
+                    <p className="rooms-subtitle">최고의 회의 경험을 위한 완벽한 공간을 찾아보세요</p>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div className="rooms-actions">
                     {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
                         <>
                             <button 
-                                className="btn btn-secondary"
+                                className="btn-action-outline"
                                 onClick={() => setIsOfficeModalOpen(true)}
                             >
-                                + 오피스 관리
+                                오피스 관리
                             </button>
                             <button 
-                                className="btn btn-primary"
+                                className="btn-action-primary"
                                 onClick={() => setIsModalOpen(true)}
                                 disabled={!selectedOfficeId}
                                 title={!selectedOfficeId ? '먼저 오피스를 선택해주세요' : ''}
@@ -125,25 +125,28 @@ function RoomsListPageContent() {
                 </div>
             </div>
 
-            {/* Office Selector */}
-            <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: 'var(--color-bg-card)', border: 'var(--glass-border)', borderRadius: 'var(--radius-lg)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
+            {/* Office Selector Panel */}
+            <div className="office-select-panel">
+                <div className="office-select-header">
                     <div style={{ flex: 1 }}>
                         <OfficeSelectorDropdown />
                     </div>
                     {offices.length === 0 && (user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
-                        <button className="btn btn-primary" onClick={() => setIsOfficeModalOpen(true)}>
-                            지금 오피스 만들기
+                        <button className="btn-action-primary" onClick={() => setIsOfficeModalOpen(true)}>
+                            첫 오피스 만들기
                         </button>
                     )}
                 </div>
+                
                 {selectedOffice && (
-                    <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <p style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
-                            📍 {selectedOffice.location} | 🕒 {selectedOffice.openTime} - {selectedOffice.closeTime}
-                        </p>
+                    <div className="office-select-info">
+                        <div className="office-info-text">
+                            <span>📍 {selectedOffice.location}</span>
+                            <span>🕒 {selectedOffice.openTime} - {selectedOffice.closeTime}</span>
+                        </div>
                         {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
                             <button
+                                className="btn-action-danger"
                                 onClick={async () => {
                                     if (confirm(`"${selectedOffice.name}" 오피스를 삭제하시겠습니까?\n⚠️ 소속 회의실이 없어야 삭제 가능합니다.`)) {
                                         try {
@@ -154,57 +157,54 @@ function RoomsListPageContent() {
                                         }
                                     }
                                 }}
-                                style={{
-                                    background: 'rgba(239,68,68,0.15)', color: '#fca5a5',
-                                    border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
-                                    padding: '4px 12px', fontSize: '13px', cursor: 'pointer'
-                                }}
                             >
-                                🗑 오피스 삭제
+                                오피스 삭제
                             </button>
                         )}
                     </div>
                 )}
             </div>
 
-            {!!selectedOfficeId && (
-                <div className="filters-bar">
-                    <button
-                        className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-                        onClick={() => setFilter('ALL')}
-                    >
-                        전체
-                    </button>
-                    <button
-                        className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
-                        onClick={() => setFilter('AVAILABLE')}
-                    >
-                        예약 가능
-                    </button>
+            {/* Main Content Area */}
+            {selectedOfficeId ? (
+                <>
+                    {/* Filters */}
+                    <div className="filters-bar">
+                        <button 
+                            className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
+                            onClick={() => setFilter('ALL')}
+                        >
+                            All Rooms
+                        </button>
+                        <button 
+                            className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
+                            onClick={() => setFilter('AVAILABLE')}
+                        >
+                            Available Now
+                        </button>
+                    </div>
+
+                    {/* Rooms Grid */}
+                    {filteredRooms.length > 0 ? (
+                        <div className="rooms-grid">
+                            {filteredRooms.map(room => (
+                                <RoomCard key={room.id} room={room} isManager={user?.role === 'MANAGER' || user?.role === 'ADMIN'} onDelete={deleteRoom} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">🏢</div>
+                            <p className="empty-state-text">이 오피스에는 아직 등록된 회의실이 없습니다.</p>
+                            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>관리자 기능으로 새로운 회의실을 추가해보세요.</p>
+                        </div>
+                    )}
+                </>
+            ) : (
+                <div className="empty-state">
+                    <div className="empty-state-icon">📍</div>
+                    <p className="empty-state-text">위에서 방문하실 오피스 지점을 먼저 선택해주세요.</p>
                 </div>
             )}
-
-            <div className="rooms-grid">
-                {filteredRooms.map(room => (
-                    <RoomCard
-                        key={room.id}
-                        room={room}
-                        isManager={user?.role === 'MANAGER' || user?.role === 'ADMIN'}
-                        onDelete={deleteRoom}
-                    />
-                ))}
-                {filteredRooms.length === 0 && !!selectedOfficeId && (
-                    <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
-                        이 오피스에는 아직 회의실이 없습니다.<br />
-                        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && '회의실을 추가해보세요!'}
-                    </p>
-                )}
-                {!selectedOfficeId && (
-                    <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
-                        오피스를 선택하면 회의실 목록이 표시됩니다.
-                    </p>
-                )}
-            </div>
 
             {/* New Office Modal */}
             {isOfficeModalOpen && (
