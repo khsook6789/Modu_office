@@ -30,7 +30,8 @@ class AdminReservationControllerTest extends ControllerTestSupport {
         private AdminCancelRequest createCancelRequest() {
                 return new AdminCancelRequest(
                                 "침수 피해로 인한 지점 임시 휴업",
-                                true);
+                                true,
+                                null);
         }
 
         private AdminCancelResponse createCancelResponse() {
@@ -51,7 +52,7 @@ class AdminReservationControllerTest extends ControllerTestSupport {
                         AppUser mockManager = createTestUser("MANAGER");
 
                         given(reservationService.adminCancelReservation(eq(1L), eq("침수 피해로 인한 지점 임시 휴업"),
-                                        any(AppUser.class)))
+                                        any(AppUser.class), any()))
                                         .willReturn(createCancelResponse());
 
                         mockMvc.perform(post("/api/admin/reservations/{id}/force-cancel", 1L)
@@ -70,6 +71,10 @@ class AdminReservationControllerTest extends ControllerTestSupport {
                                                                         fieldWithPath("sendNotification")
                                                                                         .type(JsonFieldType.BOOLEAN)
                                                                                         .description("취소 알림 메일 발송 여부")
+                                                                                        .optional(),
+                                                                        fieldWithPath("customRefundRate")
+                                                                                        .type(JsonFieldType.NUMBER)
+                                                                                        .description("관리자 커스텀 환불 비율 (0~100)")
                                                                                         .optional()),
                                                         responseFields(
                                                                         fieldWithPath("status")

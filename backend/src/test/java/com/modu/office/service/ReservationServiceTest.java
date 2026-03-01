@@ -100,8 +100,8 @@ class ReservationServiceTest {
         }
 
         @Test
-        @DisplayName("최소 1시간 요금 적용 검증 (1시간 미만 예약 시)")
-        void totalPriceMinimumOneHourTest() {
+        @DisplayName("분 단위 요금 적용 검증 (1시간 미만 예약 시)")
+        void totalPriceMinuteBasedTest() {
                 // Given
                 BigDecimal pricePerHour = new BigDecimal("5000");
 
@@ -120,8 +120,8 @@ class ReservationServiceTest {
                 // When
                 ReservationResponse response = ReservationResponse.fromEntity(reservation);
 
-                // Then: 1시간 미만이라도 1시간 요금(5000)이 책정되어야 함
-                assertThat(response.getTotalPrice()).isEqualByComparingTo(new BigDecimal("5000"));
+                // Then: 30분 요금(2500.00)이 책정되어야 함
+                assertThat(response.getTotalPrice()).isEqualByComparingTo(new BigDecimal("2500.00"));
         }
 
         @Test

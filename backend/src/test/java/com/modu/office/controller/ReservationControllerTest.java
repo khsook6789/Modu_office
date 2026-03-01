@@ -19,7 +19,7 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.docume
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
+// removed import
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -390,14 +390,109 @@ class ReservationControllerTest extends ControllerTestSupport {
         }
 
         @Test
+        @DisplayName("예약 환불 예상액 조회 - 성공")
+        void getRefundPreview_Success() throws Exception {
+                com.modu.office.dto.response.RefundPreviewResponse response = com.modu.office.dto.response.RefundPreviewResponse
+                                .builder()
+                                .reservationId(100L)
+                                .totalPrice(new BigDecimal("20000"))
+                                .refundRate(50)
+                                .refundAmount(new BigDecimal("10000"))
+                                .cancellationPenalty(new BigDecimal("10000"))
+                                .requestTime(LocalDateTime.now())
+                                .reasonDescriptor("이용 시작 1일 전 취소: 50% 환불")
+                                .build();
+
+                given(reservationService.getRefundPreview(eq(100L), any())).willReturn(response);
+
+                mockMvc.perform(get("/api/reservations/{id}/refund-preview", 100L)
+                                .with(user(createTestUser("USER"))))
+                                .andExpect(status().isOk())
+                                .andDo(document("reservation-refund-preview",
+                                                pathParameters(parameterWithName("id").description("예약 ID")),
+                                                responseFields(
+                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                .description("처리 상태"),
+                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                .description("응답 코드"),
+                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                .description("응답 메시지"),
+                                                                fieldWithPath("data.reservationId")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("예약 ID"),
+                                                                fieldWithPath("data.totalPrice")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("기존 총 결제 금액"),
+                                                                fieldWithPath("data.refundRate")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("기본 환불 비율(%)"),
+                                                                fieldWithPath("data.refundAmount")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("실제 환불 금액"),
+                                                                fieldWithPath("data.cancellationPenalty")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("취소 위약금"),
+                                                                fieldWithPath("data.requestTime")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("조회 기준 시각"),
+                                                                fieldWithPath("data.reasonDescriptor")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("적용 사유 설명"))));
+        }
+
+        @Test
         @DisplayName("예약 취소 (Soft Delete) - 성공")
         void cancelReservation_Success() throws Exception {
-                willDoNothing().given(reservationService).cancelReservation(eq(100L), any());
+                com.modu.office.dto.response.CancelReservationResponse response = com.modu.office.dto.response.CancelReservationResponse
+                                .builder()
+                                .message("예약이 정상적으로 취소되었습니다.")
+                                .refundInfo(com.modu.office.dto.response.RefundPreviewResponse.builder()
+                                                .reservationId(100L)
+                                                .totalPrice(new BigDecimal("20000"))
+                                                .refundRate(100)
+                                                .refundAmount(new BigDecimal("20000"))
+                                                .cancellationPenalty(java.math.BigDecimal.ZERO)
+                                                .requestTime(LocalDateTime.now())
+                                                .reasonDescriptor("이용 시작 7일 이전 취소: 100% 환불")
+                                                .build())
+                                .build();
+
+                given(reservationService.cancelReservation(eq(100L), any(), any())).willReturn(response);
 
                 mockMvc.perform(post("/api/reservations/{id}/cancel", 100L)
                                 .with(user(createTestUser("USER"))))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-cancel",
-                                                pathParameters(parameterWithName("id").description("예약 ID"))));
+                                                pathParameters(parameterWithName("id").description("예약 ID")),
+                                                responseFields(
+                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                .description("처리 상태"),
+                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                .description("응답 코드"),
+                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                .description("응답 메시지"),
+                                                                fieldWithPath("data.message").type(JsonFieldType.STRING)
+                                                                                .description("취소 처리 결과 메시지"),
+                                                                fieldWithPath("data.refundInfo.reservationId")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("예약 ID"),
+                                                                fieldWithPath("data.refundInfo.totalPrice")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("총 결제 금액"),
+                                                                fieldWithPath("data.refundInfo.refundRate")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("환불 비율"),
+                                                                fieldWithPath("data.refundInfo.refundAmount")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("환불 금액"),
+                                                                fieldWithPath("data.refundInfo.cancellationPenalty")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("위약금"),
+                                                                fieldWithPath("data.refundInfo.requestTime")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("처리 시각"),
+                                                                fieldWithPath("data.refundInfo.reasonDescriptor")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("사유 설명"))));
         }
 }
