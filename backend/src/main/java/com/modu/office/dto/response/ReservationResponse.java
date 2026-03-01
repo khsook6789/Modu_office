@@ -52,11 +52,11 @@ public class ReservationResponse {
         java.math.BigDecimal totalPrice = null;
         if (reservation.getRoom() != null && reservation.getRoom().getPrice() != null
                 && reservation.getStartAt() != null && reservation.getEndAt() != null) {
-            long hours = java.time.Duration.between(reservation.getStartAt(), reservation.getEndAt()).toHours();
-            // 최소 1시간 단위로 가정 (또는 비즈니스 로직에 맞춰 조정 가능)
-            if (hours == 0)
-                hours = 1;
-            totalPrice = reservation.getRoom().getPrice().multiply(java.math.BigDecimal.valueOf(hours));
+            long minutes = java.time.Duration.between(reservation.getStartAt(), reservation.getEndAt()).toMinutes();
+            // 시간당 가격(price)을 분당 가격으로 환산하여 곱함
+            java.math.BigDecimal hoursDecimal = java.math.BigDecimal.valueOf(minutes)
+                    .divide(java.math.BigDecimal.valueOf(60), 2, java.math.RoundingMode.HALF_UP);
+            totalPrice = reservation.getRoom().getPrice().multiply(hoursDecimal);
         }
 
         return ReservationResponse.builder()

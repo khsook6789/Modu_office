@@ -44,6 +44,7 @@ public class ReservationService {
     private final OfficeRepository officeRepository;
     private final RoomRepository roomRepository;
     private final AppUserRepository appUserRepository;
+    private final com.modu.office.repository.CancellationPolicyRepository cancellationPolicyRepository;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     /**
@@ -273,10 +274,82 @@ public class ReservationService {
     }
 
     /**
-     * 예약 취소 (소유자 검증 포함)
+     * 환불 정책에 따른 예상 환불 정보 계산
      */
-    @Transactional
-    public void cancelReservation(Long id, AppUser requester) {
+    private com.modu.office.dto.response.RefundPreviewResponse calculateRefund(
+            Reservation reservation,
+            LocalDateTime clientRequestTime,
+            Integer customRefundRate) {
+
+        // 1. 총 가격 계산 (minutes 단위)
+        java.math.BigDecimal totalPrice = java.math.BigDecimal.ZERO;
+        if (reservation.getRoom() != null && reservation.getRoom().getPrice() != null
+                && reservation.getStartAt() != null && reservation.getEndAt() != null) {
+            long minutes = java.time.Duration.between(reservation.getStartAt(), reservation.getEndAt()).toMinutes();
+            java.math.BigDecimal hoursDecimal = java.math.BigDecimal.valueOf(minutes)
+                    .divide(java.math.BigDecimal.valueOf(60), 2, java.math.RoundingMode.HALF_UP);
+            totalPrice = reservation.getRoom().getPrice().multiply(hoursDecimal);
+        }
+
+        int refundRate = 0;
+        String reasonDescriptor = "";
+
+        // 관리자 커스텀 환불률 우선 적용
+        if (customRefundRate != null) {
+            if (customRefundRate < 0 || customRefundRate > 100) {
+                throw new IllegalArgumentException("환불 비율은 0~100 사이여야 합니다.");
+            }
+            refundRate = customRefundRate;
+            reasonDescriptor = "관리자 재량 예외 환불 적용 (" + customRefundRate + "%)";
+        } else {
+            LocalDateTime calculationTime = clientRequestTime != null ? clientRequestTime : LocalDateTime.now();
+            long daysBefore = java.time.Duration.between(calculationTime.toLocalDate().atStartOfDay(),
+                    reservation.getStartAt().toLocalDate().atStartOfDay()).toDays();
+
+            if (daysBefore < 0) {
+                // 이미 예약 날짜가 지난 경우
+                refundRate = 0;
+                reasonDescriptor = "이용 시간이 지나 환불이 불가능합니다.";
+            } else {
+                List<com.modu.office.entity.CancellationPolicy> policies = cancellationPolicyRepository
+                        .findByOfficeIdOrderByDaysBeforeDesc(reservation.getOffice().getId());
+
+                boolean matched = false;
+                for (com.modu.office.entity.CancellationPolicy policy : policies) {
+                    if (daysBefore >= policy.getDaysBefore()) {
+                        refundRate = policy.getRefundRate();
+                        reasonDescriptor = "이용 시작 " + policy.getDaysBefore() + "일 전 취소: " + refundRate + "% 환불";
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (!matched) {
+                    refundRate = 0;
+                    reasonDescriptor = "취소 가능 기간이 경과하여 환불이 불가능합니다.";
+                }
+            }
+        }
+
+        java.math.BigDecimal refundAmount = totalPrice.multiply(java.math.BigDecimal.valueOf(refundRate))
+                .divide(java.math.BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+        java.math.BigDecimal cancellationPenalty = totalPrice.subtract(refundAmount);
+
+        return com.modu.office.dto.response.RefundPreviewResponse.builder()
+                .reservationId(reservation.getId())
+                .totalPrice(totalPrice)
+                .refundRate(refundRate)
+                .refundAmount(refundAmount)
+                .cancellationPenalty(cancellationPenalty)
+                .requestTime(clientRequestTime != null ? clientRequestTime : LocalDateTime.now())
+                .reasonDescriptor(reasonDescriptor)
+                .build();
+    }
+
+    /**
+     * 예약 환불 예상액 조회 (취소 전)
+     */
+    public com.modu.office.dto.response.RefundPreviewResponse getRefundPreview(Long id, AppUser requester) {
         Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
 
@@ -286,12 +359,50 @@ public class ReservationService {
             throw new IllegalStateException("이미 취소된 예약입니다.");
         }
 
+        return calculateRefund(reservation, LocalDateTime.now(), null);
+    }
+
+    /**
+     * 예약 취소 (소유자 검증 포함)
+     */
+    @Transactional
+    public com.modu.office.dto.response.CancelReservationResponse cancelReservation(Long id, AppUser requester,
+            LocalDateTime clientRequestTime) {
+        Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(id, "예약 ID는 필수입니다."))
+                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + id));
+
+        validateOwnership(reservation, requester);
+
+        if (reservation.isCancelled()) {
+            throw new IllegalStateException("이미 취소된 예약입니다.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        // 시간차 공격 방어 (클라이언트 환불 예상액 조회 시간과 실제 취소 시간 비교, 5분 초과 시 예외)
+        if (clientRequestTime != null && java.time.Duration.between(clientRequestTime, now).toMinutes() > 5) {
+            throw new IllegalStateException("환불 정보 조회 후 너무 많은 시간이 경과했습니다. 취소 전 다시 확인해주세요.");
+        }
+
+        com.modu.office.dto.response.RefundPreviewResponse refundInfo = calculateRefund(reservation,
+                clientRequestTime != null ? clientRequestTime : now, null);
+
         java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
         reservation.cancel();
 
+        java.util.Map<String, Object> customData = new java.util.HashMap<>();
+        customData.put("refundRate", refundInfo.getRefundRate());
+        customData.put("refundAmount", refundInfo.getRefundAmount());
+        customData.put("reasonDescriptor", refundInfo.getReasonDescriptor());
+        customData.put("totalPrice", refundInfo.getTotalPrice());
+
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getUser(), null));
+                reservation.getUser(), customData));
+
+        return com.modu.office.dto.response.CancelReservationResponse.builder()
+                .message("예약이 정상적으로 취소되었습니다.")
+                .refundInfo(refundInfo)
+                .build();
     }
 
     /**
@@ -310,7 +421,8 @@ public class ReservationService {
     public com.modu.office.dto.response.AdminCancelResponse adminCancelReservation(
             Long reservationId,
             String adminReason,
-            AppUser adminUser) {
+            AppUser adminUser,
+            Integer customRefundRate) {
 
         Reservation reservation = reservationRepository
                 .findById(java.util.Objects.requireNonNull(reservationId, "예약 ID는 필수입니다."))
@@ -327,16 +439,24 @@ public class ReservationService {
             }
         }
 
+        com.modu.office.dto.response.RefundPreviewResponse refundInfo = calculateRefund(reservation,
+                LocalDateTime.now(), customRefundRate);
+
         // 변경 전 데이터 캡처
         java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
 
         // 예약 취소 처리
         reservation.cancel();
 
-        // customData에 adminReason 포함 (LogEventListener에서 감지)
-        java.util.Map<String, Object> customData = java.util.Map.of("adminReason", adminReason);
+        // customData에 adminReason & 환불 정보 포함
+        java.util.Map<String, Object> customData = new java.util.HashMap<>();
+        customData.put("adminReason", adminReason);
+        customData.put("refundRate", refundInfo.getRefundRate());
+        customData.put("refundAmount", refundInfo.getRefundAmount());
+        customData.put("reasonDescriptor", refundInfo.getReasonDescriptor());
+        customData.put("totalPrice", refundInfo.getTotalPrice());
 
-        // 예약 취소 이벤트 발행 (adminReason 포함)
+        // 예약 취소 이벤트 발행
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
                 adminUser, customData));
