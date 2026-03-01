@@ -62,6 +62,7 @@ public class RoomService {
                 .capacity(request.getCapacity())
                 .category(request.getCategory())
                 .price(request.getPrice())
+                .bufferTime(request.getBufferTime())
                 .build();
 
         Room savedRoom = roomRepository.save(java.util.Objects.requireNonNull(room));
@@ -159,6 +160,9 @@ public class RoomService {
         room.setCapacity(request.getCapacity());
         room.setCategory(request.getCategory());
         room.setPrice(request.getPrice());
+        if (request.getBufferTime() != null) {
+            room.setBufferTime(request.getBufferTime());
+        }
 
         // Facility 관계 재설정
         if (request.getFacilityIds() != null) {
@@ -307,6 +311,7 @@ public class RoomService {
                 .id(room.getId())
                 .officeId(room.getOffice().getId())
                 .name(room.getName())
+                .bufferTime(room.getBufferTime())
                 .roomCode(room.getRoomCode())
                 .floor(room.getFloor())
                 .status(room.getStatus())

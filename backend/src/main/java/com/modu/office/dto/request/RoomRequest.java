@@ -1,6 +1,7 @@
 package com.modu.office.dto.request;
 
 import com.modu.office.entity.enums.RoomStatus;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +31,7 @@ public class RoomRequest {
     private String bannerImageUrl;
 
     @Min(value = 0, message = "정비 시간은 0분 이상이어야 합니다.")
+    @Max(value = 120, message = "정비 시간은 최대 120분까지 설정 가능합니다.")
     private Integer bufferTime;
 
     @NotBlank(message = "회의실 코드는 필수입니다.")

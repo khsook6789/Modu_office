@@ -88,7 +88,7 @@ public class Room extends BaseEntity {
 
     @Builder
     public Room(Office office, String name, String roomCode, Integer floor, RoomStatus status, Integer capacity,
-            String category, BigDecimal price) {
+            String category, BigDecimal price, Integer bufferTime) {
         this.office = office;
         this.officeId = office != null ? office.getId() : null;
         this.name = name;
@@ -98,6 +98,7 @@ public class Room extends BaseEntity {
         this.capacity = capacity;
         this.category = category;
         this.price = price != null ? price : BigDecimal.ZERO;
+        this.bufferTime = bufferTime != null ? bufferTime : 0;
     }
 
     // status는 검증 로직이 있어 수동 setter 유지
