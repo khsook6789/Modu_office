@@ -46,7 +46,7 @@ public class AdminReservationController {
             @AuthenticationPrincipal AppUser admin) {
 
         AdminCancelResponse response = reservationService.adminCancelReservation(
-                id, request.adminReason(), admin);
+                id, request.adminReason(), admin, request.customRefundRate());
 
         return ResponseEntity.ok(ApiResponse.success("예약이 관리자 권한으로 취소되었습니다.", response));
     }

@@ -123,13 +123,27 @@ public class ReservationController {
     }
 
     /**
-     * 예약 취소 (soft delete, IDOR 방어 포함)
+     * 예약 환불 예상액 조회 (취소 전)
      */
-    @PostMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<Void>> cancelReservation(
+    @GetMapping("/{id}/refund-preview")
+    public ResponseEntity<ApiResponse<com.modu.office.dto.response.RefundPreviewResponse>> getRefundPreview(
             @PathVariable Long id,
             @AuthenticationPrincipal AppUser currentUser) {
-        reservationService.cancelReservation(id, currentUser);
-        return ResponseEntity.ok(ApiResponse.success("예약이 취소되었습니다.", null));
+        com.modu.office.dto.response.RefundPreviewResponse response = reservationService.getRefundPreview(id,
+                currentUser);
+        return ResponseEntity.ok(ApiResponse.success("환불 예상액 조회 성공", response));
+    }
+
+    /**
+     * 예약 취소 (soft delete, IDOR 방어 포함, 시간차 방어 옵셔널 파라미터)
+     */
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<com.modu.office.dto.response.CancelReservationResponse>> cancelReservation(
+            @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime clientRequestTime,
+            @AuthenticationPrincipal AppUser currentUser) {
+        com.modu.office.dto.response.CancelReservationResponse response = reservationService.cancelReservation(id,
+                currentUser, clientRequestTime);
+        return ResponseEntity.ok(ApiResponse.success("예약이 취소되었습니다.", response));
     }
 }
