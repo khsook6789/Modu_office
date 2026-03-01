@@ -112,6 +112,25 @@ class RoomControllerTest extends ControllerTestSupport {
         }
 
         @Test
+        @DisplayName("회의실 생성 - 정비 시간(bufferTime) 120분 초과 시 400 반환")
+        @WithMockUser(roles = "MANAGER")
+        void createRoom_fail_bufferTime_validation() throws Exception {
+                RoomRequest invalidRequest = RoomRequest.builder()
+                                .name("테스트 회의실")
+                                .roomCode("ROOM-TEST")
+                                .capacity(10)
+                                .price(BigDecimal.valueOf(30000))
+                                .status(RoomStatus.AVAILABLE)
+                                .bufferTime(130) // 유효성 검증 실패 대상
+                                .build();
+
+                mockMvc.perform(post("/api/offices/{officeId}/rooms", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidRequest)))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
         @DisplayName("지점 내 회의실 목록 조회 - 200 반환 (필터 없음)")
         void getRoomsByOffice_success() throws Exception {
                 given(roomService.getRoomsByOfficeId(anyLong())).willReturn(List.of(roomResponse()));
