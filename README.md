@@ -330,11 +330,12 @@ frontend/
 - `GET /reservations/{id}`: 예약 상세 조회
 - `PUT /reservations/{id}`: 예약 수정
 - `PATCH /reservations/{id}/confirm`: 예약 확정
-- `POST /reservations/{id}/cancel`: 예약 취소
+- `GET /reservations/{id}/refund-preview`: 예약 취소 전 예상 환불 내역 조회
+- `POST /reservations/{id}/cancel`: 예약 취소 (환불 정책 적용)
 
 ### 7. 관리자 - 예약 관리 (Admin Reservation)
 
-- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (Manager/Admin)
+- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (커스텀 환불 비율 지정 가능)
 
 ### 8. 감사 로그 (Audit Log - Admin 전용)
 
