@@ -6,6 +6,7 @@ import { reviewApi, type Review } from '../reviews/api/review.api';
 import ReviewList from '../reviews/components/ReviewList';
 import ReviewForm from '../reviews/components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
+import FavoriteButton from '../../components/FavoriteButton';
 import './RoomDetailPage.css';
 
 export default function RoomDetailPage() {
@@ -122,7 +123,10 @@ export default function RoomDetailPage() {
             <Link to="/rooms" className="back-link">← 다른 공간 찾아보기</Link>
 
             <div className="room-title-section">
-                <h1>{room.name}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <h1 style={{ flex: 1 }}>{room.name}</h1>
+                    <FavoriteButton roomId={roomId} />
+                </div>
                 <p>📍 {room.location}</p>
             </div>
 
