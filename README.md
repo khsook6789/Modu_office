@@ -372,6 +372,15 @@ frontend/
 - `PATCH /reviews/{reviewId}`: 후기 내용 및 평점 수정 (본인 소유만)
 - `DELETE /reviews/{reviewId}`: 후기 삭제 (본인 소유 권한 확인)
 
+### 13. 관리자 대시보드 통계 (Admin Dashboard Stats)
+
+- `GET /admin/stats/occupancy`: 실시간 점유율 조회 (MANAGER는 officeId 필수, ADMIN은 선택)
+- `GET /admin/stats/cancellations`: 취소율 통계 조회
+- `GET /admin/stats/rooms/popular`: 인기 회의실 Top 5 조회
+- `GET /admin/stats/rooms/unpopular`: 비인기 회의실 Top 5 조회
+- `GET /admin/stats/peak-times`: 피크타임 분포 조회
+- `GET /admin/stats/daily-usage`: 일일 총 사용 시간 조회
+
 ---
 
 ## 개발 가이드 - 커밋 메시지 (Commit Message Convention)
