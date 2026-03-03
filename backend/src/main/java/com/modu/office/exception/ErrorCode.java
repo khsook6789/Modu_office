@@ -28,7 +28,13 @@ public enum ErrorCode {
     ROOM_NOT_AVAILABLE(400, "O002", "이용 불가능한 회의실입니다"),
 
     // 서버 에러 (5xx)
-    INTERNAL_SERVER_ERROR(500, "S001", "서버 내부 오류가 발생했습니다");
+    INTERNAL_SERVER_ERROR(500, "S001", "서버 내부 오류가 발생했습니다"),
+
+    // 인증/회원 관련 에러
+    USER_NOT_FOUND(404, "U001", "사용자를 찾을 수 없습니다"),
+
+    // 알림 관련 에러
+    NOTIFICATION_NOT_FOUND(404, "N001", "알림을 찾을 수 없습니다");
 
     private final int status;
     private final String code;

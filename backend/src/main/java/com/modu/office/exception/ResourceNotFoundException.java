@@ -11,6 +11,10 @@ public class ResourceNotFoundException extends BusinessException {
         super(ErrorCode.RESOURCE_NOT_FOUND);
     }
 
+    public ResourceNotFoundException(ErrorCode errorCode) {
+        super(errorCode);
+    }
+
     public ResourceNotFoundException(String customMessage) {
         super(ErrorCode.RESOURCE_NOT_FOUND, customMessage);
     }

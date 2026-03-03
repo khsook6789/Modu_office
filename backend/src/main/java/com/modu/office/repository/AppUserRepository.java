@@ -15,5 +15,9 @@ import java.util.List;
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     java.util.Optional<com.modu.office.entity.AppUser> findByAccount(com.modu.office.entity.Account account);
 
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM AppUser u JOIN u.account a WHERE a.email = :email")
+    java.util.Optional<com.modu.office.entity.AppUser> findByAccountEmail(
+            @org.springframework.data.repository.query.Param("email") String email);
+
     List<AppUser> findByRoleAndApprovalStatus(UserRole role, ManagerApprovalStatus approvalStatus);
 }

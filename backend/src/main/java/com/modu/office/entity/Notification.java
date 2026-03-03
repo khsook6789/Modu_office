@@ -27,8 +27,9 @@ public class Notification {
     private AppUser user;
 
     @Setter
+    @Convert(converter = com.modu.office.entity.converter.NotificationContentConverter.class)
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
-    private String content;
+    private com.modu.office.dto.NotificationPayload content;
 
     @Setter
     @Column(name = "is_read", nullable = false)
@@ -45,7 +46,7 @@ public class Notification {
     }
 
     @Builder
-    public Notification(AppUser user, String content) {
+    public Notification(AppUser user, com.modu.office.dto.NotificationPayload content) {
         this.user = user;
         this.content = content;
         this.isRead = false;
