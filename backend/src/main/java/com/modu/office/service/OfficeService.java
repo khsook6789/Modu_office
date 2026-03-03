@@ -52,7 +52,11 @@ public class OfficeService {
             });
         }
 
-        Office savedOffice = officeRepository.save(java.util.Objects.requireNonNull(officeBuilder.build()));
+        Office office = officeBuilder.build();
+        // V4 신규 필드 설정 (builder에 미포함)
+        office.setDescription(request.getDescription());
+
+        Office savedOffice = officeRepository.save(java.util.Objects.requireNonNull(office));
         return OfficeResponse.fromEntity(savedOffice);
     }
 
@@ -90,6 +94,7 @@ public class OfficeService {
         // Service 레이어에서 직접 필드 업데이트
         office.setName(request.getName());
         office.setLocation(request.getLocation());
+        office.setDescription(request.getDescription());
 
         if (request.getLatitude() != null && request.getLongitude() != null) {
             office.setLatitude(request.getLatitude());

@@ -65,6 +65,13 @@ public class RoomService {
                 .bufferTime(request.getBufferTime())
                 .build();
 
+        // V4 신규 필드 설정
+        room.setDescription(request.getDescription());
+        room.setBannerImageUrl(request.getBannerImageUrl());
+        if (request.getBufferTime() != null) {
+            room.setBufferTime(request.getBufferTime());
+        }
+
         Room savedRoom = roomRepository.save(java.util.Objects.requireNonNull(room));
 
         // Facility 관계 매핑
@@ -160,6 +167,10 @@ public class RoomService {
         room.setCapacity(request.getCapacity());
         room.setCategory(request.getCategory());
         room.setPrice(request.getPrice());
+        // V4 신규 필드 업데이트
+        room.setDescription(request.getDescription());
+        room.setBannerImageUrl(request.getBannerImageUrl());
+
         if (request.getBufferTime() != null) {
             room.setBufferTime(request.getBufferTime());
         }
@@ -311,6 +322,8 @@ public class RoomService {
                 .id(room.getId())
                 .officeId(room.getOffice().getId())
                 .name(room.getName())
+                .description(room.getDescription())
+                .bannerImageUrl(room.getBannerImageUrl())
                 .bufferTime(room.getBufferTime())
                 .roomCode(room.getRoomCode())
                 .floor(room.getFloor())

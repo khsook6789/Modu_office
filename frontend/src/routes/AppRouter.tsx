@@ -24,6 +24,7 @@ import OperatorDashboard from "../features/operator/OperatorDashboard";
 import AdminDashboard from "../features/admin/AdminDashboard";
 import MyPage from "../features/user/MyPage";
 import LandingPage from "../features/landing/LandingPage";
+import FavoritesPage from "../features/favorites/FavoritesPage";
 
 function ProtectedRoute({ children, role }: { children: React.ReactNode, role?: 'USER' | 'ADMIN' | 'MANAGER' }) {
   const { user } = useAuth();
@@ -87,6 +88,12 @@ export default function AppRouter() {
             <Route path="/mypage" element={
               <ProtectedRoute>
                 <MyPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/favorites" element={
+              <ProtectedRoute>
+                <FavoritesPage />
               </ProtectedRoute>
             } />
 

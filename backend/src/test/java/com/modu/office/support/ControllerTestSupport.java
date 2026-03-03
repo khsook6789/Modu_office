@@ -49,6 +49,7 @@ import org.springframework.context.annotation.Import;
         AdminManagerController.class,
         AdminReservationController.class,
         AdminUserController.class,
+        AdminDashboardController.class,
         AuditLogController.class,
         UpdateLogController.class
 })
@@ -92,6 +93,9 @@ public abstract class ControllerTestSupport extends RestDocsSupport {
 
     @MockitoBean
     protected AdminUserService adminUserService;
+
+    @MockitoBean
+    protected AdminDashboardService adminDashboardService;
 
     @MockitoBean
     protected UpdateLogService updateLogService;

@@ -55,16 +55,21 @@ export const roomApi = {
         const params = new URLSearchParams();
         
         if (filter?.capacity) params.append('capacity', filter.capacity.toString());
-        // Add other filters as needed
 
         // Use real backend search endpoint
         // Backend default page size might be 20. We use 100 to get "all".
+        // 응답 구조: axios response.data = { status, message, data: { content: [...] } }
         try {
             const response = await client.get<ApiResponse<PageResponse<RoomResponse>>>('/rooms/search?size=100');
             
-            // Check if response.data.content exists (PageResponse structure)
-            if (response.data && response.data.content) {
-                 return response.data.content.map(mapToRoom);
+            // ApiResponse wrapper: response.data.data.content
+            const pageData = (response.data as any)?.data;
+            if (pageData && pageData.content) {
+                return pageData.content.map(mapToRoom);
+            }
+            // Fallback: 혹시 data가 바로 PageResponse인 경우
+            if (response.data && (response.data as any).content) {
+                return (response.data as any).content.map(mapToRoom);
             }
             return [];
         } catch (error) {

@@ -382,6 +382,15 @@ frontend/
 - `GET /api/notifications/subscribe`: 실시간 개인 알림 SSE 구독
 - `GET /api/notifications/subscribe/rooms/{roomId}`: 특정 회의실 캘린더 실시간 업데이트 SSE 구독
 
+### 14. 관리자 대시보드 통계 (Admin Dashboard Stats)
+
+- `GET /admin/stats/occupancy`: 실시간 점유율 조회 (MANAGER는 officeId 필수, ADMIN은 선택)
+- `GET /admin/stats/cancellations`: 취소율 통계 조회
+- `GET /admin/stats/rooms/popular`: 인기 회의실 Top 5 조회
+- `GET /admin/stats/rooms/unpopular`: 비인기 회의실 Top 5 조회
+- `GET /admin/stats/peak-times`: 피크타임 분포 조회
+- `GET /admin/stats/daily-usage`: 일일 총 사용 시간 조회
+
 ---
 
 ## 개발 가이드 - 커밋 메시지 (Commit Message Convention)

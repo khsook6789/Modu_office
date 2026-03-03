@@ -1,39 +1,190 @@
+/* ===== Rooms List Page Premium Enhancements ===== */
 .rooms-page-header {
-    margin-bottom: var(--spacing-xl);
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rooms-title-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .rooms-subtitle {
-    color: var(--color-text-muted);
-    margin-top: var(--spacing-xs);
+    color: #64748b;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
+/* Actions Header */
+.rooms-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Office Selector Section (Glassmorphism) */
+.office-select-panel {
+    background: #fff;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.04);
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.office-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.office-select-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+}
+
+.office-info-text {
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 600;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Filters Bar */
 .filters-bar {
     display: flex;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
+    background: #fff;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    display: inline-flex;
 }
 
 .filter-btn {
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.filter-btn:hover,
-.filter-btn.active {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border-color: rgba(59, 130, 246, 0.3);
+.filter-btn:hover {
+    color: #0f172a;
+    background: #f1f5f9;
 }
 
+.filter-btn.active {
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+
+/* Button variants for actions */
+.btn-action-outline {
+    background: transparent;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-action-outline:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.btn-action-danger {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-action-danger:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+.btn-action-primary {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(27, 89, 248, 0.2);
+}
+
+.btn-action-primary:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(27, 89, 248, 0.3);
+}
+
+.btn-action-primary:disabled {
+    background: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Rooms Grid */
 .rooms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Warning Label */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #fff;
+    border-radius: 1.5rem;
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
+    margin-top: 2rem;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #475569;
 }

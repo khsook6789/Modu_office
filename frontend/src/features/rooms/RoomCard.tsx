@@ -75,23 +75,23 @@ export default function RoomCard({ room, isManager, onDelete }: RoomCardProps) {
                     </div>
 
                     <div className="room-meta">
-                        <span className="badge badge-capacity">👥 {room.capacity} People</span>
+                        <span className="room-badge badge-capacity">👥 {room.capacity} People</span>
                         {room.equipment.slice(0, 2).map((item, index) => (
-                            <span key={index} className="badge">🔧 {item}</span>
+                            <span key={index} className="room-badge">🔧 {item}</span>
                         ))}
                         {room.equipment.length > 2 && (
-                            <span className="badge">+{room.equipment.length - 2}</span>
+                            <span className="room-badge">+{room.equipment.length - 2}</span>
                         )}
                     </div>
 
                     <div className="room-footer">
                         <div className="status-indicator">
                             <span className={`status-dot ${room.isAvailable ? 'status-available' : 'status-occupied'}`}></span>
-                            <span className={room.isAvailable ? 'text-success' : 'text-muted'}>
-                                {room.isAvailable ? 'Available Now' : 'Occupied'}
+                            <span style={{ color: room.isAvailable ? '#10b981' : '#64748b' }}>
+                                {room.isAvailable ? '예약 가능' : '사용 중'}
                             </span>
                         </div>
-                        <span className="btn btn-secondary text-xs">View Details</span>
+                        <span className="btn-view-details">상세 보기</span>
                     </div>
                 </div>
             </Link>

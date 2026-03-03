@@ -34,6 +34,7 @@ public class TestSecurityConfig {
                         .requestMatchers("/api/auth/**", "/oauth2/**").permitAll()
                         // Admin 전용
                         .requestMatchers("/api/admin/reservations/**").hasAnyRole("MANAGER", "ADMIN")
+                        .requestMatchers("/api/admin/stats/**").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // GET 공개 허용
                         .requestMatchers(HttpMethod.GET,

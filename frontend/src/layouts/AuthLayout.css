@@ -1,79 +1,154 @@
+/* ═══════════════════════════════
+   Auth Layout (Login / Signup)
+   - Left: 폼 영역 (배경색 일치)
+   - Right: 프리미엄 오피스 히어로 사진
+═══════════════════════════════ */
+
 .auth-layout {
     min-height: 100vh;
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;        /* 왼쪽=폼, 오른쪽=히어로 */
     overflow: hidden;
+    background-color: var(--color-bg-main);
 }
 
-/* 오른쪽: 폼 영역 (row-reverse로 인해 오른쪽으로 배치됨) */
+/* ── Left: 폼 영역 ── */
 .auth-content {
-    flex: 1;
-    background-color: var(--color-bg-dark);
+    flex: 0 0 45%;
+    background-color: var(--color-bg-main); /* 왼쪽 배경색이 떠보이지 않게 앱 테마와 일치 */
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
-}
-
-.auth-container {
-    width: 100%;
-    max-width: 420px;
-}
-
-/* 오른쪽: 이미지 영역 */
-.auth-hero {
-    flex: 2.4;
+    padding: 3rem 4rem;
     position: relative;
-    /* 배경 이미지 설정 */
-    background-image: url('../assets/login-bg.png');
-    background-size: cover;
-    background-position: bottom;
-    background-repeat: no-repeat;
-}
-
-/* 이미지 위 어두운 커버 (글자 잘 보이게) */
-.auth-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to right, rgba(33, 37, 53, 0.9), rgba(12, 18, 44, 0.4));
     z-index: 1;
 }
 
-/* 브랜딩 텍스트 */
+/* 왼쪽 영역 상단 로고 포인트 
+.auth-content::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--color-primary), #6366f1);
+} */
+
+.auth-container {
+    width: 100%;
+    max-width: 440px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* ── Right: 히어로 이미지 영역 ── */
+.auth-hero {
+    flex: 1;
+    position: relative;
+    background-image: url('/office-login-bg.png'); /* 새 프리미엄 이미지 적용 */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 4rem;
+}
+
+/* 그라디언트 오버레이: 텍스트 가독성 및 좌측 배경과의 자연스러운 블렌딩 */
+.auth-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right, var(--color-bg-main) 0%, rgba(15, 23, 42, 0.2) 15%, transparent 40%),
+        linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.4) 40%, transparent 100%);
+    z-index: 1;
+}
+
+/* 히어로 텍스트 그룹 */
 .hero-content {
     position: relative;
     z-index: 2;
-    padding: 2rem;
+    text-align: left;
+    max-width: 520px;
+    animation: fadeIn 0.8s ease-out 0.2s both;
 }
 
-/* 모바일 대응: 위아래로 배치 */
-@media (max-width: 768px) {
+/* 브랜드 타이틀 */
+.brand-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+/* 브랜드 부제목 */
+.brand-subtitle {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* 히어로 배지/통계 */
+.hero-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 1.5rem 2rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hero-stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.hero-stat-label {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+}
+
+.hero-stat-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.2);
+    align-self: stretch;
+}
+
+/* ── 모바일 대응 ── */
+@media (max-width: 900px) {
     .auth-layout {
         flex-direction: column-reverse;
-        /* 이미지가 위로 가도록 하거나, 아래로 가도록 설정 */
+    }
+
+    .auth-content {
+        flex: none;
+        padding: 3rem 2rem;
     }
 
     .auth-hero {
         flex: none;
-        height: 300px;
-        /* 모바일에서 이미지 높이 고정 */
+        height: 320px;
+        padding: 2rem;
     }
-}
 
-/* 브랜딩 텍스트 크기 설정 */
-.brand-title {
-    font-family: var(--font-family-brand);
-    font-size: 80px;
-    color: #d7b786;
-    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.brand-subtitle {
-    font-size: 25px;
-    color: #d4b17d;
-    letter-spacing: 2px;
+    .brand-title {
+        font-size: 2.5rem;
+    }
 }
