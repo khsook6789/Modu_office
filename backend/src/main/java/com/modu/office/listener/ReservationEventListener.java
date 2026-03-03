@@ -26,7 +26,7 @@ import java.util.Map;
 public class ReservationEventListener {
 
         private final UpdateLogService updateLogService;
-        private final com.modu.office.service.WebSocketNotificationService notificationService;
+        private final com.modu.office.service.NotificationService notificationService;
 
         /**
          * 예약 생성 이벤트 처리
@@ -46,8 +46,8 @@ public class ReservationEventListener {
                                 null,
                                 ReservationLogConverter.toMap(event.getReservation()));
 
-                // 2. WebSocket 실시간 알림 전송
-                notificationService.notifyReservationCreated(
+                // 2. 실시간 알림 전송 (SSE)
+                notificationService.notifyRoomReservationCreated(
                                 event.getReservation().getRoom().getId(),
                                 event.getReservation());
 
@@ -80,9 +80,9 @@ public class ReservationEventListener {
                                 event.getBeforeData(),
                                 afterData);
 
-                // 2. WebSocket 실시간 알림 전송 (취소 시)
+                // 2. 실시간 알림 전송 (SSE, 취소 시)
                 if (event.getAction() == LogAction.CANCEL) {
-                        notificationService.notifyReservationCancelled(
+                        notificationService.notifyRoomReservationCancelled(
                                         event.getReservation().getRoom().getId(),
                                         event.getReservation().getId());
                 }

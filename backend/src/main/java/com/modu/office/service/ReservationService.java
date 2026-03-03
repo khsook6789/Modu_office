@@ -1,6 +1,7 @@
 package com.modu.office.service;
 
 import com.modu.office.dto.request.ReservationRequest;
+import com.modu.office.entity.NotificationType;
 import com.modu.office.dto.request.ReservationUpdateRequest;
 import com.modu.office.dto.response.ReservationResponse;
 import com.modu.office.entity.AppUser;
@@ -121,6 +122,14 @@ public class ReservationService {
             eventPublisher.publishEvent(new com.modu.office.event.ReservationCreatedEvent(
                     savedReservation, user));
 
+            // 알림 이벤트 발행
+            eventPublisher.publishEvent(new com.modu.office.event.NotificationEvent(
+                    this,
+                    user,
+                    com.modu.office.dto.NotificationPayload.of(
+                            NotificationType.RESERVATION_CREATED,
+                            String.format("[%s] 예약이 접수되었습니다.", reservation.getOffice().getName()),
+                            "/reservations/" + savedReservation.getId())));
             return ReservationResponse.fromEntity(savedReservation);
 
         } catch (org.springframework.dao.OptimisticLockingFailureException e) {
@@ -268,8 +277,16 @@ public class ReservationService {
         // 예약 확정 이벤트 발행 (감사 로그 자동 기록)
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.UPDATE,
-                reservation.getUser(), null));
+                requester, null));
 
+        // 알림 이벤트 발행 (사용자에게)
+        eventPublisher.publishEvent(new com.modu.office.event.NotificationEvent(
+                this,
+                reservation.getUser(),
+                com.modu.office.dto.NotificationPayload.of(
+                        NotificationType.RESERVATION_CONFIRMED,
+                        String.format("[%s] 예약이 확정되었습니다.", reservation.getOffice().getName()),
+                        "/reservations/" + reservation.getId())));
         return ReservationResponse.fromEntity(reservation);
     }
 
@@ -397,8 +414,16 @@ public class ReservationService {
 
         eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
-                reservation.getUser(), customData));
+                requester, customData));
 
+        // 알림 이벤트 발행
+        eventPublisher.publishEvent(new com.modu.office.event.NotificationEvent(
+                this,
+                reservation.getUser(),
+                com.modu.office.dto.NotificationPayload.of(
+                        NotificationType.RESERVATION_CANCELED,
+                        String.format("[%s] 예약이 취소되었습니다.", reservation.getOffice().getName()),
+                        "/reservations/" + reservation.getId())));
         return com.modu.office.dto.response.CancelReservationResponse.builder()
                 .message("예약이 정상적으로 취소되었습니다.")
                 .refundInfo(refundInfo)
@@ -461,6 +486,15 @@ public class ReservationService {
                 reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
                 adminUser, customData));
 
+        // 알림 이벤트 발행 (사용자에게)
+        eventPublisher.publishEvent(new com.modu.office.event.NotificationEvent(
+                this,
+                reservation.getUser(),
+                com.modu.office.dto.NotificationPayload.of(
+                        NotificationType.RESERVATION_CANCELED_BY_ADMIN,
+                        String.format("[%s] 예약이 관리자에 의해 취소되었습니다. (사유: %s)", reservation.getOffice().getName(),
+                                adminReason),
+                        "/reservations/" + reservation.getId())));
         return new com.modu.office.dto.response.AdminCancelResponse(
                 reservationId,
                 reservation.getUser().getAccount().getEmail(),
