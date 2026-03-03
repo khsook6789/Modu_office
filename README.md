@@ -9,7 +9,7 @@
 
 - **서비스 안정성 (Stability)**: 낙관적 락(Optimistic Locking) 기술을 도입하여 다수 사용자의 대규모 동시 접근 상황에서도 데이터 충돌 없이 중복 예약을 원천 차단합니다.
 - **성능 최적화 (Performance)**: JPA `@EntityGraph`와 `Fetch Join`을 전략적으로 활용하여 복잡한 연관 관계 조회 시 발생하는 N+1 문제를 원천 해결하고 쿼리 응답 속도를 극대화했습니다.
-- **실시간 응답성 (Responsiveness)**: WebSocket(STOMP) 프로토콜 기반의 실시간 브로드캐스팅을 통해 예약 현황 변화를 즉각적으로 전파하여 매끄러운 사용자 경험을 제공합니다.
+- **실시간 응답성 (Responsiveness)**: SSE(Server-Sent Events) 프로토콜을 도입하여 예약 현황 변화 및 실시간 알림을 새로고침 없이 즉각적으로 전파하여 매끄러운 사용자 경험을 제공합니다.
 - **데이터 신뢰성 (Reliability)**: PostgreSQL의 JSONB 타입을 활용한 정밀 감사 로그 시스템을 구축하여, 모든 자원의 변경 이력을 투명하게 추적하고 데이터 무결성을 보장합니다.
 - **아키텍처 확장성 (Scalability)**: 계정(Account)과 프로필(AppUser)을 분리한 유연한 도메인 설계와 세밀한 역할 기반 접근 제어(RBAC)를 통해 가파른 조직 성장에도 문제없이 대응합니다.
 
@@ -19,21 +19,21 @@
 
 ### Backend
 
-| category         | Technology            | Description                                       |
-| :--------------- | :-------------------- | :------------------------------------------------ |
-| **Framework**    | Spring Boot 3.5.10    | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
-| **Language**     | Java 21               | 현대적 자바 기능 기반의 안정적인 백엔드 코드      |
-| **Persistence**  | Spring Data JPA       | 객체 지향적 데이터 접근 및 관계 매핑 관리         |
-| **Database**     | PostgreSQL 15         | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재 |
-| **Security**     | Spring Security + JWT | 무상태(Stateless) 기반의 보안 인증 및 권한 관리   |
-| **Real-time**    | WebSocket (STOMP)     | `구현 예정` 예약 현황의 실시간 브로드캐스팅       |
-| **Validation**   | Jakarta Validation    | DTO 입력값 검증 및 데이터 무결성 보장             |
-| **Testing**      | JUnit 5               | 단위/통합 테스트를 통한 코드 신뢰성 확보          |
-| **Logging**      | SLF4J                 | 시스템 동작 추적 및 디버깅을 위한 로깅            |
-| **DevOps**       | Spring Boot DevTools  | 핫 리로드 등 개발 생산성 향상 도구                |
-| **External API** | Google Maps API       | 지점 위치 정보 및 거리 기반 검색 서비스 제공      |
-| **Auxiliary**    | Lombok                | 보일러플레이트 코드 제거를 통한 생산성 향상       |
-| **Build Tool**   | Gradle                | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
+| category         | Technology               | Description                                       |
+| :--------------- | :----------------------- | :------------------------------------------------ |
+| **Framework**    | Spring Boot 3.5.10       | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
+| **Language**     | Java 21                  | 현대적 자바 기능 기반의 안정적인 백엔드 코드      |
+| **Persistence**  | Spring Data JPA          | 객체 지향적 데이터 접근 및 관계 매핑 관리         |
+| **Database**     | PostgreSQL 15            | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재 |
+| **Security**     | Spring Security + JWT    | 무상태(Stateless) 기반의 보안 인증 및 권한 관리   |
+| **Real-time**    | Server-Sent Events (SSE) | 예약 현황 및 실시간 알림의 단방향 스트리밍 구현   |
+| **Validation**   | Jakarta Validation       | DTO 입력값 검증 및 데이터 무결성 보장             |
+| **Testing**      | JUnit 5                  | 단위/통합 테스트를 통한 코드 신뢰성 확보          |
+| **Logging**      | SLF4J                    | 시스템 동작 추적 및 디버깅을 위한 로깅            |
+| **DevOps**       | Spring Boot DevTools     | 핫 리로드 등 개발 생산성 향상 도구                |
+| **External API** | Google Maps API          | 지점 위치 정보 및 거리 기반 검색 서비스 제공      |
+| **Auxiliary**    | Lombok                   | 보일러플레이트 코드 제거를 통한 생산성 향상       |
+| **Build Tool**   | Gradle                   | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
 
 ### Frontend
 
@@ -55,7 +55,7 @@
 ```
 backend/
 ├── src/main/java/com/modu/office/
-│   ├── config/              # 전역 설정 (Security, JPA, WebSocket 등)
+│   ├── config/              # 전역 설정 (Security, JPA, SSE 등)
 │   ├── controller/          # REST API 엔드포인트 도메인별 관리
 │   │   └── Auth/            # 고객 및 운영자 전용 인증 컨트롤러
 │   ├── service/             # 도메인별 비즈니스 로직 및 트랜잭션 처리
@@ -96,7 +96,7 @@ frontend/
 
 - **동시성 정합성 보장**: JPA `@Version` 기반 낙관적 락을 통해 0.1초 차이로 발생하는 동시 예약 요청 중 단 하나만을 수용하여 데이터 충돌을 원천 해결합니다.
 - **지능형 스케줄 충돌 차단**: DB 제약 조건과 서비스 비즈니스 로직의 교차 검증으로 시간대 중복 예약을 완벽히 차단하여 예약 신뢰도를 높입니다.
-- **실시간 상태 전파**: WebSocket 프로토콜을 활용하여 타 사용자의 예약 또는 취소 내역을 별도 페이지 새로고침 없이 즉각 화면에 반영해 현황 파악 오류를 방지합니다.
+- **실시간 상태 전파**: SSE(Server-Sent Events) 프로토콜을 활용하여 타 사용자의 예약 또는 취소 내역 및 실시간 알림을 별도 페이지 새로고침 없이 즉각 화면에 반영해 현황 파악 오류를 방지합니다.
 - **엄격한 시간 정책**: 모든 예약은 30분 단위(00분, 30분)로만 가능하며, 운영 안정성을 위해 자정(Overnight)을 넘기는 예약은 시스템적으로 차단됩니다.
 - **소유권 기반 접근 제어 (IDOR 방어)**: 예약 상세 정보 조회, 수정 및 취소 시 현재 인증된 사용자와 예약 소유자의 일치 여부를 검증하여 비정상적인 접근을 원천 차단합니다.
 
@@ -372,6 +372,15 @@ frontend/
 - `GET /reviews/me`: 내 후기 목록 조회
 - `PATCH /reviews/{reviewId}`: 후기 내용 및 평점 수정 (본인 소유만)
 - `DELETE /reviews/{reviewId}`: 후기 삭제 (본인 소유 권한 확인)
+
+### 13. 알림 관리 (Notification)
+
+- `GET /api/notifications`: 내 알림 목록 조회 (페이징)
+- `GET /api/notifications/unread-count`: 안 읽은 알림 개수 조회
+- `PATCH /api/notifications/{id}/read`: 특정 알림 읽음 처리
+- `PATCH /api/notifications/read-all`: 모든 알림 읽음 처리
+- `GET /api/notifications/subscribe`: 실시간 개인 알림 SSE 구독
+- `GET /api/notifications/subscribe/rooms/{roomId}`: 특정 회의실 캘린더 실시간 업데이트 SSE 구독
 
 ---
 
