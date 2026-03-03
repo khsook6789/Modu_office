@@ -18,15 +18,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import com.modu.office.config.SecurityConfig;
 
-import com.modu.office.config.WebSocketConfig;
-
 /**
  * Facility Repository 통합 테스트
  * - DB 연동 테스트 (@DataJpaTest)
  * - H2 in-memory DB 사용
  */
-@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SecurityConfig.class,
-                WebSocketConfig.class }))
+@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+                SecurityConfig.class }))
 @ActiveProfiles("test")
 @Import({ JpaConfig.class, com.modu.office.config.QueryDslConfig.class })
 @DisplayName("FacilityRepository 통합 테스트")

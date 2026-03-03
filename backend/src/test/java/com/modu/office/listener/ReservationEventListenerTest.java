@@ -266,7 +266,7 @@ class ReservationEventListenerTest {
         }
 
         @org.springframework.test.context.bean.override.mockito.MockitoBean
-        private com.modu.office.service.WebSocketNotificationService notificationService;
+        private com.modu.office.service.NotificationService notificationService;
 
         @Test
         @DisplayName("예약 생성 시 WebSocket 알림이 전송된다")
@@ -291,7 +291,7 @@ class ReservationEventListenerTest {
                 });
 
                 // then
-                org.mockito.Mockito.verify(notificationService).notifyReservationCreated(
+                org.mockito.Mockito.verify(notificationService).notifyRoomReservationCreated(
                                 org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.any(Reservation.class));
         }
@@ -323,7 +323,7 @@ class ReservationEventListenerTest {
                 });
 
                 // then
-                org.mockito.Mockito.verify(notificationService).notifyReservationCancelled(
+                org.mockito.Mockito.verify(notificationService).notifyRoomReservationCancelled(
                                 org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.eq(reservation.getId()));
         }

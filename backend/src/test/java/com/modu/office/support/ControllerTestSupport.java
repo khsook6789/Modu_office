@@ -44,6 +44,7 @@ import org.springframework.context.annotation.Import;
         ReservationController.class,
         ReviewController.class,
         RoomFavoriteController.class,
+        NotificationController.class,
         // Admin
         AdminManagerController.class,
         AdminReservationController.class,
@@ -81,6 +82,9 @@ public abstract class ControllerTestSupport extends RestDocsSupport {
 
     @MockitoBean
     protected RoomFavoriteService roomFavoriteService;
+
+    @MockitoBean
+    protected NotificationService notificationService;
 
     // --- Admin Services ---
     @MockitoBean

@@ -2,7 +2,7 @@ package com.modu.office.repository;
 
 import com.modu.office.config.QueryDslConfig;
 import com.modu.office.config.SecurityConfig;
-import com.modu.office.config.WebSocketConfig;
+
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import com.modu.office.config.JpaConfig;
@@ -24,8 +24,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SecurityConfig.class,
-        WebSocketConfig.class }))
+@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+        SecurityConfig.class }))
 @Import({ QueryDslConfig.class, JpaConfig.class })
 @org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase(replace = org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE)
 @org.springframework.test.context.ActiveProfiles("test")

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.modu.office.config.SecurityConfig;
-import com.modu.office.config.WebSocketConfig;
+
 import com.modu.office.config.QueryDslConfig;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -26,8 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * RoomRepository 통합 테스트
  * - 다중 시설 필터링 커스텀 쿼리 검증
  */
-@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { SecurityConfig.class,
-                WebSocketConfig.class }))
+@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+                SecurityConfig.class }))
 @ActiveProfiles("test")
 @Import({ JpaConfig.class, QueryDslConfig.class })
 @DisplayName("RoomRepository 통합 테스트")

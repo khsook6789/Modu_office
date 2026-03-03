@@ -3,7 +3,7 @@ package com.modu.office;
 import com.modu.office.config.JpaConfig;
 import com.modu.office.config.QueryDslConfig;
 import com.modu.office.config.SecurityConfig;
-import com.modu.office.config.WebSocketConfig;
+
 import com.modu.office.dto.response.ReservationResponse;
 import com.modu.office.entity.*;
 import com.modu.office.entity.enums.*;
@@ -29,8 +29,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
-                SecurityConfig.class,
-                WebSocketConfig.class
+                SecurityConfig.class
 }))
 @Import({ QueryDslConfig.class, JpaConfig.class })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
