@@ -47,6 +47,9 @@ app:
   cors:
     allowed-origins:
       - "http://localhost:5173"
+  toss-payments:
+    base-url: https://api.tosspayments.com
+    secret-key: "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R" # 공개 테스트 키 (실제 운영 시 교체 필요)
 # Swagger / OpenAPI 설정
 springdoc:
   swagger-ui:
