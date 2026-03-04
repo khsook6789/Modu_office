@@ -87,6 +87,9 @@ public class SecurityConfig {
                                                 // 나머지 관리자 전용 - ADMIN only
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                                                // 결제 - 인증된 사용자만 (소유자 검증은 서비스 레이어)
+                                                .requestMatchers("/api/payments/**").authenticated()
+
                                                 .anyRequest().authenticated())
                                 .exceptionHandling(exception -> exception
                                                 .authenticationEntryPoint((request, response, authException) -> {

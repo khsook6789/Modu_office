@@ -51,7 +51,8 @@ import org.springframework.context.annotation.Import;
         AdminUserController.class,
         AdminDashboardController.class,
         AuditLogController.class,
-        FacilityReportController.class
+        FacilityReportController.class,
+        PaymentController.class
 })
 public abstract class ControllerTestSupport extends RestDocsSupport {
 
@@ -102,6 +103,9 @@ public abstract class ControllerTestSupport extends RestDocsSupport {
 
     @MockitoBean
     protected FacilityReportService facilityReportService;
+
+    @MockitoBean
+    protected PaymentService paymentService;
 
     // --- Security Infrastructure ---
     @MockitoBean

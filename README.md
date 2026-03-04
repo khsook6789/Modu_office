@@ -32,6 +32,7 @@
 | **Logging**      | SLF4J                    | 시스템 동작 추적 및 디버깅을 위한 로깅            |
 | **DevOps**       | Spring Boot DevTools     | 핫 리로드 등 개발 생산성 향상 도구                |
 | **External API** | Google Maps API          | 지점 위치 정보 및 거리 기반 검색 서비스 제공      |
+|                  | Toss Payments            | 결제 위젯 및 API 연동을 통한 온라인 안전 결제 처리 |
 | **Auxiliary**    | Lombok                   | 보일러플레이트 코드 제거를 통한 생산성 향상       |
 | **Build Tool**   | Gradle                   | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
 
@@ -265,6 +266,20 @@ frontend/
 - **room_id**: 공간 ID (Room FK)
 - **created_at / updated_at**: 생성 / 수정 시각
 
+### 16. Payment (결제)
+
+- **id**: PK, Auto Increment
+- **reservation_id**: Reservation FK (Unique → 결제 1건당 예약 1건)
+- **order_id**: 토스페이먼츠 주문 번호 (`rev-{reservation_id}-{random}`)
+- **payment_key**: 토스 결제 승인 후 발급되는 고유 키
+- **amount**: 실제 결제된 금액
+- **status**: 결제 처리 상태 (READY, IN_PROGRESS, DONE, CANCELED, ABORTED 등)
+- **method**: 결제 수단 (카드 등)
+- **approved_at**: 결제 최종 승인 시각
+- **canceled_at**: 결제 취소(환불) 처리 시각
+- **fail_reason**: 결제 또는 취소 실패 시 원인 기록
+- **created_at / updated_at**: 생성 / 수정 시각
+
 ---
 
 ## API 목록
@@ -349,7 +364,13 @@ frontend/
 - `GET /api/favorites`: 내 즐겨찾기 목록 조회
 - `GET /api/favorites/check/{roomId}`: 특정 공간 즐겨찾기 여부 확인
 
-### 10. 사용자 프로필 (User Profile)
+### 10. 결제 관리 (Payment)
+
+- `POST /api/payments/confirm`: 토스페이먼츠 결제 승인 요청 (결제 위젯 인증 완료 후 호출)
+- `GET /api/payments/{reservationId}`: 특정 예약건의 결제 내역 조회 (접근 권한 확인 필수)
+  *(참고: 관리자의 예약 강제 취소 API 호출 시 내부적으로 토스 결제 환불 로직이 자동 실행됩니다.)*
+
+### 11. 사용자 프로필 (User Profile)
 
 - `GET /api/users/me`: 내 정보 조회
 - `PUT /api/users/me`: 내 정보 수정 (이름 변경)

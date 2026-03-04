@@ -7,7 +7,7 @@ import java.util.List;
  * 애플리케이션 전역 설정 (app.*)
  */
 @ConfigurationProperties(prefix = "app")
-public record AppProperties(Jwt jwt, Cors cors) {
+public record AppProperties(Jwt jwt, Cors cors, TossPayments tossPayments) {
 
     /**
      * JWT 관련 설정 (app.jwt.*)
@@ -23,5 +23,11 @@ public record AppProperties(Jwt jwt, Cors cors) {
      * Why: 환경별(local/stage/prod)로 허용 Origin이 달라지므로 외부 설정으로 분리.
      */
     public record Cors(List<String> allowedOrigins) {
+    }
+
+    /**
+     * 토스페이먼츠 관련 설정 (app.toss-payments.*)
+     */
+    public record TossPayments(String secretKey, String baseUrl) {
     }
 }
