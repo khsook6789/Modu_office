@@ -46,6 +46,8 @@ class RoomControllerTest extends ControllerTestSupport {
                                 .status(RoomStatus.AVAILABLE)
                                 .floor(3)
                                 .bufferTime(30)
+                                .images(List.of(new com.modu.office.dto.request.ImageUploadRequest.ImageInfo(
+                                                "https://images.unsplash.com/photo-1497366216548-37526070297c", 0)))
                                 .build();
         }
 
@@ -78,9 +80,14 @@ class RoomControllerTest extends ControllerTestSupport {
                                                                                 .description("회의실 이름"),
                                                                 fieldWithPath("description").type(JsonFieldType.STRING)
                                                                                 .description("회의실 설명").optional(),
-                                                                fieldWithPath("bannerImageUrl")
+                                                                fieldWithPath("images").type(JsonFieldType.ARRAY)
+                                                                                .description("이미지 목록").optional(),
+                                                                fieldWithPath("images[].imageUrl")
                                                                                 .type(JsonFieldType.STRING)
-                                                                                .description("배너 이미지 URL").optional(),
+                                                                                .description("이미지 URL").optional(),
+                                                                fieldWithPath("images[].displayOrder")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("표시 순서").optional(),
                                                                 fieldWithPath("bufferTime").type(JsonFieldType.NUMBER)
                                                                                 .description("정비 시간(분)").optional(),
                                                                 fieldWithPath("roomCode").type(JsonFieldType.STRING)
@@ -228,5 +235,52 @@ class RoomControllerTest extends ControllerTestSupport {
                                 .andExpect(status().isOk())
                                 .andDo(document("room-bulk-status",
                                                 pathParameters(parameterWithName("id").description("지점 ID"))));
+        }
+
+        @Test
+        @DisplayName("회의실 이미지 일괄 교체 - MANAGER 인증 시 204 반환")
+        @WithMockUser(roles = "MANAGER")
+        void updateRoomImages_success() throws Exception {
+                willDoNothing().given(roomService).updateRoomImages(anyLong(), any(), any());
+
+                com.modu.office.dto.request.ImageUploadRequest request = new com.modu.office.dto.request.ImageUploadRequest(
+                                List.of(
+                                                new com.modu.office.dto.request.ImageUploadRequest.ImageInfo(
+                                                                "https://images.unsplash.com/photo-1497366754035-f200968a6e72",
+                                                                1),
+                                                new com.modu.office.dto.request.ImageUploadRequest.ImageInfo(
+                                                                "https://images.unsplash.com/photo-1524758631624-e2822e304c36",
+                                                                2)));
+
+                mockMvc.perform(put("/api/rooms/{roomId}/images", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isNoContent())
+                                .andDo(document("room-images-update",
+                                                pathParameters(parameterWithName("roomId").description("회의실 ID")),
+                                                requestFields(
+                                                                fieldWithPath("images").type(JsonFieldType.ARRAY)
+                                                                                .description("이미지 목록"),
+                                                                fieldWithPath("images[].imageUrl")
+                                                                                .type(JsonFieldType.STRING)
+                                                                                .description("이미지 URL"),
+                                                                fieldWithPath("images[].displayOrder")
+                                                                                .type(JsonFieldType.NUMBER)
+                                                                                .description("표시 순서"))));
+        }
+
+        @Test
+        @DisplayName("회의실 개별 이미지 삭제 - MANAGER 인증 시 204 반환")
+        @WithMockUser(roles = "MANAGER")
+        void deleteRoomImage_success() throws Exception {
+                willDoNothing().given(roomService).deleteRoomImage(anyLong(), anyLong(), any());
+
+                mockMvc.perform(delete("/api/rooms/{roomId}/images/{imageId}", 1L, 200L))
+                                .andExpect(status().isNoContent())
+                                .andDo(document("room-image-delete",
+                                                pathParameters(
+                                                                parameterWithName("roomId").description("회의실 ID"),
+                                                                parameterWithName("imageId")
+                                                                                .description("삭제할 이미지 ID"))));
         }
 }

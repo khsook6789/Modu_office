@@ -50,8 +50,7 @@ import org.springframework.context.annotation.Import;
         AdminReservationController.class,
         AdminUserController.class,
         AdminDashboardController.class,
-        AuditLogController.class,
-        UpdateLogController.class
+        AuditLogController.class
 })
 public abstract class ControllerTestSupport extends RestDocsSupport {
 

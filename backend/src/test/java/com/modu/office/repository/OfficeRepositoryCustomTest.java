@@ -105,32 +105,34 @@ class OfficeRepositoryCustomTest {
     @Test
     @DisplayName("오피스 위치 기반 검색 - 반경 5km 내")
     void searchByDistance_WithinRadius() {
-        // Given: Gangnam coordinates
-        double lat = 37.4979;
-        double lng = 127.0276;
-        double radius = 5.0; // 5km
+        // Given: Gangnam coordinates (37.4979, 127.0276)
+        com.modu.office.dto.request.OfficeSearchCondition condition = new com.modu.office.dto.request.OfficeSearchCondition();
+        condition.setLat(37.4979);
+        condition.setLng(127.0276);
+        condition.setRadius(5.0); // 5km
 
         // When
-        var result = officeRepository.findNearBy(lat, lng, radius);
+        Page<Office> result = officeRepository.searchOffices(condition, PageRequest.of(0, 10));
 
-        // Then: Only Gangnam (distance 0) should be found. Pangyo is > 10km away.
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).contains("Gangnam");
+        // Then: Only Gangnam (distance 0) should be found. Pangyo is about 12km away.
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getName()).contains("Gangnam");
     }
 
     @Test
     @DisplayName("오피스 위치 기반 검색 - 반경 20km 내")
     void searchByDistance_LargeRadius() {
-        // Given: Gangnam coordinates
-        double lat = 37.4979;
-        double lng = 127.0276;
-        double radius = 20.0; // 20km
+        // Given: Gangnam coordinates (37.4979, 127.0276)
+        com.modu.office.dto.request.OfficeSearchCondition condition = new com.modu.office.dto.request.OfficeSearchCondition();
+        condition.setLat(37.4979);
+        condition.setLng(127.0276);
+        condition.setRadius(20.0); // 20km
 
         // When
-        var result = officeRepository.findNearBy(lat, lng, radius);
+        Page<Office> result = officeRepository.searchOffices(condition, PageRequest.of(0, 10));
 
         // Then: Both within 20km
-        assertThat(result).hasSize(2);
+        assertThat(result.getContent()).hasSize(2);
     }
 
     @Test

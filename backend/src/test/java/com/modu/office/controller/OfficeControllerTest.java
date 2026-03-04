@@ -284,7 +284,6 @@ class OfficeControllerTest extends ControllerTestSupport {
                                 .andExpect(status().isOk())
                                 .andDo(document("office-my-list"));
         }
-
         // ─── UPDATE ─────────────────────────────────────────────────────
 
         @Test
