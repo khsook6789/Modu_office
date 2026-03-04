@@ -35,17 +35,24 @@ export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Load user's offices on mount
+    // 로그인/로그아웃 시 오피스 목록 재조회
     useEffect(() => {
         loadOffices();
-    }, []);
+    }, [user?.id]);
 
     const loadOffices = async () => {
         try {
             setIsLoading(true);
             setError(null);
-            // MANAGER/ADMIN은 자신의 오피스만, USER는 전체 오피스 조회
+
+            // MANAGER/ADMIN은 인증 필요 → user가 없으면 건너뜀
             const isManager = user?.role === 'MANAGER' || user?.role === 'ADMIN';
+            if (isManager && !user) {
+                setOffices([]);
+                return;
+            }
+
+            // MANAGER/ADMIN은 자신의 오피스만, USER는 전체 오피스 조회
             const data = isManager
                 ? await officeApi.getMyOffices()
                 : await officeApi.getAllOffices();
