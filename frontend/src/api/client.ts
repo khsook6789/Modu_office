@@ -3,6 +3,57 @@ export const BASE_URL = "http://localhost:8080/api";
 interface RequestOptions extends RequestInit {
   token?: string;
   params?: Record<string, any>;
+  _isRetry?: boolean; // 무한 루프 방지용 내부 플래그
+}
+
+// 역할별 refresh 엔드포인트 매핑
+function getRefreshEndpoint(): string {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const role = user?.role as string;
+    if (role === "MANAGER") return "/auth/manager/refresh";
+    if (role === "ADMIN") return "/auth/admin/refresh";
+  } catch {}
+  return "/auth/user/refresh";
+}
+
+// refreshToken으로 새 accessToken 발급. 성공시 true, 실패시 false
+async function tryRefreshToken(): Promise<boolean> {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) return false;
+
+  try {
+    const endpoint = getRefreshEndpoint();
+    const res = await fetch(`${BASE_URL}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    // 백엔드 TokenResponse: { accessToken, refreshToken, tokenType }
+    const newAccessToken = data.accessToken ?? data.data?.accessToken;
+    const newRefreshToken = data.refreshToken ?? data.data?.refreshToken;
+
+    if (!newAccessToken) return false;
+
+    localStorage.setItem("token", newAccessToken);
+    if (newRefreshToken) {
+      localStorage.setItem("refreshToken", newRefreshToken);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearAuthAndRedirect() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
+  window.location.href = "/login";
 }
 
 class ApiClient {
@@ -38,8 +89,9 @@ class ApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+    const { _isRetry, params, ...fetchOptions } = options;
     const config: RequestInit = {
-      ...options,
+      ...fetchOptions,
       headers,
     };
 
@@ -47,6 +99,24 @@ class ApiClient {
       const response = await fetch(url, config);
 
       if (!response.ok) {
+        if (response.status === 401) {
+          // 이미 재시도였으면 → 로그아웃
+          if (_isRetry) {
+            clearAuthAndRedirect();
+            throw new Error("세션이 만료되었습니다. 다시 로그인해 주세요.");
+          }
+
+          // refreshToken으로 갱신 시도
+          const refreshed = await tryRefreshToken();
+          if (!refreshed) {
+            clearAuthAndRedirect();
+            throw new Error("세션이 만료되었습니다. 다시 로그인해 주세요.");
+          }
+
+          // 갱신 성공 → 원래 요청 재시도 (_isRetry 플래그로 무한루프 방지)
+          return this.request<T>(endpoint, { ...options, _isRetry: true });
+        }
+
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `API Error: ${response.status}`);
       }

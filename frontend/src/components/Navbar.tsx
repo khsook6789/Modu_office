@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -31,6 +32,8 @@ export default function Navbar() {
               )}
 
 
+
+              <NotificationBell />
 
               <div className="separator mx-sm h-4 border-l border-gray-300"></div>
 
