@@ -50,7 +50,9 @@ import org.springframework.context.annotation.Import;
         AdminReservationController.class,
         AdminUserController.class,
         AdminDashboardController.class,
-        AuditLogController.class
+        AuditLogController.class,
+        // Payment
+        PaymentController.class
 })
 public abstract class ControllerTestSupport extends RestDocsSupport {
 
@@ -98,6 +100,9 @@ public abstract class ControllerTestSupport extends RestDocsSupport {
 
     @MockitoBean
     protected UpdateLogService updateLogService;
+
+    @MockitoBean
+    protected PaymentService paymentService;
 
     // --- Security Infrastructure ---
     @MockitoBean
