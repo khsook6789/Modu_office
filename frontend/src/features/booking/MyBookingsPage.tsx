@@ -35,6 +35,17 @@ export default function MyBookingsPage() {
     const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'CONFIRMED' | 'CANCELED'>('ALL');
 
+    // 환불 예상액 모달
+    const [refundModal, setRefundModal] = useState<{
+        bookingId: number;
+        totalPrice: number;
+        refundAmount: number;
+        cancellationPenalty: number;
+        refundRate: number;
+        reasonDescriptor: string;
+    } | null>(null);
+    const [cancellingId, setCancellingId] = useState<number | null>(null);
+
     useEffect(() => {
         if (user?.id) loadBookings();
     }, [user]);
@@ -63,12 +74,38 @@ export default function MyBookingsPage() {
     };
 
     const handleCancel = async (bookingId: number) => {
-        if (!window.confirm('정말로 이 예약을 취소하시겠습니까?')) return;
+        // 1. 환불 예상액 먼저 조회
+        try {
+            const res = await client.get<any>(`/reservations/${bookingId}/refund-preview`);
+            const raw = res?.data ?? res;
+            const preview = raw?.data ?? raw;
+            setRefundModal({
+                bookingId,
+                totalPrice: Number(preview.totalPrice ?? 0),
+                refundAmount: Number(preview.refundAmount ?? 0),
+                cancellationPenalty: Number(preview.cancellationPenalty ?? 0),
+                refundRate: preview.refundRate ?? 100,
+                reasonDescriptor: preview.reasonDescriptor ?? '',
+            });
+        } catch {
+            // 환불 정보 조회 실패 시 그냥 확인 묻기
+            if (window.confirm('정말로 이 예약을 취소하시겠습니까?')) {
+                await doCancel(bookingId);
+            }
+        } finally {
+        }
+    };
+
+    const doCancel = async (bookingId: number) => {
+        setCancellingId(bookingId);
         try {
             await client.post(`/reservations/${bookingId}/cancel`, null);
+            setRefundModal(null);
             await loadBookings();
         } catch (err: any) {
             alert('예약 취소 실패: ' + (err?.message || '서버 오류'));
+        } finally {
+            setCancellingId(null);
         }
     };
 
@@ -96,6 +133,44 @@ export default function MyBookingsPage() {
 
     return (
         <div className="my-bookings-page">
+            {/* 환불 예상액 모달 */}
+            {refundModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ background: '#1e293b', borderRadius: '1.25rem', padding: '2rem', width: '360px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.25rem', color: '#f1f5f9' }}>🔍 취소 전 환불 예상액</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: '#94a3b8' }}>결제 금액</span>
+                                <span style={{ color: '#f1f5f9' }}>{refundModal.totalPrice.toLocaleString()}원</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: '#94a3b8' }}>위약금</span>
+                                <span style={{ color: '#ef4444' }}>-{refundModal.cancellationPenalty.toLocaleString()}원</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.6rem' }}>
+                                <span style={{ color: '#94a3b8' }}>환불 예상액</span>
+                                <span style={{ color: '#34d399', fontSize: '1.05rem' }}>{refundModal.refundAmount.toLocaleString()}원</span>
+                            </div>
+                        </div>
+                        {refundModal.reasonDescriptor && (
+                            <p style={{ fontSize: '0.78rem', color: '#64748b', background: 'rgba(255,255,255,0.04)', borderRadius: '0.5rem', padding: '0.5rem 0.75rem', marginBottom: '1.25rem' }}>
+                                ℹ️ {refundModal.reasonDescriptor}
+                            </p>
+                        )}
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button
+                                onClick={() => setRefundModal(null)}
+                                style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid #475569', borderRadius: '0.75rem', color: '#94a3b8', cursor: 'pointer' }}
+                            >닫기</button>
+                            <button
+                                onClick={() => doCancel(refundModal.bookingId)}
+                                disabled={cancellingId !== null}
+                                style={{ flex: 1, padding: '0.75rem', background: '#ef4444', border: 'none', borderRadius: '0.75rem', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                            >{cancellingId ? '취소 중...' : '예약 취소 확정'}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Header */}
             <div className="bookings-header">
                 <h1 className="bookings-title">내 <span>예약</span> 내역</h1>
