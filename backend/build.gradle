@@ -15,6 +15,10 @@ java {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -77,4 +81,29 @@ openapi3 {
     format = 'yaml'
     outputDirectory = 'src/main/resources/static'
     outputFileNamePrefix = 'openapi3'
+}
+
+// openapi3.yaml 파일에 JWT 인증 설정을 추가하는 후처리 태스크
+tasks.register('addSecurityToOpenApi') {
+    dependsOn 'openapi3'
+    doLast {
+        def openapiFile = file('src/main/resources/static/openapi3.yaml')
+        if (openapiFile.exists()) {
+            def content = openapiFile.getText('UTF-8')
+            if (!content.contains('securitySchemes:')) {
+                // components 섹션 내부에 securitySchemes 추가
+                if (content.contains('components:')) {
+                    content = content.replace('components:', "components:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT")
+                } else {
+                    content += "\ncomponents:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT"
+                }
+                // 전역 보안 요구사항 추가
+                if (!content.contains('security:')) {
+                    content += "\nsecurity:\n  - bearerAuth: []"
+                }
+                openapiFile.setText(content, 'UTF-8')
+                println "Successfully added securitySchemes to openapi3.yaml"
+            }
+        }
+    }
 }
