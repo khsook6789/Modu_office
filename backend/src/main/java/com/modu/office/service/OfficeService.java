@@ -146,33 +146,6 @@ public class OfficeService {
     }
 
     /**
-     * 이름으로 지점 검색
-     */
-    public List<OfficeResponse> searchOfficesByName(String name) {
-        return officeRepository.findByNameContaining(name).stream()
-                .map(OfficeResponse::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 위치로 지점 검색
-     */
-    public List<OfficeResponse> searchOfficesByLocation(String location) {
-        return officeRepository.findByLocationContaining(location).stream()
-                .map(OfficeResponse::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 좌표 기반 반경 내 지점 검색 (거리순 정렬)
-     */
-    public List<OfficeResponse> searchOfficesByDistance(double lat, double lng, double radius) {
-        return officeRepository.findNearBy(lat, lng, radius).stream()
-                .map(OfficeResponse::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    /**
      * 통합 키워드 검색 (이름 또는 위치)
      */
     public org.springframework.data.domain.Page<OfficeResponse> searchOffices(
