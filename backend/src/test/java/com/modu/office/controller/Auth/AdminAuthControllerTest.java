@@ -31,7 +31,7 @@ class AdminAuthControllerTest extends ControllerTestSupport {
         void login_success() throws Exception {
                 AdminLoginRequest request = AdminLoginRequest.builder()
                                 .email("admin@test.com")
-                                .password("AdminPass1!")
+                                .password("admin1234!")
                                 .build();
 
                 TokenResponse tokenResponse = TokenResponse.builder()

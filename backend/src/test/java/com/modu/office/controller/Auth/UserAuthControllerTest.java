@@ -31,8 +31,8 @@ class UserAuthControllerTest extends ControllerTestSupport {
         void signup_success() throws Exception {
                 UserSignupRequest request = new UserSignupRequest();
                 request.setEmail("user@test.com");
-                request.setPassword("Password1!");
-                request.setName("홍길동");
+                request.setPassword("user1234!");
+                request.setName("유저");
 
                 willDoNothing().given(authService).signupUser(any());
 
@@ -68,7 +68,7 @@ class UserAuthControllerTest extends ControllerTestSupport {
         void login_success() throws Exception {
                 UserLoginRequest request = new UserLoginRequest();
                 request.setEmail("user@test.com");
-                request.setPassword("Password1!");
+                request.setPassword("user1234!");
 
                 TokenResponse tokenResponse = TokenResponse.builder()
                                 .accessToken("access.token.value")

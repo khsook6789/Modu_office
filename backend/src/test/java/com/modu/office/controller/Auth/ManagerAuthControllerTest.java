@@ -31,8 +31,8 @@ class ManagerAuthControllerTest extends ControllerTestSupport {
         void signup_success() throws Exception {
                 ManagerSignupRequest request = new ManagerSignupRequest();
                 request.setEmail("manager@test.com");
-                request.setPassword("Password1!");
-                request.setName("운영자이름");
+                request.setPassword("manager1234!");
+                request.setName("매니저");
 
                 willDoNothing().given(authService).signupManager(any());
 
@@ -56,7 +56,7 @@ class ManagerAuthControllerTest extends ControllerTestSupport {
         void login_success() throws Exception {
                 ManagerLoginRequest request = new ManagerLoginRequest();
                 request.setEmail("manager@test.com");
-                request.setPassword("Password1!");
+                request.setPassword("manager1234!");
 
                 TokenResponse tokenResponse = TokenResponse.builder()
                                 .accessToken("manager.access.token")
