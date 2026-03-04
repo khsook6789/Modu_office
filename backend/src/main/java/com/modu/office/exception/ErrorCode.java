@@ -34,7 +34,17 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "U001", "사용자를 찾을 수 없습니다"),
 
     // 알림 관련 에러
-    NOTIFICATION_NOT_FOUND(404, "N001", "알림을 찾을 수 없습니다");
+    NOTIFICATION_NOT_FOUND(404, "N001", "알림을 찾을 수 없습니다"),
+
+    // 비즈니스 로직 에러 - 예약
+    RESERVATION_NOT_FOUND(404, "R004", "예약을 찾을 수 없습니다"),
+
+    // 비즈니스 로직 에러 - 시설 고장 신고
+    FACILITY_NOT_FOUND(404, "F001", "시설을 찾을 수 없습니다"),
+    FACILITY_REPORT_NOT_FOUND(404, "F002", "시설 신고 내역을 찾을 수 없습니다"),
+    DUPLICATE_REPORT(409, "F003", "해당 시설에 이미 처리 중인 신고가 존재합니다"),
+    INVALID_STATUS_TRANSITION(400, "F004", "허용되지 않는 상태 전환입니다"),
+    INVALID_REQUEST(400, "E007", "잘못된 요청입니다");
 
     private final int status;
     private final String code;

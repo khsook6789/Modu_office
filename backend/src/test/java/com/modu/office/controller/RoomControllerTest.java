@@ -39,7 +39,7 @@ class RoomControllerTest extends ControllerTestSupport {
         private RoomRequest roomRequest() {
                 return RoomRequest.builder()
                                 .name("세미나룸 A")
-                                .description("화이트보드 구비")
+                                .description("화이트보드, 빔 프로젝터, 초고속 와이파이가 완비된 최고급 회의실입니다.")
                                 .roomCode("ROOM-001")
                                 .capacity(10)
                                 .price(BigDecimal.valueOf(30000))
@@ -59,6 +59,9 @@ class RoomControllerTest extends ControllerTestSupport {
                                 .capacity(10)
                                 .price(BigDecimal.valueOf(30000))
                                 .status(RoomStatus.AVAILABLE)
+                                .images(List.of(new com.modu.office.dto.response.ImageListResponse.ImageResponse(1L,
+                                                "https://images.unsplash.com/photo-1497366216548-37526070297c", 0,
+                                                "![공간 이미지](https://images.unsplash.com/photo-1497366216548-37526070297c)")))
                                 .build();
         }
 

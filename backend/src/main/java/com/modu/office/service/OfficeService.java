@@ -42,6 +42,7 @@ public class OfficeService {
                 .openTime(request.getOpenTime())
                 .closeTime(request.getCloseTime())
                 .openDays(request.getOpenDays() != null ? request.getOpenDays().toArray(new Short[0]) : null)
+                .description(request.getDescription())
                 .manager(currentUser);
 
         // 좌표가 없고 주소가 있는 경우 지오코딩 시도
@@ -53,8 +54,6 @@ public class OfficeService {
         }
 
         Office office = officeBuilder.build();
-        // V4 신규 필드 설정 (builder에 미포함)
-        office.setDescription(request.getDescription());
 
         Office savedOffice = officeRepository.save(java.util.Objects.requireNonNull(office));
         return OfficeResponse.fromEntity(savedOffice);

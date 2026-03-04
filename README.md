@@ -221,8 +221,8 @@ frontend/
 - **reservation_id**: 예약 ID (FK)
 - **room_id**: 공간 ID (FK)
 - **facility_id**: 설비 ID (FK)
-- **issue_type**: 이슈 유형 (BROKEN, MISSING, OTHER)
-- **status**: 처리 상태 (REPORTED, IN_PROGRESS, RESOLVED)
+- **issue_type**: 이슈 유형 Enum — `BROKEN`(고장), `MISSING`(비품 없음), `OTHER`(기타)
+- **status**: 처리 상태 — `REPORTED`(접수), `IN_PROGRESS`(처리 중), `RESOLVED`(해결)
 - **created_at / updated_at**: 생성 / 수정 시각
 
 ### 11. UpdateLog (변경 로그)
@@ -409,6 +409,13 @@ frontend/
 - `GET /api/admin/stats/rooms/unpopular`: 비인기 회의실 Top 5 조회
 - `GET /api/admin/stats/peak-times`: 시간대별 예약 분포(피크타임) 조회
 - `GET /api/admin/stats/daily-usage`: 일일 총 사용 시간 추이 조회
+
+### 15. 시설 신고 (Facility Report)
+
+- `POST /api/rooms/{roomId}/reports`: 시설 고장 신고 접수 (USER, 예약 시작 이후만 가능, 중복 차단)
+- `GET /api/my-reports?reservationId={id}`: 내 예약 신고 내역 조회 (USER)
+- `GET /api/offices/{officeId}/reports`: 오피스 신고 내역 전체 조회 (MANAGER/ADMIN)
+- `PATCH /api/reports/{reportId}/status`: 신고 처리 상태 변경 (MANAGER/ADMIN, IN_PROGRESS 전환 시 시설 자동 비활성화)
 
 ---
 

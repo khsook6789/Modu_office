@@ -65,7 +65,7 @@ public class Office extends BaseEntity {
 
     @Builder
     public Office(String name, String location, Double latitude, Double longitude, LocalTime openTime,
-            LocalTime closeTime, Short[] openDays, AppUser manager) {
+            LocalTime closeTime, Short[] openDays, String description, AppUser manager) {
         this.name = name;
         this.location = location;
         this.latitude = latitude;
@@ -73,6 +73,7 @@ public class Office extends BaseEntity {
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.openDays = openDays;
+        this.description = description;
         this.manager = manager;
     }
 

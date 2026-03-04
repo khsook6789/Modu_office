@@ -37,7 +37,7 @@ class OfficeControllerTest extends ControllerTestSupport {
         private OfficeRequest officeRequest() {
                 return OfficeRequest.builder()
                                 .name("강남 본점")
-                                .description("강남 위치 공유 오피스")
+                                .description("강남에 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.")
                                 .location("서울특별시 강남구 테헤란로 100")
                                 .latitude(37.500)
                                 .longitude(127.036)
@@ -51,7 +51,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                 return OfficeResponse.builder()
                                 .id(1L)
                                 .name("강남 본점")
-                                .description("강남 위치 공유 오피스")
+                                .description("강남에 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.")
                                 .location("서울특별시 강남구 테헤란로 100")
                                 .latitude(37.500)
                                 .longitude(127.036)

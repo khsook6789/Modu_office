@@ -11,12 +11,14 @@ public record ImageListResponse(
     public record ImageResponse(
             Long id,
             String imageUrl,
-            Integer displayOrder) {
+            Integer displayOrder,
+            String markdownTag) {
         public static ImageResponse from(RoomImage roomImage) {
             return new ImageResponse(
                     roomImage.getId(),
                     roomImage.getImageUrl(),
-                    roomImage.getDisplayOrder());
+                    roomImage.getDisplayOrder(),
+                    String.format("![공간 이미지](%s)", roomImage.getImageUrl()));
         }
     }
 }

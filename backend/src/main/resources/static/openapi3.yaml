@@ -48,7 +48,7 @@ paths:
                     \n    \"capacity\" : 10,\r\n    \"category\" : \"MEETING\",\r\n\
                     \    \"price\" : 5000,\r\n    \"officeId\" : 100,\r\n    \"officeName\"\
                     \ : \"강남 지점\",\r\n    \"officeLocation\" : \"서울시 강남구\",\r\n  \
-                    \  \"createdAt\" : \"2026-03-04T18:02:28.8733561\"\r\n  } ]\r\n\
+                    \  \"createdAt\" : \"2026-03-04T23:41:32.7193366\"\r\n  } ]\r\n\
                     }"
     post:
       tags:
@@ -78,54 +78,7 @@ paths:
                     \ : 10,\r\n    \"category\" : \"MEETING\",\r\n    \"price\" :\
                     \ 5000,\r\n    \"officeId\" : 100,\r\n    \"officeName\" : \"강\
                     남 지점\",\r\n    \"officeLocation\" : \"서울시 강남구\",\r\n    \"createdAt\"\
-                    \ : \"2026-03-04T18:02:28.9422149\"\r\n  }\r\n}"
-  /api/logs:
-    get:
-      tags:
-      - api
-      operationId: update-log-all
-      parameters:
-      - name: page
-        in: query
-        description: 페이지 번호 (0부터 시작)
-        required: false
-        schema:
-          type: string
-      - name: size
-        in: query
-        description: 페이지 크기
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: "200"
-          content:
-            application/json;charset=UTF-8:
-              schema:
-                $ref: "#/components/schemas/api-logs1400619844"
-              examples:
-                update-log-all:
-                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
-                    ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : {\r\
-                    \n    \"content\" : [ {\r\n      \"id\" : 1,\r\n      \"reservationId\"\
-                    \ : 100,\r\n      \"reservationTitle\" : \"오피스 A 예약\",\r\n   \
-                    \   \"action\" : \"UPDATE\",\r\n      \"actorId\" : 5,\r\n   \
-                    \   \"actorName\" : \"최관리\",\r\n      \"beforeData\" : {\r\n \
-                    \       \"status\" : \"RESERVED\"\r\n      },\r\n      \"afterData\"\
-                    \ : {\r\n        \"status\" : \"CANCELED\"\r\n      },\r\n   \
-                    \   \"occurredAt\" : \"2026-03-04T18:02:29.0679909\"\r\n    }\
-                    \ ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n\
-                    \      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
-                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
-                    \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"paged\"\
-                    \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
-                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\n\
-                    \    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n  }\r\
-                    \n}"
+                    \ : \"2026-03-04T23:41:32.8035151\"\r\n  }\r\n}"
   /api/notifications:
     get:
       tags:
@@ -143,12 +96,12 @@ paths:
                   value: "{\r\n  \"content\" : [ {\r\n    \"id\" : 1,\r\n    \"message\"\
                     \ : \"[강남 본점] 예약이 접수되었습니다.\",\r\n    \"type\" : \"RESERVATION_CREATED\"\
                     ,\r\n    \"targetUrl\" : \"/reservations/100\",\r\n    \"createdAt\"\
-                    \ : \"2026-03-04T18:02:27.3451876\",\r\n    \"read\" : false\r\
+                    \ : \"2026-03-04T23:41:31.1103524\",\r\n    \"read\" : false\r\
                     \n  } ],\r\n  \"pageable\" : \"INSTANCE\",\r\n  \"totalElements\"\
                     \ : 1,\r\n  \"last\" : true,\r\n  \"totalPages\" : 1,\r\n  \"\
                     size\" : 1,\r\n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\"\
                     \ : true,\r\n    \"sorted\" : false,\r\n    \"unsorted\" : true\r\
-                    \n  },\r\n  \"first\" : true,\r\n  \"numberOfElements\" : 1,\r\
+                    \n  },\r\n  \"numberOfElements\" : 1,\r\n  \"first\" : true,\r\
                     \n  \"empty\" : false\r\n}"
   /api/offices:
     get:
@@ -167,12 +120,12 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : [\
                     \ {\r\n    \"id\" : 1,\r\n    \"name\" : \"강남 본점\",\r\n    \"\
-                    description\" : \"강남 위치 공유 오피스\",\r\n    \"location\" : \"서울특별\
-                    시 강남구 테헤란로 100\",\r\n    \"latitude\" : 37.5,\r\n    \"longitude\"\
-                    \ : 127.036,\r\n    \"openTime\" : \"09:00:00\",\r\n    \"closeTime\"\
-                    \ : \"22:00:00\",\r\n    \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n\
-                    \    \"createdAt\" : null,\r\n    \"updatedAt\" : null\r\n  }\
-                    \ ]\r\n}"
+                    description\" : \"강남에 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.\",\r\n\
+                    \    \"location\" : \"서울특별시 강남구 테헤란로 100\",\r\n    \"latitude\"\
+                    \ : 37.5,\r\n    \"longitude\" : 127.036,\r\n    \"openTime\"\
+                    \ : \"09:00:00\",\r\n    \"closeTime\" : \"22:00:00\",\r\n   \
+                    \ \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\" : null,\r\
+                    \n    \"updatedAt\" : null\r\n  } ]\r\n}"
     post:
       tags:
       - api
@@ -184,28 +137,29 @@ paths:
               $ref: "#/components/schemas/api-offices-1433084143"
             examples:
               office-create:
-                value: "{\r\n  \"name\" : \"강남 본점\",\r\n  \"description\" : \"강남 위\
-                  치 공유 오피스\",\r\n  \"location\" : \"서울특별시 강남구 테헤란로 100\",\r\n  \"\
-                  latitude\" : 37.5,\r\n  \"longitude\" : 127.036,\r\n  \"openTime\"\
-                  \ : \"09:00:00\",\r\n  \"closeTime\" : \"22:00:00\",\r\n  \"openDays\"\
-                  \ : [ 1, 2, 3, 4, 5 ]\r\n}"
+                value: "{\r\n  \"name\" : \"강남 본점\",\r\n  \"description\" : \"강남에\
+                  \ 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.\",\r\n  \"location\" : \"서울\
+                  특별시 강남구 테헤란로 100\",\r\n  \"latitude\" : 37.5,\r\n  \"longitude\"\
+                  \ : 127.036,\r\n  \"openTime\" : \"09:00:00\",\r\n  \"closeTime\"\
+                  \ : \"22:00:00\",\r\n  \"openDays\" : [ 1, 2, 3, 4, 5 ]\r\n}"
       responses:
         "201":
           description: "201"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-839514101"
+                $ref: "#/components/schemas/api-offices-id-839514101"
               examples:
                 office-create:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"지점이 생성되었습니다.\",\r\n  \"data\" : {\r\n \
                     \   \"id\" : 1,\r\n    \"name\" : \"강남 본점\",\r\n    \"description\"\
-                    \ : \"강남 위치 공유 오피스\",\r\n    \"location\" : \"서울특별시 강남구 테헤란로 100\"\
-                    ,\r\n    \"latitude\" : 37.5,\r\n    \"longitude\" : 127.036,\r\
-                    \n    \"openTime\" : \"09:00:00\",\r\n    \"closeTime\" : \"22:00:00\"\
-                    ,\r\n    \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\"\
-                    \ : null,\r\n    \"updatedAt\" : null\r\n  }\r\n}"
+                    \ : \"강남에 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.\",\r\n    \"location\"\
+                    \ : \"서울특별시 강남구 테헤란로 100\",\r\n    \"latitude\" : 37.5,\r\n  \
+                    \  \"longitude\" : 127.036,\r\n    \"openTime\" : \"09:00:00\"\
+                    ,\r\n    \"closeTime\" : \"22:00:00\",\r\n    \"openDays\" : [\
+                    \ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
+                    \ : null\r\n  }\r\n}"
   /api/reservations:
     get:
       tags:
@@ -260,8 +214,8 @@ paths:
                     \    \"userId\" : 1,\r\n      \"userName\" : \"홍길동\",\r\n    \
                     \  \"startAt\" : \"2026-03-05T10:00:00\",\r\n      \"endAt\" :\
                     \ \"2026-03-05T12:00:00\",\r\n      \"status\" : \"PENDING\",\r\
-                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-04T18:02:27.9517155\"\
-                    ,\r\n      \"updatedAt\" : \"2026-03-04T18:02:27.9517155\",\r\n\
+                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-04T23:41:31.7026398\"\
+                    ,\r\n      \"updatedAt\" : \"2026-03-04T23:41:31.7026398\",\r\n\
                     \      \"version\" : 0\r\n    } ],\r\n    \"pageable\" : {\r\n\
                     \      \"pageNumber\" : 0,\r\n      \"pageSize\" : 20,\r\n   \
                     \   \"sort\" : {\r\n        \"empty\" : true,\r\n        \"sorted\"\
@@ -271,8 +225,8 @@ paths:
                     \ : true,\r\n    \"totalPages\" : 1,\r\n    \"size\" : 20,\r\n\
                     \    \"number\" : 0,\r\n    \"sort\" : {\r\n      \"empty\" :\
                     \ true,\r\n      \"sorted\" : false,\r\n      \"unsorted\" : true\r\
-                    \n    },\r\n    \"first\" : true,\r\n    \"numberOfElements\"\
-                    \ : 1,\r\n    \"empty\" : false\r\n  }\r\n}"
+                    \n    },\r\n    \"numberOfElements\" : 1,\r\n    \"first\" : true,\r\
+                    \n    \"empty\" : false\r\n  }\r\n}"
     post:
       tags:
       - api
@@ -305,8 +259,8 @@ paths:
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
                     홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
                     endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T18:02:27.7583774\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-04T18:02:27.7583774\",\r\n\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T23:41:31.5277393\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T23:41:31.5277393\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
   /api/reviews:
     post:
@@ -334,8 +288,8 @@ paths:
                   value: "{\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n  \"\
                     authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"rating\"\
                     \ : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\
-                    \n  \"createdAt\" : \"2026-03-04T18:02:28.4583394\",\r\n  \"updatedAt\"\
-                    \ : \"2026-03-04T18:02:28.4583394\"\r\n}"
+                    \n  \"createdAt\" : \"2026-03-04T23:41:32.1981988\",\r\n  \"updatedAt\"\
+                    \ : \"2026-03-04T23:41:32.1981988\"\r\n}"
   /api/admin/facilities:
     get:
       tags:
@@ -408,7 +362,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-logs1400619844"
+                $ref: "#/components/schemas/api-admin-logs1400619844"
               examples:
                 admin-log-list:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -417,21 +371,21 @@ paths:
                     \ : 100,\r\n      \"reservationTitle\" : \"프로젝트 A 회의실 예약\",\r\n\
                     \      \"action\" : \"UPDATE\",\r\n      \"actorId\" : 2,\r\n\
                     \      \"actorName\" : \"김실무\",\r\n      \"beforeData\" : {\r\n\
-                    \        \"status\" : \"AVAILABLE\",\r\n        \"participants\"\
-                    \ : 4\r\n      },\r\n      \"afterData\" : {\r\n        \"status\"\
-                    \ : \"IN_USE\",\r\n        \"participants\" : 5\r\n      },\r\n\
-                    \      \"occurredAt\" : \"2026-03-04T18:02:27.030231\"\r\n   \
-                    \ } ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n\
-                    \      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
-                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \        \"participants\" : 4,\r\n        \"status\" : \"AVAILABLE\"\
+                    \r\n      },\r\n      \"afterData\" : {\r\n        \"participants\"\
+                    \ : 5,\r\n        \"status\" : \"IN_USE\"\r\n      },\r\n    \
+                    \  \"occurredAt\" : \"2026-03-04T23:41:30.5907708\"\r\n    } ],\r\
+                    \n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"\
+                    pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"empty\" :\
+                    \ true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
                     \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"paged\"\
                     \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
                     \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
                     \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
                     \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\n\
-                    \    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n  }\r\
-                    \n}"
+                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
+                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ }\r\n}"
   /api/admin/users:
     get:
       tags:
@@ -450,7 +404,7 @@ paths:
                     ,\r\n  \"message\" : \"사용자 목록을 조회했습니다.\",\r\n  \"data\" : [ {\r\
                     \n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\",\r\n\
                     \    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n    \"\
-                    accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"2026-03-04T18:02:26.6909895\"\
+                    accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"2026-03-04T23:41:30.1610875\"\
                     \r\n  } ]\r\n}"
   /api/favorites/{roomId}:
     delete:
@@ -516,12 +470,12 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : [\
                     \ {\r\n    \"id\" : 1,\r\n    \"name\" : \"강남 본점\",\r\n    \"\
-                    description\" : \"강남 위치 공유 오피스\",\r\n    \"location\" : \"서울특별\
-                    시 강남구 테헤란로 100\",\r\n    \"latitude\" : 37.5,\r\n    \"longitude\"\
-                    \ : 127.036,\r\n    \"openTime\" : \"09:00:00\",\r\n    \"closeTime\"\
-                    \ : \"22:00:00\",\r\n    \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n\
-                    \    \"createdAt\" : null,\r\n    \"updatedAt\" : null\r\n  }\
-                    \ ]\r\n}"
+                    description\" : \"강남에 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.\",\r\n\
+                    \    \"location\" : \"서울특별시 강남구 테헤란로 100\",\r\n    \"latitude\"\
+                    \ : 37.5,\r\n    \"longitude\" : 127.036,\r\n    \"openTime\"\
+                    \ : \"09:00:00\",\r\n    \"closeTime\" : \"22:00:00\",\r\n   \
+                    \ \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\" : null,\r\
+                    \n    \"updatedAt\" : null\r\n  } ]\r\n}"
   /api/offices/search:
     get:
       tags:
@@ -546,23 +500,23 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : {\r\
                     \n    \"content\" : [ {\r\n      \"id\" : 1,\r\n      \"name\"\
-                    \ : \"강남 본점\",\r\n      \"description\" : \"강남 위치 공유 오피스\",\r\n\
-                    \      \"location\" : \"서울특별시 강남구 테헤란로 100\",\r\n      \"latitude\"\
-                    \ : 37.5,\r\n      \"longitude\" : 127.036,\r\n      \"openTime\"\
-                    \ : \"09:00:00\",\r\n      \"closeTime\" : \"22:00:00\",\r\n \
-                    \     \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n      \"createdAt\"\
-                    \ : null,\r\n      \"updatedAt\" : null\r\n    } ],\r\n    \"\
-                    pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"pageSize\"\
-                    \ : 10,\r\n      \"sort\" : {\r\n        \"empty\" : true,\r\n\
-                    \        \"sorted\" : false,\r\n        \"unsorted\" : true\r\n\
-                    \      },\r\n      \"offset\" : 0,\r\n      \"paged\" : true,\r\
-                    \n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
-                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 10,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\n\
-                    \    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n  }\r\
-                    \n}"
+                    \ : \"강남 본점\",\r\n      \"description\" : \"강남에 위치한 프리미엄 공유 오피\
+                    스입니다. 쾌적한 환경을 제공합니다.\",\r\n      \"location\" : \"서울특별시 강남구 테헤\
+                    란로 100\",\r\n      \"latitude\" : 37.5,\r\n      \"longitude\"\
+                    \ : 127.036,\r\n      \"openTime\" : \"09:00:00\",\r\n      \"\
+                    closeTime\" : \"22:00:00\",\r\n      \"openDays\" : [ 1, 2, 3,\
+                    \ 4, 5 ],\r\n      \"createdAt\" : null,\r\n      \"updatedAt\"\
+                    \ : null\r\n    } ],\r\n    \"pageable\" : {\r\n      \"pageNumber\"\
+                    \ : 0,\r\n      \"pageSize\" : 10,\r\n      \"sort\" : {\r\n \
+                    \       \"empty\" : true,\r\n        \"sorted\" : false,\r\n \
+                    \       \"unsorted\" : true\r\n      },\r\n      \"offset\" :\
+                    \ 0,\r\n      \"paged\" : true,\r\n      \"unpaged\" : false\r\
+                    \n    },\r\n    \"totalElements\" : 1,\r\n    \"last\" : true,\r\
+                    \n    \"totalPages\" : 1,\r\n    \"size\" : 10,\r\n    \"number\"\
+                    \ : 0,\r\n    \"sort\" : {\r\n      \"empty\" : true,\r\n    \
+                    \  \"sorted\" : false,\r\n      \"unsorted\" : true\r\n    },\r\
+                    \n    \"numberOfElements\" : 1,\r\n    \"first\" : true,\r\n \
+                    \   \"empty\" : false\r\n  }\r\n}"
   /api/offices/{id}:
     get:
       tags:
@@ -581,17 +535,18 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-839514101"
+                $ref: "#/components/schemas/api-offices-id-839514101"
               examples:
                 office-get:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : {\r\
                     \n    \"id\" : 1,\r\n    \"name\" : \"강남 본점\",\r\n    \"description\"\
-                    \ : \"강남 위치 공유 오피스\",\r\n    \"location\" : \"서울특별시 강남구 테헤란로 100\"\
-                    ,\r\n    \"latitude\" : 37.5,\r\n    \"longitude\" : 127.036,\r\
-                    \n    \"openTime\" : \"09:00:00\",\r\n    \"closeTime\" : \"22:00:00\"\
-                    ,\r\n    \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\"\
-                    \ : null,\r\n    \"updatedAt\" : null\r\n  }\r\n}"
+                    \ : \"강남에 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.\",\r\n    \"location\"\
+                    \ : \"서울특별시 강남구 테헤란로 100\",\r\n    \"latitude\" : 37.5,\r\n  \
+                    \  \"longitude\" : 127.036,\r\n    \"openTime\" : \"09:00:00\"\
+                    ,\r\n    \"closeTime\" : \"22:00:00\",\r\n    \"openDays\" : [\
+                    \ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
+                    \ : null\r\n  }\r\n}"
     put:
       tags:
       - api
@@ -610,11 +565,11 @@ paths:
               $ref: "#/components/schemas/api-auth-manager-signup486549215"
             examples:
               office-update:
-                value: "{\r\n  \"name\" : \"강남 본점\",\r\n  \"description\" : \"강남 위\
-                  치 공유 오피스\",\r\n  \"location\" : \"서울특별시 강남구 테헤란로 100\",\r\n  \"\
-                  latitude\" : 37.5,\r\n  \"longitude\" : 127.036,\r\n  \"openTime\"\
-                  \ : \"09:00:00\",\r\n  \"closeTime\" : \"22:00:00\",\r\n  \"openDays\"\
-                  \ : [ 1, 2, 3, 4, 5 ]\r\n}"
+                value: "{\r\n  \"name\" : \"강남 본점\",\r\n  \"description\" : \"강남에\
+                  \ 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.\",\r\n  \"location\" : \"서울\
+                  특별시 강남구 테헤란로 100\",\r\n  \"latitude\" : 37.5,\r\n  \"longitude\"\
+                  \ : 127.036,\r\n  \"openTime\" : \"09:00:00\",\r\n  \"closeTime\"\
+                  \ : \"22:00:00\",\r\n  \"openDays\" : [ 1, 2, 3, 4, 5 ]\r\n}"
       responses:
         "200":
           description: "200"
@@ -627,11 +582,12 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"지점 정보가 수정되었습니다.\",\r\n  \"data\" : {\r\n\
                     \    \"id\" : 1,\r\n    \"name\" : \"강남 본점\",\r\n    \"description\"\
-                    \ : \"강남 위치 공유 오피스\",\r\n    \"location\" : \"서울특별시 강남구 테헤란로 100\"\
-                    ,\r\n    \"latitude\" : 37.5,\r\n    \"longitude\" : 127.036,\r\
-                    \n    \"openTime\" : \"09:00:00\",\r\n    \"closeTime\" : \"22:00:00\"\
-                    ,\r\n    \"openDays\" : [ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\"\
-                    \ : null,\r\n    \"updatedAt\" : null\r\n  }\r\n}"
+                    \ : \"강남에 위치한 프리미엄 공유 오피스입니다. 쾌적한 환경을 제공합니다.\",\r\n    \"location\"\
+                    \ : \"서울특별시 강남구 테헤란로 100\",\r\n    \"latitude\" : 37.5,\r\n  \
+                    \  \"longitude\" : 127.036,\r\n    \"openTime\" : \"09:00:00\"\
+                    ,\r\n    \"closeTime\" : \"22:00:00\",\r\n    \"openDays\" : [\
+                    \ 1, 2, 3, 4, 5 ],\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
+                    \ : null\r\n  }\r\n}"
     delete:
       tags:
       - api
@@ -721,14 +677,14 @@ paths:
                     \    \"userId\" : 1,\r\n      \"userName\" : \"홍길동\",\r\n    \
                     \  \"startAt\" : \"2026-03-05T10:00:00\",\r\n      \"endAt\" :\
                     \ \"2026-03-05T12:00:00\",\r\n      \"status\" : \"PENDING\",\r\
-                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-04T18:02:28.1245984\"\
-                    ,\r\n      \"updatedAt\" : \"2026-03-04T18:02:28.1245984\",\r\n\
+                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-04T23:41:31.8819082\"\
+                    ,\r\n      \"updatedAt\" : \"2026-03-04T23:41:31.8819082\",\r\n\
                     \      \"version\" : 0\r\n    } ],\r\n    \"pageable\" : \"INSTANCE\"\
                     ,\r\n    \"totalElements\" : 1,\r\n    \"last\" : true,\r\n  \
                     \  \"totalPages\" : 1,\r\n    \"size\" : 1,\r\n    \"number\"\
                     \ : 0,\r\n    \"sort\" : {\r\n      \"empty\" : true,\r\n    \
                     \  \"sorted\" : false,\r\n      \"unsorted\" : true\r\n    },\r\
-                    \n    \"first\" : true,\r\n    \"numberOfElements\" : 1,\r\n \
+                    \n    \"numberOfElements\" : 1,\r\n    \"first\" : true,\r\n \
                     \   \"empty\" : false\r\n  }\r\n}"
   /api/reservations/{id}:
     get:
@@ -759,9 +715,9 @@ paths:
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
                     홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
                     endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T18:02:27.903702\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-04T18:02:27.903702\",\r\n \
-                    \   \"version\" : 0\r\n  }\r\n}"
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T23:41:31.6758349\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T23:41:31.6758349\",\r\n\
+                    \    \"version\" : 0\r\n  }\r\n}"
     put:
       tags:
       - api
@@ -799,8 +755,8 @@ paths:
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
                     홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
                     endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T18:02:27.8159209\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-04T18:02:27.8159209\",\r\n\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T23:41:31.6259127\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T23:41:31.6259127\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
   /api/reviews/me:
     get:
@@ -819,8 +775,8 @@ paths:
                   value: "[ {\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n\
                     \  \"authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"\
                     rating\" : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입\
-                    니다.\",\r\n  \"createdAt\" : \"2026-03-04T18:02:28.3605066\",\r\
-                    \n  \"updatedAt\" : \"2026-03-04T18:02:28.3605066\"\r\n} ]"
+                    니다.\",\r\n  \"createdAt\" : \"2026-03-04T23:41:32.1043087\",\r\
+                    \n  \"updatedAt\" : \"2026-03-04T23:41:32.1043087\"\r\n} ]"
   /api/reviews/{reviewId}:
     delete:
       tags:
@@ -868,8 +824,8 @@ paths:
                   value: "{\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n  \"\
                     authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"rating\"\
                     \ : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\
-                    \n  \"createdAt\" : \"2026-03-04T18:02:28.2667013\",\r\n  \"updatedAt\"\
-                    \ : \"2026-03-04T18:02:28.2667013\"\r\n}"
+                    \n  \"createdAt\" : \"2026-03-04T23:41:31.993012\",\r\n  \"updatedAt\"\
+                    \ : \"2026-03-04T23:41:31.993012\"\r\n}"
   /api/rooms/search:
     get:
       tags:
@@ -899,19 +855,22 @@ paths:
                     \ : null,\r\n      \"roomCode\" : \"ROOM-001\",\r\n      \"floor\"\
                     \ : null,\r\n      \"status\" : \"AVAILABLE\",\r\n      \"capacity\"\
                     \ : 10,\r\n      \"category\" : null,\r\n      \"price\" : 30000,\r\
-                    \n      \"facilities\" : null,\r\n      \"images\" : null,\r\n\
-                    \      \"createdAt\" : null,\r\n      \"updatedAt\" : null\r\n\
-                    \    } ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\
-                    \n      \"pageSize\" : 10,\r\n      \"sort\" : {\r\n        \"\
-                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
-                    \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"paged\"\
-                    \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
-                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 10,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\n\
-                    \    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n  }\r\
-                    \n}"
+                    \n      \"facilities\" : null,\r\n      \"images\" : [ {\r\n \
+                    \       \"id\" : 1,\r\n        \"imageUrl\" : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                    ,\r\n        \"displayOrder\" : 0,\r\n        \"markdownTag\"\
+                    \ : \"![공간 이미지](https://images.unsplash.com/photo-1497366216548-37526070297c)\"\
+                    \r\n      } ],\r\n      \"createdAt\" : null,\r\n      \"updatedAt\"\
+                    \ : null\r\n    } ],\r\n    \"pageable\" : {\r\n      \"pageNumber\"\
+                    \ : 0,\r\n      \"pageSize\" : 10,\r\n      \"sort\" : {\r\n \
+                    \       \"empty\" : true,\r\n        \"sorted\" : false,\r\n \
+                    \       \"unsorted\" : true\r\n      },\r\n      \"offset\" :\
+                    \ 0,\r\n      \"paged\" : true,\r\n      \"unpaged\" : false\r\
+                    \n    },\r\n    \"totalElements\" : 1,\r\n    \"last\" : true,\r\
+                    \n    \"totalPages\" : 1,\r\n    \"size\" : 10,\r\n    \"number\"\
+                    \ : 0,\r\n    \"sort\" : {\r\n      \"empty\" : true,\r\n    \
+                    \  \"sorted\" : false,\r\n      \"unsorted\" : true\r\n    },\r\
+                    \n    \"numberOfElements\" : 1,\r\n    \"first\" : true,\r\n \
+                    \   \"empty\" : false\r\n  }\r\n}"
   /api/rooms/{roomId}:
     get:
       tags:
@@ -941,7 +900,11 @@ paths:
                     \ \"ROOM-001\",\r\n    \"floor\" : null,\r\n    \"status\" : \"\
                     AVAILABLE\",\r\n    \"capacity\" : 10,\r\n    \"category\" : null,\r\
                     \n    \"price\" : 30000,\r\n    \"facilities\" : null,\r\n   \
-                    \ \"images\" : null,\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
+                    \ \"images\" : [ {\r\n      \"id\" : 1,\r\n      \"imageUrl\"\
+                    \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                    ,\r\n      \"displayOrder\" : 0,\r\n      \"markdownTag\" : \"\
+                    ![공간 이미지](https://images.unsplash.com/photo-1497366216548-37526070297c)\"\
+                    \r\n    } ],\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
                     \ : null\r\n  }\r\n}"
     put:
       tags:
@@ -962,11 +925,11 @@ paths:
             examples:
               room-update:
                 value: "{\r\n  \"name\" : \"세미나룸 A\",\r\n  \"description\" : \"화이트\
-                  보드 구비\",\r\n  \"bufferTime\" : 30,\r\n  \"roomCode\" : \"ROOM-001\"\
-                  ,\r\n  \"floor\" : 3,\r\n  \"status\" : \"AVAILABLE\",\r\n  \"capacity\"\
-                  \ : 10,\r\n  \"category\" : null,\r\n  \"price\" : 30000,\r\n  \"\
-                  facilityIds\" : null,\r\n  \"images\" : [ {\r\n    \"imageUrl\"\
-                  \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                  보드, 빔 프로젝터, 초고속 와이파이가 완비된 최고급 회의실입니다.\",\r\n  \"bufferTime\" : 30,\r\
+                  \n  \"roomCode\" : \"ROOM-001\",\r\n  \"floor\" : 3,\r\n  \"status\"\
+                  \ : \"AVAILABLE\",\r\n  \"capacity\" : 10,\r\n  \"category\" : null,\r\
+                  \n  \"price\" : 30000,\r\n  \"facilityIds\" : null,\r\n  \"images\"\
+                  \ : [ {\r\n    \"imageUrl\" : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
                   ,\r\n    \"displayOrder\" : 0\r\n  } ]\r\n}"
       responses:
         "200":
@@ -985,7 +948,11 @@ paths:
                     \ \"ROOM-001\",\r\n    \"floor\" : null,\r\n    \"status\" : \"\
                     AVAILABLE\",\r\n    \"capacity\" : 10,\r\n    \"category\" : null,\r\
                     \n    \"price\" : 30000,\r\n    \"facilities\" : null,\r\n   \
-                    \ \"images\" : null,\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
+                    \ \"images\" : [ {\r\n      \"id\" : 1,\r\n      \"imageUrl\"\
+                    \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                    ,\r\n      \"displayOrder\" : 0,\r\n      \"markdownTag\" : \"\
+                    ![공간 이미지](https://images.unsplash.com/photo-1497366216548-37526070297c)\"\
+                    \r\n    } ],\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
                     \ : null\r\n  }\r\n}"
     delete:
       tags:
@@ -1185,21 +1152,21 @@ paths:
                     \ : 100,\r\n      \"reservationTitle\" : \"프로젝트 A 회의실 예약\",\r\n\
                     \      \"action\" : \"UPDATE\",\r\n      \"actorId\" : 2,\r\n\
                     \      \"actorName\" : \"김실무\",\r\n      \"beforeData\" : {\r\n\
-                    \        \"status\" : \"AVAILABLE\",\r\n        \"participants\"\
-                    \ : 4\r\n      },\r\n      \"afterData\" : {\r\n        \"status\"\
-                    \ : \"IN_USE\",\r\n        \"participants\" : 5\r\n      },\r\n\
-                    \      \"occurredAt\" : \"2026-03-04T18:02:26.7581471\"\r\n  \
-                    \  } ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\
-                    \n      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
-                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \        \"participants\" : 4,\r\n        \"status\" : \"AVAILABLE\"\
+                    \r\n      },\r\n      \"afterData\" : {\r\n        \"participants\"\
+                    \ : 5,\r\n        \"status\" : \"IN_USE\"\r\n      },\r\n    \
+                    \  \"occurredAt\" : \"2026-03-04T23:41:30.2533141\"\r\n    } ],\r\
+                    \n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"\
+                    pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"empty\" :\
+                    \ true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
                     \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"paged\"\
                     \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
                     \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
                     \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
                     \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\n\
-                    \    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n  }\r\
-                    \n}"
+                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
+                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ }\r\n}"
   /api/admin/managers/pending:
     get:
       tags:
@@ -1218,7 +1185,7 @@ paths:
                     ,\r\n  \"message\" : \"승인 대기 중인 Manager 목록을 조회했습니다.\",\r\n  \"\
                     data\" : [ {\r\n    \"userId\" : 2,\r\n    \"name\" : \"강감찬\"\
                     ,\r\n    \"email\" : \"manager@example.com\",\r\n    \"approvalStatus\"\
-                    \ : \"PENDING\",\r\n    \"createdAt\" : \"2026-03-04T18:02:26.3275495\"\
+                    \ : \"PENDING\",\r\n    \"createdAt\" : \"2026-03-04T23:41:29.6322725\"\
                     \r\n  } ]\r\n}"
   /api/admin/stats/cancellations:
     get:
@@ -1595,59 +1562,6 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : true\r\
                     \n}"
-  /api/logs/reservation/{reservationId}:
-    get:
-      tags:
-      - api
-      operationId: update-log-by-reservation
-      parameters:
-      - name: reservationId
-        in: path
-        description: 대상 예약 ID
-        required: true
-        schema:
-          type: string
-      - name: page
-        in: query
-        description: 페이지 번호
-        required: false
-        schema:
-          type: string
-      - name: size
-        in: query
-        description: 페이지 크기
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: "200"
-          content:
-            application/json;charset=UTF-8:
-              schema:
-                $ref: "#/components/schemas/api-logs1400619844"
-              examples:
-                update-log-by-reservation:
-                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
-                    ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : {\r\
-                    \n    \"content\" : [ {\r\n      \"id\" : 1,\r\n      \"reservationId\"\
-                    \ : 100,\r\n      \"reservationTitle\" : \"오피스 A 예약\",\r\n   \
-                    \   \"action\" : \"UPDATE\",\r\n      \"actorId\" : 5,\r\n   \
-                    \   \"actorName\" : \"최관리\",\r\n      \"beforeData\" : {\r\n \
-                    \       \"status\" : \"RESERVED\"\r\n      },\r\n      \"afterData\"\
-                    \ : {\r\n        \"status\" : \"CANCELED\"\r\n      },\r\n   \
-                    \   \"occurredAt\" : \"2026-03-04T18:02:29.0208165\"\r\n    }\
-                    \ ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n\
-                    \      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
-                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
-                    \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"paged\"\
-                    \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
-                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\n\
-                    \    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n  }\r\
-                    \n}"
   /api/notifications/{notificationId}/read:
     patch:
       tags:
@@ -1704,7 +1618,11 @@ paths:
                     \ \"ROOM-001\",\r\n    \"floor\" : null,\r\n    \"status\" : \"\
                     AVAILABLE\",\r\n    \"capacity\" : 10,\r\n    \"category\" : null,\r\
                     \n    \"price\" : 30000,\r\n    \"facilities\" : null,\r\n   \
-                    \ \"images\" : null,\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
+                    \ \"images\" : [ {\r\n      \"id\" : 1,\r\n      \"imageUrl\"\
+                    \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                    ,\r\n      \"displayOrder\" : 0,\r\n      \"markdownTag\" : \"\
+                    ![공간 이미지](https://images.unsplash.com/photo-1497366216548-37526070297c)\"\
+                    \r\n    } ],\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
                     \ : null\r\n  } ]\r\n}"
     post:
       tags:
@@ -1725,11 +1643,11 @@ paths:
             examples:
               room-create:
                 value: "{\r\n  \"name\" : \"세미나룸 A\",\r\n  \"description\" : \"화이트\
-                  보드 구비\",\r\n  \"bufferTime\" : 30,\r\n  \"roomCode\" : \"ROOM-001\"\
-                  ,\r\n  \"floor\" : 3,\r\n  \"status\" : \"AVAILABLE\",\r\n  \"capacity\"\
-                  \ : 10,\r\n  \"category\" : null,\r\n  \"price\" : 30000,\r\n  \"\
-                  facilityIds\" : null,\r\n  \"images\" : [ {\r\n    \"imageUrl\"\
-                  \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                  보드, 빔 프로젝터, 초고속 와이파이가 완비된 최고급 회의실입니다.\",\r\n  \"bufferTime\" : 30,\r\
+                  \n  \"roomCode\" : \"ROOM-001\",\r\n  \"floor\" : 3,\r\n  \"status\"\
+                  \ : \"AVAILABLE\",\r\n  \"capacity\" : 10,\r\n  \"category\" : null,\r\
+                  \n  \"price\" : 30000,\r\n  \"facilityIds\" : null,\r\n  \"images\"\
+                  \ : [ {\r\n    \"imageUrl\" : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
                   ,\r\n    \"displayOrder\" : 0\r\n  } ]\r\n}"
       responses:
         "201":
@@ -1748,7 +1666,11 @@ paths:
                     \ \"ROOM-001\",\r\n    \"floor\" : null,\r\n    \"status\" : \"\
                     AVAILABLE\",\r\n    \"capacity\" : 10,\r\n    \"category\" : null,\r\
                     \n    \"price\" : 30000,\r\n    \"facilities\" : null,\r\n   \
-                    \ \"images\" : null,\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
+                    \ \"images\" : [ {\r\n      \"id\" : 1,\r\n      \"imageUrl\"\
+                    \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                    ,\r\n      \"displayOrder\" : 0,\r\n      \"markdownTag\" : \"\
+                    ![공간 이미지](https://images.unsplash.com/photo-1497366216548-37526070297c)\"\
+                    \r\n    } ],\r\n    \"createdAt\" : null,\r\n    \"updatedAt\"\
                     \ : null\r\n  }\r\n}"
   /api/reservations/{id}/cancel:
     post:
@@ -1777,7 +1699,7 @@ paths:
                     \ : {\r\n      \"reservationId\" : 100,\r\n      \"totalPrice\"\
                     \ : 20000,\r\n      \"refundRate\" : 100,\r\n      \"refundAmount\"\
                     \ : 20000,\r\n      \"cancellationPenalty\" : 0,\r\n      \"requestTime\"\
-                    \ : \"2026-03-04T18:02:28.0728305\",\r\n      \"reasonDescriptor\"\
+                    \ : \"2026-03-04T23:41:31.8087857\",\r\n      \"reasonDescriptor\"\
                     \ : \"이용 시작 7일 이전 취소: 100% 환불\"\r\n    }\r\n  }\r\n}"
   /api/reservations/{id}/confirm:
     patch:
@@ -1808,8 +1730,8 @@ paths:
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
                     홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
                     endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T18:02:28.1029714\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-04T18:02:28.1029714\",\r\n\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T23:41:31.8529161\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T23:41:31.8529161\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
   /api/reservations/{id}/refund-preview:
     get:
@@ -1837,7 +1759,7 @@ paths:
                     \   \"reservationId\" : 100,\r\n    \"totalPrice\" : 20000,\r\n\
                     \    \"refundRate\" : 50,\r\n    \"refundAmount\" : 10000,\r\n\
                     \    \"cancellationPenalty\" : 10000,\r\n    \"requestTime\" :\
-                    \ \"2026-03-04T18:02:28.0147446\",\r\n    \"reasonDescriptor\"\
+                    \ \"2026-03-04T23:41:31.7524688\",\r\n    \"reasonDescriptor\"\
                     \ : \"이용 시작 1일 전 취소: 50% 환불\"\r\n  }\r\n}"
   /api/reviews/room/{roomId}:
     get:
@@ -1875,8 +1797,8 @@ paths:
                   value: "{\r\n  \"content\" : [ {\r\n    \"id\" : 100,\r\n    \"\
                     reservationId\" : 10,\r\n    \"authorUserId\" : 1,\r\n    \"authorName\"\
                     \ : \"홍길동\",\r\n    \"rating\" : 5,\r\n    \"content\" : \"공간이\
-                    \ 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\n    \"createdAt\" : \"2026-03-04T18:02:28.4218406\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-04T18:02:28.4218406\"\r\n \
+                    \ 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\n    \"createdAt\" : \"2026-03-04T23:41:32.1514869\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T23:41:32.1514869\"\r\n \
                     \ } ],\r\n  \"pageable\" : {\r\n    \"pageNumber\" : 0,\r\n  \
                     \  \"pageSize\" : 10,\r\n    \"sort\" : {\r\n      \"empty\" :\
                     \ false,\r\n      \"sorted\" : true,\r\n      \"unsorted\" : false\r\
@@ -1885,7 +1807,7 @@ paths:
                     \  \"last\" : true,\r\n  \"totalPages\" : 1,\r\n  \"size\" : 10,\r\
                     \n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\" : false,\r\
                     \n    \"sorted\" : true,\r\n    \"unsorted\" : false\r\n  },\r\
-                    \n  \"first\" : true,\r\n  \"numberOfElements\" : 1,\r\n  \"empty\"\
+                    \n  \"numberOfElements\" : 1,\r\n  \"first\" : true,\r\n  \"empty\"\
                     \ : false\r\n}"
   /api/rooms/{roomId}/images:
     put:
@@ -1964,7 +1886,7 @@ paths:
                     ,\r\n  \"message\" : \"Manager가 승인되었습니다.\",\r\n  \"data\" : {\r\
                     \n    \"userId\" : 2,\r\n    \"name\" : \"강감찬\",\r\n    \"email\"\
                     \ : \"manager@example.com\",\r\n    \"approvalStatus\" : \"APPROVED\"\
-                    ,\r\n    \"createdAt\" : \"2026-03-04T18:02:26.2729789\"\r\n \
+                    ,\r\n    \"createdAt\" : \"2026-03-04T23:41:29.5569497\"\r\n \
                     \ }\r\n}"
   /api/admin/reservations/{id}/force-cancel:
     post:
@@ -1999,7 +1921,7 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"예약이 관리자 권한으로 취소되었습니다.\",\r\n  \"data\"\
                     \ : {\r\n    \"reservationId\" : 1,\r\n    \"userEmail\" : \"\
-                    user1@example.com\",\r\n    \"canceledAt\" : \"2026-03-04T18:02:26.4835535\"\
+                    user1@example.com\",\r\n    \"canceledAt\" : \"2026-03-04T23:41:29.76682\"\
                     ,\r\n    \"adminReason\" : \"침수 피해로 인한 지점 임시 휴업\"\r\n  }\r\n}"
   /api/admin/stats/rooms/popular:
     get:
@@ -2105,7 +2027,7 @@ paths:
                     \ {\r\n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\"\
                     ,\r\n    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n \
                     \   \"accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"\
-                    2026-03-04T18:02:26.6076415\"\r\n  }\r\n}"
+                    2026-03-04T23:41:29.9796987\"\r\n  }\r\n}"
   /api/admin/users/{id}/suspend:
     patch:
       tags:
@@ -2131,7 +2053,7 @@ paths:
                     ,\r\n  \"message\" : \"사용자 계정이 정지되었습니다.\",\r\n  \"data\" : {\r\
                     \n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\",\r\n\
                     \    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n    \"\
-                    accountStatus\" : \"SUSPENDED\",\r\n    \"createdAt\" : \"2026-03-04T18:02:26.6463592\"\
+                    accountStatus\" : \"SUSPENDED\",\r\n    \"createdAt\" : \"2026-03-04T23:41:30.0519523\"\
                     \r\n  }\r\n}"
   /api/offices/{id}/rooms/status:
     patch:
@@ -2212,11 +2134,6 @@ paths:
         "204":
           description: "204"
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
   schemas:
     api-offices-officeId-rooms1206639723:
       required:
@@ -2346,6 +2263,26 @@ components:
         status:
           type: string
           description: 처리 상태
+    api-favorites-check-roomId-393213291:
+      required:
+      - code
+      - data
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          type: boolean
+          description: "즐겨찾기 여부 (true: 즐겨찾기 중, false: 즐겨찾기 안함)"
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
     api-offices-1433084143:
       required:
       - closeTime
@@ -2388,26 +2325,6 @@ components:
           type: number
           description: 경도
           nullable: true
-    api-favorites-check-roomId-393213291:
-      required:
-      - code
-      - data
-      - message
-      - status
-      type: object
-      properties:
-        code:
-          type: string
-          description: 응답 코드
-        data:
-          type: boolean
-          description: "즐겨찾기 여부 (true: 즐겨찾기 중, false: 즐겨찾기 안함)"
-        message:
-          type: string
-          description: 응답 메시지
-        status:
-          type: string
-          description: 처리 상태
     api-users-me1479937214:
       type: object
       properties:
@@ -3142,69 +3059,7 @@ components:
         content:
           type: string
           description: 후기 내용
-    api-admin-stats-daily-usage1900580727:
-      required:
-      - code
-      - message
-      - status
-      type: object
-      properties:
-        code:
-          type: string
-          description: 응답 코드
-        data:
-          type: array
-          items:
-            required:
-            - date
-            - totalUsageMinutes
-            type: object
-            properties:
-              date:
-                type: string
-                description: 날짜 (yyyy-MM-dd)
-              totalUsageMinutes:
-                type: number
-                description: 총 사용 시간 (분)
-        message:
-          type: string
-          description: 응답 메시지
-        status:
-          type: string
-          description: 처리 상태
-    api-admin-stats-cancellations-893511423:
-      required:
-      - code
-      - message
-      - status
-      type: object
-      properties:
-        code:
-          type: string
-          description: 응답 코드
-        data:
-          required:
-          - canceledCount
-          - cancellationRate
-          - totalReservations
-          type: object
-          properties:
-            canceledCount:
-              type: number
-              description: 취소된 예약 수
-            cancellationRate:
-              type: number
-              description: 취소율 (%)
-            totalReservations:
-              type: number
-              description: 전체 예약 수
-        message:
-          type: string
-          description: 응답 메시지
-        status:
-          type: string
-          description: 처리 상태
-    api-logs1400619844:
+    api-admin-logs1400619844:
       required:
       - code
       - message
@@ -3296,6 +3151,68 @@ components:
             totalElements:
               type: number
               description: 전체 데이터 수
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-admin-stats-daily-usage1900580727:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          type: array
+          items:
+            required:
+            - date
+            - totalUsageMinutes
+            type: object
+            properties:
+              date:
+                type: string
+                description: 날짜 (yyyy-MM-dd)
+              totalUsageMinutes:
+                type: number
+                description: 총 사용 시간 (분)
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-admin-stats-cancellations-893511423:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - canceledCount
+          - cancellationRate
+          - totalReservations
+          type: object
+          properties:
+            canceledCount:
+              type: number
+              description: 취소된 예약 수
+            cancellationRate:
+              type: number
+              description: 취소율 (%)
+            totalReservations:
+              type: number
+              description: 전체 예약 수
         message:
           type: string
           description: 응답 메시지
@@ -3485,6 +3402,21 @@ components:
         status:
           type: string
           description: 응답 상태
+    api-reservations-id447669472:
+      type: object
+      properties:
+        endAt:
+          type: string
+          description: 변경할 종료 시간
+          nullable: true
+        startAt:
+          type: string
+          description: 변경할 시작 시간
+          nullable: true
+        status:
+          type: string
+          description: 변경할 상태
+          nullable: true
     api-notifications1229337096:
       required:
       - empty
@@ -3571,21 +3503,6 @@ components:
         totalElements:
           type: number
           description: 전체 데이터 수
-    api-reservations-id447669472:
-      type: object
-      properties:
-        endAt:
-          type: string
-          description: 변경할 종료 시간
-          nullable: true
-        startAt:
-          type: string
-          description: 변경할 시작 시간
-          nullable: true
-        status:
-          type: string
-          description: 변경할 상태
-          nullable: true
     api-users-me950837630:
       required:
       - name
@@ -4048,7 +3965,23 @@ components:
         status:
           type: string
           description: 처리 상태
-    api-offices-839514101:
+    api-reviews-room-roomId-summary660224167:
+      required:
+      - averageRating
+      - reviewCount
+      - roomId
+      type: object
+      properties:
+        reviewCount:
+          type: number
+          description: 후기 총 개수
+        averageRating:
+          type: number
+          description: 평균 평점 (소수점 1자리 반올림)
+        roomId:
+          type: number
+          description: 회의실 ID
+    api-offices-id-839514101:
       required:
       - code
       - message
@@ -4110,22 +4043,6 @@ components:
         status:
           type: string
           description: 처리 상태 (SUCCESS/ERROR)
-    api-reviews-room-roomId-summary660224167:
-      required:
-      - averageRating
-      - reviewCount
-      - roomId
-      type: object
-      properties:
-        reviewCount:
-          type: number
-          description: 후기 총 개수
-        averageRating:
-          type: number
-          description: 평균 평점 (소수점 1자리 반올림)
-        roomId:
-          type: number
-          description: 회의실 ID
     api-favorites282292269:
       required:
       - code
@@ -4192,6 +4109,3 @@ components:
         status:
           type: string
           description: 처리 상태
-
-security:
-  - bearerAuth: []
