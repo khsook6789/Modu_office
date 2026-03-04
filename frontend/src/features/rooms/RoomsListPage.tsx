@@ -174,13 +174,13 @@ function RoomsListPageContent() {
                             className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
                             onClick={() => setFilter('ALL')}
                         >
-                            All Rooms
+                            전체 회의실
                         </button>
                         <button 
                             className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
                             onClick={() => setFilter('AVAILABLE')}
                         >
-                            Available Now
+                            예약 가능
                         </button>
                     </div>
 

@@ -224,11 +224,11 @@ export default function StatsDashboard() {
                                     const mins = d.totalMinutes % 60;
                                     return (
                                         <div key={d.date} className="daily-row">
-                                            <span className="daily-date">{d.date.slice(5)}</span>
+                                            <span className="daily-date">{d.date.slice(5).replace('-', '.')}</span>
                                             <div className="daily-bar-bg">
                                                 <div className="daily-bar-fill" style={{ width: `${pct}%` }} />
                                             </div>
-                                            <span className="daily-value">{hrs}h {mins}m</span>
+                                            <span className="daily-value">{hrs}시간 {mins}분</span>
                                         </div>
                                     );
                                 })}

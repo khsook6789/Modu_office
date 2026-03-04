@@ -41,6 +41,7 @@
     outline: none;
     transition: border-color 0.2s;
     min-width: 140px;
+    font-family: inherit;
 }
 
 .stats-select:focus,
