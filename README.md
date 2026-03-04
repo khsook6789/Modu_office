@@ -269,127 +269,125 @@ frontend/
 
 ## API 목록
 
-모든 API는 `/api` 프리픽스를 가집니다.
-
 ### 1. 인증 (Auth)
 
 - **User**
-  - `POST /auth/user/signup`: 고객 회원가입
-  - `POST /auth/user/login`: 고객 로그인
-  - `POST /auth/user/refresh`: 토큰 갱신
-  - `POST /auth/user/logout`: 고객 로그아웃
+  - `POST /api/auth/user/signup`: 고객 회원가입
+  - `POST /api/auth/user/login`: 고객 로그인
+  - `POST /api/auth/user/refresh`: 토큰 갱신
+  - `POST /api/auth/user/logout`: 고객 로그아웃
 - **Manager**
-  - `POST /auth/manager/signup`: 운영자 회원가입 (Admin 승인 필요)
-  - `POST /auth/manager/login`: 운영자 로그인
-  - `POST /auth/manager/refresh`: 토큰 갱신
-  - `POST /auth/manager/logout`: 운영자 로그아웃
+  - `POST /api/auth/manager/signup`: 운영자 회원가입 (Admin 승인 필요)
+  - `POST /api/auth/manager/login`: 운영자 로그인
+  - `POST /api/auth/manager/refresh`: 토큰 갱신
+  - `POST /api/auth/manager/logout`: 운영자 로그아웃
 - **Admin**
-  - `POST /auth/admin/login`: 관리자 로그인
-  - `POST /auth/admin/refresh`: 토큰 갱신
-  - `POST /auth/admin/logout`: 관리자 로그아웃
+  - `POST /api/auth/admin/login`: 관리자 로그인
+  - `POST /api/auth/admin/refresh`: 토큰 갱신
+  - `POST /api/auth/admin/logout`: 관리자 로그아웃
 
 ### 2. 관리자 - Manager 승인 관리 (Admin)
 
-- `GET /admin/managers/pending`: 승인 대기 중인 Manager 목록 조회
-- `PATCH /admin/managers/{id}/approve`: Manager 승인 처리 (승인 시 권한 부여)
+- `GET /api/admin/managers/pending`: 승인 대기 중인 Manager 목록 조회
+- `PATCH /api/admin/managers/{id}/approve`: Manager 승인 처리 (승인 시 권한 부여)
 
 ### 3. 지점 관리 (Office)
 
-- `POST /offices`: 지점 생성 (Manager/Admin)
-- `GET /offices`: 전체 지점 조회
-- `GET /offices/{id}`: 특정 지점 조회
-- `PUT /offices/{id}`: 지점 정보 수정 (본인 지점만)
-- `DELETE /offices/{id}`: 지점 삭제 (본인 지점만)
-- `GET /offices/search`: 지점 복합 검색 (키워드, 위치, 위경도 반경 거리 기반 통합)
-- `GET /offices/my-offices`: 내 담당 지점 목록 조회 (Manager/Admin)
+- `POST /api/offices`: 지점 생성 (Manager/Admin)
+- `GET /api/offices`: 전체 지점 조회
+- `GET /api/offices/{id}`: 특정 지점 조회
+- `PUT /api/offices/{id}`: 지점 정보 수정 (Manager/Admin, 소유권 확인)
+- `DELETE /api/offices/{id}`: 지점 삭제 (Manager/Admin, 소유권 및 예약 가능 여부 확인)
+- `GET /api/offices/search`: 지점 복합 검색 (키워드, 위치, 위경도 반경 거리 기반 통합)
+- `GET /api/offices/my-offices`: 내 담당 지점 목록 조회 (Manager/Admin)
 
 ### 4. 회의실 관리 (Room)
 
-- `POST /offices/{officeId}/rooms`: 공간 생성 (Manager/Admin)
-- `GET /offices/{officeId}/rooms`: 지점별 공간 조회 (필터링 가능)
-- `GET /rooms/{roomId}`: 특정 공간 조회
-- `GET /rooms/search`: 고급 공간 검색 (위치, 예약 가능 여부, 편의시설 등)
-- `PUT /rooms/{roomId}`: 공간 정보 수정
-- `DELETE /rooms/{roomId}`: 공간 삭제
-- `PATCH /offices/{id}/rooms/status`: 회의실 상태 일괄 변경 (Manager/Admin)
+- `POST /api/offices/{officeId}/rooms`: 특정 지점에 새 공간 등록 (Manager/Admin)
+- `GET /api/offices/{officeId}/rooms`: 특정 지점의 모든 회의실 조회 (상태/인원 필터링 지원)
+- `GET /api/rooms/{roomId}`: 특정 공간 상세 조회
+- `GET /api/rooms/search`: 고급 공간 검색 (예약 가능 여부, 날짜, 시간, 위치, 시설 등 복합 필터)
+- `PUT /api/rooms/{roomId}`: 공간 정보 수정 (Manager/Admin)
+- `DELETE /api/rooms/{roomId}`: 공간 삭제 (Manager/Admin)
+- `PATCH /api/offices/{id}/rooms/status`: 지점 내 회의실 상태 일괄 변경 (Manager/Admin)
+- `PUT /api/rooms/{roomId}/images`: 회의실 이미지 일괄 등록/수정 (URL 기반, displayOrder 지원)
+- `DELETE /api/rooms/{roomId}/images/{imageId}`: 특정 회의실 이미지 삭제
 
 ### 5. 편의시설 관리 (Facility)
 
-- `POST /admin/facilities`: 편의시설 생성 (Admin)
-- `GET /facilities`: 활성 편의시설 목록 조회
-- `GET /admin/facilities`: 전체 편의시설 목록 조회 (Admin)
-- `GET /admin/facilities/{id}`: 편의시설 상세 조회 (Admin)
-- `PUT /admin/facilities/{id}`: 편의시설 수정 (Admin)
-- `DELETE /admin/facilities/{id}`: 편의시설 삭제 (Admin)
+- `POST /api/admin/facilities`: 편의시설 생성 (Admin)
+- `GET /api/facilities`: 활성 편의시설 목록 조회
+- `GET /api/admin/facilities`: 전체 편의시설 목록 조회 (Admin)
+- `GET /api/admin/facilities/{id}`: 편의시설 상세 조회 (Admin)
+- `PUT /api/admin/facilities/{id}`: 편의시설 수정 (Admin)
+- `DELETE /api/admin/facilities/{id}`: 편의시설 삭제 (Admin)
 
 ### 6. 예약 관리 (Reservation)
 
-- `POST /reservations`: 예약 생성
-- `GET /reservations`: 예약 목록 조회 (필터링 가능)
-- `GET /reservations/search`: 관리자/운영자용 예약 검색 (페이징 포함)
-- `GET /reservations/{id}`: 예약 상세 조회
-- `PUT /reservations/{id}`: 예약 수정
-- `PATCH /reservations/{id}/confirm`: 예약 확정
-- `GET /reservations/{id}/refund-preview`: 예약 취소 전 예상 환불 내역 조회
-- `POST /reservations/{id}/cancel`: 예약 취소 (환불 정책 적용)
+- `POST /api/reservations`: 새 예약 신청
+- `GET /api/reservations`: 예약 목록 조회 (일반 사용자는 본인 것만 강제 필터링, customerId/roomId 필터 지원)
+- `GET /api/reservations/{id}`: 특정 예약 상세 조회 (IDOR 방어 포함)
+- `PUT /api/reservations/{id}`: 예약 정보(시간/상태) 수정
+- `PATCH /api/reservations/{id}/confirm`: 예약 확정 알림 (Manager/Admin 전용)
+- `POST /api/reservations/{id}/cancel`: 예약 취소 (환불 규정 자동 적용, 중복 취소 방지)
+- `GET /api/reservations/search`: 오퍼레이터용 예약 목록 검색 (Manager/Admin 전용)
+- `GET /api/reservations/{id}/refund-preview`: 취소 시 환불 예상액 미리보기
 
 ### 7. 관리자 - 예약 관리 (Admin Reservation)
 
-- `POST /admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (커스텀 환불 비율 지정 가능)
+- `POST /api/admin/reservations/{id}/force-cancel`: 관리자 권한 예약 강제 취소 (커스텀 환불 비율 지정 가능)
 
 ### 8. 감사 로그 (Audit Log - Admin 전용)
 
-- `GET /logs`: 전체 로그 조회 (페이징 지원)
-- `GET /logs/reservation/{reservationId}`: 특정 예약 관련 로그 조회
-- `GET /admin/logs`: 전사 감사 로그 조회
-- `GET /admin/logs/search`: 감사 로그 정밀 검색 (PostgreSQL JSONB 기반)
+- `GET /api/admin/logs`: 전체 감사 로그 조회 (페이징 지원)
+- `GET /api/admin/logs/search`: 감사 로그 정밀 검색 (예약 ID, 변경 필드값, PostgreSQL JSONB 연산 검색 지원)
 
 ### 9. 즐겨찾기 (RoomFavorite)
 
-- `POST /favorites`: 즐겨찾기 추가
-- `DELETE /favorites/{roomId}`: 즐겨찾기 삭제
-- `GET /favorites`: 내 즐겨찾기 목록 조회
-- `GET /favorites/check/{roomId}`: 즐겨찾기 여부 확인
+- `POST /api/favorites`: 즐겨찾기 추가
+- `DELETE /api/favorites/{roomId}`: 즐겨찾기 삭제
+- `GET /api/favorites`: 내 즐겨찾기 목록 조회
+- `GET /api/favorites/check/{roomId}`: 특정 공간 즐겨찾기 여부 확인
 
 ### 10. 사용자 프로필 (User Profile)
 
-- `GET /users/me`: 내 정보 조회
-- `PUT /users/me`: 내 정보 수정 (이름 변경)
-- `PUT /users/me/password`: 비밀번호 변경
-- `DELETE /users/me`: 회원탈퇴 (소프트 삭제)
+- `GET /api/users/me`: 내 정보 조회
+- `PUT /api/users/me`: 내 정보 수정 (이름 변경)
+- `PUT /api/users/me/password`: 비밀번호 변경
+- `DELETE /api/users/me`: 회원탈퇴 (소프트 삭제)
 
 ### 11. 관리자 - 사용자 관리 (Admin User Management)
 
-- `GET /admin/users`: 전체 사용자 목록 조회 (ADMIN 제외)
-- `PATCH /admin/users/{id}/suspend`: 사용자 계정 정지
-- `PATCH /admin/users/{id}/reactivate`: 사용자 계정 정지 해제
+- `GET /api/admin/users`: 전체 사용자 목록 조회 (ADMIN 본인 제외, 페이징 지원)
+- `PATCH /api/admin/users/{id}/suspend`: 사용자 계정 일시 정지 (로그인 차단)
+- `PATCH /api/admin/users/{id}/reactivate`: 사용자 계정 정지 해제 및 활성화
 
 ### 12. 후기 관리 (Review)
 
-- `POST /reviews`: 공간 예약 후기 작성
-- `GET /reviews/room/{roomId}`: 특정 공간의 후기 목록 조회 (페이징)
-- `GET /reviews/room/{roomId}/summary`: 특정 공간의 후기 요약(평균 별점, 전체 리뷰 수) 통계 조회
-- `GET /reviews/me`: 내 후기 목록 조회
-- `PATCH /reviews/{reviewId}`: 후기 내용 및 평점 수정 (본인 소유만)
-- `DELETE /reviews/{reviewId}`: 후기 삭제 (본인 소유 권한 확인)
+- `POST /api/reviews`: 공간 예약 후기 작성 (사용 이력 확인 필수)
+- `GET /api/reviews/room/{roomId}`: 특정 공간의 후기 목록 조회 (페이징, 최신순)
+- `GET /api/reviews/room/{roomId}/summary`: 특정 공간의 후기 요약(평균 별점, 전체 리뷰 수) 조회
+- `GET /api/reviews/me`: 내 후기 목록 조회
+- `PATCH /api/reviews/{reviewId}`: 후기 내용 및 평점 수정
+- `DELETE /api/reviews/{reviewId}`: 후기 삭제
 
 ### 13. 알림 관리 (Notification)
 
-- `GET /api/notifications`: 내 알림 목록 조회 (페이징)
-- `GET /api/notifications/unread-count`: 안 읽은 알림 개수 조회
-- `PATCH /api/notifications/{id}/read`: 특정 알림 읽음 처리
-- `PATCH /api/notifications/read-all`: 모든 알림 읽음 처리
-- `GET /api/notifications/subscribe`: 실시간 개인 알림 SSE 구독
-- `GET /api/notifications/subscribe/rooms/{roomId}`: 특정 회의실 캘린더 실시간 업데이트 SSE 구독
+- `GET /api/notifications`: 내 알림 목록 조회 (페이징 지원)
+- `GET /api/notifications/unread-count`: 읽지 않은 알림 개수 실시간 조회
+- `PATCH /api/notifications/{notificationId}/read`: 단일 알림 읽음 처리
+- `PATCH /api/notifications/read-all`: 모든 알림 일괄 읽음 처리
+- `GET /api/notifications/subscribe`: 실시간 개인 알림 SSE 스트림 구독
+- `GET /api/notifications/subscribe/rooms/{roomId}`: 특정 회의실 캘린더 업데이트 SSE 스트림 구독
 
 ### 14. 관리자 대시보드 통계 (Admin Dashboard Stats)
 
-- `GET /admin/stats/occupancy`: 실시간 점유율 조회 (MANAGER는 officeId 필수, ADMIN은 선택)
-- `GET /admin/stats/cancellations`: 취소율 통계 조회
-- `GET /admin/stats/rooms/popular`: 인기 회의실 Top 5 조회
-- `GET /admin/stats/rooms/unpopular`: 비인기 회의실 Top 5 조회
-- `GET /admin/stats/peak-times`: 피크타임 분포 조회
-- `GET /admin/stats/daily-usage`: 일일 총 사용 시간 조회
+- `GET /api/admin/stats/occupancy`: 실시간 점유율 조회 (MANAGER는 officeId 필수, ADMIN은 선택)
+- `GET /api/admin/stats/cancellations`: 취소율 통계 조회
+- `GET /api/admin/stats/rooms/popular`: 인기 회의실 Top 5 조회
+- `GET /api/admin/stats/rooms/unpopular`: 비인기 회의실 Top 5 조회
+- `GET /api/admin/stats/peak-times`: 시간대별 예약 분포(피크타임) 조회
+- `GET /api/admin/stats/daily-usage`: 일일 총 사용 시간 추이 조회
 
 ---
 
