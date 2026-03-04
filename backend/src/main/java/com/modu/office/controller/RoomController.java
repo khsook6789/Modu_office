@@ -136,4 +136,32 @@ public class RoomController {
                 request, currentUser);
         return ResponseEntity.ok(ApiResponse.success("회의실 상태가 일괄 변경되었습니다.", response));
     }
+
+    /**
+     * [관리자] 회의실 이미지 일괄 교체 (URL 기반)
+     */
+    @PutMapping("/rooms/{roomId}/images")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ResponseEntity<Void> updateRoomImages(
+            @PathVariable Long roomId,
+            @Valid @RequestBody com.modu.office.dto.request.ImageUploadRequest request,
+            @AuthenticationPrincipal AppUser currentUser) {
+
+        roomService.updateRoomImages(roomId, request, currentUser);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * [관리자] 회의실 개별 이미지 삭제
+     */
+    @DeleteMapping("/rooms/{roomId}/images/{imageId}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ResponseEntity<Void> deleteRoomImage(
+            @PathVariable Long roomId,
+            @PathVariable Long imageId,
+            @AuthenticationPrincipal AppUser currentUser) {
+
+        roomService.deleteRoomImage(roomId, imageId, currentUser);
+        return ResponseEntity.noContent().build();
+    }
 }

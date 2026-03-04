@@ -1,5 +1,6 @@
 package com.modu.office.service;
 
+import com.modu.office.dto.request.ImageUploadRequest.ImageInfo;
 import com.modu.office.dto.request.RoomRequest;
 import com.modu.office.dto.response.FacilityResponse;
 import com.modu.office.dto.response.RoomResponse;
@@ -22,6 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +55,9 @@ public class RoomService {
         // 운영자 권한 검증
         validateManagerAccess(currentUser, office);
 
+        // 배너 이미지는 하단 updateRoomImages 호출 후 설정됨
+        String bannerImageUrl = null;
+
         Room room = Room.builder()
                 .office(office)
                 .name(request.getName())
@@ -63,14 +68,9 @@ public class RoomService {
                 .category(request.getCategory())
                 .price(request.getPrice())
                 .bufferTime(request.getBufferTime())
+                .description(request.getDescription())
+                .bannerImageUrl(bannerImageUrl) // 초기에는 null로 설정
                 .build();
-
-        // V4 신규 필드 설정
-        room.setDescription(request.getDescription());
-        room.setBannerImageUrl(request.getBannerImageUrl());
-        if (request.getBufferTime() != null) {
-            room.setBufferTime(request.getBufferTime());
-        }
 
         Room savedRoom = roomRepository.save(java.util.Objects.requireNonNull(room));
 
@@ -78,6 +78,14 @@ public class RoomService {
         if (request.getFacilityIds() != null && !request.getFacilityIds().isEmpty()) {
             attachFacilitiesToRoom(savedRoom, request.getFacilityIds());
         }
+
+        // 이미지 추가 (V4)
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            updateRoomImagesInternal(savedRoom, request.getImages());
+        }
+
+        // 배너 이미지 자동 갱신 (0순위)
+        updateBannerImageUrl(savedRoom);
 
         return buildRoomResponseWithFacilities(savedRoom);
     }
@@ -167,9 +175,7 @@ public class RoomService {
         room.setCapacity(request.getCapacity());
         room.setCategory(request.getCategory());
         room.setPrice(request.getPrice());
-        // V4 신규 필드 업데이트
         room.setDescription(request.getDescription());
-        room.setBannerImageUrl(request.getBannerImageUrl());
 
         if (request.getBufferTime() != null) {
             room.setBufferTime(request.getBufferTime());
@@ -182,6 +188,12 @@ public class RoomService {
             if (!request.getFacilityIds().isEmpty()) {
                 attachFacilitiesToRoom(room, request.getFacilityIds());
             }
+        }
+
+        // 이미지 일괄 교체 (V4) 및 배너 이미지 갱신
+        if (request.getImages() != null) {
+            updateRoomImagesInternal(room, request.getImages());
+            updateBannerImageUrl(room);
         }
 
         return buildRoomResponseWithFacilities(room);
@@ -332,6 +344,9 @@ public class RoomService {
                 .category(room.getCategory())
                 .price(room.getPrice())
                 .facilities(facilities)
+                .images(room.getRoomImages().stream()
+                        .map(com.modu.office.dto.response.ImageListResponse.ImageResponse::from)
+                        .collect(Collectors.toList()))
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
                 .build();
@@ -351,6 +366,73 @@ public class RoomService {
             }
         } else if (currentUser.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("접근 권한이 없습니다.");
+        }
+    }
+
+    /**
+     * 회의실 이미지 일괄 교체 (PUT)
+     * 기존 이미지를 제거하고 전달받은 이미지 목록으로 덮어씁니다.
+     */
+    @Transactional
+    public void updateRoomImages(Long roomId, com.modu.office.dto.request.ImageUploadRequest request,
+            AppUser currentUser) {
+        Room room = roomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
+                .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
+
+        validateManagerAccess(currentUser, room.getOffice());
+
+        updateRoomImagesInternal(room, request.images());
+        updateBannerImageUrl(room);
+    }
+
+    /**
+     * 내부적으로 회의실 이미지 목록을 업데이트하는 메서드
+     * 기존 이미지를 제거하고 전달받은 이미지 목록으로 덮어씁니다.
+     * 이 메서드는 트랜잭션 내부에서 호출되어야 합니다.
+     */
+    private void updateRoomImagesInternal(Room room, List<ImageInfo> images) {
+        // N+1 삭제 방지를 위해 먼저 리스트를 클리어(메모리)
+        room.getRoomImages().clear();
+
+        if (images != null && !images.isEmpty()) {
+            List<com.modu.office.entity.RoomImage> newImages = images.stream()
+                    .map(img -> com.modu.office.entity.RoomImage.builder()
+                            .room(room)
+                            .imageUrl(img.imageUrl())
+                            .displayOrder(img.displayOrder())
+                            .build())
+                    .collect(Collectors.toList());
+
+            room.getRoomImages().addAll(newImages);
+        }
+    }
+
+    /**
+     * 회의실의 배너 이미지 URL을 업데이트합니다.
+     * 이미지 목록 중 displayOrder가 가장 낮은 이미지의 URL을 배너 이미지로 설정합니다.
+     * 이미지가 없으면 배너 이미지를 null로 설정합니다.
+     */
+    private void updateBannerImageUrl(Room room) {
+        String bannerImageUrl = room.getRoomImages().stream()
+                .min(Comparator.comparingInt(com.modu.office.entity.RoomImage::getDisplayOrder))
+                .map(com.modu.office.entity.RoomImage::getImageUrl)
+                .orElse(null);
+        room.setBannerImageUrl(bannerImageUrl);
+    }
+
+    /**
+     * 특정 회의실 이미지 단건 삭제
+     */
+    @Transactional
+    public void deleteRoomImage(Long roomId, Long imageId, AppUser currentUser) {
+        Room room = roomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
+                .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
+
+        validateManagerAccess(currentUser, room.getOffice());
+
+        boolean removed = room.getRoomImages().removeIf(img -> img.getId() != null && img.getId().equals(imageId));
+        if (!removed) {
+            throw new EntityNotFoundException("해당 회의실 이미지를 찾을 수 없습니다. ID: " + imageId);
         }
     }
 }

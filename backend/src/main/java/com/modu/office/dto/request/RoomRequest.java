@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import com.modu.office.dto.request.ImageUploadRequest.ImageInfo;
 
 /**
  * Room 생성/수정 요청 DTO
@@ -27,8 +28,6 @@ public class RoomRequest {
     private String name;
 
     private String description;
-
-    private String bannerImageUrl;
 
     @Min(value = 0, message = "정비 시간은 0분 이상이어야 합니다.")
     @Max(value = 120, message = "정비 시간은 최대 120분까지 설정 가능합니다.")
@@ -58,4 +57,7 @@ public class RoomRequest {
      * (선택적 필드, 비어있을 경우 시설 연결 없음)
      */
     private List<Long> facilityIds;
+
+    @Size(max = 5, message = "이미지는 최대 5장까지 등록 가능합니다.")
+    private List<ImageInfo> images;
 }

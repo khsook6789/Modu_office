@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import java.util.stream.Collectors;
 import java.util.List;
+import com.modu.office.dto.response.ImageListResponse.ImageResponse;
 
 /**
  * Room 응답 DTO
@@ -33,6 +35,7 @@ public class RoomResponse {
     private String category;
     private java.math.BigDecimal price;
     private List<FacilityResponse> facilities;
+    private List<ImageResponse> images;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -54,6 +57,9 @@ public class RoomResponse {
                 .category(room.getCategory())
                 .price(room.getPrice())
                 .facilities(List.of()) // 기본값: 빈 리스트 (Service 레이어에서 설정)
+                .images(room.getRoomImages() != null ? room.getRoomImages().stream()
+                        .map(ImageResponse::from)
+                        .collect(Collectors.toList()) : List.of())
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
                 .build();

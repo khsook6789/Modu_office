@@ -88,7 +88,7 @@ public class Room extends BaseEntity {
 
     @Builder
     public Room(Office office, String name, String roomCode, Integer floor, RoomStatus status, Integer capacity,
-            String category, BigDecimal price, Integer bufferTime) {
+            String category, BigDecimal price, Integer bufferTime, String description, String bannerImageUrl) {
         this.office = office;
         this.officeId = office != null ? office.getId() : null;
         this.name = name;
@@ -99,6 +99,28 @@ public class Room extends BaseEntity {
         this.category = category;
         this.price = price != null ? price : BigDecimal.ZERO;
         this.bufferTime = bufferTime != null ? bufferTime : 0;
+        this.description = description;
+        this.bannerImageUrl = bannerImageUrl;
+    }
+
+    public void update(String name, String description, String roomCode, Integer floor, RoomStatus status,
+            Integer capacity, String category, BigDecimal price, Integer bufferTime) {
+        this.name = name;
+        this.description = description;
+        this.roomCode = roomCode;
+        this.floor = floor;
+        if (status != null)
+            this.status = status;
+        this.capacity = capacity;
+        this.category = category;
+        if (price != null)
+            this.price = price;
+        if (bufferTime != null)
+            this.bufferTime = bufferTime;
+    }
+
+    public void updateBannerImageUrl(String bannerImageUrl) {
+        this.bannerImageUrl = bannerImageUrl;
     }
 
     // status는 검증 로직이 있어 수동 setter 유지
