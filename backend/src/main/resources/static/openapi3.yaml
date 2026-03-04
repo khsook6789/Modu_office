@@ -18,7 +18,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-facilities2060499395"
+                $ref: "#/components/schemas/api-admin-facilities2060499395"
               examples:
                 facility-user-list:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -27,6 +27,129 @@ paths:
                     \    \"facilityName\" : \"무선 인터넷\",\r\n    \"isActive\" : true,\r\
                     \n    \"createdAt\" : null,\r\n    \"updatedAt\" : null\r\n  }\
                     \ ]\r\n}"
+  /api/favorites:
+    get:
+      tags:
+      - api
+      operationId: favorite-my-list
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-favorites282292269"
+              examples:
+                favorite-my-list:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : [\
+                    \ {\r\n    \"favoriteId\" : 1,\r\n    \"roomId\" : 10,\r\n   \
+                    \ \"roomName\" : \"회의실 A\",\r\n    \"roomCode\" : \"A-101\",\r\
+                    \n    \"capacity\" : 10,\r\n    \"category\" : \"MEETING\",\r\n\
+                    \    \"price\" : 5000,\r\n    \"officeId\" : 100,\r\n    \"officeName\"\
+                    \ : \"강남 지점\",\r\n    \"officeLocation\" : \"서울시 강남구\",\r\n  \
+                    \  \"createdAt\" : \"2026-03-04T12:50:31.7792774\"\r\n  } ]\r\n\
+                    }"
+    post:
+      tags:
+      - api
+      operationId: favorite-add
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/api-favorites483412598"
+            examples:
+              favorite-add:
+                value: "{\r\n  \"roomId\" : 10\r\n}"
+      responses:
+        "201":
+          description: "201"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-favorites-1181626733"
+              examples:
+                favorite-add:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"즐겨찾기에 추가되었습니다.\",\r\n  \"data\" : {\r\n\
+                    \    \"favoriteId\" : 1,\r\n    \"roomId\" : 10,\r\n    \"roomName\"\
+                    \ : \"회의실 A\",\r\n    \"roomCode\" : \"A-101\",\r\n    \"capacity\"\
+                    \ : 10,\r\n    \"category\" : \"MEETING\",\r\n    \"price\" :\
+                    \ 5000,\r\n    \"officeId\" : 100,\r\n    \"officeName\" : \"강\
+                    남 지점\",\r\n    \"officeLocation\" : \"서울시 강남구\",\r\n    \"createdAt\"\
+                    \ : \"2026-03-04T12:50:31.8520666\"\r\n  }\r\n}"
+  /api/logs:
+    get:
+      tags:
+      - api
+      operationId: update-log-all
+      parameters:
+      - name: page
+        in: query
+        description: 페이지 번호 (0부터 시작)
+        required: false
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: 페이지 크기
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-logs1400619844"
+              examples:
+                update-log-all:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : {\r\
+                    \n    \"content\" : [ {\r\n      \"id\" : 1,\r\n      \"reservationId\"\
+                    \ : 100,\r\n      \"reservationTitle\" : \"오피스 A 예약\",\r\n   \
+                    \   \"action\" : \"UPDATE\",\r\n      \"actorId\" : 5,\r\n   \
+                    \   \"actorName\" : \"최관리\",\r\n      \"beforeData\" : {\r\n \
+                    \       \"status\" : \"RESERVED\"\r\n      },\r\n      \"afterData\"\
+                    \ : {\r\n        \"status\" : \"CANCELED\"\r\n      },\r\n   \
+                    \   \"occurredAt\" : \"2026-03-04T12:50:31.9454506\"\r\n    }\
+                    \ ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n\
+                    \      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
+                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"unpaged\"\
+                    \ : false,\r\n      \"paged\" : true\r\n    },\r\n    \"totalElements\"\
+                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
+                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
+                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
+                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
+                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ }\r\n}"
+  /api/notifications:
+    get:
+      tags:
+      - api
+      operationId: notification-my-list
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-notifications1229337096"
+              examples:
+                notification-my-list:
+                  value: "{\r\n  \"content\" : [ {\r\n    \"id\" : 1,\r\n    \"message\"\
+                    \ : \"[강남 본점] 예약이 접수되었습니다.\",\r\n    \"type\" : \"RESERVATION_CREATED\"\
+                    ,\r\n    \"targetUrl\" : \"/reservations/100\",\r\n    \"createdAt\"\
+                    \ : \"2026-03-04T12:50:30.0483181\",\r\n    \"read\" : false\r\
+                    \n  } ],\r\n  \"pageable\" : \"INSTANCE\",\r\n  \"totalElements\"\
+                    \ : 1,\r\n  \"last\" : true,\r\n  \"totalPages\" : 1,\r\n  \"\
+                    size\" : 1,\r\n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\"\
+                    \ : true,\r\n    \"sorted\" : false,\r\n    \"unsorted\" : true\r\
+                    \n  },\r\n  \"numberOfElements\" : 1,\r\n  \"first\" : true,\r\
+                    \n  \"empty\" : false\r\n}"
   /api/offices:
     get:
       tags:
@@ -135,16 +258,16 @@ paths:
                     \ : \"강남 본점\",\r\n      \"roomId\" : 10,\r\n      \"roomName\"\
                     \ : \"Alpha Room\",\r\n      \"roomCode\" : \"ROOM-A\",\r\n  \
                     \    \"userId\" : 1,\r\n      \"userName\" : \"홍길동\",\r\n    \
-                    \  \"startAt\" : \"2026-03-02T10:00:00\",\r\n      \"endAt\" :\
-                    \ \"2026-03-02T12:00:00\",\r\n      \"status\" : \"PENDING\",\r\
-                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-01T00:23:19.8190465\"\
-                    ,\r\n      \"updatedAt\" : \"2026-03-01T00:23:19.8190465\",\r\n\
+                    \  \"startAt\" : \"2026-03-05T10:00:00\",\r\n      \"endAt\" :\
+                    \ \"2026-03-05T12:00:00\",\r\n      \"status\" : \"PENDING\",\r\
+                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-04T12:50:30.8012273\"\
+                    ,\r\n      \"updatedAt\" : \"2026-03-04T12:50:30.8012273\",\r\n\
                     \      \"version\" : 0\r\n    } ],\r\n    \"pageable\" : {\r\n\
                     \      \"pageNumber\" : 0,\r\n      \"pageSize\" : 20,\r\n   \
                     \   \"sort\" : {\r\n        \"empty\" : true,\r\n        \"sorted\"\
                     \ : false,\r\n        \"unsorted\" : true\r\n      },\r\n    \
-                    \  \"offset\" : 0,\r\n      \"paged\" : true,\r\n      \"unpaged\"\
-                    \ : false\r\n    },\r\n    \"totalElements\" : 1,\r\n    \"last\"\
+                    \  \"offset\" : 0,\r\n      \"unpaged\" : false,\r\n      \"paged\"\
+                    \ : true\r\n    },\r\n    \"totalElements\" : 1,\r\n    \"last\"\
                     \ : true,\r\n    \"totalPages\" : 1,\r\n    \"size\" : 20,\r\n\
                     \    \"number\" : 0,\r\n    \"sort\" : {\r\n      \"empty\" :\
                     \ true,\r\n      \"sorted\" : false,\r\n      \"unsorted\" : true\r\
@@ -162,8 +285,8 @@ paths:
             examples:
               reservation-create:
                 value: "{\r\n  \"title\" : \"팀 주간 회의\",\r\n  \"officeId\" : 1,\r\n\
-                  \  \"roomId\" : 10,\r\n  \"userId\" : 1,\r\n  \"startAt\" : \"2026-03-02T10:00:00\"\
-                  ,\r\n  \"endAt\" : \"2026-03-02T12:00:00\",\r\n  \"endAtAfterStartAt\"\
+                  \  \"roomId\" : 10,\r\n  \"userId\" : 1,\r\n  \"startAt\" : \"2026-03-05T10:00:00\"\
+                  ,\r\n  \"endAt\" : \"2026-03-05T12:00:00\",\r\n  \"endAtAfterStartAt\"\
                   \ : true\r\n}"
       responses:
         "201":
@@ -180,11 +303,39 @@ paths:
                     \ : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\" :\
                     \ 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-02T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-02T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-01T00:23:19.6436304\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-01T00:23:19.6436304\",\r\n\
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T12:50:30.5922175\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T12:50:30.5922175\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
+  /api/reviews:
+    post:
+      tags:
+      - api
+      operationId: review-create
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/api-reviews-897924924"
+            examples:
+              review-create:
+                value: "{\r\n  \"reservationId\" : 10,\r\n  \"rating\" : 5,\r\n  \"\
+                  content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입니다.\"\r\n}"
+      responses:
+        "201":
+          description: "201"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-reviews-1529360671"
+              examples:
+                review-create:
+                  value: "{\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n  \"\
+                    authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"rating\"\
+                    \ : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\
+                    \n  \"createdAt\" : \"2026-03-04T12:50:31.3552505\",\r\n  \"updatedAt\"\
+                    \ : \"2026-03-04T12:50:31.3552505\"\r\n}"
   /api/admin/facilities:
     get:
       tags:
@@ -196,7 +347,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-facilities2060499395"
+                $ref: "#/components/schemas/api-admin-facilities2060499395"
               examples:
                 facility-admin-list:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -233,6 +384,121 @@ paths:
                     facilityName\" : \"무선 인터넷\",\r\n    \"isActive\" : true,\r\n \
                     \   \"createdAt\" : null,\r\n    \"updatedAt\" : null\r\n  }\r\
                     \n}"
+  /api/admin/logs:
+    get:
+      tags:
+      - api
+      operationId: admin-log-list
+      parameters:
+      - name: page
+        in: query
+        description: 페이지 번호 (0부터 시작)
+        required: false
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: 페이지 크기
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-logs1400619844"
+              examples:
+                admin-log-list:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"감사 로그 목록을 조회했습니다.\",\r\n  \"data\" : {\r\
+                    \n    \"content\" : [ {\r\n      \"id\" : 1,\r\n      \"reservationId\"\
+                    \ : 100,\r\n      \"reservationTitle\" : \"프로젝트 A 회의실 예약\",\r\n\
+                    \      \"action\" : \"UPDATE\",\r\n      \"actorId\" : 2,\r\n\
+                    \      \"actorName\" : \"김실무\",\r\n      \"beforeData\" : {\r\n\
+                    \        \"participants\" : 4,\r\n        \"status\" : \"AVAILABLE\"\
+                    \r\n      },\r\n      \"afterData\" : {\r\n        \"participants\"\
+                    \ : 5,\r\n        \"status\" : \"IN_USE\"\r\n      },\r\n    \
+                    \  \"occurredAt\" : \"2026-03-04T12:50:29.5347438\"\r\n    } ],\r\
+                    \n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"\
+                    pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"empty\" :\
+                    \ true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"unpaged\"\
+                    \ : false,\r\n      \"paged\" : true\r\n    },\r\n    \"totalElements\"\
+                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
+                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
+                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
+                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
+                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ }\r\n}"
+  /api/admin/users:
+    get:
+      tags:
+      - api
+      operationId: admin-user-list
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-users644268557"
+              examples:
+                admin-user-list:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"사용자 목록을 조회했습니다.\",\r\n  \"data\" : [ {\r\
+                    \n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\",\r\n\
+                    \    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n    \"\
+                    accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"2026-03-04T12:50:29.1089931\"\
+                    \r\n  } ]\r\n}"
+  /api/favorites/{roomId}:
+    delete:
+      tags:
+      - api
+      operationId: favorite-remove
+      parameters:
+      - name: roomId
+        in: path
+        description: 삭제할 즐겨찾기의 회의실 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-favorites-roomId748482256"
+              examples:
+                favorite-remove:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"즐겨찾기에서 삭제되었습니다.\",\r\n  \"data\" : null\r\
+                    \n}"
+  /api/notifications/read-all:
+    patch:
+      tags:
+      - api
+      operationId: notification-mark-all-read
+      responses:
+        "204":
+          description: "204"
+  /api/notifications/unread-count:
+    get:
+      tags:
+      - api
+      operationId: notification-unread-count
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
+              examples:
+                notification-unread-count:
+                  value: "5"
   /api/offices/my-offices:
     get:
       tags:
@@ -244,7 +510,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 office-my-list:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -274,7 +540,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 office-search:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -289,10 +555,10 @@ paths:
                     pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"pageSize\"\
                     \ : 10,\r\n      \"sort\" : {\r\n        \"empty\" : true,\r\n\
                     \        \"sorted\" : false,\r\n        \"unsorted\" : true\r\n\
-                    \      },\r\n      \"offset\" : 0,\r\n      \"paged\" : true,\r\
-                    \n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
-                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 10,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
+                    \      },\r\n      \"offset\" : 0,\r\n      \"unpaged\" : false,\r\
+                    \n      \"paged\" : true\r\n    },\r\n    \"totalElements\" :\
+                    \ 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n  \
+                    \  \"size\" : 10,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
                     \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
                     \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
                     \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
@@ -341,7 +607,7 @@ paths:
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+              $ref: "#/components/schemas/api-auth-manager-signup486549215"
             examples:
               office-update:
                 value: "{\r\n  \"name\" : \"강남 본점\",\r\n  \"description\" : \"강남 위\
@@ -355,7 +621,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 office-update:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -383,7 +649,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 office-delete:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -443,7 +709,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 reservation-search-manager:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -453,10 +719,10 @@ paths:
                     \ : \"강남 본점\",\r\n      \"roomId\" : 10,\r\n      \"roomName\"\
                     \ : \"Alpha Room\",\r\n      \"roomCode\" : \"ROOM-A\",\r\n  \
                     \    \"userId\" : 1,\r\n      \"userName\" : \"홍길동\",\r\n    \
-                    \  \"startAt\" : \"2026-03-02T10:00:00\",\r\n      \"endAt\" :\
-                    \ \"2026-03-02T12:00:00\",\r\n      \"status\" : \"PENDING\",\r\
-                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-01T00:23:20.012596\"\
-                    ,\r\n      \"updatedAt\" : \"2026-03-01T00:23:20.012596\",\r\n\
+                    \  \"startAt\" : \"2026-03-05T10:00:00\",\r\n      \"endAt\" :\
+                    \ \"2026-03-05T12:00:00\",\r\n      \"status\" : \"PENDING\",\r\
+                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-04T12:50:31.0212442\"\
+                    ,\r\n      \"updatedAt\" : \"2026-03-04T12:50:31.0212442\",\r\n\
                     \      \"version\" : 0\r\n    } ],\r\n    \"pageable\" : \"INSTANCE\"\
                     ,\r\n    \"totalElements\" : 1,\r\n    \"last\" : true,\r\n  \
                     \  \"totalPages\" : 1,\r\n    \"size\" : 1,\r\n    \"number\"\
@@ -482,7 +748,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 reservation-get-one:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -491,10 +757,10 @@ paths:
                     officeId\" : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\"\
                     \ : 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-02T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-02T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-01T00:23:19.7937241\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-01T00:23:19.7937241\",\r\n\
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T12:50:30.7731976\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T12:50:30.7731976\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
     put:
       tags:
@@ -514,15 +780,15 @@ paths:
               $ref: "#/components/schemas/api-reservations-id447669472"
             examples:
               reservation-update:
-                value: "{\r\n  \"startAt\" : \"2026-03-03T11:00:00\",\r\n  \"endAt\"\
-                  \ : \"2026-03-03T13:00:00\",\r\n  \"status\" : \"PENDING\"\r\n}"
+                value: "{\r\n  \"startAt\" : \"2026-03-06T11:00:00\",\r\n  \"endAt\"\
+                  \ : \"2026-03-06T13:00:00\",\r\n  \"status\" : \"PENDING\"\r\n}"
       responses:
         "200":
           description: "200"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 reservation-update:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -531,11 +797,79 @@ paths:
                     \ : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\" :\
                     \ 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-02T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-02T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-01T00:23:19.7344689\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-01T00:23:19.7344689\",\r\n\
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T12:50:30.7174084\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T12:50:30.7174084\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
+  /api/reviews/me:
+    get:
+      tags:
+      - api
+      operationId: review-my-list
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-reviews-me-996196378"
+              examples:
+                review-my-list:
+                  value: "[ {\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n\
+                    \  \"authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"\
+                    rating\" : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입\
+                    니다.\",\r\n  \"createdAt\" : \"2026-03-04T12:50:31.2641287\",\r\
+                    \n  \"updatedAt\" : \"2026-03-04T12:50:31.2641287\"\r\n} ]"
+  /api/reviews/{reviewId}:
+    delete:
+      tags:
+      - api
+      operationId: review-delete
+      parameters:
+      - name: reviewId
+        in: path
+        description: 삭제할 후기 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: "204"
+    patch:
+      tags:
+      - api
+      operationId: review-update
+      parameters:
+      - name: reviewId
+        in: path
+        description: 수정할 후기 ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/api-reviews-reviewId2120508141"
+            examples:
+              review-update:
+                value: "{\r\n  \"rating\" : 4,\r\n  \"content\" : \"생각보다 소음이 있었지만\
+                  \ 전반적으로 만족합니다.\"\r\n}"
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-reviews-1529360671"
+              examples:
+                review-update:
+                  value: "{\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n  \"\
+                    authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"rating\"\
+                    \ : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\
+                    \n  \"createdAt\" : \"2026-03-04T12:50:31.1542043\",\r\n  \"updatedAt\"\
+                    \ : \"2026-03-04T12:50:31.1542043\"\r\n}"
   /api/rooms/search:
     get:
       tags:
@@ -554,7 +888,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 room-search:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -570,8 +904,8 @@ paths:
                     \ {\r\n      \"pageNumber\" : 0,\r\n      \"pageSize\" : 10,\r\
                     \n      \"sort\" : {\r\n        \"empty\" : true,\r\n        \"\
                     sorted\" : false,\r\n        \"unsorted\" : true\r\n      },\r\
-                    \n      \"offset\" : 0,\r\n      \"paged\" : true,\r\n      \"\
-                    unpaged\" : false\r\n    },\r\n    \"totalElements\" : 1,\r\n\
+                    \n      \"offset\" : 0,\r\n      \"unpaged\" : false,\r\n    \
+                    \  \"paged\" : true\r\n    },\r\n    \"totalElements\" : 1,\r\n\
                     \    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n    \"size\"\
                     \ : 10,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\n      \"\
                     empty\" : true,\r\n      \"sorted\" : false,\r\n      \"unsorted\"\
@@ -595,7 +929,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 room-get:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -623,7 +957,7 @@ paths:
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+              $ref: "#/components/schemas/api-auth-manager-signup486549215"
             examples:
               room-update:
                 value: "{\r\n  \"name\" : \"세미나룸 A\",\r\n  \"description\" : \"화이트\
@@ -637,7 +971,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 room-update:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -667,7 +1001,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 room-delete:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -760,7 +1094,7 @@ paths:
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+              $ref: "#/components/schemas/api-auth-manager-signup486549215"
             examples:
               facility-update:
                 value: "{\r\n  \"facilityCode\" : \"WIFI\",\r\n  \"facilityName\"\
@@ -771,7 +1105,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 facility-update:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -797,12 +1131,240 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 facility-delete:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"시설이 삭제되었습니다.\",\r\n  \"data\" : null\r\n\
                     }"
+  /api/admin/logs/search:
+    get:
+      tags:
+      - api
+      operationId: admin-log-search
+      parameters:
+      - name: reservationId
+        in: query
+        description: 대상 예약 ID
+        required: false
+        schema:
+          type: string
+      - name: action
+        in: query
+        description: "동작 유형 (CREATE, UPDATE, CANCEL)"
+        required: false
+        schema:
+          type: string
+      - name: changedField
+        in: query
+        description: "비교할 JSONB 내 필드 키 (예: status)"
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 페이지 번호
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
+              examples:
+                admin-log-search:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"감사 로그 검색 결과입니다.\",\r\n  \"data\" : {\r\n\
+                    \    \"content\" : [ {\r\n      \"id\" : 1,\r\n      \"reservationId\"\
+                    \ : 100,\r\n      \"reservationTitle\" : \"프로젝트 A 회의실 예약\",\r\n\
+                    \      \"action\" : \"UPDATE\",\r\n      \"actorId\" : 2,\r\n\
+                    \      \"actorName\" : \"김실무\",\r\n      \"beforeData\" : {\r\n\
+                    \        \"participants\" : 4,\r\n        \"status\" : \"AVAILABLE\"\
+                    \r\n      },\r\n      \"afterData\" : {\r\n        \"participants\"\
+                    \ : 5,\r\n        \"status\" : \"IN_USE\"\r\n      },\r\n    \
+                    \  \"occurredAt\" : \"2026-03-04T12:50:29.2056307\"\r\n    } ],\r\
+                    \n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"\
+                    pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"empty\" :\
+                    \ true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"unpaged\"\
+                    \ : false,\r\n      \"paged\" : true\r\n    },\r\n    \"totalElements\"\
+                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
+                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
+                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
+                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
+                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ }\r\n}"
+  /api/admin/managers/pending:
+    get:
+      tags:
+      - api
+      operationId: admin-manager-pending-list
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-managers-pending40421041"
+              examples:
+                admin-manager-pending-list:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"승인 대기 중인 Manager 목록을 조회했습니다.\",\r\n  \"\
+                    data\" : [ {\r\n    \"userId\" : 2,\r\n    \"name\" : \"강감찬\"\
+                    ,\r\n    \"email\" : \"manager@example.com\",\r\n    \"approvalStatus\"\
+                    \ : \"PENDING\",\r\n    \"createdAt\" : \"2026-03-04T12:50:28.6950116\"\
+                    \r\n  } ]\r\n}"
+  /api/admin/stats/cancellations:
+    get:
+      tags:
+      - api
+      operationId: admin-stats-cancellations
+      parameters:
+      - name: officeId
+        in: query
+        description: 지점 ID (선택)
+        required: false
+        schema:
+          type: string
+      - name: startDate
+        in: query
+        description: 조회 시작 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        description: 조회 종료 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-stats-cancellations-893511423"
+              examples:
+                admin-stats-cancellations:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"취소율 통계 조회 성공\",\r\n  \"data\" : {\r\n \
+                    \   \"totalReservations\" : 100,\r\n    \"canceledCount\" : 15,\r\
+                    \n    \"cancellationRate\" : 15.0\r\n  }\r\n}"
+  /api/admin/stats/daily-usage:
+    get:
+      tags:
+      - api
+      operationId: admin-stats-daily-usage
+      parameters:
+      - name: officeId
+        in: query
+        description: 지점 ID (선택)
+        required: false
+        schema:
+          type: string
+      - name: startDate
+        in: query
+        description: 조회 시작 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        description: 조회 종료 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-stats-daily-usage1900580727"
+              examples:
+                admin-stats-daily-usage:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"일일 총 사용 시간 조회 성공\",\r\n  \"data\" : [ {\r\
+                    \n    \"date\" : \"2026-03-01\",\r\n    \"totalUsageMinutes\"\
+                    \ : 480\r\n  }, {\r\n    \"date\" : \"2026-03-02\",\r\n    \"\
+                    totalUsageMinutes\" : 360\r\n  } ]\r\n}"
+  /api/admin/stats/occupancy:
+    get:
+      tags:
+      - api
+      operationId: admin-stats-occupancy
+      parameters:
+      - name: officeId
+        in: query
+        description: 지점 ID (MANAGER 필수 / ADMIN 선택)
+        required: false
+        schema:
+          type: string
+      - name: floor
+        in: query
+        description: 층 (선택)
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-stats-occupancy598576014"
+              examples:
+                admin-stats-occupancy:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"실시간 점유율 조회 성공\",\r\n  \"data\" : [ {\r\n\
+                    \    \"officeId\" : 1,\r\n    \"floor\" : 1,\r\n    \"totalRooms\"\
+                    \ : 5,\r\n    \"occupiedRooms\" : 3,\r\n    \"occupancyRate\"\
+                    \ : 60.0\r\n  }, {\r\n    \"officeId\" : 1,\r\n    \"floor\" :\
+                    \ 2,\r\n    \"totalRooms\" : 4,\r\n    \"occupiedRooms\" : 1,\r\
+                    \n    \"occupancyRate\" : 25.0\r\n  } ]\r\n}"
+  /api/admin/stats/peak-times:
+    get:
+      tags:
+      - api
+      operationId: admin-stats-peak-times
+      parameters:
+      - name: officeId
+        in: query
+        description: 지점 ID (선택)
+        required: false
+        schema:
+          type: string
+      - name: startDate
+        in: query
+        description: 조회 시작 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        description: 조회 종료 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-stats-peak-times1097026338"
+              examples:
+                admin-stats-peak-times:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"피크타임 분포 조회 성공\",\r\n  \"data\" : [ {\r\n\
+                    \    \"hour\" : 9,\r\n    \"reservationCount\" : 12\r\n  }, {\r\
+                    \n    \"hour\" : 10,\r\n    \"reservationCount\" : 24\r\n  },\
+                    \ {\r\n    \"hour\" : 14,\r\n    \"reservationCount\" : 18\r\n\
+                    \  } ]\r\n}"
   /api/auth/admin/login:
     post:
       tags:
@@ -816,14 +1378,14 @@ paths:
             examples:
               admin-auth-login:
                 value: "{\r\n  \"email\" : \"admin@test.com\",\r\n  \"password\" :\
-                  \ \"AdminPass1!\"\r\n}"
+                  \ \"admin1234!\"\r\n}"
       responses:
         "200":
           description: "200"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-auth-manager-login537651293"
+                $ref: "#/components/schemas/api-auth-user-login537651293"
               examples:
                 admin-auth-login:
                   value: "{\r\n  \"accessToken\" : \"admin.access.token\",\r\n  \"\
@@ -864,18 +1426,18 @@ paths:
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/api-auth-manager-login-788118888"
+              $ref: "#/components/schemas/api-auth-user-login-788118888"
             examples:
               manager-auth-login:
                 value: "{\r\n  \"email\" : \"manager@test.com\",\r\n  \"password\"\
-                  \ : \"Password1!\"\r\n}"
+                  \ : \"manager1234!\"\r\n}"
       responses:
         "200":
           description: "200"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-auth-manager-login537651293"
+                $ref: "#/components/schemas/api-auth-user-login537651293"
               examples:
                 manager-auth-login:
                   value: "{\r\n  \"accessToken\" : \"manager.access.token\",\r\n \
@@ -920,14 +1482,14 @@ paths:
             examples:
               manager-auth-signup:
                 value: "{\r\n  \"email\" : \"manager@test.com\",\r\n  \"password\"\
-                  \ : \"Password1!\",\r\n  \"name\" : \"운영자이름\"\r\n}"
+                  \ : \"manager1234!\",\r\n  \"name\" : \"매니저\"\r\n}"
       responses:
         "200":
           description: "200"
           content:
             text/plain;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 manager-auth-signup:
                   value: 가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.
@@ -940,18 +1502,18 @@ paths:
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/api-auth-manager-login-788118888"
+              $ref: "#/components/schemas/api-auth-user-login-788118888"
             examples:
               user-auth-login:
                 value: "{\r\n  \"email\" : \"user@test.com\",\r\n  \"password\" :\
-                  \ \"Password1!\"\r\n}"
+                  \ \"user1234!\"\r\n}"
       responses:
         "200":
           description: "200"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-auth-manager-login537651293"
+                $ref: "#/components/schemas/api-auth-user-login537651293"
               examples:
                 user-auth-login:
                   value: "{\r\n  \"accessToken\" : \"access.token.value\",\r\n  \"\
@@ -995,17 +1557,109 @@ paths:
             examples:
               user-auth-signup:
                 value: "{\r\n  \"email\" : \"user@test.com\",\r\n  \"password\" :\
-                  \ \"Password1!\",\r\n  \"name\" : \"홍길동\"\r\n}"
+                  \ \"user1234!\",\r\n  \"name\" : \"유저\"\r\n}"
       responses:
         "200":
           description: "200"
           content:
             text/plain;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 user-auth-signup:
                   value: 가입이 완료되었습니다.
+  /api/favorites/check/{roomId}:
+    get:
+      tags:
+      - api
+      operationId: favorite-check
+      parameters:
+      - name: roomId
+        in: path
+        description: 즐겨찾기 여부를 확인할 회의실 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-favorites-check-roomId-393213291"
+              examples:
+                favorite-check:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : true\r\
+                    \n}"
+  /api/logs/reservation/{reservationId}:
+    get:
+      tags:
+      - api
+      operationId: update-log-by-reservation
+      parameters:
+      - name: reservationId
+        in: path
+        description: 대상 예약 ID
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 페이지 번호
+        required: false
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: 페이지 크기
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-logs1400619844"
+              examples:
+                update-log-by-reservation:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : {\r\
+                    \n    \"content\" : [ {\r\n      \"id\" : 1,\r\n      \"reservationId\"\
+                    \ : 100,\r\n      \"reservationTitle\" : \"오피스 A 예약\",\r\n   \
+                    \   \"action\" : \"UPDATE\",\r\n      \"actorId\" : 5,\r\n   \
+                    \   \"actorName\" : \"최관리\",\r\n      \"beforeData\" : {\r\n \
+                    \       \"status\" : \"RESERVED\"\r\n      },\r\n      \"afterData\"\
+                    \ : {\r\n        \"status\" : \"CANCELED\"\r\n      },\r\n   \
+                    \   \"occurredAt\" : \"2026-03-04T12:50:31.9043064\"\r\n    }\
+                    \ ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n\
+                    \      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
+                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"unpaged\"\
+                    \ : false,\r\n      \"paged\" : true\r\n    },\r\n    \"totalElements\"\
+                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
+                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
+                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
+                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
+                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ }\r\n}"
+  /api/notifications/{notificationId}/read:
+    patch:
+      tags:
+      - api
+      operationId: notification-mark-read
+      parameters:
+      - name: notificationId
+        in: path
+        description: 읽음 처리할 알림 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: "204"
   /api/offices/{officeId}/rooms:
     get:
       tags:
@@ -1036,7 +1690,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 room-list-by-office:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -1078,7 +1732,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 room-create:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -1118,7 +1772,7 @@ paths:
                     \ : {\r\n      \"reservationId\" : 100,\r\n      \"totalPrice\"\
                     \ : 20000,\r\n      \"refundRate\" : 100,\r\n      \"refundAmount\"\
                     \ : 20000,\r\n      \"cancellationPenalty\" : 0,\r\n      \"requestTime\"\
-                    \ : \"2026-03-01T00:23:19.9520933\",\r\n      \"reasonDescriptor\"\
+                    \ : \"2026-03-04T12:50:30.9230348\",\r\n      \"reasonDescriptor\"\
                     \ : \"이용 시작 7일 이전 취소: 100% 환불\"\r\n    }\r\n  }\r\n}"
   /api/reservations/{id}/confirm:
     patch:
@@ -1138,7 +1792,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 reservation-confirm:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
@@ -1147,11 +1801,11 @@ paths:
                     \ : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\" :\
                     \ 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-02T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-02T12:00:00\",\r\n    \"status\" : \"PENDING\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-01T00:23:19.9864181\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-01T00:23:19.9864181\",\r\n\
-                    \    \"version\" : 0\r\n  }\r\n}"
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-05T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-05T12:00:00\",\r\n    \"status\" : \"PENDING\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-04T12:50:30.981614\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T12:50:30.981614\",\r\n \
+                    \   \"version\" : 0\r\n  }\r\n}"
   /api/reservations/{id}/refund-preview:
     get:
       tags:
@@ -1178,8 +1832,56 @@ paths:
                     \   \"reservationId\" : 100,\r\n    \"totalPrice\" : 20000,\r\n\
                     \    \"refundRate\" : 50,\r\n    \"refundAmount\" : 10000,\r\n\
                     \    \"cancellationPenalty\" : 10000,\r\n    \"requestTime\" :\
-                    \ \"2026-03-01T00:23:19.8885634\",\r\n    \"reasonDescriptor\"\
+                    \ \"2026-03-04T12:50:30.8547165\",\r\n    \"reasonDescriptor\"\
                     \ : \"이용 시작 1일 전 취소: 50% 환불\"\r\n  }\r\n}"
+  /api/reviews/room/{roomId}:
+    get:
+      tags:
+      - api
+      operationId: review-list-by-room
+      parameters:
+      - name: roomId
+        in: path
+        description: 회의실 ID
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 페이지 번호 (0부터 시작)
+        required: false
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: 페이지 크기
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-reviews-room-roomId-910725678"
+              examples:
+                review-list-by-room:
+                  value: "{\r\n  \"content\" : [ {\r\n    \"id\" : 100,\r\n    \"\
+                    reservationId\" : 10,\r\n    \"authorUserId\" : 1,\r\n    \"authorName\"\
+                    \ : \"홍길동\",\r\n    \"rating\" : 5,\r\n    \"content\" : \"공간이\
+                    \ 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\n    \"createdAt\" : \"2026-03-04T12:50:31.3086382\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-04T12:50:31.3086382\"\r\n \
+                    \ } ],\r\n  \"pageable\" : {\r\n    \"pageNumber\" : 0,\r\n  \
+                    \  \"pageSize\" : 10,\r\n    \"sort\" : {\r\n      \"empty\" :\
+                    \ false,\r\n      \"sorted\" : true,\r\n      \"unsorted\" : false\r\
+                    \n    },\r\n    \"offset\" : 0,\r\n    \"unpaged\" : false,\r\n\
+                    \    \"paged\" : true\r\n  },\r\n  \"totalElements\" : 1,\r\n\
+                    \  \"last\" : true,\r\n  \"totalPages\" : 1,\r\n  \"size\" : 10,\r\
+                    \n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\" : false,\r\
+                    \n    \"sorted\" : true,\r\n    \"unsorted\" : false\r\n  },\r\
+                    \n  \"numberOfElements\" : 1,\r\n  \"first\" : true,\r\n  \"empty\"\
+                    \ : false\r\n}"
   /api/users/me/password:
     put:
       tags:
@@ -1192,8 +1894,8 @@ paths:
               $ref: "#/components/schemas/api-users-me-password-374993548"
             examples:
               user-change-password:
-                value: "{\r\n  \"newPassword\" : \"New1234!\",\r\n  \"currentPassword\"\
-                  \ : \"Old1234!\"\r\n}"
+                value: "{\r\n  \"currentPassword\" : \"Old1234!\",\r\n  \"newPassword\"\
+                  \ : \"New1234!\"\r\n}"
       responses:
         "200":
           description: "200"
@@ -1206,6 +1908,200 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"비밀번호가 변경되었습니다.\",\r\n  \"data\" : null\r\
                     \n}"
+  /api/admin/managers/{id}/approve:
+    patch:
+      tags:
+      - api
+      operationId: admin-manager-approve
+      parameters:
+      - name: id
+        in: path
+        description: 승인 처리할 Manager의 회원 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-managers-id-approve-552064076"
+              examples:
+                admin-manager-approve:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"Manager가 승인되었습니다.\",\r\n  \"data\" : {\r\
+                    \n    \"userId\" : 2,\r\n    \"name\" : \"강감찬\",\r\n    \"email\"\
+                    \ : \"manager@example.com\",\r\n    \"approvalStatus\" : \"APPROVED\"\
+                    ,\r\n    \"createdAt\" : \"2026-03-04T12:50:28.5918951\"\r\n \
+                    \ }\r\n}"
+  /api/admin/reservations/{id}/force-cancel:
+    post:
+      tags:
+      - api
+      operationId: admin-reservation-force-cancel
+      parameters:
+      - name: id
+        in: path
+        description: 강제 취소할 예약 ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/api-admin-reservations-id-force-cancel-209556888"
+            examples:
+              admin-reservation-force-cancel:
+                value: "{\r\n  \"adminReason\" : \"침수 피해로 인한 지점 임시 휴업\",\r\n  \"sendNotification\"\
+                  \ : true,\r\n  \"customRefundRate\" : null\r\n}"
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-reservations-id-force-cancel-815695376"
+              examples:
+                admin-reservation-force-cancel:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"예약이 관리자 권한으로 취소되었습니다.\",\r\n  \"data\"\
+                    \ : {\r\n    \"reservationId\" : 1,\r\n    \"userEmail\" : \"\
+                    user1@example.com\",\r\n    \"canceledAt\" : \"2026-03-04T12:50:28.8160347\"\
+                    ,\r\n    \"adminReason\" : \"침수 피해로 인한 지점 임시 휴업\"\r\n  }\r\n}"
+  /api/admin/stats/rooms/popular:
+    get:
+      tags:
+      - api
+      operationId: admin-stats-popular-rooms
+      parameters:
+      - name: officeId
+        in: query
+        description: 지점 ID (선택)
+        required: false
+        schema:
+          type: string
+      - name: startDate
+        in: query
+        description: 조회 시작 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        description: 조회 종료 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1862761355"
+              examples:
+                admin-stats-popular-rooms:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"인기 회의실 Top 5 조회 성공\",\r\n  \"data\" : [\
+                    \ {\r\n    \"roomId\" : 1,\r\n    \"roomName\" : \"대회의실A\",\r\n\
+                    \    \"officeLocation\" : \"서울 강남점\",\r\n    \"reservationCount\"\
+                    \ : 42\r\n  }, {\r\n    \"roomId\" : 2,\r\n    \"roomName\" :\
+                    \ \"소회의실B\",\r\n    \"officeLocation\" : \"서울 강남점\",\r\n    \"\
+                    reservationCount\" : 35\r\n  } ]\r\n}"
+  /api/admin/stats/rooms/unpopular:
+    get:
+      tags:
+      - api
+      operationId: admin-stats-unpopular-rooms
+      parameters:
+      - name: officeId
+        in: query
+        description: 지점 ID (선택)
+        required: false
+        schema:
+          type: string
+      - name: startDate
+        in: query
+        description: 조회 시작 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        description: 조회 종료 날짜 (yyyy-MM-dd)
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1862761355"
+              examples:
+                admin-stats-unpopular-rooms:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"비인기 회의실 Top 5 조회 성공\",\r\n  \"data\" :\
+                    \ [ {\r\n    \"roomId\" : 10,\r\n    \"roomName\" : \"소회의실Z\"\
+                    ,\r\n    \"officeLocation\" : \"부산 해운대점\",\r\n    \"reservationCount\"\
+                    \ : 1\r\n  } ]\r\n}"
+  /api/admin/users/{id}/reactivate:
+    patch:
+      tags:
+      - api
+      operationId: admin-user-reactivate
+      parameters:
+      - name: id
+        in: path
+        description: 복원할 사용자 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-users-id-reactivate641840899"
+              examples:
+                admin-user-reactivate:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"사용자 계정 정지가 해제되었습니다.\",\r\n  \"data\" :\
+                    \ {\r\n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\"\
+                    ,\r\n    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n \
+                    \   \"accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"\
+                    2026-03-04T12:50:29.0161681\"\r\n  }\r\n}"
+  /api/admin/users/{id}/suspend:
+    patch:
+      tags:
+      - api
+      operationId: admin-user-suspend
+      parameters:
+      - name: id
+        in: path
+        description: 정지할 사용자 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-admin-users-id-suspend2078446800"
+              examples:
+                admin-user-suspend:
+                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
+                    ,\r\n  \"message\" : \"사용자 계정이 정지되었습니다.\",\r\n  \"data\" : {\r\
+                    \n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\",\r\n\
+                    \    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n    \"\
+                    accountStatus\" : \"SUSPENDED\",\r\n    \"createdAt\" : \"2026-03-04T12:50:29.0567538\"\
+                    \r\n  }\r\n}"
   /api/offices/{id}/rooms/status:
     patch:
       tags:
@@ -1222,7 +2118,7 @@ paths:
         content:
           application/json;charset=UTF-8:
             schema:
-              $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+              $ref: "#/components/schemas/api-auth-manager-signup486549215"
             examples:
               room-bulk-status:
                 value: "{\r\n  \"targetStatus\" : \"INACTIVE\",\r\n  \"floor\" : null,\r\
@@ -1233,43 +2129,107 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-reservations-id-confirm486549215"
+                $ref: "#/components/schemas/api-auth-manager-signup486549215"
               examples:
                 room-bulk-status:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"회의실 상태가 일괄 변경되었습니다.\",\r\n  \"data\" :\
                     \ {\r\n    \"affectedCount\" : 3,\r\n    \"roomIds\" : [ 1, 2,\
                     \ 3 ],\r\n    \"newStatus\" : \"INACTIVE\"\r\n  }\r\n}"
+  /api/reviews/room/{roomId}/summary:
+    get:
+      tags:
+      - api
+      operationId: review-room-summary
+      parameters:
+      - name: roomId
+        in: path
+        description: 회의실 ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/api-reviews-room-roomId-summary660224167"
+              examples:
+                review-room-summary:
+                  value: "{\r\n  \"roomId\" : 1,\r\n  \"averageRating\" : 4.6,\r\n\
+                    \  \"reviewCount\" : 23\r\n}"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
-    api-reservations465586564:
+    api-favorites-1181626733:
       required:
-      - endAt
-      - officeId
-      - roomId
-      - startAt
-      - title
-      - userId
+      - code
+      - message
+      - status
       type: object
       properties:
-        officeId:
-          type: number
-          description: 지점 ID
-        endAt:
+        code:
           type: string
-          description: 종료 시간
-        title:
+          description: 응답 코드
+        data:
+          required:
+          - capacity
+          - category
+          - createdAt
+          - favoriteId
+          - officeId
+          - officeLocation
+          - officeName
+          - price
+          - roomCode
+          - roomId
+          - roomName
+          type: object
+          properties:
+            createdAt:
+              type: string
+              description: 즐겨찾기 등록 일시
+            officeName:
+              type: string
+              description: 지점 이름
+            favoriteId:
+              type: number
+              description: 즐겨찾기 ID
+            officeLocation:
+              type: string
+              description: 지점 위치
+            officeId:
+              type: number
+              description: 지점 ID
+            price:
+              type: number
+              description: 1시간 기준 이용 요금
+            roomCode:
+              type: string
+              description: 회의실 코드
+            category:
+              type: string
+              description: 회의실 카테고리
+            roomName:
+              type: string
+              description: 회의실 이름
+            roomId:
+              type: number
+              description: 회의실 ID
+            capacity:
+              type: number
+              description: 수용 인원
+        message:
           type: string
-          description: 예약 제목
-        userId:
-          type: number
-          description: 예약자 ID
-        startAt:
+          description: 응답 메시지
+        status:
           type: string
-          description: 시작 시간
-        roomId:
-          type: number
-          description: 회의실 ID
+          description: 처리 상태
     api-offices-1433084143:
       required:
       - closeTime
@@ -1312,6 +2272,26 @@ components:
           type: number
           description: 경도
           nullable: true
+    api-favorites-check-roomId-393213291:
+      required:
+      - code
+      - data
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          type: boolean
+          description: "즐겨찾기 여부 (true: 즐겨찾기 중, false: 즐겨찾기 안함)"
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
     api-users-me1479937214:
       type: object
       properties:
@@ -1319,7 +2299,18 @@ components:
           type: string
           description: 비밀번호 (oAuth 로그인의 경우 생략 가능)
           nullable: true
-    api-users-me16351925:
+    api-reviews-reviewId2120508141:
+      type: object
+      properties:
+        rating:
+          type: number
+          description: "변경할 평점 (1~5, 선택)"
+          nullable: true
+        content:
+          type: string
+          description: 변경할 후기 내용 (선택)
+          nullable: true
+    api-admin-stats-rooms-popular-1862761355:
       required:
       - code
       - message
@@ -1330,39 +2321,33 @@ components:
           type: string
           description: 응답 코드
         data:
-          required:
-          - email
-          - id
-          - loginType
-          - name
-          - role
-          type: object
-          properties:
-            createdAt:
-              type: string
-              description: 계정 생성일
-              nullable: true
-            role:
-              type: string
-              description: "권한 (USER, MANAGER, ADMIN)"
-            loginType:
-              type: string
-              description: "로그인 유형 (LOCAL, KAKAO, NAVER, GOOGLE)"
-            name:
-              type: string
-              description: 이름
-            id:
-              type: number
-              description: 사용자 고유 아이디
-            email:
-              type: string
-              description: 이메일
+          type: array
+          items:
+            required:
+            - officeLocation
+            - reservationCount
+            - roomId
+            - roomName
+            type: object
+            properties:
+              officeLocation:
+                type: string
+                description: 지점 위치
+              reservationCount:
+                type: number
+                description: 예약 건수
+              roomName:
+                type: string
+                description: 회의실 이름
+              roomId:
+                type: number
+                description: 회의실 ID
         message:
           type: string
           description: 응답 메시지
         status:
           type: string
-          description: 응답 상태
+          description: 처리 상태
     api-reservations-id-refund-preview-1901559131:
       required:
       - code
@@ -1411,42 +2396,43 @@ components:
         status:
           type: string
           description: 처리 상태
-    api-reservations-id447669472:
+    api-admin-reservations-id-force-cancel-815695376:
+      required:
+      - code
+      - message
+      - status
       type: object
       properties:
-        endAt:
+        code:
           type: string
-          description: 변경할 종료 시간
-          nullable: true
-        startAt:
+          description: 응답 코드
+        data:
+          required:
+          - adminReason
+          - canceledAt
+          - reservationId
+          - userEmail
+          type: object
+          properties:
+            reservationId:
+              type: number
+              description: 취소된 예약 ID
+            canceledAt:
+              type: string
+              description: 취소 처리 일시
+            userEmail:
+              type: string
+              description: 예약자 이메일
+            adminReason:
+              type: string
+              description: 관리자 강제 취소 사유
+        message:
           type: string
-          description: 변경할 시작 시간
-          nullable: true
+          description: 응답 메시지
         status:
           type: string
-          description: 변경할 상태
-          nullable: true
-    api-users-me950837630:
-      required:
-      - name
-      type: object
-      properties:
-        name:
-          type: string
-          description: 변경할 이름
-    api-users-me-password-374993548:
-      required:
-      - currentPassword
-      - newPassword
-      type: object
-      properties:
-        newPassword:
-          type: string
-          description: 새 비밀번호 (8자 이상)
-        currentPassword:
-          type: string
-          description: 현재 비밀번호
-    api-facilities2060499395:
+          description: 처리 상태
+    api-admin-facilities2060499395:
       required:
       - code
       - message
@@ -1484,22 +2470,6 @@ components:
         status:
           type: string
           description: 처리 상태
-    api-auth-manager-login537651293:
-      required:
-      - accessToken
-      - refreshToken
-      - tokenType
-      type: object
-      properties:
-        tokenType:
-          type: string
-          description: 토큰 타입 (Bearer)
-        accessToken:
-          type: string
-          description: Access Token (JWT)
-        refreshToken:
-          type: string
-          description: Refresh Token
     api-reservations1107845776:
       required:
       - code
@@ -1682,18 +2652,6 @@ components:
         status:
           type: string
           description: 결과 상태
-    api-auth-admin-login-1854507603:
-      required:
-      - email
-      - password
-      type: object
-      properties:
-        password:
-          type: string
-          description: 비밀번호 (최소 6자)
-        email:
-          type: string
-          description: 관리자 이메일
     api-users-me1229089246:
       required:
       - code
@@ -1738,6 +2696,850 @@ components:
         status:
           type: string
           description: 응답 상태
+    api-auth-user-login-788118888:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        password:
+          type: string
+          description: 비밀번호
+        email:
+          type: string
+          description: 이메일
+    api-admin-stats-occupancy598576014:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          type: array
+          items:
+            required:
+            - occupancyRate
+            - occupiedRooms
+            - officeId
+            - totalRooms
+            type: object
+            properties:
+              officeId:
+                type: number
+                description: 지점 ID
+              occupiedRooms:
+                type: number
+                description: 점유 중인 방 수
+              occupancyRate:
+                type: number
+                description: 점유율 (%)
+              floor:
+                type: number
+                description: 층
+                nullable: true
+              totalRooms:
+                type: number
+                description: 전체 방 수
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-favorites483412598:
+      required:
+      - roomId
+      type: object
+      properties:
+        roomId:
+          type: number
+          description: 즐겨찾기할 회의실 ID
+    api-auth-user-refresh1908482022:
+      required:
+      - accessToken
+      - refreshToken
+      - tokenType
+      type: object
+      properties:
+        tokenType:
+          type: string
+          description: 토큰 타입 (Bearer)
+        accessToken:
+          type: string
+          description: 새로 발급된 Access Token
+        refreshToken:
+          type: string
+          description: 기존 Refresh Token
+    api-auth-manager-signup960645994:
+      required:
+      - email
+      - name
+      - password
+      type: object
+      properties:
+        password:
+          type: string
+          description: 비밀번호
+        name:
+          type: string
+          description: 운영자 이름
+        email:
+          type: string
+          description: 이메일 (로그인 ID)
+    api-admin-managers-id-approve-552064076:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - approvalStatus
+          - createdAt
+          - email
+          - name
+          - userId
+          type: object
+          properties:
+            approvalStatus:
+              type: string
+              description: 승인 상태 (APPROVED 갱신됨)
+            createdAt:
+              type: string
+              description: 가입 일시
+            name:
+              type: string
+              description: 이름
+            userId:
+              type: number
+              description: 회원 ID
+            email:
+              type: string
+              description: 이메일
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-admin-users-id-suspend2078446800:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - accountStatus
+          - createdAt
+          - email
+          - id
+          - name
+          - role
+          type: object
+          properties:
+            accountStatus:
+              type: string
+              description: 계정 상태 (LOCKED 갱신됨)
+            createdAt:
+              type: string
+              description: 가입 일시
+            role:
+              type: string
+              description: 역할
+            name:
+              type: string
+              description: 이름
+            id:
+              type: number
+              description: 사용자 ID
+            email:
+              type: string
+              description: 이메일
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-reviews-1529360671:
+      required:
+      - authorName
+      - authorUserId
+      - content
+      - createdAt
+      - id
+      - rating
+      - reservationId
+      - updatedAt
+      type: object
+      properties:
+        createdAt:
+          type: string
+          description: 작성 일시
+        authorUserId:
+          type: number
+          description: 작성자 ID
+        reservationId:
+          type: number
+          description: 예약 ID
+        authorName:
+          type: string
+          description: 작성자 이름
+        rating:
+          type: number
+          description: 평점
+        id:
+          type: number
+          description: 후기 ID
+        content:
+          type: string
+          description: 후기 내용
+        updatedAt:
+          type: string
+          description: 수정 일시
+    api-admin-facilities-1848698505:
+      required:
+      - facilityCode
+      - facilityName
+      - isActive
+      type: object
+      properties:
+        facilityCode:
+          type: string
+          description: 시설 코드
+        facilityName:
+          type: string
+          description: 시설 이름
+        isActive:
+          type: boolean
+          description: 활성화 여부
+    api-reviews-897924924:
+      required:
+      - content
+      - rating
+      - reservationId
+      type: object
+      properties:
+        reservationId:
+          type: number
+          description: 예약 ID
+        rating:
+          type: number
+          description: 평점 (1~5)
+        content:
+          type: string
+          description: 후기 내용
+    api-reservations-1817439982:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - endAt
+          - id
+          - officeId
+          - officeName
+          - roomCode
+          - roomId
+          - roomName
+          - startAt
+          - status
+          - title
+          - totalPrice
+          - userId
+          - userName
+          - version
+          type: object
+          properties:
+            officeName:
+              type: string
+              description: 지점 이름
+            totalPrice:
+              type: number
+              description: 총 결제 금액
+            roomCode:
+              type: string
+              description: 회의실 코드
+            endAt:
+              type: string
+              description: 예약 종료 시간
+            userName:
+              type: string
+              description: 사용자 이름
+            title:
+              type: string
+              description: 예약 제목
+            version:
+              type: number
+              description: 낙관적 락 버전
+            userId:
+              type: number
+              description: 사용자 ID
+            roomName:
+              type: string
+              description: 회의실 이름
+            roomId:
+              type: number
+              description: 회의실 ID
+            createdAt:
+              type: string
+              description: 생성 일시
+              nullable: true
+            officeId:
+              type: number
+              description: 지점 ID
+            id:
+              type: number
+              description: 예약 ID
+            startAt:
+              type: string
+              description: 예약 시작 시간
+            updatedAt:
+              type: string
+              description: 수정 일시
+              nullable: true
+            status:
+              type: string
+              description: 예약 상태
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-admin-stats-daily-usage1900580727:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          type: array
+          items:
+            required:
+            - date
+            - totalUsageMinutes
+            type: object
+            properties:
+              date:
+                type: string
+                description: 날짜 (yyyy-MM-dd)
+              totalUsageMinutes:
+                type: number
+                description: 총 사용 시간 (분)
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-logs1400619844:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - empty
+          - first
+          - last
+          - number
+          - numberOfElements
+          - pageable
+          - size
+          - totalElements
+          - totalPages
+          type: object
+          properties:
+            number:
+              type: number
+              description: 현재 페이지 번호
+            numberOfElements:
+              type: number
+              description: 현재 페이지의 데이터 수
+            size:
+              type: number
+              description: 현재 페이지 크기
+            last:
+              type: boolean
+              description: 마지막 페이지 여부
+            totalPages:
+              type: number
+              description: 전체 페이지 수
+            pageable:
+              type: object
+              description: 페이징 정보
+            first:
+              type: boolean
+              description: 첫 번째 페이지 여부
+            content:
+              type: array
+              items:
+                required:
+                - action
+                - actorId
+                - actorName
+                - afterData
+                - id
+                - occurredAt
+                - reservationId
+                - reservationTitle
+                type: object
+                properties:
+                  occurredAt:
+                    type: string
+                    description: 발생 일시
+                  actorId:
+                    type: number
+                    description: 수행자 회원 ID
+                  reservationId:
+                    type: number
+                    description: 대상 예약 ID
+                  reservationTitle:
+                    type: string
+                    description: 예약 제목
+                  beforeData:
+                    type: object
+                    description: 변경 전 JSONB 데이터 (optional)
+                    nullable: true
+                  action:
+                    type: string
+                    description: "로그 액션형 (CREATE, UPDATE, CANCEL)"
+                  actorName:
+                    type: string
+                    description: 수행자 이름
+                  id:
+                    type: number
+                    description: 로그 ID
+                  afterData:
+                    type: object
+                    description: 변경 후 JSONB 데이터
+            empty:
+              type: boolean
+              description: 데이터 비어있음 여부
+            totalElements:
+              type: number
+              description: 전체 데이터 수
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-admin-stats-cancellations-893511423:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - canceledCount
+          - cancellationRate
+          - totalReservations
+          type: object
+          properties:
+            canceledCount:
+              type: number
+              description: 취소된 예약 수
+            cancellationRate:
+              type: number
+              description: 취소율 (%)
+            totalReservations:
+              type: number
+              description: 전체 예약 수
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-admin-stats-peak-times1097026338:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          type: array
+          items:
+            required:
+            - hour
+            - reservationCount
+            type: object
+            properties:
+              hour:
+                type: number
+                description: 시간대 (0~23)
+              reservationCount:
+                type: number
+                description: 예약 건수
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-admin-users-id-reactivate641840899:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - accountStatus
+          - createdAt
+          - email
+          - id
+          - name
+          - role
+          type: object
+          properties:
+            accountStatus:
+              type: string
+              description: 계정 상태 (NORMAL 갱신됨)
+            createdAt:
+              type: string
+              description: 가입 일시
+            role:
+              type: string
+              description: 역할
+            name:
+              type: string
+              description: 이름
+            id:
+              type: number
+              description: 사용자 ID
+            email:
+              type: string
+              description: 이메일
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-reservations465586564:
+      required:
+      - endAt
+      - officeId
+      - roomId
+      - startAt
+      - title
+      - userId
+      type: object
+      properties:
+        officeId:
+          type: number
+          description: 지점 ID
+        endAt:
+          type: string
+          description: 종료 시간
+        title:
+          type: string
+          description: 예약 제목
+        userId:
+          type: number
+          description: 예약자 ID
+        startAt:
+          type: string
+          description: 시작 시간
+        roomId:
+          type: number
+          description: 회의실 ID
+    api-favorites-roomId748482256:
+      required:
+      - code
+      - data
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-users-me16351925:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - email
+          - id
+          - loginType
+          - name
+          - role
+          type: object
+          properties:
+            createdAt:
+              type: string
+              description: 계정 생성일
+              nullable: true
+            role:
+              type: string
+              description: "권한 (USER, MANAGER, ADMIN)"
+            loginType:
+              type: string
+              description: "로그인 유형 (LOCAL, KAKAO, NAVER, GOOGLE)"
+            name:
+              type: string
+              description: 이름
+            id:
+              type: number
+              description: 사용자 고유 아이디
+            email:
+              type: string
+              description: 이메일
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 응답 상태
+    api-notifications1229337096:
+      required:
+      - empty
+      - first
+      - last
+      - number
+      - numberOfElements
+      - pageable
+      - size
+      - totalElements
+      - totalPages
+      type: object
+      properties:
+        number:
+          type: number
+          description: 현재 페이지 번호
+        numberOfElements:
+          type: number
+          description: 현재 페이지 데이터 수
+        size:
+          type: number
+          description: 페이지 당 데이터 수
+        last:
+          type: boolean
+          description: 마지막 페이지 여부
+        totalPages:
+          type: number
+          description: 전체 페이지 수
+        pageable:
+          type: string
+          description: 페이징 정보
+        sort:
+          required:
+          - empty
+          - sorted
+          - unsorted
+          type: object
+          properties:
+            unsorted:
+              type: boolean
+              description: 정렬되지 않았는지 여부
+            sorted:
+              type: boolean
+              description: 정렬되었는지 여부
+            empty:
+              type: boolean
+              description: 정렬 정보가 비어있는지 여부
+        first:
+          type: boolean
+          description: 첫 페이지 여부
+        content:
+          type: array
+          items:
+            required:
+            - createdAt
+            - id
+            - message
+            - read
+            - targetUrl
+            - type
+            type: object
+            properties:
+              createdAt:
+                type: string
+                description: 알림 생성 일시
+              read:
+                type: boolean
+                description: 알림 읽음 여부
+              id:
+                type: number
+                description: 알림 ID
+              message:
+                type: string
+                description: 알림 메시지
+              type:
+                type: string
+                description: 알림 타입
+              targetUrl:
+                type: string
+                description: 알림 클릭 시 이동할 URL
+        empty:
+          type: boolean
+          description: 데이터가 비어있는지 여부
+        totalElements:
+          type: number
+          description: 전체 데이터 수
+    api-reservations-id447669472:
+      type: object
+      properties:
+        endAt:
+          type: string
+          description: 변경할 종료 시간
+          nullable: true
+        startAt:
+          type: string
+          description: 변경할 시작 시간
+          nullable: true
+        status:
+          type: string
+          description: 변경할 상태
+          nullable: true
+    api-users-me950837630:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: 변경할 이름
+    api-users-me-password-374993548:
+      required:
+      - currentPassword
+      - newPassword
+      type: object
+      properties:
+        newPassword:
+          type: string
+          description: 새 비밀번호 (8자 이상)
+        currentPassword:
+          type: string
+          description: 현재 비밀번호
+    api-auth-user-login537651293:
+      required:
+      - accessToken
+      - refreshToken
+      - tokenType
+      type: object
+      properties:
+        tokenType:
+          type: string
+          description: 토큰 타입 (Bearer)
+        accessToken:
+          type: string
+          description: Access Token (JWT)
+        refreshToken:
+          type: string
+          description: Refresh Token
+    api-admin-managers-pending40421041:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          type: array
+          items:
+            required:
+            - approvalStatus
+            - createdAt
+            - email
+            - name
+            - userId
+            type: object
+            properties:
+              approvalStatus:
+                type: string
+                description: "승인 상태 (PENDING, APPROVED, REJECTED)"
+              createdAt:
+                type: string
+                description: 가입 일시
+              name:
+                type: string
+                description: 이름
+              userId:
+                type: number
+                description: 회원 ID
+              email:
+                type: string
+                description: 이메일
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    api-auth-admin-login-1854507603:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        password:
+          type: string
+          description: 비밀번호 (최소 6자)
+        email:
+          type: string
+          description: 관리자 이메일
     api-users-me-164437394:
       required:
       - code
@@ -1808,19 +3610,7 @@ components:
           type: string
           description: 상태 (AVAILABLE/INACTIVE)
           nullable: true
-    api-auth-manager-login-788118888:
-      required:
-      - email
-      - password
-      type: object
-      properties:
-        password:
-          type: string
-          description: 비밀번호
-        email:
-          type: string
-          description: 이메일
-    api-reservations-id-confirm486549215:
+    api-auth-manager-signup486549215:
       type: object
     api-auth-user-signup519598362:
       required:
@@ -1902,38 +3692,142 @@ components:
         status:
           type: string
           description: 처리 상태 (SUCCESS/ERROR)
-    api-auth-user-refresh1908482022:
+    api-reviews-room-roomId-910725678:
       required:
-      - accessToken
-      - refreshToken
-      - tokenType
+      - empty
+      - first
+      - last
+      - number
+      - numberOfElements
+      - size
+      - totalElements
+      - totalPages
       type: object
       properties:
-        tokenType:
-          type: string
-          description: 토큰 타입 (Bearer)
-        accessToken:
-          type: string
-          description: 새로 발급된 Access Token
-        refreshToken:
-          type: string
-          description: 기존 Refresh Token
-    api-auth-manager-signup960645994:
+        number:
+          type: number
+          description: 현재 페이지 번호
+        numberOfElements:
+          type: number
+          description: 현재 페이지 항목 수
+        size:
+          type: number
+          description: 페이지 크기
+        last:
+          type: boolean
+          description: 마지막 페이지 여부
+        totalPages:
+          type: number
+          description: 총 페이지 수
+        first:
+          type: boolean
+          description: 첫 번째 페이지 여부
+        content:
+          type: array
+          items:
+            required:
+            - authorName
+            - authorUserId
+            - content
+            - createdAt
+            - id
+            - rating
+            - reservationId
+            - updatedAt
+            type: object
+            properties:
+              createdAt:
+                type: string
+                description: 작성 일시
+              authorUserId:
+                type: number
+                description: 작성자 ID
+              reservationId:
+                type: number
+                description: 예약 ID
+              authorName:
+                type: string
+                description: 작성자 이름
+              rating:
+                type: number
+                description: 평점
+              id:
+                type: number
+                description: 후기 ID
+              content:
+                type: string
+                description: 후기 내용
+              updatedAt:
+                type: string
+                description: 수정 일시
+        empty:
+          type: boolean
+          description: 결과 없음 여부
+        totalElements:
+          type: number
+          description: 총 항목 수
+    api-admin-reservations-id-force-cancel-209556888:
       required:
-      - email
-      - name
-      - password
+      - adminReason
       type: object
       properties:
-        password:
+        customRefundRate:
+          type: number
+          description: 관리자 커스텀 환불 비율 (0~100)
+          nullable: true
+        sendNotification:
+          type: boolean
+          description: 취소 알림 메일 발송 여부
+          nullable: true
+        adminReason:
           type: string
-          description: 비밀번호
-        name:
+          description: 관리자 강제 취소 사유
+    api-admin-users644268557:
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
           type: string
-          description: 운영자 이름
-        email:
+          description: 응답 코드
+        data:
+          type: array
+          items:
+            required:
+            - accountStatus
+            - createdAt
+            - email
+            - id
+            - name
+            - role
+            type: object
+            properties:
+              accountStatus:
+                type: string
+                description: "계정 상태 (NORMAL, LOCKED, DELETED)"
+              createdAt:
+                type: string
+                description: 가입 일시
+              role:
+                type: string
+                description: "역할 (USER, MANAGER)"
+              name:
+                type: string
+                description: 이름
+              id:
+                type: number
+                description: 사용자 ID
+              email:
+                type: string
+                description: 이메일
+        message:
           type: string
-          description: 이메일 (로그인 ID)
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
     api-admin-facilities-1557899690:
       required:
       - code
@@ -1978,22 +3872,44 @@ components:
         refreshToken:
           type: string
           description: 갱신에 사용할 Refresh Token
-    api-admin-facilities-1848698505:
-      required:
-      - facilityCode
-      - facilityName
-      - isActive
-      type: object
-      properties:
-        facilityCode:
-          type: string
-          description: 시설 코드
-        facilityName:
-          type: string
-          description: 시설 이름
-        isActive:
-          type: boolean
-          description: 활성화 여부
+    api-reviews-me-996196378:
+      type: array
+      items:
+        required:
+        - authorName
+        - authorUserId
+        - content
+        - createdAt
+        - id
+        - rating
+        - reservationId
+        - updatedAt
+        type: object
+        properties:
+          createdAt:
+            type: string
+            description: 작성 일시
+          authorUserId:
+            type: number
+            description: 작성자 ID
+          reservationId:
+            type: number
+            description: 예약 ID
+          authorName:
+            type: string
+            description: 작성자 이름
+          rating:
+            type: number
+            description: 평점
+          id:
+            type: number
+            description: 후기 ID
+          content:
+            type: string
+            description: 후기 내용
+          updatedAt:
+            type: string
+            description: 수정 일시
     api-reservations-id-cancel-1029657894:
       required:
       - code
@@ -2112,7 +4028,23 @@ components:
         status:
           type: string
           description: 처리 상태 (SUCCESS/ERROR)
-    api-reservations-1817439982:
+    api-reviews-room-roomId-summary660224167:
+      required:
+      - averageRating
+      - reviewCount
+      - roomId
+      type: object
+      properties:
+        reviewCount:
+          type: number
+          description: 후기 총 개수
+        averageRating:
+          type: number
+          description: 평균 평점 (소수점 1자리 반올림)
+        roomId:
+          type: number
+          description: 회의실 ID
+    api-favorites282292269:
       required:
       - code
       - message
@@ -2123,76 +4055,61 @@ components:
           type: string
           description: 응답 코드
         data:
-          required:
-          - endAt
-          - id
-          - officeId
-          - officeName
-          - roomCode
-          - roomId
-          - roomName
-          - startAt
-          - status
-          - title
-          - totalPrice
-          - userId
-          - userName
-          - version
-          type: object
-          properties:
-            officeName:
-              type: string
-              description: 지점 이름
-            totalPrice:
-              type: number
-              description: 총 결제 금액
-            roomCode:
-              type: string
-              description: 회의실 코드
-            endAt:
-              type: string
-              description: 예약 종료 시간
-            userName:
-              type: string
-              description: 사용자 이름
-            title:
-              type: string
-              description: 예약 제목
-            version:
-              type: number
-              description: 낙관적 락 버전
-            userId:
-              type: number
-              description: 사용자 ID
-            roomName:
-              type: string
-              description: 회의실 이름
-            roomId:
-              type: number
-              description: 회의실 ID
-            createdAt:
-              type: string
-              description: 생성 일시
-              nullable: true
-            officeId:
-              type: number
-              description: 지점 ID
-            id:
-              type: number
-              description: 예약 ID
-            startAt:
-              type: string
-              description: 예약 시작 시간
-            updatedAt:
-              type: string
-              description: 수정 일시
-              nullable: true
-            status:
-              type: string
-              description: 예약 상태
+          type: array
+          items:
+            required:
+            - capacity
+            - category
+            - createdAt
+            - favoriteId
+            - officeId
+            - officeLocation
+            - officeName
+            - price
+            - roomCode
+            - roomId
+            - roomName
+            type: object
+            properties:
+              createdAt:
+                type: string
+                description: 즐겨찾기 등록 일시
+              officeName:
+                type: string
+                description: 지점 이름
+              favoriteId:
+                type: number
+                description: 즐겨찾기 ID
+              officeLocation:
+                type: string
+                description: 지점 위치
+              officeId:
+                type: number
+                description: 지점 ID
+              price:
+                type: number
+                description: 이용 요금
+              roomCode:
+                type: string
+                description: 회의실 코드
+              category:
+                type: string
+                description: 회의실 카테고리
+              roomName:
+                type: string
+                description: 회의실 이름
+              roomId:
+                type: number
+                description: 회의실 ID
+              capacity:
+                type: number
+                description: 수용 인원
         message:
           type: string
           description: 응답 메시지
         status:
           type: string
           description: 처리 상태
+
+security:
+  - bearerAuth: []
