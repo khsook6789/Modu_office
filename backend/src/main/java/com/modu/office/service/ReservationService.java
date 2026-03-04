@@ -47,6 +47,7 @@ public class ReservationService {
     private final AppUserRepository appUserRepository;
     private final com.modu.office.repository.CancellationPolicyRepository cancellationPolicyRepository;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+    private final PaymentService paymentService;
 
     /**
      * 새 예약 생성
@@ -403,6 +404,10 @@ public class ReservationService {
         com.modu.office.dto.response.RefundPreviewResponse refundInfo = calculateRefund(reservation,
                 clientRequestTime != null ? clientRequestTime : now, null);
 
+        // Toss 결제 내역이 있다면 함께 결제 취소(환불) 처리
+        // 사용자 본인 취소이므로 사유는 고정 또는 선택
+        paymentService.cancelPaymentByReservation(id, "고객 본인 요청으로 인한 예약 취소");
+
         java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
         reservation.cancel();
 
@@ -469,6 +474,9 @@ public class ReservationService {
 
         // 변경 전 데이터 캡처
         java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
+
+        // 결제가 있으면 토스 취소 API도 함께 호출 (결제 미도입 예약은 무시)
+        paymentService.cancelPaymentByReservation(reservationId, adminReason != null ? adminReason : "관리자 예약 취소");
 
         // 예약 취소 처리
         reservation.cancel();
