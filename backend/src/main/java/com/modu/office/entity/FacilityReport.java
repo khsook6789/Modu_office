@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * 시설 문제 리포트 엔티티
@@ -37,11 +39,13 @@ public class FacilityReport extends BaseEntity {
 
     @Setter
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "issue_type", nullable = false, columnDefinition = "report_issue_type")
     private ReportIssueType issueType;
 
     @Setter
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false, columnDefinition = "report_status")
     private ReportStatus status = ReportStatus.REPORTED;
 

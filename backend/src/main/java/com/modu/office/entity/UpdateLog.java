@@ -28,6 +28,7 @@ public class UpdateLog {
     private Reservation reservation;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "action", nullable = false, columnDefinition = "log_action")
     private LogAction action;
 

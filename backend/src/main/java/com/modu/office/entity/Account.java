@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.modu.office.entity.enums.AccountStatus;
 import com.modu.office.entity.enums.LoginType;
@@ -30,6 +32,7 @@ public class Account extends BaseEntity {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "login_type", nullable = false, length = 20, columnDefinition = "login_type")
     private LoginType loginType = LoginType.LOCAL;
 
@@ -37,6 +40,7 @@ public class Account extends BaseEntity {
     private String oauthId;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false, columnDefinition = "account_status")
     private AccountStatus status = AccountStatus.ACTIVE;
 

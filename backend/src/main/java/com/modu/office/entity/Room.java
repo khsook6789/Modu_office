@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * 지점 내 개별 회의실 정보를 관리하는 엔티티
@@ -47,6 +49,7 @@ public class Room extends BaseEntity {
     private Integer floor;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false, columnDefinition = "room_status")
     private RoomStatus status = RoomStatus.AVAILABLE;
 

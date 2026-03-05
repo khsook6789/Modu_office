@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 import com.modu.office.entity.enums.ReservationStatus;
@@ -52,6 +54,7 @@ public class Reservation extends BaseEntity {
     // PostgreSQL이 ENUM ↔ VARCHAR 비교를 거부하는 500 에러 발생.
     // columnDefinition으로 DB 타입을 명시해야 올바른 타입 바인딩이 수행됨.
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false, columnDefinition = "reservation_status")
     private ReservationStatus status = ReservationStatus.PENDING;
 
