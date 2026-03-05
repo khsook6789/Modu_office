@@ -53,6 +53,11 @@ function clearAuthAndRedirect() {
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
+
+  // 무한 리다이렉트 방지: 이미 로그인 페이지면 이동하지 않음
+  if (window.location.pathname === "/login") {
+    return;
+  }
   window.location.href = "/login";
 }
 
@@ -66,12 +71,15 @@ class ApiClient {
     // Handle Query Params
     if (options.params) {
       const queryString = new URLSearchParams(
-        Object.entries(options.params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value);
-          }
-          return acc;
-        }, {} as Record<string, string>)
+        Object.entries(options.params).reduce(
+          (acc, [key, value]) => {
+            if (value !== undefined && value !== null) {
+              acc[key] = String(value);
+            }
+            return acc;
+          },
+          {} as Record<string, string>,
+        ),
       ).toString();
       if (queryString) {
         url += `?${queryString}`;

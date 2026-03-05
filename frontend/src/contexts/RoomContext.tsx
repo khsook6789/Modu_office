@@ -17,11 +17,11 @@ export function RoomProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const fetchRooms = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return; // 미인증 상태면 요청 생략
+
             try {
-                // Fetch from API (which uses its own localStorage/mock)
                 const apiRooms = await roomApi.getAllRooms();
-                // Map API response to UI model
-                // const mappedRooms = apiRooms.map(mapToRoom); // Already mapped in API
                 setRooms(apiRooms);
             } catch (err) {
                 console.error("Failed to load rooms", err);
