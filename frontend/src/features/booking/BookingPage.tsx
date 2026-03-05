@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { loadPaymentWidget } from '@tosspayments/payment-widget-sdk';
+import { loadPaymentWidget, type PaymentWidgetInstance } from '@tosspayments/payment-widget-sdk';
 import { type RoomResponse } from '../rooms/api/room.api';
 import { client } from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
@@ -27,6 +27,14 @@ export default function BookingPage() {
 
     const [isProcessing, setIsProcessing] = useState(false);
 
+    // 결제 위젯 관련 상태
+    const [paymentWidget, setPaymentWidget] = useState<PaymentWidgetInstance | null>(null);
+    const [isWidgetLoading, setIsWidgetLoading] = useState(false);
+    const [reservationId, setReservationId] = useState<number | null>(null);
+    const [step, setStep] = useState<'form' | 'payment'>('form'); // form → payment 2단계
+
+    const paymentMethodRef = useRef<HTMLDivElement>(null);
+
     // 방 정보 불러오기
     useEffect(() => {
         if (!roomId) return;
@@ -39,12 +47,45 @@ export default function BookingPage() {
             .catch(() => { alert('존재하지 않는 회의실입니다.'); navigate('/rooms'); });
     }, [roomId, navigate]);
 
-    // 가격 계산 (방의 pricePerHour 필드 없으면 임시 10,000원)
+    // 가격 계산
     useEffect(() => {
         if (!room) return;
         const pricePerHour = (room as any).pricePerHour ?? 10000;
         setTotalPrice(Number(duration) * pricePerHour);
     }, [duration, room]);
+
+    // 결제 위젯 마운트 (step === 'payment' 로 전환된 후)
+    useEffect(() => {
+        if (step !== 'payment' || !paymentMethodRef.current || totalPrice <= 0) return;
+
+        let cancelled = false;
+        setIsWidgetLoading(true);
+
+        const customerKey = `user-${user?.id ?? 'guest'}`;
+
+        loadPaymentWidget(TOSS_CLIENT_KEY, customerKey)
+            .then(async (widget) => {
+                if (cancelled) return;
+                await widget.renderPaymentMethods(
+                    '#payment-method',
+                    { value: totalPrice }
+                );
+                if (!cancelled) {
+                    setPaymentWidget(widget);
+                    setIsWidgetLoading(false);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    console.error('위젯 로드 실패', err);
+                    alert('결제 위젯 로드에 실패했습니다. 다시 시도해 주세요.');
+                    setStep('form');
+                    setIsWidgetLoading(false);
+                }
+            });
+
+        return () => { cancelled = true; };
+    }, [step, totalPrice, user?.id]);
 
     const calculateEndTimeForUI = (start: string, addHours: number) => {
         const [h, m] = start.split(':').map(Number);
@@ -62,12 +103,12 @@ export default function BookingPage() {
         return `${y}-${m}-${d}T${h}:${min}:00`;
     };
 
-    const generateOrderId = (reservationId: number) => {
-        // 토스 orderId: 영문자/숫자/- 6~64자
-        return `ORDER-${reservationId}-${Date.now()}`.slice(0, 64);
+    const generateOrderId = (resId: number) => {
+        return `ORDER-${resId}-${Date.now()}`.slice(0, 64);
     };
 
-    const handlePayment = async () => {
+    // 1단계: 예약 생성 후 결제 UI 표시
+    const handleProceedToPayment = async () => {
         if (!date || !startTime || !room) {
             alert('날짜와 시간을 선택해주세요.');
             return;
@@ -77,7 +118,6 @@ export default function BookingPage() {
             const endAt = calculateEndDateTimeISO(date, startTime, Number(duration));
             const startAt = `${date}T${startTime}:00`;
 
-            // 1. 예약 생성
             const resResponse = await client.post<ApiResponse<ReservationResponse>>('/reservations', {
                 roomId: Number(roomId),
                 officeId: Number((room as any).officeId),
@@ -88,22 +128,34 @@ export default function BookingPage() {
                 guestCount: Number(guestCount),
             });
             const reservation = resResponse.data ?? (resResponse as any).data;
-            const reservationId: number = reservation?.id ?? (resResponse as any).id;
+            const resId: number = reservation?.id ?? (resResponse as any).id;
+
+            setReservationId(resId);
+            setStep('payment'); // 결제 UI 단계로 전환
+        } catch (err: any) {
+            console.error('예약 생성 오류', err);
+            alert('예약 생성 중 오류가 발생했습니다: ' + (err?.message || err));
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    // 2단계: 결제 요청
+    const handlePayment = async () => {
+        if (!paymentWidget || !reservationId || !room) return;
+
+        setIsProcessing(true);
+        try {
             const orderId = generateOrderId(reservationId);
-
-            // 2. 토스 위젯 로드 & 결제 요청
-            const customerKey = `user-${user?.id ?? 'guest'}`;
-            const widget = await loadPaymentWidget(TOSS_CLIENT_KEY, customerKey);
-
             const successUrl = `${window.location.origin}/booking/success?orderId=${orderId}&reservationId=${reservationId}&amount=${totalPrice}`;
             const failUrl = `${window.location.origin}/rooms/${roomId}/book?error=payment_failed`;
 
-            await widget.requestPayment({
+            await paymentWidget.requestPayment({
                 orderId,
                 orderName: `${room.name} (${date} ${startTime}~${endTimeUI})`,
                 successUrl,
                 failUrl,
-                customerName: undefined,
+                customerName: user?.name ?? undefined,
                 amount: totalPrice,
             } as any);
 
@@ -125,7 +177,11 @@ export default function BookingPage() {
         <div className="booking-page-container">
             <div className="booking-header">
                 <h1 className="booking-title">예약 진행하기</h1>
-                <p className="booking-subtitle">원하시는 일정과 인원을 선택하시면 결제가 진행됩니다.</p>
+                <p className="booking-subtitle">
+                    {step === 'form'
+                        ? '원하시는 일정과 인원을 선택하시면 결제가 진행됩니다.'
+                        : '결제수단을 선택하고 결제를 완료해 주세요.'}
+                </p>
             </div>
 
             {/* Room Info Banner */}
@@ -149,80 +205,93 @@ export default function BookingPage() {
             </div>
 
             <div className="booking-content-grid">
-                {/* Left: Form */}
-                <div className="booking-form-section shadow-subtle">
-                    <h3 className="booking-section-title">일정 및 인원 선택</h3>
+                {/* Left: Form 또는 Payment Widget */}
+                {step === 'form' ? (
+                    <div className="booking-form-section shadow-subtle">
+                        <h3 className="booking-section-title">일정 및 인원 선택</h3>
 
-                    <div className="booking-input-row">
-                        <div className="form-group" style={{ width: '100%' }}>
-                            <label className="input-label booking-label">예약 제목</label>
-                            <input
-                                type="text"
-                                className="input-field booking-custom-input"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder={`${room.name} 예약`}
-                            />
+                        <div className="booking-input-row">
+                            <div className="form-group" style={{ width: '100%' }}>
+                                <label className="input-label booking-label">예약 제목</label>
+                                <input
+                                    type="text"
+                                    className="input-field booking-custom-input"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder={`${room.name} 예약`}
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="booking-input-row">
-                        <div className="form-group" style={{ width: '100%' }}>
-                            <label className="input-label booking-label">이용 날짜</label>
-                            <input
-                                type="date"
-                                className="input-field booking-custom-input"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                min={new Date().toISOString().split('T')[0]}
-                            />
+                        <div className="booking-input-row">
+                            <div className="form-group" style={{ width: '100%' }}>
+                                <label className="input-label booking-label">이용 날짜</label>
+                                <input
+                                    type="date"
+                                    className="input-field booking-custom-input"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    min={new Date().toISOString().split('T')[0]}
+                                />
+                            </div>
+                            <div className="form-group" style={{ width: '100%' }}>
+                                <label className="input-label booking-label">시작 시간</label>
+                                <input
+                                    type="time"
+                                    className="input-field booking-custom-input"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                    min="09:00"
+                                    max="22:00"
+                                />
+                            </div>
                         </div>
-                        <div className="form-group" style={{ width: '100%' }}>
-                            <label className="input-label booking-label">시작 시간</label>
-                            <input
-                                type="time"
-                                className="input-field booking-custom-input"
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                                min="09:00"
-                                max="22:00"
-                            />
-                        </div>
-                    </div>
 
-                    <div className="booking-input-row">
-                        <div className="form-group" style={{ width: '100%' }}>
-                            <label className="input-label booking-label">이용 시간</label>
-                            <select
-                                className="input-field booking-custom-select"
-                                value={duration}
-                                onChange={(e) => setDuration(e.target.value)}
-                            >
-                                <option value="1">1시간</option>
-                                <option value="2">2시간</option>
-                                <option value="3">3시간</option>
-                                <option value="4">4시간</option>
-                                <option value="8">8시간 (종일)</option>
-                            </select>
-                        </div>
-                        <div className="form-group" style={{ width: '100%' }}>
-                            <label className="input-label booking-label">참여 인원</label>
-                            <div className="guest-counter">
-                                <button
-                                    className="btn-counter"
-                                    onClick={() => setGuestCount(c => String(Math.max(1, Number(c) - 1)))}
-                                    disabled={Number(guestCount) <= 1}
-                                >-</button>
-                                <div className="guest-count-display">{guestCount}명</div>
-                                <button
-                                    className="btn-counter"
-                                    onClick={() => setGuestCount(c => String(Math.min(room.capacity, Number(c) + 1)))}
-                                    disabled={Number(guestCount) >= room.capacity}
-                                >+</button>
+                        <div className="booking-input-row">
+                            <div className="form-group" style={{ width: '100%' }}>
+                                <label className="input-label booking-label">이용 시간</label>
+                                <select
+                                    className="input-field booking-custom-select"
+                                    value={duration}
+                                    onChange={(e) => setDuration(e.target.value)}
+                                >
+                                    <option value="1">1시간</option>
+                                    <option value="2">2시간</option>
+                                    <option value="3">3시간</option>
+                                    <option value="4">4시간</option>
+                                    <option value="8">8시간 (종일)</option>
+                                </select>
+                            </div>
+                            <div className="form-group" style={{ width: '100%' }}>
+                                <label className="input-label booking-label">참여 인원</label>
+                                <div className="guest-counter">
+                                    <button
+                                        className="btn-counter"
+                                        onClick={() => setGuestCount(c => String(Math.max(1, Number(c) - 1)))}
+                                        disabled={Number(guestCount) <= 1}
+                                    >-</button>
+                                    <div className="guest-count-display">{guestCount}명</div>
+                                    <button
+                                        className="btn-counter"
+                                        onClick={() => setGuestCount(c => String(Math.min(room.capacity, Number(c) + 1)))}
+                                        disabled={Number(guestCount) >= room.capacity}
+                                    >+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="booking-form-section shadow-subtle" style={{ minHeight: 300 }}>
+                        <h3 className="booking-section-title">결제수단 선택</h3>
+                        {isWidgetLoading && (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                                결제 위젯 로딩 중...
+                            </div>
+                        )}
+                        {/* 토스 결제수단 위젯이 이 div 안에 렌더링됩니다 */}
+                        <div ref={paymentMethodRef} id="payment-method" />
+                    </div>
+                )}
 
                 {/* Right: Summary */}
                 <div className="booking-summary-widget">
@@ -244,20 +313,30 @@ export default function BookingPage() {
                         <span className="total-amount">{totalPrice.toLocaleString()}원</span>
                     </div>
 
-                    <button
-                        onClick={handlePayment}
-                        className="btn-book-submit"
-                        disabled={isProcessing}
-                    >
-                        {isProcessing ? '처리 중...' : '토스페이로 결제하기'}
-                    </button>
+                    {step === 'form' ? (
+                        <button
+                            onClick={handleProceedToPayment}
+                            className="btn-book-submit"
+                            disabled={isProcessing}
+                        >
+                            {isProcessing ? '처리 중...' : '다음 단계 (결제수단 선택)'}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handlePayment}
+                            className="btn-book-submit"
+                            disabled={isProcessing || isWidgetLoading || !paymentWidget}
+                        >
+                            {isProcessing ? '처리 중...' : '토스페이로 결제하기'}
+                        </button>
+                    )}
 
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => step === 'payment' ? setStep('form') : navigate(-1)}
                         className="btn btn-outline w-full mt-sm"
                         style={{ border: 'none', color: '#94a3b8' }}
                     >
-                        취소 및 뒤로가기
+                        {step === 'payment' ? '← 일정 다시 선택' : '취소 및 뒤로가기'}
                     </button>
                 </div>
             </div>
