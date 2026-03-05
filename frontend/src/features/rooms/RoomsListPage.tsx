@@ -34,6 +34,7 @@ function RoomsListPageContent() {
     const [isOfficeModalOpen, setIsOfficeModalOpen] = useState(false);
     const [newRoom, setNewRoom] = useState({
         name: '',
+        description: '',
         location: '',
         capacity: 4,
         equipment: '',
@@ -43,6 +44,7 @@ function RoomsListPageContent() {
 
     const [newOfficeData, setNewOfficeData] = useState({
         name: '',
+        description: '',
         location: '',
         openTime: '09:00',
         closeTime: '18:00'
@@ -60,6 +62,7 @@ function RoomsListPageContent() {
         try {
             await createOffice({
                 name: newOfficeData.name,
+                description: newOfficeData.description,
                 location: newOfficeData.location,
                 latitude: 37.5665,
                 longitude: 126.9780,
@@ -68,7 +71,7 @@ function RoomsListPageContent() {
                 openDays: [1, 2, 3, 4, 5]
             });
             setIsOfficeModalOpen(false);
-            setNewOfficeData({ name: '', location: '', openTime: '09:00', closeTime: '18:00' });
+            setNewOfficeData({ name: '', description: '', location: '', openTime: '09:00', closeTime: '18:00' });
             alert('오피스가 성공적으로 생성되었습니다!');
         } catch (err: any) {
             console.error('Office creation error:', err);
@@ -86,6 +89,7 @@ function RoomsListPageContent() {
         
         addRoom(selectedOfficeId, {
             name: newRoom.name,
+            description: newRoom.description,
             location: newRoom.location,
             capacity: Number(newRoom.capacity),
             equipment: newRoom.equipment.split(',').map(item => item.trim()).filter(Boolean),
@@ -93,7 +97,7 @@ function RoomsListPageContent() {
             price: Number(newRoom.price) || 0
         });
         setIsModalOpen(false);
-        setNewRoom({ name: '', location: '', capacity: 4, equipment: '', imageUrl: '', price: 0 });
+        setNewRoom({ name: '', description: '', location: '', capacity: 4, equipment: '', imageUrl: '', price: 0 });
     };
 
     return (
@@ -217,6 +221,18 @@ function RoomsListPageContent() {
                         <h2 className="text-xl font-bold mb-md text-gradient">새 오피스(지점) 등록</h2>
                         <form onSubmit={handleCreateOffice}>
                             <Input label="오피스 이름" value={newOfficeData.name} onChange={e => setNewOfficeData({...newOfficeData, name: e.target.value})} required fullWidth />
+                            <div className="form-group mb-sm">
+                                <label className="block text-sm font-medium mb-xs">오피스 설명 <span style={{color:'var(--color-error)'}}>*</span></label>
+                                <textarea
+                                    className="input-field w-full"
+                                    style={{ minHeight: '80px', resize: 'vertical' }}
+                                    value={newOfficeData.description}
+                                    onChange={e => setNewOfficeData({...newOfficeData, description: e.target.value})}
+                                    placeholder="오피스 설명을 20자 이상 입력하세요."
+                                    required
+                                    minLength={20}
+                                />
+                            </div>
                             <Input label="위치 (주소)" value={newOfficeData.location} onChange={e => setNewOfficeData({...newOfficeData, location: e.target.value})} required fullWidth />
                             
                             <div className="flex gap-sm mt-lg justify-end">
@@ -244,6 +260,18 @@ function RoomsListPageContent() {
                         )}
                         <form onSubmit={handleAddRoom}>
                             <Input label="회의실 이름" value={newRoom.name} onChange={e => setNewRoom({...newRoom, name: e.target.value})} required fullWidth />
+                            <div className="form-group mb-sm">
+                                <label className="block text-sm font-medium mb-xs">회의실 설명 <span style={{color:'var(--color-error)'}}>*</span></label>
+                                <textarea
+                                    className="input-field w-full"
+                                    style={{ minHeight: '80px', resize: 'vertical' }}
+                                    value={newRoom.description}
+                                    onChange={e => setNewRoom({...newRoom, description: e.target.value})}
+                                    placeholder="회의실 설명을 20자 이상 입력하세요."
+                                    required
+                                    minLength={20}
+                                />
+                            </div>
                             <Input label="위치" value={newRoom.location} onChange={e => setNewRoom({...newRoom, location: e.target.value})} required fullWidth />
                             <Input label="수용 인원" type="number" value={newRoom.capacity} onChange={e => setNewRoom({...newRoom, capacity: Number(e.target.value)})} required fullWidth />
                             <Input label="장비 (쉼표로 구분)" placeholder="TV, 화이트보드, 프로젝터" value={newRoom.equipment} onChange={e => setNewRoom({...newRoom, equipment: e.target.value})} fullWidth />

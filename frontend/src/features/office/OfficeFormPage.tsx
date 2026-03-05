@@ -9,6 +9,7 @@ export default function OfficeFormPage() {
     const isEditMode = !!id;
 
     const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
     const [openTime, setOpenTime] = useState('09:00');
     const [closeTime, setCloseTime] = useState('18:00');
@@ -21,6 +22,7 @@ export default function OfficeFormPage() {
             officeApi.getOfficeById(id!)
                 .then((data) => {
                     setName(data.name);
+                    setDescription((data as any).description || '');
                     setLocation(data.location);
                     setOpenTime(data.openTime);
                     setCloseTime(data.closeTime);
@@ -36,9 +38,10 @@ export default function OfficeFormPage() {
 
         const officeData = {
             name,
+            description,
             location,
-            latitude: 37.5, // Mock
-            longitude: 127.0, // Mock
+            latitude: 37.5,
+            longitude: 127.0,
             openTime,
             closeTime
         };
@@ -76,6 +79,19 @@ export default function OfficeFormPage() {
                     fullWidth
                     placeholder="예: 강남 공유오피스 1호점"
                 />
+
+                <div className="form-group mb-sm">
+                    <label className="block text-sm font-medium mb-xs">오피스 설명 <span style={{color:'var(--color-error)'}}>*</span></label>
+                    <textarea
+                        className="input-field w-full"
+                        style={{ minHeight: '100px', resize: 'vertical' }}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="오피스에 대한 설명을 20자 이상 입력해주세요. (예: 강남역 도보 2분 거리의 프리미엄 공유오피스입니다.)"
+                        required
+                        minLength={20}
+                    />
+                </div>
 
                 <Input
                     label="위치 (주소)"

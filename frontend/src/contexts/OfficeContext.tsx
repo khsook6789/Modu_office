@@ -10,7 +10,7 @@ interface OfficeContextType {
     error: string | null;
     selectOffice: (id: number) => void;
     refreshOffices: () => Promise<void>;
-    createOffice: (data: Omit<Office, 'id'>) => Promise<Office>;
+    createOffice: (data: any) => Promise<Office>;
     deleteOffice: (id: number) => Promise<void>;
 }
 
@@ -78,7 +78,7 @@ export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
         await loadOffices();
     };
 
-    const createOffice = async (data: Omit<Office, 'id'>): Promise<Office> => {
+    const createOffice = async (data: any): Promise<Office> => {
         try {
             const newOffice = await officeApi.createOffice(data);
             await refreshOffices();

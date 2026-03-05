@@ -6,7 +6,7 @@ import { roomApi } from '../features/rooms/api/room.api';
 
 interface RoomContextType {
     rooms: Room[];
-    addRoom: (officeId: number, room: Omit<Room, 'id' | 'isAvailable' | 'officeId'>) => void;
+    addRoom: (officeId: number, room: any) => void;
     deleteRoom: (id: string) => void;
 }
 
@@ -35,11 +35,12 @@ export function RoomProvider({ children }: { children: ReactNode }) {
 
 
 
-    const addRoom = async (officeId: number, roomData: Omit<Room, 'id' | 'isAvailable' | 'officeId'>) => {
+    const addRoom = async (officeId: number, roomData: any) => {
         try {
             // 1. Map frontend input to backend request
             const payload = {
                 name: roomData.name,
+                description: roomData.description,
                 roomCode: roomData.location.slice(0, 50), 
                 floor: 1, 
                 capacity: roomData.capacity,

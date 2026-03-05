@@ -31,7 +31,7 @@ export const officeApi = {
         const response = await client.get<ApiResponse<Office>>(`/offices/${id}`);
         return response.data;
     },
-    createOffice: async (data: Omit<Office, 'id'>): Promise<Office> => {
+    createOffice: async (data: any): Promise<Office> => {
         const response = await client.post<ApiResponse<Office>>('/offices', data);
         return response.data;
     },

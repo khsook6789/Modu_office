@@ -18,6 +18,7 @@ export default function RoomFormPage() {
     const isEditMode = !!roomId;
 
     const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
     const [floor, setFloor] = useState('1');
     const [roomCode, setRoomCode] = useState('');
     const [capacity, setCapacity] = useState('4');
@@ -34,6 +35,7 @@ export default function RoomFormPage() {
             roomApi.getRoomById(Number(roomId))
                 .then(room => {
                     setName(room.name);
+                    setDescription((room as any).description || '');
                     setFloor(String(room.floor));
                     setRoomCode(room.roomCode);
                     setCapacity(String(room.capacity));
@@ -68,10 +70,11 @@ export default function RoomFormPage() {
         const roomData = {
             officeId: currentOfficeId,
             name,
+            description,
             floor: Number(floor),
             roomCode,
             capacity: Number(capacity),
-            price: Number(price),
+            price,
             category,
             equipment,
             imageUrl
@@ -182,6 +185,19 @@ export default function RoomFormPage() {
                             </label>
                         ))}
                     </div>
+                </div>
+
+                <div className="mt-md">
+                    <label className="block text-sm font-medium mb-xs">회의실 설명 <span style={{color:'var(--color-error)'}}>*</span></label>
+                    <textarea
+                        className="input-field w-full"
+                        style={{ minHeight: '100px', resize: 'vertical' }}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="회의실에 대한 설명을 20자 이상 입력해주세요. (예: 최대 8인 수용 가능한 대형 회의실로 빔프로젝터와 화이트보드가 구비되어 있습니다.)"
+                        required
+                        minLength={20}
+                    />
                 </div>
 
                 <div className="mt-md">
