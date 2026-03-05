@@ -2,23 +2,23 @@
 
 :root {
   /* ── Brand Colors (Modu Office) ── */
-  --color-primary: #1b59f8;           /* 브랜드 블루 */
-  --color-primary-dark: #1040b0;      /* 진한 블루 */
-  --color-primary-glow: rgba(27, 89, 248, 0.15);
+  --color-primary: #2563eb;           /* 브랜드 블루 (조금 더 밝고 세련된 톤) */
+  --color-primary-dark: #1d4ed8;      /* 진한 블루 */
+  --color-primary-glow: rgba(37, 99, 235, 0.15);
   --color-accent: #6366f1;            /* 인디고 보조 */
-  --color-accent-teal: #0ea5e9;       /* 포인트 스카이블루 */
+  --color-accent-teal: #06b6d4;       /* 포인트 틸 (조금 더 밝고 맑은 느낌) */
   --color-secondary: #64748b;
 
-  /* ── Backgrounds (Light Theme) ── */
-  --color-bg-dark: #0d1117;           /* 네비바용 다크 */
-  --color-bg-main: #f6f7fa;           /* 앱 메인 배경 (연회색) */
-  --color-bg-card: #ffffff;           /* 카드 배경 (흰색) */
+  /* ── Backgrounds (Premium Light Theme) ── */
+  --color-bg-dark: #0f172a;           /* 네비바용/다크섹션 네이비 톤 */
+  --color-bg-main: #f8fafc;           /* 앱 메인 배경 (조금 더 깨끗하고 밝은 오프화이트) */
+  --color-bg-card: #ffffff;           /* 카드 배경 (순백색) */
   --color-bg-card-solid: #ffffff;
   --color-bg-hover: #f1f5f9;
 
   /* ── Form / Login Area ── */
   --color-bg-form: #ffffff;
-  --color-bg-form-input: #f8fafc;
+  --color-bg-form-input: #ffffff;
 
   /* ── Text Colors (Light Theme) ── */
   --color-text-main: #0f172a;         /* 다크 텍스트 */
@@ -59,16 +59,16 @@
   --radius-xl: 1.5rem;
   --radius-full: 9999px;
 
-  /* ── Shadows (Light) ── */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
-  --shadow-glow: 0 0 24px rgba(27, 89, 248, 0.2);
+  /* ── Shadows (Premium Soft Shadows) ── */
+  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 15px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08), 0 5px 12px rgba(15, 23, 42, 0.03);
+  --shadow-glow: 0 0 24px rgba(37, 99, 235, 0.15);
 
-  /* ── Borders ── */
-  --backdrop-blur: 12px;
-  --glass-border: 1px solid rgba(0, 0, 0, 0.07);
-  --glass-border-light: 1px solid rgba(0,0,0,0.05);
+  /* ── Borders & Glassmorphism ── */
+  --backdrop-blur: 16px;
+  --glass-border: 1px solid rgba(15, 23, 42, 0.04);
+  --glass-border-light: 1px solid rgba(15, 23, 42, 0.02);
 }
 
 /* ── Animations ── */
@@ -83,8 +83,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(27, 89, 248, 0.2); }
-  50%       { box-shadow: 0 0 0 8px rgba(27, 89, 248, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.2); }
+  50%       { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
 }
 
 .animate-fade-in   { animation: fadeIn 0.45s ease-out forwards; }

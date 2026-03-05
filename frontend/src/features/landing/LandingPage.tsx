@@ -49,7 +49,7 @@ export default function LandingPage() {
                 onClick={() => navigate(user ? '/rooms' : '/signup')}
                 className="btn-hero-primary"
               >
-                {user ? '스마트 예약 시작하기' : '무료로 시작하기'}
+                {user ? '스마트 예약 시작하기' : '무료로 시작하기 🚀'}
               </button>
               {!user && (
                 <button 
@@ -72,15 +72,74 @@ export default function LandingPage() {
                     <div className="window-dot dot-yellow"></div>
                     <div className="window-dot dot-green"></div>
                 </div>
-                {/* Placeholder for Dashboard Content */}
-                <div className="mockup-body">
-                    <div className="mockup-placeholder">
-                        <div style={{ fontSize: '4rem', marginBottom: '0.5rem', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.1))' }}>✨</div>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>Premium UX/UI</h3>
-                        <p style={{ color: '#64748b', fontSize: '1rem', fontWeight: 500 }}>직관적인 대시보드로 공간을 손쉽게 관리하세요</p>
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                            <div className="mockup-skeleton-card"></div>
-                            <div className="mockup-skeleton-card"></div>
+                {/* Detailed Realistic Dashboard Mockup */}
+                <div className="mockup-body" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    
+                    {/* Mockup Top Navbar */}
+                    <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(0,0,0,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: 28, height: 28, borderRadius: 6, background: 'linear-gradient(135deg, var(--color-primary), #3b82f6)' }}></div>
+                            <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1.05rem', letterSpacing: '-0.02em' }}>Admin Portal</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ width: 160, height: 32, borderRadius: 16, background: '#f1f5f9', border: '1px solid #e2e8f0' }}></div>
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#cbd5e1' }}></div>
+                        </div>
+                    </div>
+
+                    {/* Mockup Main Content */}
+                    <div style={{ display: 'flex', flex: 1, background: '#f8fafc' }}>
+                        
+                        {/* Mockup Sidebar */}
+                        <div style={{ width: '200px', borderRight: '1px solid rgba(0,0,0,0.04)', padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#ffffff' }}>
+                            <div style={{ height: 32, borderRadius: 6, background: 'var(--color-primary-glow)', border: '1px solid var(--color-primary)', display: 'flex', alignItems: 'center', padding: '0 0.75rem' }}>
+                                <div style={{ width: '60%', height: 8, borderRadius: 4, background: 'var(--color-primary)' }}></div>
+                            </div>
+                            <div style={{ height: 32, borderRadius: 6, display: 'flex', alignItems: 'center', padding: '0 0.75rem' }}>
+                                <div style={{ width: '40%', height: 8, borderRadius: 4, background: '#cbd5e1' }}></div>
+                            </div>
+                            <div style={{ height: 32, borderRadius: 6, display: 'flex', alignItems: 'center', padding: '0 0.75rem' }}>
+                                <div style={{ width: '70%', height: 8, borderRadius: 4, background: '#cbd5e1' }}></div>
+                            </div>
+                        </div>
+
+                        {/* Mockup Content Area */}
+                        <div style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            
+                            {/* Page Header */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
+                                <div>
+                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>Dashboard Analytics</h3>
+                                    <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>실시간 오피스 점유율 및 예약 현황</p>
+                                </div>
+                                <div style={{ width: 100, height: 36, borderRadius: 8, background: 'var(--color-primary)', opacity: 0.9 }}></div>
+                            </div>
+
+                            {/* Stats Cards */}
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                {[
+                                    { color: '#eff6ff', bar: 'var(--color-primary)' },
+                                    { color: '#f0fdf4', bar: '#10b981' },
+                                    { color: '#fff7ed', bar: '#f59e0b' }
+                                ].map((stat, i) => (
+                                    <div key={i} style={{ flex: 1, background: '#ffffff', borderRadius: 12, padding: '1rem', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                                        <div style={{ width: 32, height: 32, borderRadius: 8, background: stat.color, marginBottom: '1rem' }}></div>
+                                        <div style={{ width: '80%', height: 20, borderRadius: 4, background: '#1e293b', marginBottom: '0.5rem' }}></div>
+                                        <div style={{ width: '50%', height: 10, borderRadius: 4, background: '#94a3b8' }}></div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Main Chart Card */}
+                            <div style={{ flex: 1, background: '#ffffff', borderRadius: 12, padding: '1.5rem', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ width: '30%', height: 16, borderRadius: 4, background: '#e2e8f0', marginBottom: '2rem' }}></div>
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
+                                    {[40, 70, 100, 60, 80, 50, 90].map((h, i) => (
+                                        <div key={i} style={{ flex: 1, height: `${h}%`, background: 'var(--color-primary)', opacity: h === 100 ? 1 : 0.4, borderRadius: '4px 4px 0 0' }}></div>
+                                    ))}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -113,7 +172,15 @@ export default function LandingPage() {
         <div className="landing-container feature-grid">
           <AnimatedSection className="feature-visual">
              <div className="feature-visual-box">
-                <span className="feature-icon-large">📅</span>
+                <span className="feature-icon-large">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary)' }}>
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                        <rect x="8" y="14" width="3" height="3" rx="0.5"></rect>
+                    </svg>
+                </span>
              </div>
           </AnimatedSection>
           <AnimatedSection className="feature-content" delay={200}>
@@ -139,8 +206,13 @@ export default function LandingPage() {
       <section className="feature-section bg-white">
         <div className="landing-container feature-grid reverse">
           <AnimatedSection className="feature-visual">
-             <div className="feature-visual-box" style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)' }}>
-                <span className="feature-icon-large">🔒</span>
+             <div className="feature-visual-box" style={{ background: 'linear-gradient(135deg, #f8fafc, #eff6ff)' }}>
+                <span className="feature-icon-large">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#10b981' }}>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+                </span>
              </div>
           </AnimatedSection>
           <AnimatedSection className="feature-content" delay={200}>
