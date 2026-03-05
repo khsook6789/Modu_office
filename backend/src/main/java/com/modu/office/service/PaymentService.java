@@ -1,6 +1,5 @@
 package com.modu.office.service;
 
-import com.modu.office.dto.request.PaymentCancelRequest;
 import com.modu.office.dto.request.PaymentConfirmRequest;
 import com.modu.office.dto.response.PaymentResponse;
 import com.modu.office.entity.AppUser;
@@ -52,9 +51,13 @@ public class PaymentService {
      */
     @Transactional
     public PaymentResponse confirmPayment(PaymentConfirmRequest request, AppUser requester) {
+        log.debug("[PaymentConfirm] reservationId: {}, orderId: {}, amount: {}, user: {}",
+                request.getReservationId(), request.getOrderId(), request.getAmount(), requester.getUsername());
+
         // 1. orderId로 기존 Payment 조회 (중복 승인 방지)
         paymentRepository.findByOrderId(request.getOrderId()).ifPresent(existing -> {
             if (existing.getStatus() == PaymentStatus.DONE) {
+                log.warn("[PaymentConfirm] Already DONE: {}", request.getOrderId());
                 throw new IllegalStateException("이미 승인된 결제입니다. orderId: " + request.getOrderId());
             }
         });
@@ -63,7 +66,12 @@ public class PaymentService {
         Long reservationId = Objects.requireNonNull(request.getReservationId(), "reservationId는 필수입니다.");
         Reservation reservation = reservationRepository
                 .findById(reservationId)
-                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId));
+                .orElseThrow(() -> {
+                    log.error(
+                            "[PaymentConfirm] Reservation NOT FOUND in DB. ID: {}. Check if it was deleted or never created accurately.",
+                            reservationId);
+                    return new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId);
+                });
 
         // 3. 예약 소유자 확인
         if (!reservation.getUser().getId().equals(requester.getId())) {

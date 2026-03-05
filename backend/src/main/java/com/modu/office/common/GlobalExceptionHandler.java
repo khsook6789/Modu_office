@@ -109,6 +109,17 @@ public class GlobalExceptionHandler {
         }
 
         /**
+         * 상태 오류 처리 (400 Bad Request)
+         * Why: 중복 예약 등 비즈니스 로직 상 거부되는 요청을 500이 아닌 400으로 응답.
+         */
+        @ExceptionHandler(IllegalStateException.class)
+        public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException e) {
+                log.error("Illegal state: {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(ApiResponse.error("400", e.getMessage()));
+        }
+
+        /**
          * 리소스를 찾을 수 없는 경우 처리 (404 Not Found)
          */
         @ExceptionHandler(NoHandlerFoundException.class)

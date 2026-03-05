@@ -143,19 +143,47 @@ export default function BookingPage() {
         setStep('payment');
     };
 
-    // 2단계: 결제 요청 — 예약은 성공 콜백에서 생성됨
+    // 2단계: 결제 요청 — 예약을 먼저 생성(PENDING)한 뒤 결제 위젯 호출
     const handlePayment = async () => {
         if (!paymentWidget || !room) return;
 
+        const raw = sessionStorage.getItem('pendingReservation');
+        if (!raw) {
+            alert('예약 정보가 유실되었습니다. 다시 시도해주세요.');
+            setStep('form');
+            return;
+        }
+
         setIsProcessing(true);
         try {
-            const orderId = generateOrderId();
-            // 토스는 successUrl에 paymentKey, orderId, amount, paymentType을 자동으로 추가함
-            // → successUrl에 중복으로 포함하지 않음
-            const successUrl = `${window.location.origin}/booking/success`;
-            const failUrl = `${window.location.origin}/rooms/${roomId}/book?error=payment_failed`;
+            const info: PendingReservationInfo = JSON.parse(raw);
 
-            // 토스가 successUrl로 redirect 시 paymentKey, orderId, amount를 자동 추가
+            // 1. 서버에 예약 먼저 생성 (PENDING 상태)
+            const res = await client.post<ApiResponse<any>>('/reservations', {
+                roomId: info.roomId,
+                officeId: info.officeId,
+                userId: info.userId,
+                title: info.title,
+                startAt: info.startAt,
+                endAt: info.endAt,
+                guestCount: info.guestCount,
+            });
+
+            console.log('[BookingPage] Reservation Response Raw:', res);
+            const reservationId = res.data?.id ?? (res as any).id;
+            console.log('[BookingPage] Extracted reservationId:', reservationId);
+            
+            if (!reservationId) throw new Error('예약 생성에 실패했습니다.');
+
+            // 리다이렉트 시 유실 방지를 위해 세션에도 저장
+            sessionStorage.setItem('lastReservationId', String(reservationId));
+
+            // 2. 결제 요청
+            const orderId = generateOrderId();
+            // successUrl에 reservationId를 쿼리 파라미터로 추가하여 SuccessPage에서 중복 생성을 방지함
+            const successUrl = `${window.location.origin}/booking/success?reservationId=${reservationId}`;
+            const failUrl = `${window.location.origin}/rooms/${roomId}/book?error=payment_failed&reservationId=${reservationId}`;
+
             await paymentWidget.requestPayment({
                 orderId,
                 orderName: `${room.name} (${date} ${startTime}~${endTimeUI})`,
@@ -166,9 +194,9 @@ export default function BookingPage() {
             } as any);
 
         } catch (err: any) {
-            console.error('결제 오류', err);
+            console.error('결제/예약 준비 오류', err);
             if (err?.code !== 'USER_CANCEL') {
-                alert('결제 중 오류가 발생했습니다: ' + (err?.message || err));
+                alert('처리 중 오류가 발생했습니다: ' + (err?.message || '잠시 후 다시 시도해주세요.'));
             }
         } finally {
             setIsProcessing(false);
