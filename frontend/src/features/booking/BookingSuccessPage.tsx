@@ -1,6 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { paymentApi } from './api/payment.api';
+import { client } from '../../api/client';
+import { type PendingReservationInfo } from './BookingPage';
+
+interface ApiResponse<T> { status: string; message: string; data: T; }
+interface ReservationResponse { id: number; }
 
 type Status = 'loading' | 'success' | 'error';
 
@@ -9,8 +14,13 @@ export default function BookingSuccessPage() {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState<Status>('loading');
     const [errorMsg, setErrorMsg] = useState('');
+    // React StrictMode 개발 모드에서 useEffect가 2회 실행되는 것을 방어
+    const hasRun = useRef(false);
 
     useEffect(() => {
+        if (hasRun.current) return; // StrictMode 이중 실행 방어
+        hasRun.current = true;
+
         const paymentKey = searchParams.get('paymentKey');
         const orderId = searchParams.get('orderId');
         const amount = searchParams.get('amount');
@@ -21,25 +31,61 @@ export default function BookingSuccessPage() {
             return;
         }
 
-        // 결제 confirm API 호출
-        paymentApi.confirm({
-            paymentKey,
-            orderId,
-            amount: Number(amount),
-        })
-            .then(() => setStatus('success'))
-            .catch((err: any) => {
-                console.error('결제 승인 실패', err);
-                setErrorMsg(err?.message || '알 수 없는 오류');
+        // sessionStorage에서 예약 정보 읽기
+        const raw = sessionStorage.getItem('pendingReservation');
+        if (!raw) {
+            setErrorMsg('예약 정보가 만료되었습니다. 다시 시도해 주세요.');
+            setStatus('error');
+            return;
+        }
+
+        const info: PendingReservationInfo = JSON.parse(raw);
+
+        const run = async () => {
+            try {
+                // 1. 예약 생성 (결제 성공이 확인된 후 최초 생성)
+                const resRes = await client.post<ApiResponse<ReservationResponse>>('/reservations', {
+                    roomId: info.roomId,
+                    officeId: info.officeId,
+                    userId: info.userId,
+                    title: info.title,
+                    startAt: info.startAt,
+                    endAt: info.endAt,
+                    guestCount: info.guestCount,
+                });
+                const reservationId: number = (resRes as any).data?.id ?? (resRes as any).id;
+
+                if (!reservationId) {
+                    throw new Error('예약 생성에 실패했습니다.');
+                }
+
+                // 2. 결제 confirm API 호출 (reservationId 명시)
+                await paymentApi.confirm({
+                    paymentKey,
+                    orderId,
+                    amount: Number(amount),
+                    reservationId,
+                });
+
+                // 3. 임시 저장 데이터 정리
+                sessionStorage.removeItem('pendingReservation');
+                setStatus('success');
+
+            } catch (err: any) {
+                console.error('예약/결제 승인 실패', err);
+                setErrorMsg(err?.message || '알 수 없는 오류가 발생했습니다.');
                 setStatus('error');
-            });
-    }, []);
+            }
+        };
+
+        run();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (status === 'loading') {
         return (
             <div className="container mx-auto p-xl text-center flex flex-col items-center justify-center min-h-[60vh]">
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>결제를 확인하는 중...</h1>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>예약 및 결제를 확인하는 중...</h1>
                 <p style={{ color: '#94a3b8', marginTop: '0.5rem' }}>잠시만 기다려 주세요.</p>
             </div>
         );
@@ -49,7 +95,7 @@ export default function BookingSuccessPage() {
         return (
             <div className="container mx-auto p-xl text-center flex flex-col items-center justify-center min-h-[60vh]">
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>❌</div>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>결제 승인 실패</h1>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>예약/결제 처리 실패</h1>
                 <p style={{ color: '#94a3b8', marginTop: '0.5rem', marginBottom: '2rem' }}>{errorMsg}</p>
                 <div className="flex gap-md">
                     <button onClick={() => navigate(-1)} className="btn btn-outline px-lg">뒤로 가기</button>

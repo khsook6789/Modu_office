@@ -4,6 +4,7 @@ export interface PaymentConfirmRequest {
     paymentKey: string;
     orderId: string;
     amount: number;
+    reservationId: number;
 }
 
 export interface PaymentResponse {
@@ -26,6 +27,7 @@ interface ApiResponse<T> {
 
 export const paymentApi = {
     confirm: async (request: PaymentConfirmRequest): Promise<PaymentResponse> => {
+        // client.post<T>는 Promise<T>를 반환 (커스텀 ApiClient — fetch 기반)
         const res = await client.post<ApiResponse<PaymentResponse>>('/payments/confirm', request);
         return res.data;
     },

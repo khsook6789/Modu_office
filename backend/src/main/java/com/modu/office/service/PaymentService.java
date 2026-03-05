@@ -59,12 +59,11 @@ public class PaymentService {
             }
         });
 
-        // 2. Reservation 조회 (orderId -> reservationId 역추적을 위해 orderId 파싱)
-        // orderId 형식: "reservation-{reservationId}-{randomSuffix}"
-        Long reservationId = extractReservationId(request.getOrderId());
+        // 2. Reservation 조회 (request에서 직접 받은 reservationId 사용)
+        Long reservationId = Objects.requireNonNull(request.getReservationId(), "reservationId는 필수입니다.");
         Reservation reservation = reservationRepository
-                .findById(Objects.requireNonNull(reservationId))
-                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다."));
+                .findById(reservationId)
+                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId));
 
         // 3. 예약 소유자 확인
         if (!reservation.getUser().getId().equals(requester.getId())) {
@@ -155,22 +154,6 @@ public class PaymentService {
     // =========================================================
     // Private helpers
     // =========================================================
-
-    /**
-     * orderId에서 reservationId 추출
-     * orderId 형식: "rev-{reservationId}-{uuid8}"
-     * Why: 프론트가 orderId를 생성할 때 이 형식을 사용해야 함
-     */
-    private Long extractReservationId(String orderId) {
-        try {
-            // 형식 예: "rev-42-a3f7c2b1"
-            String[] parts = orderId.split("-");
-            return Long.parseLong(parts[1]);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "orderId 형식이 올바르지 않습니다. 형식: rev-{reservationId}-{suffix}, 입력값: " + orderId);
-        }
-    }
 
     /**
      * Toss 결제 승인 API 호출

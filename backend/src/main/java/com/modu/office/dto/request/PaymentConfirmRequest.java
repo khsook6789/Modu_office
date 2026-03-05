@@ -38,4 +38,12 @@ public class PaymentConfirmRequest {
     @NotNull(message = "amount는 필수입니다.")
     @Min(value = 1, message = "amount는 1 이상이어야 합니다.")
     private Long amount;
+
+    /**
+     * 예약 ID (orderId 파싱 방식 대신 명시적으로 전달)
+     * Why: orderId 문자열에서 reservationId를 파싱하는 방식은 취약함.
+     * 프론트에서 직접 reservationId를 전달하여 안전하게 조회.
+     */
+    @NotNull(message = "reservationId는 필수입니다.")
+    private Long reservationId;
 }

@@ -55,7 +55,7 @@ export default function AppRouter() {
             <Route path="/intro" element={<LandingPage />} />
             {/* Redirect / to /intro as default public landing */}
             <Route path="/" element={<Navigate to="/intro" replace />} />
-            
+
             <Route path="/rooms" element={
               <ProtectedRoute>
                 <RoomsListPage />
@@ -74,7 +74,7 @@ export default function AppRouter() {
               </ProtectedRoute>
             } />
             {/* PaymentPage Removed */}
-            <Route path="/booking/success/:id" element={
+            <Route path="/booking/success" element={
               <ProtectedRoute>
                 <BookingSuccessPage />
               </ProtectedRoute>

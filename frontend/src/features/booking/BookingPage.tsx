@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { loadPaymentWidget, type PaymentWidgetInstance } from '@tosspayments/payment-widget-sdk';
 import { type RoomResponse } from '../rooms/api/room.api';
@@ -10,7 +10,18 @@ import './BookingPage.css';
 const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
 
 interface ApiResponse<T> { status: string; message: string; data: T; }
-interface ReservationResponse { id: number; totalPrice: number | null; }
+
+// sessionStorage에 임시 저장할 예약 정보 타입
+export interface PendingReservationInfo {
+    roomId: number;
+    officeId: number;
+    userId: number;
+    title: string;
+    startAt: string;
+    endAt: string;
+    guestCount: number;
+    amount: number;
+}
 
 export default function BookingPage() {
     const { roomId } = useParams();
@@ -30,17 +41,14 @@ export default function BookingPage() {
     // 결제 위젯 관련 상태
     const [paymentWidget, setPaymentWidget] = useState<PaymentWidgetInstance | null>(null);
     const [isWidgetLoading, setIsWidgetLoading] = useState(false);
-    const [reservationId, setReservationId] = useState<number | null>(null);
-    const [step, setStep] = useState<'form' | 'payment'>('form'); // form → payment 2단계
-
-    const paymentMethodRef = useRef<HTMLDivElement>(null);
+    const [step, setStep] = useState<'form' | 'payment'>('form');
 
     // 방 정보 불러오기
     useEffect(() => {
         if (!roomId) return;
-        client.get(`/rooms/${roomId}`)
-            .then((res: any) => {
-                const data = res?.data?.data ?? res?.data ?? res;
+        client.get<ApiResponse<RoomResponse>>(`/rooms/${roomId}`)
+            .then((res) => {
+                const data = (res as any).data ?? res;
                 setRoom(data);
                 setDate(new Date().toISOString().split('T')[0]);
             })
@@ -56,7 +64,7 @@ export default function BookingPage() {
 
     // 결제 위젯 마운트 (step === 'payment' 로 전환된 후)
     useEffect(() => {
-        if (step !== 'payment' || !paymentMethodRef.current || totalPrice <= 0) return;
+        if (step !== 'payment' || totalPrice <= 0) return;
 
         let cancelled = false;
         setIsWidgetLoading(true);
@@ -96,60 +104,58 @@ export default function BookingPage() {
         const dateObj = new Date(`${dateStr}T${timeStr}:00`);
         dateObj.setHours(dateObj.getHours() + addHours);
         const y = dateObj.getFullYear();
-        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const mo = String(dateObj.getMonth() + 1).padStart(2, '0');
         const d = String(dateObj.getDate()).padStart(2, '0');
         const h = String(dateObj.getHours()).padStart(2, '0');
         const min = String(dateObj.getMinutes()).padStart(2, '0');
-        return `${y}-${m}-${d}T${h}:${min}:00`;
+        return `${y}-${mo}-${d}T${h}:${min}:00`;
     };
 
-    const generateOrderId = (resId: number) => {
-        return `ORDER-${resId}-${Date.now()}`.slice(0, 64);
+    // 랜덤 orderId 생성 (reservationId 불필요 — 예약을 아직 생성하지 않음)
+    const generateOrderId = () => {
+        const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+        return `PAYMENT-${Date.now()}-${rand}`.slice(0, 64);
     };
 
-    // 1단계: 예약 생성 후 결제 UI 표시
-    const handleProceedToPayment = async () => {
+    // 1단계: 폼 유효성 검사 후 결제 UI 표시 (예약 생성 X)
+    const handleProceedToPayment = () => {
         if (!date || !startTime || !room) {
             alert('날짜와 시간을 선택해주세요.');
             return;
         }
-        setIsProcessing(true);
-        try {
-            const endAt = calculateEndDateTimeISO(date, startTime, Number(duration));
-            const startAt = `${date}T${startTime}:00`;
 
-            const resResponse = await client.post<ApiResponse<ReservationResponse>>('/reservations', {
-                roomId: Number(roomId),
-                officeId: Number((room as any).officeId),
-                userId: Number(user?.id),
-                title: title || `${room.name} 예약`,
-                startAt,
-                endAt,
-                guestCount: Number(guestCount),
-            });
-            const reservation = resResponse.data ?? (resResponse as any).data;
-            const resId: number = reservation?.id ?? (resResponse as any).id;
+        const endAt = calculateEndDateTimeISO(date, startTime, Number(duration));
+        const startAt = `${date}T${startTime}:00`;
 
-            setReservationId(resId);
-            setStep('payment'); // 결제 UI 단계로 전환
-        } catch (err: any) {
-            console.error('예약 생성 오류', err);
-            alert('예약 생성 중 오류가 발생했습니다: ' + (err?.message || err));
-        } finally {
-            setIsProcessing(false);
-        }
+        // 예약 정보를 sessionStorage에 임시 저장 (결제 성공 후 생성)
+        const info: PendingReservationInfo = {
+            roomId: Number(roomId),
+            officeId: Number((room as any).officeId),
+            userId: Number(user?.id),
+            title: title || `${room.name} 예약`,
+            startAt,
+            endAt,
+            guestCount: Number(guestCount),
+            amount: totalPrice,
+        };
+        sessionStorage.setItem('pendingReservation', JSON.stringify(info));
+
+        setStep('payment');
     };
 
-    // 2단계: 결제 요청
+    // 2단계: 결제 요청 — 예약은 성공 콜백에서 생성됨
     const handlePayment = async () => {
-        if (!paymentWidget || !reservationId || !room) return;
+        if (!paymentWidget || !room) return;
 
         setIsProcessing(true);
         try {
-            const orderId = generateOrderId(reservationId);
-            const successUrl = `${window.location.origin}/booking/success?orderId=${orderId}&reservationId=${reservationId}&amount=${totalPrice}`;
+            const orderId = generateOrderId();
+            // 토스는 successUrl에 paymentKey, orderId, amount, paymentType을 자동으로 추가함
+            // → successUrl에 중복으로 포함하지 않음
+            const successUrl = `${window.location.origin}/booking/success`;
             const failUrl = `${window.location.origin}/rooms/${roomId}/book?error=payment_failed`;
 
+            // 토스가 successUrl로 redirect 시 paymentKey, orderId, amount를 자동 추가
             await paymentWidget.requestPayment({
                 orderId,
                 orderName: `${room.name} (${date} ${startTime}~${endTimeUI})`,
@@ -289,7 +295,7 @@ export default function BookingPage() {
                             </div>
                         )}
                         {/* 토스 결제수단 위젯이 이 div 안에 렌더링됩니다 */}
-                        <div ref={paymentMethodRef} id="payment-method" />
+                        <div id="payment-method" />
                     </div>
                 )}
 
@@ -319,7 +325,7 @@ export default function BookingPage() {
                             className="btn-book-submit"
                             disabled={isProcessing}
                         >
-                            {isProcessing ? '처리 중...' : '다음 단계 (결제수단 선택)'}
+                            다음 단계 (결제수단 선택)
                         </button>
                     ) : (
                         <button
