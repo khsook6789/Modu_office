@@ -108,3 +108,8 @@ tasks.register('addSecurityToOpenApi') {
         }
     }
 }
+
+// openapi3 태스크가 끝나면 무조건 addSecurityToOpenApi 실행
+tasks.matching { it.name == 'openapi3' }.configureEach {
+    finalizedBy 'addSecurityToOpenApi'
+}
