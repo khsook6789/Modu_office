@@ -37,12 +37,12 @@ public class FacilityReport extends BaseEntity {
 
     @Setter
     @Enumerated(EnumType.STRING)
-    @Column(name = "issue_type", nullable = false)
+    @Column(name = "issue_type", nullable = false, columnDefinition = "report_issue_type")
     private ReportIssueType issueType;
 
     @Setter
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "report_status")
     private ReportStatus status = ReportStatus.REPORTED;
 
     @Builder

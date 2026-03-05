@@ -46,8 +46,13 @@ public class Reservation extends BaseEntity {
     @Column(name = "end_at_include_buffer_time", nullable = false)
     private LocalDateTime endAtIncludeBufferTime;
 
+    // Why: DB 스키마(V1__init_schema.sql)에서 status 컬럼을 PostgreSQL ENUM
+    // 타입(reservation_status)으로 정의.
+    // @Enumerated(EnumType.STRING)만 사용하면 Hibernate가 VARCHAR로 바인딩하여
+    // PostgreSQL이 ENUM ↔ VARCHAR 비교를 거부하는 500 에러 발생.
+    // columnDefinition으로 DB 타입을 명시해야 올바른 타입 바인딩이 수행됨.
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "reservation_status")
     private ReservationStatus status = ReservationStatus.PENDING;
 
     @Version

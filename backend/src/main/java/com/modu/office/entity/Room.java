@@ -47,7 +47,7 @@ public class Room extends BaseEntity {
     private Integer floor;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "room_status")
     private RoomStatus status = RoomStatus.AVAILABLE;
 
     @Setter

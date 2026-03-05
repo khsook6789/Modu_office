@@ -30,14 +30,14 @@ public class Account extends BaseEntity {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "login_type", nullable = false, length = 20)
+    @Column(name = "login_type", nullable = false, length = 20, columnDefinition = "login_type")
     private LoginType loginType = LoginType.LOCAL;
 
     @Column(name = "oauth_id", length = 100)
     private String oauthId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "account_status")
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @Builder

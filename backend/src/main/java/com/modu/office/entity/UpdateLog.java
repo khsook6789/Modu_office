@@ -28,7 +28,7 @@ public class UpdateLog {
     private Reservation reservation;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "action", nullable = false)
+    @Column(name = "action", nullable = false, columnDefinition = "log_action")
     private LogAction action;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
