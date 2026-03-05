@@ -92,7 +92,8 @@ export default function BookingPage() {
             const orderId = generateOrderId(reservationId);
 
             // 2. 토스 위젯 로드 & 결제 요청
-            const widget = await loadPaymentWidget(TOSS_CLIENT_KEY, String(reservationId));
+            const customerKey = `user-${user?.id ?? 'guest'}`;
+            const widget = await loadPaymentWidget(TOSS_CLIENT_KEY, customerKey);
 
             const successUrl = `${window.location.origin}/booking/success?orderId=${orderId}&reservationId=${reservationId}&amount=${totalPrice}`;
             const failUrl = `${window.location.origin}/rooms/${roomId}/book?error=payment_failed`;
