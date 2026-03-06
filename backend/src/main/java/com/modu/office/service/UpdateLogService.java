@@ -38,13 +38,19 @@ public class UpdateLogService {
      * @return 저장된 UpdateLog 엔티티
      */
     @Transactional
-    @SuppressWarnings("null")
     public UpdateLog createLog(
             Reservation reservation,
             LogAction action,
             AppUser actor,
             Map<String, Object> beforeData,
             Map<String, Object> afterData) {
+
+        if (reservation == null)
+            throw new IllegalArgumentException("reservation must not be null");
+        if (action == null)
+            throw new IllegalArgumentException("action must not be null");
+        if (actor == null)
+            throw new IllegalArgumentException("actor must not be null");
 
         UpdateLog log = UpdateLog.builder()
                 .reservation(reservation)
@@ -54,7 +60,7 @@ public class UpdateLogService {
                 .afterData(afterData)
                 .build();
 
-        return updateLogRepository.save(log);
+        return updateLogRepository.save(java.util.Objects.requireNonNull(log));
     }
 
     /**

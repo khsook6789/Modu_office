@@ -167,15 +167,16 @@ public class PaymentService {
      * Toss 결제 승인 API 호출
      * POST /v1/payments/confirm
      */
-    @SuppressWarnings("unchecked")
     private Map<String, Object> callTossConfirmApi(Map<String, Object> body) {
         try {
-            return tossWebClient.post()
+            Map<String, Object> result = tossWebClient.post()
                     .uri("/v1/payments/confirm")
-                    .bodyValue(body)
+                    .bodyValue(java.util.Objects.requireNonNull(body))
                     .retrieve()
-                    .bodyToMono(Map.class)
+                    .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {
+                    })
                     .block();
+            return result != null ? result : new HashMap<>();
         } catch (WebClientResponseException e) {
             log.error("Toss 결제 승인 실패 - status: {}, body: {}", e.getStatusCode(), e.getResponseBodyAsString());
             if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
@@ -189,15 +190,16 @@ public class PaymentService {
      * Toss 결제 취소 API 호출
      * POST /v1/payments/{paymentKey}/cancel
      */
-    @SuppressWarnings("unchecked")
     private Map<String, Object> callTossCancelApi(String paymentKey, Map<String, Object> body) {
         try {
-            return tossWebClient.post()
+            Map<String, Object> result = tossWebClient.post()
                     .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
-                    .bodyValue(body)
+                    .bodyValue(java.util.Objects.requireNonNull(body))
                     .retrieve()
-                    .bodyToMono(Map.class)
+                    .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {
+                    })
                     .block();
+            return result != null ? result : new HashMap<>();
         } catch (WebClientResponseException e) {
             log.error("Toss 결제 취소 실패 - paymentKey: {}, status: {}, body: {}", paymentKey, e.getStatusCode(),
                     e.getResponseBodyAsString());
@@ -207,8 +209,9 @@ public class PaymentService {
 
     private String extractTossErrorMessage(WebClientResponseException e) {
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> errorBody = e.getResponseBodyAs(Map.class);
+            Map<String, Object> errorBody = e
+                    .getResponseBodyAs(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {
+                    });
             if (errorBody != null && errorBody.containsKey("message")) {
                 return (String) errorBody.get("message");
             }

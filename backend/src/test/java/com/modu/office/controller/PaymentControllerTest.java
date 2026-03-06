@@ -39,14 +39,15 @@ class PaymentControllerTest extends ControllerTestSupport {
 
                 // When & Then
                 ResultActions result = mockMvc.perform(post("/api/payments/confirm")
-                                .with(SecurityMockMvcRequestPostProcessors.user(createTestUser("USER")))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                                .with(java.util.Objects.requireNonNull(
+                                                SecurityMockMvcRequestPostProcessors.user(createTestUser("USER"))))
+                                .contentType(java.util.Objects.requireNonNull(MediaType.APPLICATION_JSON))
+                                .content(java.util.Objects.requireNonNull(objectMapper.writeValueAsString(request))))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                                 .andExpect(jsonPath("$.data.orderId").value("rev-1-abc123"));
 
-                result.andDo(document("payment-confirm",
+                result.andDo(java.util.Objects.requireNonNull(document("payment-confirm",
                                 requestFields(
                                                 fieldWithPath("paymentKey").description("토스 paymentKey (max 200자)"),
                                                 fieldWithPath("orderId").description("주문번호 (영문 대소문자·숫자·-·_, 6~64자)"),
@@ -64,15 +65,16 @@ class PaymentControllerTest extends ControllerTestSupport {
                                                 fieldWithPath("data.method").description("결제 수단"),
                                                 fieldWithPath("data.approvedAt").description("결제 승인 시각"),
                                                 fieldWithPath("data.canceledAt").description("결제 취소 시각").optional(),
-                                                fieldWithPath("data.createdAt").description("생성 시각"))));
+                                                fieldWithPath("data.createdAt").description("생성 시각")))));
         }
 
         @Test
         @DisplayName("결제 승인 - 미인증 사용자 403")
         void confirmPayment_unauthorized() throws Exception {
                 mockMvc.perform(post("/api/payments/confirm")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(createConfirmRequest())))
+                                .contentType(java.util.Objects.requireNonNull(MediaType.APPLICATION_JSON))
+                                .content(java.util.Objects.requireNonNull(
+                                                objectMapper.writeValueAsString(createConfirmRequest()))))
                                 .andExpect(status().isForbidden());
         }
 
@@ -82,8 +84,9 @@ class PaymentControllerTest extends ControllerTestSupport {
                 // paymentKey 없이 요청
                 String invalidJson = "{\"orderId\":\"rev-1-abc\",\"amount\":10000}";
                 mockMvc.perform(post("/api/payments/confirm")
-                                .with(SecurityMockMvcRequestPostProcessors.user(createTestUser("USER")))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(java.util.Objects.requireNonNull(
+                                                SecurityMockMvcRequestPostProcessors.user(createTestUser("USER"))))
+                                .contentType(java.util.Objects.requireNonNull(MediaType.APPLICATION_JSON))
                                 .content(invalidJson))
                                 .andExpect(status().isBadRequest());
         }
@@ -98,11 +101,12 @@ class PaymentControllerTest extends ControllerTestSupport {
                 when(paymentService.getPaymentByReservation(any(), any())).thenReturn(paymentResponse());
 
                 ResultActions result = mockMvc.perform(get("/api/payments/{reservationId}", 1L)
-                                .with(SecurityMockMvcRequestPostProcessors.user(createTestUser("USER"))))
+                                .with(java.util.Objects.requireNonNull(
+                                                SecurityMockMvcRequestPostProcessors.user(createTestUser("USER")))))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.data.orderId").value("rev-1-abc123"));
 
-                result.andDo(document("payment-get",
+                result.andDo(java.util.Objects.requireNonNull(document("payment-get",
                                 pathParameters(
                                                 parameterWithName("reservationId").description("예약 ID")),
                                 responseFields(
@@ -118,7 +122,7 @@ class PaymentControllerTest extends ControllerTestSupport {
                                                 fieldWithPath("data.method").description("결제 수단"),
                                                 fieldWithPath("data.approvedAt").description("결제 승인 시각"),
                                                 fieldWithPath("data.canceledAt").description("결제 취소 시각").optional(),
-                                                fieldWithPath("data.createdAt").description("생성 시각"))));
+                                                fieldWithPath("data.createdAt").description("생성 시각")))));
         }
 
         @Test

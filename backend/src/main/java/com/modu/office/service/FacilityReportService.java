@@ -51,7 +51,9 @@ public class FacilityReportService {
         @Transactional
         public FacilityReportResponse createReport(String userEmail, Long roomId, FacilityReportCreateRequest request) {
                 // 1. 예약 존재 및 소유자(IDOR) 검증
-                Reservation reservation = reservationRepository.findById(request.getReservationId())
+                Long resId = java.util.Objects.requireNonNull(request.getReservationId(),
+                                "reservationId must not be null");
+                Reservation reservation = reservationRepository.findById(resId)
                                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
 
                 AppUser currentUser = appUserRepository.findByAccountEmail(userEmail)
@@ -74,7 +76,8 @@ public class FacilityReportService {
                 }
 
                 // 4. 해당 Room의 시설인지 검증
-                Facility facility = facilityRepository.findById(request.getFacilityId())
+                Long facId = java.util.Objects.requireNonNull(request.getFacilityId(), "facilityId must not be null");
+                Facility facility = facilityRepository.findById(facId)
                                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.FACILITY_NOT_FOUND));
 
                 if (!reservation.getRoom().getId().equals(roomId)) {
@@ -99,7 +102,7 @@ public class FacilityReportService {
                                 .issueType(request.getIssueType())
                                 .build();
 
-                FacilityReport saved = facilityReportRepository.save(report);
+                facilityReportRepository.save(java.util.Objects.requireNonNull(report));
 
                 // 7. 해당 오피스의 운영자(MANAGER)에게 SSE 실시간 알림 발행
                 // Why: 이벤트 발행 방식을 사용하면 알림 실패가 메인 트랜잭션을 롤백시키지 않음
@@ -115,16 +118,17 @@ public class FacilityReportService {
                 eventPublisher.publishEvent(new NotificationEvent(this, manager, payload));
 
                 log.info("FacilityReport created: id={}, reservationId={}, facilityId={}",
-                                saved.getId(), request.getReservationId(), request.getFacilityId());
+                                report.getId(), request.getReservationId(), request.getFacilityId());
 
-                return FacilityReportResponse.from(saved);
+                return FacilityReportResponse.from(report);
         }
 
         /**
          * 고객 본인의 예약에 달린 신고 내역 조회
          */
         public List<FacilityReportResponse> getMyReports(Long reservationId, String userEmail) {
-                Reservation reservation = reservationRepository.findById(reservationId)
+                Long resId = java.util.Objects.requireNonNull(reservationId, "reservationId must not be null");
+                Reservation reservation = reservationRepository.findById(resId)
                                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
 
                 AppUser currentUser = appUserRepository.findByAccountEmail(userEmail)
@@ -149,7 +153,8 @@ public class FacilityReportService {
                 AppUser manager = appUserRepository.findByAccountEmail(managerEmail)
                                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-                officeRepository.findById(officeId)
+                Long offId = java.util.Objects.requireNonNull(officeId, "officeId must not be null");
+                officeRepository.findById(offId)
                                 .filter(office -> office.getManager().getId().equals(manager.getId()))
                                 .orElseThrow(() -> new InvalidRequestException(ErrorCode.FORBIDDEN));
 
@@ -169,7 +174,8 @@ public class FacilityReportService {
         @Transactional
         public FacilityReportResponse updateReportStatus(Long reportId, FacilityReportStatusUpdateRequest request,
                         String managerEmail) {
-                FacilityReport report = facilityReportRepository.findById(reportId)
+                Long repId = java.util.Objects.requireNonNull(reportId, "reportId must not be null");
+                FacilityReport report = facilityReportRepository.findById(repId)
                                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.FACILITY_REPORT_NOT_FOUND));
 
                 // 운영자 본인 오피스의 신고인지 검증
@@ -202,7 +208,8 @@ public class FacilityReportService {
 
         /*
          * TODO: CANCELED Enum DB 추가 후 활성화
-         * /**
+         */
+        /**
          * 사용자의 신고 철회 (CANCELED 상태로 전환)
          *
          * Why: 오해 등으로 잘못 신고한 경우 운영자 리소스를 낭비하지 않도록 사용자가 직접 철회 가능

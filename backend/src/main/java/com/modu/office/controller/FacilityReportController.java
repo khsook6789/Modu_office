@@ -43,8 +43,9 @@ public class FacilityReportController {
                 FacilityReportResponse response = facilityReportService.createReport(
                                 userDetails.getUsername(), roomId, request);
 
+                String location = "/api/rooms/" + roomId + "/reports/" + response.getReportId();
                 return ResponseEntity
-                                .created(URI.create("/api/rooms/" + roomId + "/reports/" + response.getReportId()))
+                                .created(java.util.Objects.requireNonNull(URI.create(location)))
                                 .body(response);
         }
 

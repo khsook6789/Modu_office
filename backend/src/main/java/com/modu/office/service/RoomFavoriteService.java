@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@SuppressWarnings("null")
 public class RoomFavoriteService {
 
     private final RoomFavoriteRepository favoriteRepository;
@@ -35,6 +34,11 @@ public class RoomFavoriteService {
      */
     @Transactional
     public RoomFavoriteResponse addFavorite(Long userId, Long roomId) {
+        if (userId == null)
+            throw new IllegalArgumentException("userId must not be null");
+        if (roomId == null)
+            throw new IllegalArgumentException("roomId must not be null");
+
         // 1. 중복 체크
         if (favoriteRepository.existsByUserIdAndRoomId(userId, roomId)) {
             throw new IllegalStateException("이미 즐겨찾기에 추가된 회의실입니다.");
@@ -54,7 +58,7 @@ public class RoomFavoriteService {
                 .room(room)
                 .build();
 
-        RoomFavorite saved = favoriteRepository.save(favorite);
+        RoomFavorite saved = favoriteRepository.save(java.util.Objects.requireNonNull(favorite));
 
         log.info("즐겨찾기 추가됨: userId={}, roomId={}", userId, roomId);
 
@@ -67,9 +71,11 @@ public class RoomFavoriteService {
     @Transactional
     public void removeFavorite(Long userId, Long roomId) {
         RoomFavorite favorite = favoriteRepository
-                .findByUserIdAndRoomId(java.util.Objects.requireNonNull(userId),
-                        java.util.Objects.requireNonNull(roomId))
+                .findByUserIdAndRoomId(userId, roomId)
                 .orElseThrow(() -> new EntityNotFoundException("즐겨찾기를 찾을 수 없습니다."));
+
+        if (favorite == null)
+            throw new EntityNotFoundException("즐겨찾기를 찾을 수 없습니다.");
 
         favoriteRepository.delete(favorite);
 

@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Objects;
 
 /**
  * 토스페이먼츠 WebClient 설정
@@ -23,24 +24,23 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class TossPaymentsConfig {
 
-    private final AppProperties appProperties;
+        private final AppProperties appProperties;
 
-    @Bean(name = "tossWebClient")
-    public WebClient tossWebClient() {
-        AppProperties.TossPayments toss = appProperties.tossPayments();
-        String baseUrl = toss != null && toss.baseUrl() != null
-                ? toss.baseUrl()
-                : "https://api.tosspayments.com";
-        String secretKey = toss != null ? toss.secretKey() : "";
+        @Bean(name = "tossWebClient")
+        public WebClient tossWebClient() {
+                AppProperties.TossPayments toss = Objects.requireNonNull(appProperties.tossPayments(),
+                                "TossPayments configuration cannot be null");
+                String baseUrl = Objects.requireNonNull(toss.baseUrl(), "TossPayments base URL cannot be null");
+                String secretKey = Objects.requireNonNull(toss.secretKey(), "TossPayments secret key cannot be null");
 
-        // Basic 인증 헤더: Base64("secretKey:")
-        String encoded = Base64.getEncoder()
-                .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+                // Basic 인증 헤더: Base64("secretKey:")
+                String encoded = Base64.getEncoder()
+                                .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
 
-        return WebClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoded)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-    }
+                return WebClient.builder()
+                                .baseUrl(baseUrl)
+                                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoded)
+                                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .build();
+        }
 }

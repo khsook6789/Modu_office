@@ -89,33 +89,24 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
 
         @Override
         public CancellationStatsResponse getCancellationStats(Long officeId, LocalDate startDate, LocalDate endDate) {
-                long total = queryFactory
+                Long totalCount = queryFactory
                                 .select(reservation.count())
                                 .from(reservation)
                                 .where(
                                                 officeIdEq(officeId),
                                                 dateBetween(startDate, endDate))
-                                .fetchOne() != null
-                                                ? queryFactory.select(reservation.count()).from(reservation)
-                                                                .where(officeIdEq(officeId),
-                                                                                dateBetween(startDate, endDate))
-                                                                .fetchOne()
-                                                : 0L;
+                                .fetchOne();
+                long total = totalCount != null ? totalCount : 0L;
 
-                long canceled = queryFactory
+                Long canceledCount = queryFactory
                                 .select(reservation.count())
                                 .from(reservation)
                                 .where(
                                                 officeIdEq(officeId),
                                                 reservation.status.eq(ReservationStatus.CANCELED),
                                                 dateBetween(startDate, endDate))
-                                .fetchOne() != null
-                                                ? queryFactory.select(reservation.count()).from(reservation)
-                                                                .where(officeIdEq(officeId), reservation.status
-                                                                                .eq(ReservationStatus.CANCELED),
-                                                                                dateBetween(startDate, endDate))
-                                                                .fetchOne()
-                                                : 0L;
+                                .fetchOne();
+                long canceled = canceledCount != null ? canceledCount : 0L;
 
                 double rate = total == 0 ? 0.0 : Math.round((double) canceled / total * 1000) / 10.0;
                 return new CancellationStatsResponse(total, canceled, rate);
@@ -243,7 +234,10 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                 if (startDate != null) {
                         return reservation.startAt.goe(startDate.atStartOfDay());
                 }
-                return reservation.startAt.lt(endDate.plusDays(1).atStartOfDay());
+                if (endDate != null) {
+                        return reservation.startAt.lt(endDate.plusDays(1).atStartOfDay());
+                }
+                return null;
         }
 
         // ─────────────────────────────────────────────────────────────
