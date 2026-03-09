@@ -46,7 +46,7 @@ public class PaymentService {
      * <p>
      * 1. PaymentConfirmRequest를 통해 Toss 승인 API 호출
      * 2. Payment(DONE) 엔티티 저장
-     * 3. Reservation은 PENDING 유지 (매니저 확정 전까지)
+     * 3. Reservation은 PENDING_APPROVAL 상태로 변경 (매니저 확정 대기)
      * </p>
      */
     @Transactional
@@ -103,6 +103,9 @@ public class PaymentService {
                 (String) tossResponse.get("paymentKey"),
                 (String) tossResponse.get("method"),
                 approvedAt);
+
+        // 예약 상태를 결제 완료(매니저 승인 대기)로 변경
+        reservation.markAsPaid();
 
         paymentRepository.save(payment);
 
