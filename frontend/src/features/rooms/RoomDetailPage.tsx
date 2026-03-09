@@ -16,7 +16,7 @@ export default function RoomDetailPage() {
 
     const navigate = useNavigate();
     const { user } = useAuth();
-    
+
     // Room State
     const [room, setRoom] = useState<any>(null); // Ideally use Room type
     const [loadingRoom, setLoadingRoom] = useState(true);
@@ -64,13 +64,13 @@ export default function RoomDetailPage() {
         loadReviews();
         // 해당 방의 완료된 예약 조회 (리뷰 작성용)
         if (user?.id) {
-            client.get<any>(`/reservations?customerId=${user.id}&roomId=${roomId}`)
+            client.get<any>(`/reservations?userId=${user.id}&roomId=${roomId}`)
                 .then((res: any) => {
                     const list = res.data?.content ?? res.data ?? [];
                     const completed = list.find((r: any) => r.roomId === roomId && r.status === 'CONFIRMED');
                     if (completed) setCompletedReservationId(completed.id);
                 })
-                .catch(() => {});
+                .catch(() => { });
         }
     }, [roomId, user]);
 
@@ -199,11 +199,11 @@ export default function RoomDetailPage() {
                         <div className="widget-price">
                             {room.pricePerHour ? `${room.pricePerHour.toLocaleString()}원` : '무료'} <span>/ 시간</span>
                         </div>
-                        
+
                         <hr className="widget-divider" />
-                        
+
                         <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
-                            달력이 있는 페이지로 이동하여<br/>원하는 날짜와 시간을 선택하세요.
+                            달력이 있는 페이지로 이동하여<br />원하는 날짜와 시간을 선택하세요.
                         </p>
 
                         <button
@@ -218,7 +218,7 @@ export default function RoomDetailPage() {
                     <div className="info-section" style={{ marginTop: '2rem', padding: '1.5rem' }}>
                         <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>위치 정보</h3>
                         <div style={{ width: '100%', height: '180px', background: '#f1f5f9', borderRadius: '1rem', overflow: 'hidden' }}>
-                             <iframe
+                            <iframe
                                 title="Google Map"
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.379047209633!2d127.02553757640697!3d37.49883582806316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca13768f54c31%3A0xe54972dd0cc459f!2z6rCV64Ko!5e0!3m2!1sko!2skr!4v1707920000000!5m2!1sko!2skr"
                                 width="100%"

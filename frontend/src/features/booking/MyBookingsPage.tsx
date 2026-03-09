@@ -16,7 +16,7 @@ interface ReservationResponse {
     userName: string;
     startAt: string;
     endAt: string;
-    status: 'PENDING' | 'CONFIRMED' | 'CANCELED';
+    status: 'PENDING_PAYMENT' | 'PENDING_APPROVAL' | 'CONFIRMED' | 'CANCELED';
     totalPrice: number | null;
     createdAt: string;
 }
@@ -33,7 +33,7 @@ export default function MyBookingsPage() {
     const [bookings, setBookings] = useState<ReservationResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'CONFIRMED' | 'CANCELED'>('ALL');
+    const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PENDING_APPROVAL' | 'CONFIRMED' | 'CANCELED'>('ALL');
 
     // 환불 예상액 모달
     const [refundModal, setRefundModal] = useState<{
@@ -55,14 +55,14 @@ export default function MyBookingsPage() {
             setIsLoading(true);
             setError(null);
             const response = await client.get<ApiResponse<ReservationResponse[]>>(
-                `/reservations?customerId=${user!.id}`
+                `/reservations?userId=${user!.id}`
             );
             // 응답이 배열이거나 data 안에 있는 경우 모두 처리
             const raw = response as any;
             const list: ReservationResponse[] = Array.isArray(raw) ? raw
                 : Array.isArray(raw?.data) ? raw.data
-                : Array.isArray(raw?.data?.content) ? raw.data.content
-                : [];
+                    : Array.isArray(raw?.data?.content) ? raw.data.content
+                        : [];
             setBookings([...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         } catch (err: any) {
             console.error('Failed to load bookings:', err);
@@ -114,7 +114,8 @@ export default function MyBookingsPage() {
     const getStatusInfo = (booking: ReservationResponse) => {
         if (booking.status === 'CANCELED') return { label: '취소됨', cls: 'CANCELED' };
         if (new Date(booking.endAt) < today) return { label: '이용 완료', cls: 'DONE' };
-        if (booking.status === 'PENDING') return { label: '승인 대기', cls: 'PENDING' };
+        if (booking.status === 'PENDING_PAYMENT') return { label: '결제 대기', cls: 'PENDING_PAYMENT' };
+        if (booking.status === 'PENDING_APPROVAL') return { label: '승인 대기', cls: 'PENDING_APPROVAL' };
         return { label: '예약 확정', cls: 'CONFIRMED' };
     };
 
@@ -124,7 +125,8 @@ export default function MyBookingsPage() {
 
     const stats = {
         total: bookings.length,
-        pending: bookings.filter(b => b.status === 'PENDING').length,
+        pendingPayment: bookings.filter(b => b.status === 'PENDING_PAYMENT').length,
+        pendingApproval: bookings.filter(b => b.status === 'PENDING_APPROVAL').length,
         confirmed: bookings.filter(b => b.status === 'CONFIRMED').length,
         canceled: bookings.filter(b => b.status === 'CANCELED').length,
     };
@@ -192,8 +194,12 @@ export default function MyBookingsPage() {
                     <div><div className="book-stat-value">{stats.total}</div><div className="book-stat-label">전체</div></div>
                 </div>
                 <div className="book-stat-card">
-                    <span className="book-stat-icon" style={{ background: '#fffbeb' }}>⏳</span>
-                    <div><div className="book-stat-value" style={{ color: '#b45309' }}>{stats.pending}</div><div className="book-stat-label">대기 중</div></div>
+                    <span className="book-stat-icon" style={{ background: '#fffbeb' }}>💳</span>
+                    <div><div className="book-stat-value" style={{ color: '#b45309' }}>{stats.pendingPayment}</div><div className="book-stat-label">결제 대기</div></div>
+                </div>
+                <div className="book-stat-card">
+                    <span className="book-stat-icon" style={{ background: '#fef08a' }}>⏳</span>
+                    <div><div className="book-stat-value" style={{ color: '#854d0e' }}>{stats.pendingApproval}</div><div className="book-stat-label">승인 대기</div></div>
                 </div>
                 <div className="book-stat-card">
                     <span className="book-stat-icon" style={{ background: '#f0fdf4' }}>✅</span>
@@ -207,7 +213,7 @@ export default function MyBookingsPage() {
 
             {/* Filter tabs */}
             <div className="book-filter-tabs">
-                {[['ALL', '전체'], ['PENDING', '대기'], ['CONFIRMED', '확정'], ['CANCELED', '취소']] .map(([v, l]) => (
+                {[['ALL', '전체'], ['PENDING_PAYMENT', '결제 대기'], ['PENDING_APPROVAL', '승인 대기'], ['CONFIRMED', '확정'], ['CANCELED', '취소']].map(([v, l]) => (
                     <button
                         key={v}
                         className={`book-filter-btn ${filter === v ? 'active' : ''}`}

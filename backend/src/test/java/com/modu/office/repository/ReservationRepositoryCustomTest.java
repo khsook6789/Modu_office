@@ -95,12 +95,12 @@ class ReservationRepositoryCustomTest {
                                 .endAtIncludeBufferTime(today.plusHours(2))
                                 .status(ReservationStatus.CONFIRMED).build());
 
-                // Res 2: Office A, User Bob, PENDING, Tomorrow
+                // Res 2: Office A, User Bob, PENDING_PAYMENT, Tomorrow
                 reservationRepository.save(Reservation.builder()
                                 .office(officeA).room(roomA).user(user2).title("Meeting 2")
                                 .startAt(today.plusDays(1)).endAt(today.plusDays(1).plusHours(2))
                                 .endAtIncludeBufferTime(today.plusDays(1).plusHours(2))
-                                .status(ReservationStatus.PENDING).build());
+                                .status(ReservationStatus.PENDING_PAYMENT).build());
 
                 // Res 3: Office B, User Alice, CANCELED, Day after tomorrow
                 reservationRepository.save(Reservation.builder()
@@ -144,9 +144,10 @@ class ReservationRepositoryCustomTest {
         void searchByStatus() {
                 // When
                 Page<Reservation> result = reservationRepository.search(
-                                null, null, null, null, ReservationStatus.PENDING, null, null, PageRequest.of(0, 10));
+                                null, null, null, null, ReservationStatus.PENDING_PAYMENT, null, null,
+                                PageRequest.of(0, 10));
 
-                // Then (Res 2 is PENDING)
+                // Then (Res 2 is PENDING_PAYMENT)
                 assertThat(result.getContent()).hasSize(1)
                                 .extracting("title")
                                 .containsOnly("Meeting 2");

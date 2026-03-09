@@ -46,7 +46,8 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                                 .from(reservation)
                                 .where(
                                                 reservation.office.id.eq(officeId),
-                                                reservation.status.in(ReservationStatus.PENDING,
+                                                reservation.status.in(ReservationStatus.PENDING_PAYMENT,
+                                                                ReservationStatus.PENDING_APPROVAL,
                                                                 ReservationStatus.CONFIRMED),
                                                 reservation.startAt.loe(now),
                                                 reservation.endAtIncludeBufferTime.gt(now))
@@ -146,7 +147,8 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                                 .from(reservation)
                                 .where(
                                                 officeIdEq(officeId),
-                                                reservation.status.in(ReservationStatus.PENDING,
+                                                reservation.status.in(ReservationStatus.PENDING_PAYMENT,
+                                                                ReservationStatus.PENDING_APPROVAL,
                                                                 ReservationStatus.CONFIRMED),
                                                 dateBetween(startDate, endDate))
                                 .groupBy(hourExpr)
@@ -176,7 +178,8 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                                 .from(reservation)
                                 .where(
                                                 officeIdEq(officeId),
-                                                reservation.status.in(ReservationStatus.PENDING,
+                                                reservation.status.in(ReservationStatus.PENDING_PAYMENT,
+                                                                ReservationStatus.PENDING_APPROVAL,
                                                                 ReservationStatus.CONFIRMED),
                                                 dateBetween(startDate, endDate))
                                 .groupBy(dateExpr)
@@ -206,7 +209,8 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                                 .join(reservation.office, office)
                                 .where(
                                                 officeIdEq(officeId),
-                                                reservation.status.in(ReservationStatus.PENDING,
+                                                reservation.status.in(ReservationStatus.PENDING_PAYMENT,
+                                                                ReservationStatus.PENDING_APPROVAL,
                                                                 ReservationStatus.CONFIRMED),
                                                 dateBetween(startDate, endDate))
                                 .groupBy(reservation.room.id, reservation.room.name, reservation.office.location)

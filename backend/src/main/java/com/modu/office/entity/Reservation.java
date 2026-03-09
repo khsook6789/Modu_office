@@ -56,7 +56,7 @@ public class Reservation extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false, columnDefinition = "reservation_status")
-    private ReservationStatus status = ReservationStatus.PENDING;
+    private ReservationStatus status = ReservationStatus.PENDING_PAYMENT;
 
     @Version
     @Column(name = "version")
@@ -73,17 +73,27 @@ public class Reservation extends BaseEntity {
         this.startAt = startAt;
         this.endAt = endAt;
         this.endAtIncludeBufferTime = endAtIncludeBufferTime;
-        this.status = status != null ? status : ReservationStatus.PENDING;
+        this.status = status != null ? status : ReservationStatus.PENDING_PAYMENT;
     }
 
     /**
      * 예약 확정
      */
     public void confirm() {
-        if (this.status != ReservationStatus.PENDING) {
+        if (this.status != ReservationStatus.PENDING_PAYMENT && this.status != ReservationStatus.PENDING_APPROVAL) {
             throw new IllegalStateException("대기 중인 예약만 확정할 수 있습니다. 현재 상태: " + this.status);
         }
         this.status = ReservationStatus.CONFIRMED;
+    }
+
+    /**
+     * 결제 완료로 인한 상태 변경 (PENDING_PAYMENT -> PENDING_APPROVAL)
+     */
+    public void markAsPaid() {
+        if (this.status != ReservationStatus.PENDING_PAYMENT) {
+            throw new IllegalStateException("결제 대기 중인 예약만 결제 완료 처리할 수 있습니다. 현재 상태: " + this.status);
+        }
+        this.status = ReservationStatus.PENDING_APPROVAL;
     }
 
     /**

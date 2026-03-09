@@ -91,7 +91,7 @@ class ReviewServiceTest {
 
         Reservation reservation = mock(Reservation.class);
         given(reservation.getUser()).willReturn(user);
-        given(reservation.getStatus()).willReturn(ReservationStatus.PENDING); // 에러 원인
+        given(reservation.getStatus()).willReturn(ReservationStatus.PENDING_PAYMENT); // 에러 원인
 
         ReviewRequest request = ReviewRequest.builder().reservationId(10L).rating((short) 5).content("Test").build();
 

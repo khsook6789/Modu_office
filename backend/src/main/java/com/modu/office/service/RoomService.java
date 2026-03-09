@@ -211,7 +211,8 @@ public class RoomService {
         validateManagerAccess(currentUser, room.getOffice());
 
         // 활성 예약이 있는지 확인
-        List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+        List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING_PAYMENT,
+                ReservationStatus.PENDING_APPROVAL, ReservationStatus.CONFIRMED);
         if (reservationRepository.existsByRoomIdAndStatusIn(roomId, activeStatuses)) {
             throw new IllegalStateException("활성 상태의 예약이 있는 회의실은 삭제할 수 없습니다. 회의실 ID: " + roomId);
         }
