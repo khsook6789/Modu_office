@@ -56,7 +56,7 @@ public class Office extends BaseEntity {
     private Short[] openDays;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_user_id", nullable = false) // Reverted from manager_id
+    @JoinColumn(name = "manager_id", nullable = false)
     private AppUser manager;
 
     @org.hibernate.annotations.BatchSize(size = 100)

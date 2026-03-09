@@ -17,12 +17,10 @@ import lombok.RequiredArgsConstructor;
 public enum ReportIssueType {
     BROKEN("고장(파손)"),
     MISSING("비품 없음"),
-    OTHER("기타");
-
-    // TODO: DB 관리자(khsook6789)가 DB Enum에 아래 항목들을 추가한 뒤 주석 해제하여 사용
-    // MALFUNCTION("오작동"),
-    // NEEDS_SUPPLIES("소모품 부족"),
-    // DIRTY("청결 불량");
+    OTHER("기타"),
+    MALFUNCTION("오작동"),
+    NEEDS_SUPPLIES("소모품 부족"),
+    DIRTY("청결 불량");
 
     private final String displayName;
 }

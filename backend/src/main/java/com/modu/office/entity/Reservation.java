@@ -36,7 +36,7 @@ public class Reservation extends BaseEntity {
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false) // Reverted from user_id
+    @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
 
     @Column(name = "start_at", nullable = false)

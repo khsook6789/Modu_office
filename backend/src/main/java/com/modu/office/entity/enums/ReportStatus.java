@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 public enum ReportStatus {
     REPORTED("접수됨"),
     IN_PROGRESS("처리중"),
-    RESOLVED("해결됨");
-    // CANCELED("철회됨"); // TODO: DB 반영 후 활성화
+    RESOLVED("해결됨"),
+    CANCELED("철회됨");
 
     private final String displayName;
 
@@ -25,11 +25,11 @@ public enum ReportStatus {
      */
     public boolean canTransitionTo(ReportStatus next) {
         return switch (this) {
-            case REPORTED -> next == IN_PROGRESS; // || next == CANCELED;
+            case REPORTED -> next == IN_PROGRESS || next == CANCELED;
             case IN_PROGRESS -> next == RESOLVED;
             // RESOLVED(및 CANCELED)는 종착 상태 - 전이 불가
             case RESOLVED -> false;
-            // case CANCELED -> false;
+            case CANCELED -> false;
         };
     }
 }
