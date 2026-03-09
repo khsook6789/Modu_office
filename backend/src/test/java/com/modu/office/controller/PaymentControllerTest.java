@@ -51,7 +51,8 @@ class PaymentControllerTest extends ControllerTestSupport {
                                 requestFields(
                                                 fieldWithPath("paymentKey").description("토스 paymentKey (max 200자)"),
                                                 fieldWithPath("orderId").description("주문번호 (영문 대소문자·숫자·-·_, 6~64자)"),
-                                                fieldWithPath("amount").description("결제 금액")),
+                                                fieldWithPath("amount").description("결제 금액"),
+                                                fieldWithPath("reservationId").description("예약 ID")),
                                 responseFields(
                                                 fieldWithPath("status").description("응답 상태"),
                                                 fieldWithPath("code").description("HTTP 상태 코드"),
@@ -141,7 +142,8 @@ class PaymentControllerTest extends ControllerTestSupport {
                                 {
                                   "paymentKey": "testPaymentKey_ABC123",
                                   "orderId": "rev-1-abc123",
-                                  "amount": 10000
+                                  "amount": 10000,
+                                  "reservationId": 1
                                 }
                                 """;
                 return objectMapper.readValue(json, PaymentConfirmRequest.class);
