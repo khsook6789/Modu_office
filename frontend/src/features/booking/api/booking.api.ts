@@ -7,7 +7,7 @@ export interface Booking {
     roomId: number;
     roomName?: string; // Backend might need to join this or frontend fetches it
     officeName?: string;
-    customerId: number;
+    userId: number;
     startAt: string; // ISO LocalDateTime
     endAt: string;   // ISO LocalDateTime
     status: 'PENDING_PAYMENT' | 'PENDING_APPROVAL' | 'CONFIRMED' | 'CANCELED';
@@ -18,7 +18,7 @@ export interface CreateBookingRequest {
     title: string;
     officeId: number;
     roomId: number;
-    customerId: number; // Required by Backend
+    userId: number; // Required by Backend
     startAt: string;
     endAt: string;
 }
@@ -31,10 +31,10 @@ interface ApiResponse<T> {
 
 export const bookingApi = {
     // Get all bookings (optional filters can be added)
-    getMyBookings: async (customerId?: number) => {
-        // Backend doesn't support "me" endpoint, must filter by customerId
-        // If customerId is unknown, this will fail or return empty
-        const params = customerId ? { customerId } : {};
+    getMyBookings: async (userId?: number) => {
+        // Backend doesn't support "me" endpoint, must filter by userId
+        // If userId is unknown, this will fail or return empty
+        const params = userId ? { userId } : {};
         const response = await client.get<ApiResponse<Booking[]>>('/reservations', { params });
         return response.data;
     },

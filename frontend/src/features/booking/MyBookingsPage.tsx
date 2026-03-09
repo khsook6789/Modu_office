@@ -55,7 +55,7 @@ export default function MyBookingsPage() {
             setIsLoading(true);
             setError(null);
             const response = await client.get<ApiResponse<ReservationResponse[]>>(
-                `/reservations?customerId=${user!.id}`
+                `/reservations?userId=${user!.id}`
             );
             // 응답이 배열이거나 data 안에 있는 경우 모두 처리
             const raw = response as any;
