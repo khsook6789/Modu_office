@@ -1,0 +1,5 @@
+-- 1. 새로운 상태 추가 (PENDING_APPROVAL)
+ALTER TYPE reservation_status ADD VALUE 'PENDING_APPROVAL';
+
+-- 2. 기존 상태 이름 변경 (PENDING -> PENDING_PAYMENT)
+ALTER TYPE reservation_status RENAME VALUE 'PENDING' TO 'PENDING_PAYMENT';
