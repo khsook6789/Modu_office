@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRooms } from '../../contexts/RoomContext';
 import { OfficeProvider, useOfficeContext } from '../../contexts/OfficeContext';
 import { OfficeSelectorDropdown } from '../../components/OfficeSelectorDropdown';
 import RoomCard from './RoomCard';
 import Input from '../../components/Input';
+import { roomApi, type FacilityResponse } from './api/room.api';
 
 
 import './RoomsListPage.css';
@@ -32,14 +33,28 @@ function RoomsListPageContent() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOfficeModalOpen, setIsOfficeModalOpen] = useState(false);
+    
+    // Facility State
+    const [facilities, setFacilities] = useState<FacilityResponse[]>([]);
+    const [selectedFacilities, setSelectedFacilities] = useState<number[]>([]);
+
+    useEffect(() => {
+        const loadFacilities = async () => {
+            const data = await roomApi.getActiveFacilities();
+            setFacilities(data);
+        };
+        loadFacilities();
+    }, []);
+
     const [newRoom, setNewRoom] = useState({
         name: '',
         description: '',
-        location: '',
+        floor: 1,
+        roomCode: '',
         capacity: 4,
-        equipment: '',
         imageUrl: '',
-        price: 0
+        price: 0,
+        bufferTime: 0
     });
 
     const [newOfficeData, setNewOfficeData] = useState({
@@ -51,8 +66,8 @@ function RoomsListPageContent() {
     });
 
     // Filter rooms by selected office AND availability
-    const filteredRooms = !selectedOfficeId ? [] : rooms.filter(room => {
-        const matchesOffice = room.officeId === selectedOfficeId;
+    const filteredRooms = rooms.filter(room => {
+        const matchesOffice = !selectedOfficeId || room.officeId === selectedOfficeId;
         const matchesAvailability = filter === 'ALL' ? true : room.isAvailable;
         return matchesOffice && matchesAvailability;
     });
@@ -90,14 +105,17 @@ function RoomsListPageContent() {
         addRoom(selectedOfficeId, {
             name: newRoom.name,
             description: newRoom.description,
-            location: newRoom.location,
+            floor: Number(newRoom.floor),
+            roomCode: newRoom.roomCode,
             capacity: Number(newRoom.capacity),
-            equipment: newRoom.equipment.split(',').map(item => item.trim()).filter(Boolean),
+            facilityIds: selectedFacilities,
             imageUrl: newRoom.imageUrl || undefined,
-            price: Number(newRoom.price) || 0
+            price: Number(newRoom.price) || 0,
+            bufferTime: Number(newRoom.bufferTime) || 0
         });
         setIsModalOpen(false);
-        setNewRoom({ name: '', description: '', location: '', capacity: 4, equipment: '', imageUrl: '', price: 0 });
+        setNewRoom({ name: '', description: '', floor: 1, roomCode: '', capacity: 4, imageUrl: '', price: 0, bufferTime: 0 });
+        setSelectedFacilities([]);
     };
 
     return (
@@ -170,43 +188,38 @@ function RoomsListPageContent() {
             </div>
 
             {/* Main Content Area */}
-            {selectedOfficeId ? (
-                <>
-                    {/* Filters */}
-                    <div className="filters-bar">
-                        <button 
-                            className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-                            onClick={() => setFilter('ALL')}
-                        >
-                            전체 회의실
-                        </button>
-                        <button 
-                            className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
-                            onClick={() => setFilter('AVAILABLE')}
-                        >
-                            예약 가능
-                        </button>
-                    </div>
+            {/* Filters */}
+            <div className="filters-bar">
+                <button 
+                    className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
+                    onClick={() => setFilter('ALL')}
+                >
+                    전체 회의실
+                </button>
+                <button 
+                    className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
+                    onClick={() => setFilter('AVAILABLE')}
+                >
+                    예약 가능
+                </button>
+            </div>
 
-                    {/* Rooms Grid */}
-                    {filteredRooms.length > 0 ? (
-                        <div className="rooms-grid">
-                            {filteredRooms.map(room => (
-                                <RoomCard key={room.id} room={room} isManager={user?.role === 'MANAGER' || user?.role === 'ADMIN'} onDelete={deleteRoom} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="empty-state">
-                            <div className="empty-state-icon">🏢</div>
-                            <p className="empty-state-text">이 오피스에는 아직 등록된 회의실이 없습니다.</p>
-                            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>관리자 기능으로 새로운 회의실을 추가해보세요.</p>
-                        </div>
-                    )}
-                </>
+            {/* Rooms Grid */}
+            {filteredRooms.length > 0 ? (
+                <div className="rooms-grid">
+                    {filteredRooms.map(room => (
+                        <RoomCard key={room.id} room={room} isManager={user?.role === 'MANAGER' || user?.role === 'ADMIN'} onDelete={deleteRoom} />
+                    ))}
+                </div>
             ) : (
                 <div className="empty-state">
-                    <div className="empty-state-icon">📍</div>
-                    <p className="empty-state-text">위에서 방문하실 오피스 지점을 먼저 선택해주세요.</p>
+                    <div className="empty-state-icon">🏢</div>
+                    <p className="empty-state-text">
+                        {selectedOfficeId ? '이 오피스에는 아직 등록된 회의실이 없습니다.' : '등록된 회의실이 없습니다.'}
+                    </p>
+                    {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
+                        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>관리자 기능으로 새로운 회의실을 추가해보세요.</p>
+                    )}
                 </div>
             )}
 
@@ -272,9 +285,63 @@ function RoomsListPageContent() {
                                     minLength={20}
                                 />
                             </div>
-                            <Input label="위치" value={newRoom.location} onChange={e => setNewRoom({...newRoom, location: e.target.value})} required fullWidth />
-                            <Input label="수용 인원" type="number" value={newRoom.capacity} onChange={e => setNewRoom({...newRoom, capacity: Number(e.target.value)})} required fullWidth />
-                            <Input label="장비 (쉼표로 구분)" placeholder="TV, 화이트보드, 프로젝터" value={newRoom.equipment} onChange={e => setNewRoom({...newRoom, equipment: e.target.value})} fullWidth />
+                            <div className="flex gap-sm w-full mb-sm" style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <Input label="해당 층 (-1, 1, 2...)" type="number" value={newRoom.floor} onChange={e => setNewRoom({...newRoom, floor: Number(e.target.value)})} required fullWidth />
+                                </div>
+                                <div style={{ flex: 2 }}>
+                                    <Input label="호수 (예: 301호)" value={newRoom.roomCode} onChange={e => setNewRoom({...newRoom, roomCode: e.target.value})} required fullWidth />
+                                </div>
+                            </div>
+                            <div className="flex gap-sm w-full mb-sm" style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <Input label="수용 인원" type="number" value={newRoom.capacity} onChange={e => setNewRoom({...newRoom, capacity: Number(e.target.value)})} required fullWidth />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <Input label="시간당 가격(원)" type="number" value={newRoom.price} onChange={e => setNewRoom({...newRoom, price: Number(e.target.value)})} required fullWidth />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <Input label="정비 시간(분)" type="number" value={newRoom.bufferTime} onChange={e => setNewRoom({...newRoom, bufferTime: Number(e.target.value)})} required fullWidth />
+                                </div>
+                            </div>
+                            <div className="form-group mb-sm">
+                                <label className="block text-sm font-medium mb-xs">시설/장비 선택</label>
+                                {facilities.length > 0 ? (
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {facilities.map(facility => {
+                                            const isSelected = selectedFacilities.includes(facility.id);
+                                            return (
+                                                <button
+                                                    key={facility.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedFacilities(prev => 
+                                                            prev.includes(facility.id) 
+                                                                ? prev.filter(id => id !== facility.id)
+                                                                : [...prev, facility.id]
+                                                        )
+                                                    }}
+                                                    className="btn-action-outline"
+                                                    style={{ 
+                                                        padding: '0.4rem 0.8rem', 
+                                                        borderRadius: '20px',
+                                                        backgroundColor: isSelected ? 'var(--color-primary)' : 'transparent',
+                                                        color: isSelected ? '#fff' : 'inherit',
+                                                        borderColor: isSelected ? 'var(--color-primary)' : 'var(--color-border)',
+                                                        fontSize: '0.85rem'
+                                                    }}
+                                                >
+                                                    {facility.facilityName}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div style={{ padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.9rem', color: '#94a3b8' }}>
+                                        등록된 시설/장비가 없습니다.
+                                    </div>
+                                )}
+                            </div>
                             <Input label="이미지 URL (선택)" placeholder="https://..." value={newRoom.imageUrl} onChange={e => setNewRoom({...newRoom, imageUrl: e.target.value})} fullWidth />
                             
                             <div className="flex gap-sm mt-lg justify-end">

@@ -1,5 +1,12 @@
 import { type Room } from '../RoomCard';
 
+export interface FacilityResponse {
+    id: number;
+    facilityCode: string;
+    facilityName: string;
+    isActive: boolean;
+}
+
 // Backend Room Response Structure
 export interface RoomResponse {
     id: number;
@@ -10,8 +17,13 @@ export interface RoomResponse {
     status: 'AVAILABLE' | 'RESERVED' | 'MAINTENANCE';
     capacity: number;
     category: 'MEETING_ROOM' | 'CONFERENCE_HALL' | 'FOCUS_ROOM' | 'STUDIO';
-    equipment?: string[];
+    facilities?: FacilityResponse[];
     imageUrl?: string;
+    bannerImageUrl?: string;
+    images?: { imageUrl: string }[];
+    description?: string;
+    price: number;
+    bufferTime: number;
 }
 
 import { client } from '../../../api/client';
@@ -45,9 +57,14 @@ export const mapToRoom = (apiRoom: RoomResponse): Room => ({
     name: apiRoom.name,
     location: `${apiRoom.floor}F - ${apiRoom.roomCode}`, // Format location
     capacity: apiRoom.capacity,
-    equipment: apiRoom.equipment || [], // Use backend equipment if available
-    imageUrl: apiRoom.imageUrl || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000', // Default image
-    isAvailable: apiRoom.status === 'AVAILABLE'
+    equipment: apiRoom.facilities ? apiRoom.facilities.map(f => f.facilityName) : [], // Map facility names
+    imageUrl: apiRoom.bannerImageUrl || (apiRoom.images && apiRoom.images.length > 0 ? apiRoom.images[0].imageUrl : undefined) || apiRoom.imageUrl || undefined,
+    isAvailable: apiRoom.status === 'AVAILABLE',
+    floor: apiRoom.floor,
+    roomCode: apiRoom.roomCode,
+    description: apiRoom.description,
+    price: apiRoom.price,
+    bufferTime: apiRoom.bufferTime
 });
 
 export const roomApi = {
@@ -77,13 +94,32 @@ export const roomApi = {
             return [];
         }
     },
+    getActiveFacilities: async (): Promise<FacilityResponse[]> => {
+        try {
+            const response = await client.get<ApiResponse<FacilityResponse[]>>('/facilities');
+            // Depending on interceptor, response might be the data itself or AxiosResponse
+            const resData = response.data as any;
+            if (resData && resData.data) {
+                return resData.data;
+            }
+            if (Array.isArray(resData)) {
+                return resData;
+            }
+            return [];
+        } catch (error) {
+            console.error("Failed to fetch facilities", error);
+            return [];
+        }
+    },
     getRoomsByOffice: async (officeId: number) => {
         const response = await client.get<ApiResponse<RoomResponse[]>>(`/offices/${officeId}/rooms`);
         return response.data;
     },
     getRoomById: async (roomId: number | string) => {
         const response = await client.get<ApiResponse<RoomResponse>>(`/rooms/${roomId}`);
-        return response.data;
+        // Return inner data if wrapped in ApiResponse
+        const resData = response.data as any;
+        return resData?.data || resData;
     },
     createRoom: async (officeId: number, data: any) => {
         const response = await client.post<ApiResponse<RoomResponse>>(`/offices/${officeId}/rooms`, data);

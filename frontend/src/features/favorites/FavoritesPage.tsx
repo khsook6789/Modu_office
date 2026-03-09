@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { favoriteApi, type Favorite } from './api/favorite.api';
+import { roomApi } from '../rooms/api/room.api';
 import './FavoritesPage.css';
 
+// Extend Favorite locally to hold the fetched image
+interface FavoriteWithImage extends Favorite {
+    displayImageUrl?: string | null;
+}
+
 export default function FavoritesPage() {
-    const [favorites, setFavorites] = useState<Favorite[]>([]);
+    const [favorites, setFavorites] = useState<FavoriteWithImage[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -16,7 +22,24 @@ export default function FavoritesPage() {
         setLoading(true);
         try {
             const data = await favoriteApi.getMyFavorites();
-            setFavorites(data);
+            
+            // Backend doesn't provide image in favorite response, so we fetch it via room API
+            const favoritesWithImages = await Promise.all(
+                data.map(async (fav) => {
+                    try {
+                        const roomData = await roomApi.getRoomById(fav.roomId);
+                        return {
+                            ...fav,
+                            // Priority: Room response bannerImageUrl > Room response imageUrl > Favorite response imageUrl
+                            displayImageUrl: roomData.bannerImageUrl || roomData.imageUrl || (roomData.images && roomData.images.length > 0 ? roomData.images[0].imageUrl : undefined) || fav.imageUrl || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000'
+                        };
+                    } catch (e) {
+                        return { ...fav, displayImageUrl: fav.imageUrl || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000' };
+                    }
+                })
+            );
+            
+            setFavorites(favoritesWithImages);
         } catch (err) {
             console.error('즐겨찾기 로드 실패', err);
         } finally {
@@ -58,7 +81,7 @@ export default function FavoritesPage() {
                         <div key={fav.id} className="fav-card">
                             <div
                                 className="fav-card-image"
-                                style={{ backgroundImage: fav.imageUrl ? `url(${fav.imageUrl})` : 'linear-gradient(135deg,#1e3a5f,#0ea5e9)' }}
+                                style={{ backgroundImage: fav.displayImageUrl ? `url(${fav.displayImageUrl})` : 'linear-gradient(135deg,#1e3a5f,#0ea5e9)' }}
                                 onClick={() => navigate(`/rooms/${fav.roomId}`)}
                             >
                                 <button

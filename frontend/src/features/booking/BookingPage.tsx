@@ -58,7 +58,7 @@ export default function BookingPage() {
     // 가격 계산
     useEffect(() => {
         if (!room) return;
-        const pricePerHour = (room as any).pricePerHour ?? 10000;
+        const pricePerHour = room.price || 10000;
         setTotalPrice(Number(duration) * pricePerHour);
     }, [duration, room]);
 
@@ -221,7 +221,7 @@ export default function BookingPage() {
             {/* Room Info Banner */}
             <div className="booking-room-banner shadow-subtle">
                 <img
-                    src={room.imageUrl || 'https://via.placeholder.com/400x300'}
+                    src={room.bannerImageUrl || (room.images && room.images.length > 0 ? room.images[0].imageUrl : undefined) || room.imageUrl || 'https://via.placeholder.com/400x300'}
                     alt={room.name}
                     className="booking-room-img"
                 />
@@ -230,9 +230,15 @@ export default function BookingPage() {
                     <div className="booking-room-info">
                         <span>👥 최대 {room.capacity}명 수용</span>
                         <span>📍 {room.floor}층 - {room.roomCode}</span>
+                        {room.bufferTime > 0 && <span>🧹 사용 후 {room.bufferTime}분 정비</span>}
                     </div>
+                    {room.description && (
+                        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#64748b', lineHeight: '1.4' }}>
+                            {room.description}
+                        </p>
+                    )}
                     <div className="booking-room-price">
-                        {((room as any).pricePerHour ?? 10000).toLocaleString()}원{' '}
+                        {(room.price || 10000).toLocaleString()}원{' '}
                         <span style={{ fontSize: '0.9rem', color: '#94a3b8' }}>/ 시간</span>
                     </div>
                 </div>
@@ -241,7 +247,7 @@ export default function BookingPage() {
             <div className="booking-content-grid">
                 {/* Left: Form 또는 Payment Widget */}
                 {step === 'form' ? (
-                    <div className="booking-form-section shadow-subtle">
+                    <div className="booking-form-section shadow-subtle" key="form">
                         <h3 className="booking-section-title">일정 및 인원 선택</h3>
 
                         <div className="booking-input-row">
@@ -315,7 +321,7 @@ export default function BookingPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="booking-form-section shadow-subtle" style={{ minHeight: 300 }}>
+                    <div className="booking-form-section shadow-subtle" style={{ minHeight: 300 }} key="payment">
                         <h3 className="booking-section-title">결제수단 선택</h3>
                         {isWidgetLoading && (
                             <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>

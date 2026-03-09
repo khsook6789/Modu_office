@@ -47,10 +47,10 @@ export default function RoomDetailPage() {
                     name: data.name,
                     location: `${data.floor}F - ${data.roomCode}`,
                     capacity: data.capacity,
-                    description: '넓은 공간과 최신 장비를 갖춘 프리미엄 회의실입니다.', 
-                    equipment: data.equipment || [],
-                    imageUrl: data.imageUrl,
-                    pricePerHour: 0,
+                    description: data.description || '넓은 공간과 최신 장비를 갖춘 프리미엄 회의실입니다.', 
+                    equipment: data.facilities ? data.facilities.map((f: any) => f.facilityName) : [],
+                    imageUrl: data.bannerImageUrl || data.imageUrl || (data.images && data.images.length > 0 ? data.images[0].imageUrl : 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000'),
+                    pricePerHour: data.price ? Number(data.price) : 0,
                     rating: (data as any).rating || 0
                 });
             } catch (error) {
@@ -131,7 +131,11 @@ export default function RoomDetailPage() {
             </div>
 
             <div className="room-hero-image-wrapper">
-                <img src={room.imageUrl || 'https://via.placeholder.com/800'} alt={room.name} className="room-hero-image" />
+                {room.imageUrl ? (
+                    <img src={room.imageUrl} alt={room.name} className="room-hero-image" />
+                ) : (
+                    <div className="room-hero-image fallback" style={{ background: 'linear-gradient(135deg, #1e3a5f, #0ea5e9)', width: '100%', height: '100%' }} />
+                )}
                 <div className="room-hero-overlay">
                     <div className="hero-meta">
                         <div className="hero-rating">

@@ -12,6 +12,10 @@ export interface Room {
     isAvailable: boolean;
     rating?: number; // Added rating
     price?: number; // Added for backend OfficeRoomRequest
+    floor?: number;
+    roomCode?: string;
+    description?: string;
+    bufferTime?: number;
 }
 
 interface RoomCardProps {
@@ -71,8 +75,13 @@ export default function RoomCard({ room, isManager, onDelete }: RoomCardProps) {
                 <div className="room-content">
                     <div className="room-header">
                         <h3 className="room-name">{room.name}</h3>
-                        <span className="room-location">📍 {room.location}</span>
+                        <span className="room-location">📍 {room.floor}층 - {room.roomCode}</span>
                     </div>
+                    {room.description && (
+                        <p className="room-description" style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0 0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: '1.4' }}>
+                            {room.description}
+                        </p>
+                    )}
 
                     <div className="room-meta">
                         <span className="room-badge badge-capacity">👥 {room.capacity} People</span>
@@ -91,7 +100,12 @@ export default function RoomCard({ room, isManager, onDelete }: RoomCardProps) {
                                 {room.isAvailable ? '예약 가능' : '사용 중'}
                             </span>
                         </div>
-                        <span className="btn-view-details">상세 보기</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {room.price !== undefined && room.price > 0 && (
+                                <span style={{ fontWeight: 'bold', color: 'var(--color-primary)', fontSize: '0.9rem' }}>{room.price.toLocaleString()}원/시간</span>
+                            )}
+                            <span className="btn-view-details">상세 보기</span>
+                        </div>
                     </div>
                 </div>
             </Link>
