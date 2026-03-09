@@ -148,7 +148,7 @@ class ReservationEventListenerTest {
                                         .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
                                         .endAtIncludeBufferTime(
                                                         LocalDateTime.now().plusDays(1).withHour(12).withMinute(0))
-                                        .status(ReservationStatus.PENDING)
+                                        .status(ReservationStatus.PENDING_PAYMENT)
                                         .build();
                         reservationRepository.save(res);
 
@@ -186,14 +186,14 @@ class ReservationEventListenerTest {
                                 .startAt(originalStart)
                                 .endAt(originalEnd)
                                 .endAtIncludeBufferTime(originalEnd)
-                                .status(ReservationStatus.PENDING)
+                                .status(ReservationStatus.PENDING_PAYMENT)
                                 .build();
                 reservationRepository.save(reservation);
 
                 // beforeData 생성
                 Map<String, Object> beforeData = new HashMap<>();
                 beforeData.put("id", reservation.getId());
-                beforeData.put("status", "PENDING");
+                beforeData.put("status", "PENDING_PAYMENT");
                 beforeData.put("startAt", originalStart.toString());
 
                 // when - 트랜잭션 내에서 예약 수정 및 이벤트 발행
@@ -281,7 +281,7 @@ class ReservationEventListenerTest {
                                         .startAt(LocalDateTime.now().plusDays(1))
                                         .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
                                         .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(2))
-                                        .status(ReservationStatus.PENDING)
+                                        .status(ReservationStatus.PENDING_PAYMENT)
                                         .build();
                         reservationRepository.save(res);
 

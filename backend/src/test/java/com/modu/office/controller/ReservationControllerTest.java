@@ -59,7 +59,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                 .withNano(0))
                                 .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0).withSecond(0)
                                                 .withNano(0))
-                                .status(ReservationStatus.PENDING)
+                                .status(ReservationStatus.PENDING_PAYMENT)
                                 .totalPrice(new BigDecimal("20000"))
                                 .createdAt(LocalDateTime.now())
                                 .updatedAt(LocalDateTime.now())
@@ -158,7 +158,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .with(user(createTestUser("USER")))
                                 .param("page", "0")
                                 .param("size", "20")
-                                .param("status", "PENDING"))
+                                .param("status", "PENDING_PAYMENT"))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-list-user",
                                                 queryParameters(
@@ -348,7 +348,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                 .withNano(0))
                                 .endAt(LocalDateTime.now().plusDays(2).withHour(13).withMinute(0).withSecond(0)
                                                 .withNano(0))
-                                .status(ReservationStatus.PENDING)
+                                .status(ReservationStatus.PENDING_PAYMENT)
                                 .build();
 
                 given(reservationService.updateReservation(eq(100L), any(), any())).willReturn(createResponse());
@@ -370,7 +370,7 @@ class ReservationControllerTest extends ControllerTestSupport {
         }
 
         @Test
-        @DisplayName("예약 확정 API - PENDING -> CONFIRMED (MANAGER 전용)")
+        @DisplayName("예약 확정 API - PENDING_PAYMENT -> CONFIRMED (MANAGER 전용)")
         void confirmReservation_Success() throws Exception {
                 given(reservationService.confirmReservation(eq(100L), any())).willReturn(createResponse());
 

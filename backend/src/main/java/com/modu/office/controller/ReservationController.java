@@ -111,7 +111,7 @@ public class ReservationController {
     }
 
     /**
-     * 예약 확정 (PENDING -> CONFIRMED)
+     * 예약 확정 (PENDING_APPROVAL -> CONFIRMED)
      */
     @PatchMapping("/{id}/confirm")
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")

@@ -135,7 +135,8 @@ public class OfficeService {
         validateManagerAccess(currentUser, office);
 
         // 활성 예약이 있는지 확인
-        List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+        List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING_PAYMENT,
+                ReservationStatus.PENDING_APPROVAL, ReservationStatus.CONFIRMED);
         if (reservationRepository.existsByOfficeIdAndStatusIn(id, activeStatuses)) {
             throw new IllegalStateException("활성 상태의 예약이 있는 지점은 삭제할 수 없습니다. 지점 ID: " + id);
         }

@@ -93,7 +93,8 @@ public class ReservationService {
 
             // 6. 낙관적 락을 사용한 시간 충돌 확인 (bufferTime 포함 시간으로 확인)
             List<ReservationStatus> activeStatuses = Arrays.asList(
-                    ReservationStatus.PENDING,
+                    ReservationStatus.PENDING_PAYMENT,
+                    ReservationStatus.PENDING_APPROVAL,
                     ReservationStatus.CONFIRMED);
             List<Reservation> conflicts = reservationRepository.findConflictingReservationsWithOptimisticLock(
                     room.getId(),
@@ -114,7 +115,7 @@ public class ReservationService {
                     .startAt(request.getStartAt())
                     .endAt(request.getEndAt())
                     .endAtIncludeBufferTime(endAtIncludeBufferTime)
-                    .status(ReservationStatus.PENDING)
+                    .status(ReservationStatus.PENDING_PAYMENT)
                     .build();
 
             Reservation savedReservation = reservationRepository.save(java.util.Objects.requireNonNull(reservation));
@@ -206,7 +207,8 @@ public class ReservationService {
 
                 // 낙관적 락을 사용한 시간 충돌 확인 (현재 예약 제외, bufferTime 포함 시간)
                 List<ReservationStatus> activeStatuses = Arrays.asList(
-                        ReservationStatus.PENDING,
+                        ReservationStatus.PENDING_PAYMENT,
+                        ReservationStatus.PENDING_APPROVAL,
                         ReservationStatus.CONFIRMED);
                 List<Reservation> conflicts = reservationRepository
                         .findConflictingReservationsExcludingWithOptimisticLock(
@@ -227,7 +229,8 @@ public class ReservationService {
             // 상태 수정 (직접 setter 사용 - 일반적인 업데이트용)
             if (request.getStatus() != null) {
                 if (request.getStatus() == ReservationStatus.CONFIRMED
-                        && reservation.getStatus() == ReservationStatus.PENDING) {
+                        && (reservation.getStatus() == ReservationStatus.PENDING_PAYMENT
+                                || reservation.getStatus() == ReservationStatus.PENDING_APPROVAL)) {
                     reservation.confirm();
                 } else if (request.getStatus() == ReservationStatus.CANCELED) {
                     reservation.cancel();
@@ -249,7 +252,7 @@ public class ReservationService {
     }
 
     /**
-     * 예약 확정 (PENDING -> CONFIRMED)
+     * 예약 확정 (PENDING_APPROVAL -> CONFIRMED)
      */
     @Transactional
     public ReservationResponse confirmReservation(Long id, AppUser requester) {

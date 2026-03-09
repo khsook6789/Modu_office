@@ -145,7 +145,7 @@ class SchemaSyncIntegrationTest {
                                 .startAt(start)
                                 .endAt(end)
                                 .endAtIncludeBufferTime(end)
-                                .status(ReservationStatus.PENDING)
+                                .status(ReservationStatus.PENDING_PAYMENT)
                                 .build();
 
                 Reservation saved = reservationRepository.save(reservation);
@@ -172,7 +172,7 @@ class SchemaSyncIntegrationTest {
                                 .startAt(LocalDateTime.now().plusDays(1))
                                 .endAt(LocalDateTime.now().plusDays(1).plusHours(1))
                                 .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(1))
-                                .status(ReservationStatus.PENDING)
+                                .status(ReservationStatus.PENDING_PAYMENT)
                                 .build();
                 reservationRepository.save(reservation);
 
@@ -180,7 +180,7 @@ class SchemaSyncIntegrationTest {
                                 .reservation(reservation)
                                 .action(LogAction.CREATE)
                                 .beforeData(null)
-                                .afterData(Map.of("status", "PENDING"))
+                                .afterData(Map.of("status", "PENDING_PAYMENT"))
                                 .actor(testUser)
                                 .build();
 

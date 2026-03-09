@@ -31,7 +31,7 @@ public class PaymentController {
      * <p>
      * 프론트에서 Toss successUrl 파라미터(paymentKey, orderId, amount)를 전달하면
      * 토스 서버에 최종 승인을 요청하고 Payment 엔티티를 저장합니다.
-     * Reservation은 PENDING 유지 (매니저 확정 후 CONFIRMED로 변경).
+     * Reservation은 PENDING_APPROVAL 상태로 변경 (매니저 확정 대기).
      * </p>
      */
     @PostMapping("/confirm")

@@ -1,7 +1,8 @@
 package com.modu.office.entity.enums;
 
 public enum ReservationStatus {
-    PENDING,
+    PENDING_PAYMENT,
+    PENDING_APPROVAL,
     CONFIRMED,
     CANCELED
 }
