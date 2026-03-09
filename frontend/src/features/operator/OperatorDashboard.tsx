@@ -17,7 +17,7 @@ const STAT_CARDS = (stats: { offices: number; rooms: number; capacity: number; p
     { icon: '⏳', label: '승인 대기 예약', value: stats.pending, unit: '건', cls: 'yellow' },
 ];
 
-type ReservationStatus = 'ALL' | 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+type ReservationStatus = 'ALL' | 'PENDING_PAYMENT' | 'PENDING_APPROVAL' | 'CONFIRMED' | 'CANCELED';
 
 export default function OperatorDashboard() {
     const navigate = useNavigate();
@@ -69,7 +69,7 @@ export default function OperatorDashboard() {
             const raw = res.data ?? res;
             const list: Booking[] = raw?.data?.content ?? raw?.content ?? raw?.data ?? raw ?? [];
             setReservations(list);
-            setStats(prev => ({ ...prev, pending: list.filter(r => r.status === 'PENDING').length }));
+            setStats(prev => ({ ...prev, pending: list.filter(r => r.status === 'PENDING_APPROVAL').length }));
         } catch (e) {
             console.error(e);
             // fallback to my bookings
@@ -107,11 +107,11 @@ export default function OperatorDashboard() {
         if (!reason) return;
         try {
             await client.post(`/admin/reservations/${id}/force-cancel`, { adminReason: reason });
-            setReservations(prev => prev.map(r => r.id === id ? { ...r, status: 'CANCELLED' as const } : r));
+            setReservations(prev => prev.map(r => r.id === id ? { ...r, status: 'CANCELED' as const } : r));
         } catch { alert('취소에 실패했습니다.'); }
     };
 
-    const statusLabel = (s: string) => ({ PENDING: '대기', CONFIRMED: '확정', CANCELLED: '취소' }[s] || s);
+    const statusLabel = (s: string) => ({ PENDING_PAYMENT: '결제 대기', PENDING_APPROVAL: '승인 대기', CONFIRMED: '확정', CANCELED: '취소' }[s] || s);
 
     return (
         <div className="operator-dashboard">
@@ -192,9 +192,10 @@ export default function OperatorDashboard() {
                                     </select>
                                     <select className="res-filter-select" value={searchStatus} onChange={e => setSearchStatus(e.target.value as ReservationStatus)}>
                                         <option value="ALL">전체 상태</option>
-                                        <option value="PENDING">대기</option>
+                                        <option value="PENDING_PAYMENT">결제 대기</option>
+                                        <option value="PENDING_APPROVAL">승인 대기</option>
                                         <option value="CONFIRMED">확정</option>
-                                        <option value="CANCELLED">취소</option>
+                                        <option value="CANCELED">취소</option>
                                     </select>
                                     <input
                                         type="text"
@@ -230,8 +231,8 @@ export default function OperatorDashboard() {
                                                         <td><span className={`badge-reservation ${r.status}`}>{statusLabel(r.status)}</span></td>
                                                         <td>
                                                             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                                                {r.status === 'PENDING' && <button className="res-btn-confirm" onClick={() => handleConfirm(r.id)}>확정</button>}
-                                                                {r.status !== 'CANCELLED' && <button className="res-btn-cancel" onClick={() => handleForceCancel(r.id)}>강제취소</button>}
+                                                                {r.status === 'PENDING_APPROVAL' && <button className="res-btn-confirm" onClick={() => handleConfirm(r.id)}>확정</button>}
+                                                                {r.status !== 'CANCELED' && <button className="res-btn-cancel" onClick={() => handleForceCancel(r.id)}>강제취소</button>}
                                                             </div>
                                                         </td>
                                                     </tr>

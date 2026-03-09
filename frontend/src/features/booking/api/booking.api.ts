@@ -10,7 +10,7 @@ export interface Booking {
     customerId: number;
     startAt: string; // ISO LocalDateTime
     endAt: string;   // ISO LocalDateTime
-    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+    status: 'PENDING_PAYMENT' | 'PENDING_APPROVAL' | 'CONFIRMED' | 'CANCELED';
     version?: number;
 }
 
