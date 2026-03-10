@@ -439,6 +439,58 @@ public class ReservationService {
     }
 
     /**
+     * 결제 제한 시간 초과로 인한 자동 취소 (스케줄러 호출용)
+     * <p>
+     * 시스템 주체의 취소이므로 requester 매개변수 없이 처리합니다.
+     * </p>
+     *
+     * @param reservationId 취소할 예약 ID
+     */
+    @Transactional
+    public void cancelUnpaidReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId));
+
+        if (reservation.isCancelled()) {
+            return; // 이미 취소된 경우 무시
+        }
+
+        // 상태 이중 체크 (PENDING_PAYMENT 상태인 경우에만 취소)
+        if (reservation.getStatus() != ReservationStatus.PENDING_PAYMENT) {
+            log.warn("자동 취소 대상이 아닙니다 (상태: {}). reservationId: {}", reservation.getStatus(), reservationId);
+            return;
+        }
+
+        java.util.Map<String, Object> beforeData = com.modu.office.util.ReservationLogConverter.toMap(reservation);
+
+        // 결제 대기 중이므로 토스 취소는 호출 불필요 (단일 환불/금액 처리 없음)
+        reservation.cancel();
+
+        java.util.Map<String, Object> customData = new java.util.HashMap<>();
+        customData.put("adminReason", "결제 제한 시간(10분) 초과로 인한 자동 취소");
+        customData.put("refundRate", 100);
+        customData.put("refundAmount", 0);
+        customData.put("reasonDescriptor", "미결제 자동 취소");
+        customData.put("totalPrice", 0);
+
+        // 시스템 주체 예약 취소 이벤트 설정 (requester는 null)
+        eventPublisher.publishEvent(new com.modu.office.event.ReservationChangedEvent(
+                reservation, beforeData, com.modu.office.entity.enums.LogAction.CANCEL,
+                null, customData));
+
+        // 알림 이벤트 발행
+        eventPublisher.publishEvent(new com.modu.office.event.NotificationEvent(
+                this,
+                reservation.getUser(),
+                com.modu.office.dto.NotificationPayload.of(
+                        NotificationType.RESERVATION_CANCELED,
+                        String.format("[%s] 결제 제한 시간 초과로 예약이 자동 취소되었습니다.", reservation.getOffice().getName()),
+                        "/reservations/" + reservation.getId())));
+
+        log.info("결제 제한 시간 초과 자동 취소 처리 완료 - reservationId: {}", reservationId);
+    }
+
+    /**
      * 관리자 권한 예약 강제 취소 (adminReason 포함)
      * <p>
      * MANAGER 또는 ADMIN이 다른 사용자의 예약을 취소할 때 사용합니다.

@@ -40,6 +40,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         Page<Reservation> findByStatus(ReservationStatus status, Pageable pageable);
 
         /**
+         * 상태와 생성 시간을 기준으로 과거의 예약 목록 조회 (스케줄러용)
+         */
+        List<Reservation> findByStatusAndCreatedAtBefore(ReservationStatus status, LocalDateTime threshold);
+
+        /**
          * 특정 회의실에서 주어진 시간대와 충돌하는 예약 찾기
          * <p>
          * 시간 충돌 조건: (기존예약종료 > 새예약시작) AND (기존예약시작 < 새예약종료)
