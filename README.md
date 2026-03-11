@@ -35,6 +35,16 @@
 |                  | Toss Payments            | 결제 위젯 및 API 연동을 통한 온라인 안전 결제 처리 |
 | **Auxiliary**    | Lombok                   | 보일러플레이트 코드 제거를 통한 생산성 향상       |
 | **Build Tool**   | Gradle                   | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
+| **Documentation**| Spring REST Docs + Swagger| TDD 기반의 신뢰성 높은 자동화 API 명세서          |
+
+---
+
+## 🚀 시작하기 (Getting Started)
+
+### API 문서 (Swagger UI)
+서버 실행 후 아래 주소에서 전체 API 명세 및 테스트 가이드를 확인할 수 있습니다.
+- **URL**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- **참고**: `SWAGGER_TEST_GUIDE.md`의 최신 가이드 내용이 Swagger UI 상단에 자동으로 주입됩니다.
 
 ### Frontend
 

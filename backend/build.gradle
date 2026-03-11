@@ -84,32 +84,70 @@ openapi3 {
     outputFileNamePrefix = 'openapi3'
 }
 
-// openapi3.yaml 파일에 JWT 인증 설정을 추가하는 후처리 태스크
-tasks.register('addSecurityToOpenApi') {
+// openapi3.yaml 파일에 JWT 인증 설정 및 에러 사전을 추가하는 후처리 태스크
+tasks.register('enhanceOpenApi') {
     dependsOn 'openapi3'
     doLast {
-        def openapiFile = file('src/main/resources/static/openapi3.yaml')
+        // 경로 확인 (openapi3 태스크 설정에 따라 다를 수 있음)
+        def openapiFile = file("${projectDir}/src/main/resources/static/openapi3.yaml")
+        if (!openapiFile.exists()) {
+            openapiFile = file("${buildDir}/api-spec/openapi3.yaml")
+        }
+        
         if (openapiFile.exists()) {
+            println "Enhancing OpenAPI spec at: ${openapiFile.absolutePath}"
             def content = openapiFile.getText('UTF-8')
+            
+            // 1. SecuritySchemes 추가
             if (!content.contains('securitySchemes:')) {
-                // components 섹션 내부에 securitySchemes 추가
                 if (content.contains('components:')) {
                     content = content.replace('components:', "components:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT")
                 } else {
                     content += "\ncomponents:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT"
                 }
-                // 전역 보안 요구사항 추가
-                if (!content.contains('security:')) {
-                    content += "\nsecurity:\n  - bearerAuth: []"
-                }
-                openapiFile.setText(content, 'UTF-8')
-                println "Successfully added securitySchemes to openapi3.yaml"
             }
+            
+            // 2. 전역 보안 요구사항 추가
+            if (!content.contains('security:')) {
+                content += "\nsecurity:\n  - bearerAuth: []"
+            }
+            
+            // 3. SWAGGER_TEST_GUIDE.md 주입 (YAML Block Scalar 방식)
+            def guideFile = file("${projectDir}/../SWAGGER_TEST_GUIDE.md")
+            println "Searching for guide file at: ${guideFile.absolutePath}"
+            if (guideFile.exists()) {
+                def guideContent = guideFile.getText("UTF-8")
+                // 4칸 인벤팅 (Yaml format)
+                def indentedGuide = guideContent.split("\n").collect { "    ${it}" }.join("\n")
+                
+                def lines = content.split("\n")
+                def descriptionIndex = -1
+                for (int i = 0; i < Math.min(30, lines.length); i++) {
+                    if (lines[i].contains("description:") && (lines[i].contains("모두의") || lines[i].contains("통합"))) {
+                        descriptionIndex = i
+                        break
+                    }
+                }
+
+                if (descriptionIndex != -1) {
+                    println "Found description at line ${descriptionIndex + 1}, injecting guide..."
+                    lines[descriptionIndex] = "  description: |\n" + indentedGuide
+                    content = lines.join("\n")
+                } else {
+                    println "Warning: Targeted description line not found. Fallback to replaceFirst."
+                    content = content.replaceFirst(/(?m)^[ ]*description: .*/, "  description: |\n" + indentedGuide)
+                }
+            }
+
+            openapiFile.setText(content, 'UTF-8')
+            println "Successfully enhanced openapi3.yaml (Size: ${content.length()} bytes)"
+        } else {
+            println "Error: openapi3.yaml not found at any expected location."
         }
     }
 }
 
-// openapi3 태스크가 끝나면 무조건 addSecurityToOpenApi 실행
+// openapi3 태스크가 끝나면 무조건 enhanceOpenApi 실행
 tasks.matching { it.name == 'openapi3' }.configureEach {
-    finalizedBy 'addSecurityToOpenApi'
+    finalizedBy 'enhanceOpenApi'
 }
