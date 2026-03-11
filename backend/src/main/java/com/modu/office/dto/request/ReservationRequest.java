@@ -48,6 +48,7 @@ public class ReservationRequest {
      * 
      * @AssertTrue 메서드명은 반드시 'is'로 시작해야 Bean Validation이 인식함.
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @AssertTrue(message = "종료 시간은 시작 시간 이후여야 합니다.")
     public boolean isEndAtAfterStartAt() {
         if (startAt == null || endAt == null)

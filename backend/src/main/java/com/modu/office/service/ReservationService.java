@@ -10,7 +10,6 @@ import com.modu.office.entity.Room;
 import com.modu.office.entity.Reservation;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.UserRole;
-import com.modu.office.exception.InvalidTimeUnitException;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.RoomRepository;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -48,6 +46,7 @@ public class ReservationService {
     private final com.modu.office.repository.CancellationPolicyRepository cancellationPolicyRepository;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
     private final PaymentService paymentService;
+    private final com.modu.office.service.validator.ReservationValidator reservationValidator;
 
     /**
      * 새 예약 생성
@@ -60,11 +59,10 @@ public class ReservationService {
     @Transactional
     public ReservationResponse createReservation(ReservationRequest request) {
         try {
-            // 1. 시간 범위 유효성 검증
-            validateTimeRange(request.getStartAt(), request.getEndAt());
-
-            // 1-1. 30분 단위 검증
-            validateTimeUnit(request.getStartAt(), request.getEndAt());
+            // 1. 과거 예약 여부 검증 (DTO에서 못하는 TimeRange 일부)
+            if (request.getStartAt() != null && request.getStartAt().isBefore(LocalDateTime.now())) {
+                throw new IllegalArgumentException("시작 시간은 현재 시간 이후여야 합니다.");
+            }
 
             // 2. 관련 엔티티 존재 확인
             Office office = officeRepository
@@ -79,14 +77,10 @@ public class ReservationService {
             AppUser user = appUserRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
-            // 3. 영업시간 및 휴무일 검증 (기존 내부 메서드 활용)
-            validateBusinessHours(office, request.getStartAt(), request.getEndAt());
-            validateOpenDays(office, request.getStartAt());
-
-            // 4. 예약자 확인 및 권한 검증 (여기서는 userRole만 확인)
-            if (user.getRole() != UserRole.USER) {
-                throw new IllegalArgumentException("일반 사용자만 예약할 수 있습니다.");
-            }
+            // 3. Rule Validator를 통한 비즈니스 규칙 검증 (시간단위, 영업시간, 휴무일, 권한 등)
+            com.modu.office.service.validator.ReservationValidationContext context = 
+                    com.modu.office.service.validator.ReservationValidationContext.forCreation(request, office, room, user);
+            reservationValidator.validate(context);
 
             // 5. 정비 시간(bufferTime)을 포함한 실제 점유 종료 시간 계산
             LocalDateTime endAtIncludeBufferTime = request.getEndAt().plusMinutes(room.getBufferTime());
@@ -194,12 +188,15 @@ public class ReservationService {
 
             // 시간 수정
             if (request.getStartAt() != null && request.getEndAt() != null) {
-                validateTimeRange(request.getStartAt(), request.getEndAt());
-                validateTimeUnit(request.getStartAt(), request.getEndAt());
+                if (request.getStartAt().isBefore(LocalDateTime.now())) {
+                    throw new IllegalArgumentException("시작 시간은 현재 시간 이후여야 합니다.");
+                }
 
-                // 영업시간 및 휴무일 검증
-                validateBusinessHours(reservation.getOffice(), request.getStartAt(), request.getEndAt());
-                validateOpenDays(reservation.getOffice(), request.getStartAt());
+                // Rule Validator를 통한 비즈니스 규칙 검증
+                com.modu.office.service.validator.ReservationValidationContext context = 
+                        com.modu.office.service.validator.ReservationValidationContext.forUpdate(
+                                request, reservation.getOffice(), reservation.getRoom(), requester);
+                reservationValidator.validate(context);
 
                 // 정비 시간(bufferTime)을 포함한 실제 점유 종료 시간 계산
                 LocalDateTime endAtIncludeBufferTime = request.getEndAt()
@@ -566,58 +563,6 @@ public class ReservationService {
     }
 
     /**
-     * 시간 범위 유효성 검증
-     */
-    private void validateTimeRange(LocalDateTime startAt, LocalDateTime endAt) {
-        java.util.Objects.requireNonNull(startAt, "시작 시간은 필수입니다.");
-        java.util.Objects.requireNonNull(endAt, "종료 시간은 필수입니다.");
-
-        if (endAt.isBefore(startAt) || endAt.isEqual(startAt)) {
-            throw new IllegalArgumentException("종료 시간은 시작 시간 이후여야 합니다.");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        if (startAt.isBefore(now)) {
-            throw new IllegalArgumentException("시작 시간은 현재 시간 이후여야 합니다.");
-        }
-    }
-
-    /**
-     * 예약 시간 단위 검증 (30분 단위 강제)
-     * Why: 자투리 시간(10/15분 단위) 발생을 차단하여 회의실 운영 효율(Utilization) 최대화.
-     */
-    private void validateTimeUnit(LocalDateTime startAt, LocalDateTime endAt) {
-        int startMin = startAt.getMinute();
-        int endMin = endAt.getMinute();
-        if (startMin != 0 && startMin != 30) {
-            throw new InvalidTimeUnitException("예약 시작 시간은 정각 또는 30분이어야 합니다. (현재: " + startMin + "분)");
-        }
-        if (endMin != 0 && endMin != 30) {
-            throw new InvalidTimeUnitException("예약 종료 시간은 정각 또는 30분이어야 합니다. (현재: " + endMin + "분)");
-        }
-    }
-
-    /**
-     * 영업시간 검증 (Overnight 차단 포함)
-     * Why: 날짜가 다른 경우(자정 초과 예약) 영업시간 비교가 무의미해지므로 먼저 차단.
-     */
-    private void validateBusinessHours(Office office, LocalDateTime startAt, LocalDateTime endAt) {
-        // [추가] Overnight 차단: 종료 날짜가 시작 날짜보다 큰 경우 (자정 넘기는 예약)
-        if (!endAt.toLocalDate().equals(startAt.toLocalDate())) {
-            throw new IllegalArgumentException("자정을 넘기는 예약(Overnight)은 불가능합니다.");
-        }
-
-        LocalTime startTime = startAt.toLocalTime();
-        LocalTime endTime = endAt.toLocalTime();
-
-        if (startTime.isBefore(office.getOpenTime()) || endTime.isAfter(office.getCloseTime())) {
-            throw new IllegalArgumentException(
-                    String.format("영업시간(%s~%s) 외 예약은 불가능합니다.",
-                            office.getOpenTime(), office.getCloseTime()));
-        }
-    }
-
-    /**
      * 예약 소유권 검증 (IDOR 방어)
      * Why: .authenticated()만으로는 로그인한 타인이 다른 사람의 예약 조회/수정/취소 가능.
      * ADMIN은 운영 목적상 모든 예약에 접근 허용.
@@ -628,35 +573,6 @@ public class ReservationService {
         boolean isOwner = reservation.getUser().getId().equals(requester.getId());
         if (!isAdmin && !isOwner) {
             throw new AccessDeniedException("해당 예약에 접근할 권한이 없습니다.");
-        }
-    }
-
-    /**
-     * 휴무일 검증
-     * <p>
-     * 예약일이 지점의 영업 요일(open_days) 내에 있는지 검증합니다.
-     * </p>
-     *
-     * @param office  지점 정보
-     * @param startAt 예약 시작 시간
-     */
-    private void validateOpenDays(Office office, LocalDateTime startAt) {
-        if (office.getOpenDays() == null || office.getOpenDays().length == 0) {
-            return;
-        }
-
-        // 1=Mon ... 7=Sun (ISO-8601 day of week)
-        int dayOfWeek = startAt.getDayOfWeek().getValue();
-        boolean isOpen = false;
-        for (short openDay : office.getOpenDays()) {
-            if (openDay == dayOfWeek) {
-                isOpen = true;
-                break;
-            }
-        }
-
-        if (!isOpen) {
-            throw new IllegalArgumentException(String.format("해당 요일(%s)은 지점의 휴무일입니다.", startAt.getDayOfWeek()));
         }
     }
 }
