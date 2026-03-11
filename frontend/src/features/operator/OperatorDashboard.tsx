@@ -8,7 +8,19 @@ import StatsDashboard from './StatsDashboard';
 import './OperatorDashboard.css';
 import './StatsDashboard.css';
 
-type Tab = 'OFFICES' | 'RESERVATIONS' | 'STATS';
+type Tab = 'OFFICES' | 'RESERVATIONS' | 'STATS' | 'REPORTS';
+
+interface FacilityReport {
+    reportId: number;
+    reservationId: number;
+    facilityId: number;
+    facilityName: string;
+    issueType: string;
+    issueTypeName: string;
+    status: 'REPORTED' | 'IN_PROGRESS' | 'RESOLVED' | 'CANCELED';
+    statusName: string;
+    createdAt: string;
+}
 
 const STAT_CARDS = (stats: { offices: number; rooms: number; capacity: number; pending: number }) => [
     { icon: '🏢', label: '운영 중인 오피스', value: stats.offices, unit: '개', cls: 'blue' },
@@ -33,6 +45,11 @@ export default function OperatorDashboard() {
     const [searchStartDate, setSearchStartDate] = useState('');
     const [searchEndDate, setSearchEndDate] = useState('');
     const [searchOfficeId, setSearchOfficeId] = useState<number | ''>('');
+
+    // 신고 관련
+    const [reports, setReports] = useState<FacilityReport[]>([]);
+    const [reportOfficeId, setReportOfficeId] = useState<number | ''>('');
+    const [reportLoading, setReportLoading] = useState(false);
 
     useEffect(() => { loadOffices(); }, []);
 
@@ -84,6 +101,7 @@ export default function OperatorDashboard() {
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab);
         if (tab === 'RESERVATIONS') loadReservations();
+        if (tab === 'REPORTS') loadReports();
     };
 
     const handleDeleteOffice = async (office: Office) => {
@@ -92,6 +110,31 @@ export default function OperatorDashboard() {
             await officeApi.deleteOffice(office.id);
             setOffices(prev => prev.filter(o => o.id !== office.id));
         } catch { alert('삭제에 실패했습니다.'); }
+    };
+
+    // 신고 내역 조회
+    const loadReports = async () => {
+        setReportLoading(true);
+        try {
+            const officeId = reportOfficeId || (offices[0]?.id ?? null);
+            if (!officeId) { setReports([]); return; }
+            const res = await client.get<any>(`/offices/${officeId}/reports`);
+            const raw = res?.data ?? res;
+            const list: FacilityReport[] = Array.isArray(raw) ? raw
+                : Array.isArray(raw?.data) ? raw.data : [];
+            setReports(list);
+        } catch { setReports([]); }
+        finally { setReportLoading(false); }
+    };
+
+    // 신고 상태 변경
+    const handleReportStatus = async (reportId: number, newStatus: 'IN_PROGRESS' | 'RESOLVED') => {
+        try {
+            await client.patch(`/reports/${reportId}/status`, { status: newStatus });
+            setReports(prev => prev.map(r =>
+                r.reportId === reportId ? { ...r, status: newStatus, statusName: newStatus === 'IN_PROGRESS' ? '처리 중' : '해결' } : r
+            ));
+        } catch { alert('상태 변경에 실패했습니다.'); }
     };
 
     const handleConfirm = async (id: number) => {
@@ -135,14 +178,76 @@ export default function OperatorDashboard() {
 
             {/* Tabs */}
             <div className="op-tabs">
-                <button className={`op-tab-btn ${activeTab === 'OFFICES' ? 'active' : ''}`} onClick={() => handleTabChange('OFFICES')}>🏢 오피스 관리</button>
-                <button className={`op-tab-btn ${activeTab === 'RESERVATIONS' ? 'active' : ''}`} onClick={() => handleTabChange('RESERVATIONS')}>📋 예약 관리</button>
-                <button className={`op-tab-btn ${activeTab === 'STATS' ? 'active' : ''}`} onClick={() => handleTabChange('STATS')}>📊 통계 대시보드</button>
+                <button className={'op-tab-btn' + (activeTab === 'OFFICES' ? ' active' : '')} onClick={() => handleTabChange('OFFICES')}>🏢 오피스 관리</button>
+                <button className={'op-tab-btn' + (activeTab === 'RESERVATIONS' ? ' active' : '')} onClick={() => handleTabChange('RESERVATIONS')}>📋 예약 관리</button>
+                <button className={'op-tab-btn' + (activeTab === 'REPORTS' ? ' active' : '')} onClick={() => handleTabChange('REPORTS')}>🔧 시설 신고</button>
+                <button className={'op-tab-btn' + (activeTab === 'STATS' ? ' active' : '')} onClick={() => handleTabChange('STATS')}>📊 통계 대시보드</button>
             </div>
 
-            {/* Stats Tab (rendered outside loading block) */}
+            {/* Stats Tab */}
             {activeTab === 'STATS' && <StatsDashboard />}
 
+            {/* Reports Tab */}
+            {activeTab === 'REPORTS' && (
+                <div>
+                    {/* 오피스 선택 + 조회 */}
+                    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', alignItems: 'center' }}>
+                        <select
+                            className="res-filter-select"
+                            value={reportOfficeId}
+                            onChange={e => setReportOfficeId(e.target.value ? Number(e.target.value) : '')}
+                        >
+                            <option value="">오피스 선택...</option>
+                            {offices.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                        </select>
+                        <button className="res-search-btn" onClick={loadReports}>조회</button>
+                    </div>
+
+                    {reportLoading ? (
+                        <div className="op-empty"><p>로딩 중...</p></div>
+                    ) : reports.length === 0 ? (
+                        <div className="op-empty"><p>신고 내역이 없습니다.</p></div>
+                    ) : (
+                        <div className="op-table-wrap">
+                            <table className="op-table">
+                                <thead>
+                                    <tr>
+                                        <th>신고 ID</th>
+                                        <th>시설명</th>
+                                        <th>문제 유형</th>
+                                        <th>신고 일시</th>
+                                        <th>상태</th>
+                                        <th style={{ textAlign: 'center' }}>처리</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {reports.map(r => (
+                                        <tr key={r.reportId}>
+                                            <td style={{ color: '#94a3b8', fontSize: '0.82rem' }}>#{r.reportId}</td>
+                                            <td style={{ fontWeight: 600 }}>{r.facilityName}</td>
+                                            <td style={{ color: '#64748b' }}>{r.issueTypeName}</td>
+                                            <td style={{ color: '#94a3b8', fontSize: '0.82rem' }}>{new Date(r.createdAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                                            <td>
+                                                <span className={'report-op-badge ' + r.status}>{r.statusName}</span>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                                    {r.status === 'REPORTED' && (
+                                                        <button className="res-btn-confirm" onClick={() => handleReportStatus(r.reportId, 'IN_PROGRESS')}>처리 시작</button>
+                                                    )}
+                                                    {r.status === 'IN_PROGRESS' && (
+                                                        <button className="res-btn-confirm" style={{ background: '#10b981' }} onClick={() => handleReportStatus(r.reportId, 'RESOLVED')}>해결</button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
             {activeTab !== 'STATS' && (
                 loading ? (
                     <div className="op-empty"><p>로딩 중...</p></div>

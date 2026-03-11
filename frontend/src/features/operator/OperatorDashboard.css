@@ -297,3 +297,19 @@
 }
 
 .res-search-btn:hover { opacity: 0.85; }
+
+/* 신고 상태 뱃지 (운영자) */
+.report-op-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.report-op-badge.REPORTED    { background: #fffbeb; color: #b45309; }
+.report-op-badge.IN_PROGRESS { background: #eff6ff; color: #1d4ed8; }
+.report-op-badge.RESOLVED    { background: #f0fdf4; color: #15803d; }
+.report-op-badge.CANCELED    { background: #f8fafc; color: #94a3b8; }
+

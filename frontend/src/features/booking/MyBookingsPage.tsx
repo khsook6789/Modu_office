@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { client } from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { reportApi, type FacilityReport } from '../reports/api/report.api';
+import FacilityReportModal from '../reports/components/FacilityReportModal';
 import './MyBookings.css';
+import '../reports/components/FacilityReportModal.css';
 
 interface ReservationResponse {
     id: number;
@@ -27,6 +30,12 @@ interface ApiResponse<T> {
     data: T;
 }
 
+interface ReportModalTarget {
+    roomId: number;
+    reservationId: number;
+    facilities: { id: number; facilityName: string }[];
+}
+
 export default function MyBookingsPage() {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -46,6 +55,28 @@ export default function MyBookingsPage() {
     } | null>(null);
     const [cancellingId, setCancellingId] = useState<number | null>(null);
 
+    // 신고 관련 상태
+    const [reportModalTarget, setReportModalTarget] = useState<ReportModalTarget | null>(null);
+    const [reportsMap, setReportsMap] = useState<Record<number, FacilityReport[]>>({});
+    const [expandedReports, setExpandedReports] = useState<Set<number>>(new Set());
+
+    // PENDING_PAYMENT 카운트다운 (초 단위 남은 시간)
+    const [countdowns, setCountdowns] = useState<Record<number, number>>({});
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // 10분(600초) 카운트다운 계산
+    const calcCountdowns = useCallback((list: ReservationResponse[]) => {
+        const now = Date.now();
+        const map: Record<number, number> = {};
+        list.forEach(b => {
+            if (b.status === 'PENDING_PAYMENT') {
+                const expiry = new Date(b.createdAt).getTime() + 10 * 60 * 1000;
+                map[b.id] = Math.max(0, Math.floor((expiry - now) / 1000));
+            }
+        });
+        return map;
+    }, []);
+
     useEffect(() => {
         if (user?.id) loadBookings();
     }, [user]);
@@ -57,24 +88,89 @@ export default function MyBookingsPage() {
             const response = await client.get<ApiResponse<ReservationResponse[]>>(
                 `/reservations?userId=${user!.id}`
             );
-            // 응답이 배열이거나 data 안에 있는 경우 모두 처리
             const raw = response as any;
             const list: ReservationResponse[] = Array.isArray(raw) ? raw
                 : Array.isArray(raw?.data) ? raw.data
                     : Array.isArray(raw?.data?.content) ? raw.data.content
                         : [];
-            setBookings([...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+            const sorted = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            setBookings(sorted);
+
+            // 카운트다운 초기화 + 인터밸 시작
+            if (timerRef.current) clearInterval(timerRef.current);
+            const hasPending = sorted.some(b => b.status === 'PENDING_PAYMENT');
+            if (hasPending) {
+                setCountdowns(calcCountdowns(sorted));
+                timerRef.current = setInterval(() => {
+                    setCountdowns(calcCountdowns(sorted));
+                }, 1000);
+            }
         } catch (err: any) {
             console.error('Failed to load bookings:', err);
             setError('예약 목록을 불러오는 데 실패했습니다. (데이터가 없거나 서버 오류)');
-            setBookings([]);  // 에러여도 빈 목록으로 표시
+            setBookings([]);
         } finally {
             setIsLoading(false);
         }
     };
 
+    // 언마운트 시 인터밸 정리
+    useEffect(() => {
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, []);
+
+
+    // 신고 내역 조회
+    const loadReports = async (reservationId: number) => {
+        try {
+            const reports = await reportApi.getMyReports(reservationId);
+            setReportsMap(prev => ({ ...prev, [reservationId]: reports }));
+        } catch {
+            setReportsMap(prev => ({ ...prev, [reservationId]: [] }));
+        }
+    };
+
+    // 신고 내역 펼치기/접기
+    const toggleReports = (reservationId: number) => {
+        setExpandedReports(prev => {
+            const next = new Set(prev);
+            if (next.has(reservationId)) {
+                next.delete(reservationId);
+            } else {
+                next.add(reservationId);
+                if (!reportsMap[reservationId]) {
+                    loadReports(reservationId);
+                }
+            }
+            return next;
+        });
+    };
+
+    // 신고 철회
+    const handleWithdrawReport = async (reportId: number, reservationId: number) => {
+        try {
+            await reportApi.cancelReport(reportId);
+            await loadReports(reservationId);
+        } catch (err: any) {
+            alert('신고 철회 실패: ' + (err?.message || '서버 오류'));
+        }
+    };
+
+    // 방의 시설 목록 조회 후 신고 모달 열기
+    const handleOpenReportModal = async (booking: ReservationResponse) => {
+        try {
+            const res = await client.get<any>(`/rooms/${booking.roomId}`);
+            const raw = res?.data ?? res;
+            const roomData = raw?.data ?? raw;
+            const facilities: { id: number; facilityName: string }[] =
+                (roomData?.facilities ?? []).map((f: any) => ({ id: f.id, facilityName: f.facilityName }));
+            setReportModalTarget({ roomId: booking.roomId, reservationId: booking.id, facilities });
+        } catch {
+            setReportModalTarget({ roomId: booking.roomId, reservationId: booking.id, facilities: [] });
+        }
+    };
+
     const handleCancel = async (bookingId: number) => {
-        // 1. 환불 예상액 먼저 조회
         try {
             const res = await client.get<any>(`/reservations/${bookingId}/refund-preview`);
             const raw = res?.data ?? res;
@@ -88,11 +184,9 @@ export default function MyBookingsPage() {
                 reasonDescriptor: preview.reasonDescriptor ?? '',
             });
         } catch {
-            // 환불 정보 조회 실패 시 그냥 확인 묻기
             if (window.confirm('정말로 이 예약을 취소하시겠습니까?')) {
                 await doCancel(bookingId);
             }
-        } finally {
         }
     };
 
@@ -173,6 +267,7 @@ export default function MyBookingsPage() {
                     </div>
                 </div>
             )}
+
             {/* Header */}
             <div className="bookings-header">
                 <h1 className="bookings-title">내 <span>예약</span> 내역</h1>
@@ -216,7 +311,7 @@ export default function MyBookingsPage() {
                 {[['ALL', '전체'], ['PENDING_PAYMENT', '결제 대기'], ['PENDING_APPROVAL', '승인 대기'], ['CONFIRMED', '확정'], ['CANCELED', '취소']].map(([v, l]) => (
                     <button
                         key={v}
-                        className={`book-filter-btn ${filter === v ? 'active' : ''}`}
+                        className={'book-filter-btn' + (filter === v ? ' active' : '')}
                         onClick={() => setFilter(v as any)}
                     >{l}</button>
                 ))}
@@ -235,11 +330,26 @@ export default function MyBookingsPage() {
                         const isPast = new Date(booking.endAt) < today;
                         const canCancel = booking.status !== 'CANCELED' && !isPast;
 
+                        // 신고 버튼: CONFIRMED + 예약 시작 이후
+                        const hasStarted = new Date(booking.startAt) <= today;
+                        const canReport = booking.status === 'CONFIRMED' && hasStarted;
+                        const isReportsExpanded = expandedReports.has(booking.id);
+                        const bookingReports = reportsMap[booking.id] ?? [];
+                        const activeReportCount = bookingReports.filter(r => r.status !== 'CANCELED').length;
+
+                        // 결제 카운트다운
+                        const secsLeft = countdowns[booking.id];
+                        const isExpired = secsLeft === 0;
+                        const isUrgent = secsLeft !== undefined && secsLeft <= 180;
+                        const timerLabel = secsLeft !== undefined
+                            ? (isExpired ? '⏰ 만료됨 (잠시 후 자동 취소)' : ('⏱ 결제 마감: ' + String(Math.floor(secsLeft / 60)).padStart(2, '0') + ':' + String(secsLeft % 60).padStart(2, '0')))
+                            : null;
+
                         return (
-                            <div key={booking.id} className={`booking-card ${cls === 'CANCELED' || cls === 'DONE' ? 'muted' : ''}`}>
+                            <div key={booking.id} className={'booking-card' + (cls === 'CANCELED' || cls === 'DONE' ? ' muted' : '')}>
                                 <div className="booking-card-left">
                                     <div className="booking-card-top">
-                                        <span className={`booking-badge ${cls}`}>{label}</span>
+                                        <span className={'booking-badge ' + cls}>{label}</span>
                                         <span className="booking-date-created">{booking.createdAt.substring(0, 10)} 예약</span>
                                     </div>
                                     <h3 className="booking-room-name">
@@ -251,7 +361,37 @@ export default function MyBookingsPage() {
                                         <span>🏢 {booking.officeName}</span>
                                         <span>🕐 {new Date(booking.startAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} ~ {new Date(booking.endAt).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
+
+                                    {/* 결제 카운트다운 배너 */}
+                                    {booking.status === 'PENDING_PAYMENT' && timerLabel && (
+                                        <div className={'payment-timer' + (isExpired ? ' expired' : isUrgent ? ' urgent' : '')}>
+                                            {timerLabel}
+                                        </div>
+                                    )}
+                                    {/* 신고 내역 인라인 */}
+                                    {isReportsExpanded && (
+                                        <div className="report-list">
+                                            {bookingReports.length === 0 ? (
+                                                <p style={{ color: '#64748b', fontSize: '0.8rem', padding: '0.35rem 0' }}>신고 내역이 없습니다.</p>
+                                            ) : bookingReports.map(report => (
+                                                <div key={report.reportId} className="report-item">
+                                                    <div className="report-item-info">
+                                                        <span className="report-item-name">{report.facilityName}</span>
+                                                        <span className="report-item-issue"> · {report.issueTypeName}</span>
+                                                    </div>
+                                                    <span className={'report-status-badge ' + report.status}>{report.statusName}</span>
+                                                    {report.status === 'REPORTED' && (
+                                                        <button
+                                                            className="report-withdraw-btn"
+                                                            onClick={() => handleWithdrawReport(report.reportId, booking.id)}
+                                                        >철회</button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
+
                                 <div className="booking-card-right">
                                     <div className="booking-price">
                                         {booking.totalPrice != null
@@ -259,6 +399,24 @@ export default function MyBookingsPage() {
                                             : <span className="price-unknown">가격 미정</span>
                                         }
                                     </div>
+                                    {canReport && (
+                                        <button
+                                            className="booking-cancel-btn"
+                                            style={{ background: 'linear-gradient(135deg,#0ea5e9,#6366f1)', borderColor: 'transparent', color: '#fff', marginBottom: '0.5rem' }}
+                                            onClick={() => handleOpenReportModal(booking)}
+                                        >
+                                            🔧 고장 신고
+                                        </button>
+                                    )}
+                                    {canReport && (
+                                        <button
+                                            className="booking-cancel-btn"
+                                            style={{ background: 'transparent', fontSize: '0.78rem', padding: '0.4rem 0.875rem', marginBottom: '0.5rem' }}
+                                            onClick={() => toggleReports(booking.id)}
+                                        >
+                                            {isReportsExpanded ? '▲ 신고 내역 닫기' : ('📋 신고 내역' + (activeReportCount > 0 ? ' (' + activeReportCount + ')' : ''))}
+                                        </button>
+                                    )}
                                     {canCancel && (
                                         <button className="booking-cancel-btn" onClick={() => handleCancel(booking.id)}>
                                             예약 취소
@@ -269,6 +427,26 @@ export default function MyBookingsPage() {
                         );
                     })}
                 </div>
+            )}
+
+            {/* 신고 모달 */}
+            {reportModalTarget && (
+                <FacilityReportModal
+                    roomId={reportModalTarget.roomId}
+                    reservationId={reportModalTarget.reservationId}
+                    facilities={reportModalTarget.facilities}
+                    onClose={() => setReportModalTarget(null)}
+                    onSuccess={() => {
+                        if (reportModalTarget) {
+                            loadReports(reportModalTarget.reservationId);
+                            setExpandedReports(prev => {
+                                const next = new Set(prev);
+                                next.add(reportModalTarget.reservationId);
+                                return next;
+                            });
+                        }
+                    }}
+                />
             )}
         </div>
     );
