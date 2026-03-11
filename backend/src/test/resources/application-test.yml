@@ -12,6 +12,8 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+    mapping-resources:
+      - META-INF/orm.xml
     properties:
       hibernate:
         "[format_sql]": true
@@ -52,6 +54,9 @@ app:
     secret: "dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXktdGVzdC1zZWNyZXQta2V5"
     access-token-expiration-milliseconds: 3600000
     refresh-token-expiration-milliseconds: 604800000
+  toss-payments:
+    base-url: "https://api.tosspayments.com"
+    secret-key: "test_sk_abc123"
 
 google:
   maps:

@@ -42,7 +42,20 @@ public class TestSecurityConfig {
                                 "/api/reviews/room/**")
                         .permitAll()
                         // 나머지 - 인증 필요
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter()
+                                    .write("{\"status\":\"ERROR\",\"code\":\"401\",\"message\":\"인증이 필요합니다.\",\"data\":null}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter()
+                                    .write("{\"status\":\"ERROR\",\"code\":\"403\",\"message\":\"접근 권한이 없습니다.\",\"data\":null}");
+                        }));
 
         return http.build();
     }

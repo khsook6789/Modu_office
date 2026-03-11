@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+                 version="3.0">
+    
+    <entity class="com.modu.office.entity.Account">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="loginType">
+                <column name="login_type" length="20" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="status">
+                <column name="status" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="com.modu.office.entity.AppUser">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="role">
+                <column name="role" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="approvalStatus">
+                <column name="approval_status"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="com.modu.office.entity.Reservation">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="status">
+                <column name="status" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="com.modu.office.entity.Room">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="status">
+                <column name="status" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="com.modu.office.entity.FacilityReport">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="issueType">
+                <column name="issue_type" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="status">
+                <column name="status" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="com.modu.office.entity.UpdateLog">
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="action">
+                <column name="action" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="beforeData">
+                <column name="before_data" column-definition="TEXT"/>
+                <convert converter="com.modu.office.test.util.TestJsonConverter"/>
+            </basic>
+            <basic name="afterData">
+                <column name="after_data" column-definition="TEXT"/>
+                <convert converter="com.modu.office.test.util.TestJsonConverter"/>
+            </basic>
+        </attributes>
+    </entity>
+
+</entity-mappings>
