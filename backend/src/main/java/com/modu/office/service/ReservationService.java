@@ -448,7 +448,7 @@ public class ReservationService {
      */
     @Transactional
     public void cancelUnpaidReservation(Long reservationId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findById(java.util.Objects.requireNonNull(reservationId, "예약 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId));
 
         if (reservation.isCancelled()) {
