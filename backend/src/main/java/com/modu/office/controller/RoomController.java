@@ -72,6 +72,15 @@ public class RoomController {
     }
 
     /**
+     * 유사 회의실 목록 추천
+     */
+    @GetMapping("/rooms/{roomId}/similar")
+    public ResponseEntity<ApiResponse<java.util.List<RoomResponse>>> getSimilarRooms(@PathVariable Long roomId) {
+        java.util.List<RoomResponse> response = roomService.getSimilarRooms(roomId);
+        return ResponseEntity.ok(ApiResponse.success("유사 회의실 목록을 성공적으로 조회했습니다.", response));
+    }
+
+    /**
      * 고급 회의실 검색 (예약 가능 여부, 위치, 편의시설 등)
      */
     /**

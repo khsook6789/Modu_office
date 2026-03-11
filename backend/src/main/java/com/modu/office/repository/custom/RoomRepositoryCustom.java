@@ -18,4 +18,14 @@ public interface RoomRepositoryCustom {
      * @return 검색된 회의실 목록 (페이징)
      */
     Page<Room> searchRooms(RoomSearchCondition condition, Pageable pageable);
+
+    /**
+     * 유사 회의실 후보군 조회 (인원수 기준 및 예약 이력 기반)
+     *
+     * @param targetRoomId     기준 회의실 ID
+     * @param targetCapacity   기준 회의실의 수용 인원
+     * @param limit            조회 최대 개수
+     * @return 후보군 회의실 목록
+     */
+    java.util.List<Room> findSimilarRoomCandidates(Long targetRoomId, Integer targetCapacity, int limit);
 }
