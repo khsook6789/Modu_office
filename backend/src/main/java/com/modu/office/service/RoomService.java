@@ -114,7 +114,78 @@ public class RoomService {
     }
 
     /**
+     * 특정 회의실과 유사한 회의실 목록 추천
+     * 인원수 ±2명 필터, 예약 통계(협업 필터링), 위치(거리) 가점, 시설 유사도 가점 반영
+     */
+    public List<RoomResponse> getSimilarRooms(Long roomId) {
+        Room targetRoom = roomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
+
+        // 1. 후보군 추출 (DB 단계: 무조건 AVAILABLE, 인원수 필터, 예약 통계 순으로 정렬되어 옴)
+        List<Room> candidates = roomRepository.findSimilarRoomCandidates(roomId, targetRoom.getCapacity(), 20);
+
+        // 타겟 방의 시설 ID 목록 추출 (비교용)
+        List<Long> targetFacilityIds = targetRoom.getRoomFacilities().stream()
+                .map(rf -> rf.getFacility().getId())
+                .collect(Collectors.toList());
+
+        // 2. 가중치 적용 및 정렬
+        java.util.concurrent.atomic.AtomicInteger rank = new java.util.concurrent.atomic.AtomicInteger(0);
+        return candidates.stream()
+                .map(candidate -> {
+                    // DB에서 높은 순위(협업 필터링 점수 높음)로 올수록 Rank 가점 부여 (20등=5점 ~ 1등=100점)
+                    int popularityScore = (20 - rank.getAndIncrement()) * 5;
+                    double score = calculateSimilarityScore(candidate, targetRoom, targetFacilityIds, popularityScore);
+                    return new java.util.AbstractMap.SimpleEntry<>(candidate, score);
+                })
+                .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue())) // 점수 내림차순 정렬
+                .limit(5) // 최종 Top 5
+                .map(entry -> buildRoomResponseWithFacilities(entry.getKey()))
+                .collect(Collectors.toList());
+    }
+
+    private double calculateSimilarityScore(Room candidate, Room targetRoom, List<Long> targetFacilityIds,
+            int popularityScore) {
+        double score = popularityScore;
+
+        Office targetOffice = targetRoom.getOffice();
+        Office candidateOffice = candidate.getOffice();
+
+        // 위치 가점 (Distance Score - 최우선순위)
+        if (targetOffice.getId().equals(candidateOffice.getId())) {
+            // 동일 지점 보너스 150 + 최고 근접 점수 300 = 450점
+            score += 450.0;
+        } else if (targetOffice.getLatitude() != null && targetOffice.getLongitude() != null
+                && candidateOffice.getLatitude() != null && candidateOffice.getLongitude() != null) {
+            double distance = calculateHaversineDistance(
+                    targetOffice.getLatitude(), targetOffice.getLongitude(),
+                    candidateOffice.getLatitude(), candidateOffice.getLongitude());
+            score += 150.0 / (distance + 0.5); // 거리가 가까울수록 최대 300점
+        }
+
+        // 시설 매칭 (Facility Score)
+        long matchingFacilitiesCount = candidate.getRoomFacilities().stream()
+                .filter(rf -> targetFacilityIds.contains(rf.getFacility().getId()))
+                .count();
+        score += matchingFacilitiesCount * 10.0;
+
+        return score;
+    }
+
+    private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // 지구 반지름 (km)
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                        * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    /**
      * 지정된 모든 시설을 보유한 회의실 검색 (AND 검색)
+     * 
      * 
      * @param officeId    지점 ID
      * @param facilityIds 필요한 시설 ID 목록

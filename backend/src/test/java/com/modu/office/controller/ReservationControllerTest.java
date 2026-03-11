@@ -118,11 +118,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                                                                 .description("예약 시작 시간 (ISO_DATE_TIME)"),
                                                                                 fieldWithPath("endAt").type(
                                                                                                 JsonFieldType.STRING)
-                                                                                                .description("예약 종료 시간 (ISO_DATE_TIME)"),
-                                                                                fieldWithPath("endAtAfterStartAt").type(
-                                                                                                JsonFieldType.BOOLEAN)
-                                                                                                .description("종료 시간 검증 로직용")
-                                                                                                .ignored())
+                                                                                                .description("예약 종료 시간 (ISO_DATE_TIME)"))
                                                                 .build())));
         }
 

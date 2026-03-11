@@ -47,6 +47,18 @@ class ReservationServiceTest {
         @Mock
         private ApplicationEventPublisher eventPublisher;
 
+        @org.mockito.Spy
+        private com.modu.office.service.validator.ReservationValidator reservationValidator = 
+            new com.modu.office.service.validator.ReservationValidator(
+                java.util.List.of(
+                    new com.modu.office.service.validator.rule.TimeUnitRule(),
+                    new com.modu.office.service.validator.rule.BusinessHoursRule(),
+                    new com.modu.office.service.validator.rule.OpenDaysRule(),
+                    new com.modu.office.service.validator.rule.UserRoleRule(),
+                    new com.modu.office.service.validator.rule.LeadTimeRule()
+                )
+            );
+
         @InjectMocks
         private ReservationService reservationService;
 

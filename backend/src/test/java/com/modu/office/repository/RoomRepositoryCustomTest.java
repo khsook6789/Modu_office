@@ -369,4 +369,80 @@ class RoomRepositoryCustomTest {
                 assertThat(content).extracting("name")
                                 .containsSubsequence("Room A", "Room Busan"); // A가 Busan보다 앞에 와야 함
         }
+
+        @Test
+        @org.junit.jupiter.api.DisplayName("유사 회의실 후보군 추출 - 인원수 범위(±2) 내의 예약 기록이 있는 방만 조회")
+        void findSimilarRoomCandidates_success() {
+                // Given: 새로운 방들 추가
+                Room roomC = Room.builder()
+                                .office(office)
+                                .name("Room C")
+                                .roomCode("C101")
+                                .floor(1)
+                                .capacity(11) // Room A (10) 와 유사 범위 (8~12)
+                                .category("MEETING")
+                                .price(new java.math.BigDecimal("1200"))
+                                .status(com.modu.office.entity.enums.RoomStatus.AVAILABLE)
+                                .build();
+                roomRepository.save(roomC);
+
+                Room roomD = Room.builder()
+                                .office(office)
+                                .name("Room D")
+                                .roomCode("D101")
+                                .floor(1)
+                                .capacity(15) // Room A 와 유사 범위 밖
+                                .category("MEETING")
+                                .price(new java.math.BigDecimal("1500"))
+                                .status(com.modu.office.entity.enums.RoomStatus.AVAILABLE)
+                                .build();
+                roomRepository.save(roomD);
+
+                // User가 A, C를 예약했다고 가정
+                com.modu.office.entity.AppUser user = appUserRepository.findAll().get(0);
+                java.time.LocalDateTime now = java.time.LocalDateTime.now();
+                
+                com.modu.office.entity.Reservation resA = com.modu.office.entity.Reservation.builder()
+                                .room(room1) // 타겟 방
+                                .office(office)
+                                .user(user)
+                                .startAt(now)
+                                .endAt(now.plusHours(1))
+                                .endAtIncludeBufferTime(now.plusHours(1))
+                                .status(ReservationStatus.CONFIRMED)
+                                .build();
+                reservationRepository.save(resA);
+
+                com.modu.office.entity.Reservation resC = com.modu.office.entity.Reservation.builder()
+                                .room(roomC) // 추천될 방 (인원수 맞음)
+                                .office(office)
+                                .user(user)
+                                .startAt(now.plusDays(1))
+                                .endAt(now.plusDays(1).plusHours(1))
+                                .endAtIncludeBufferTime(now.plusDays(1).plusHours(1))
+                                .status(ReservationStatus.CONFIRMED)
+                                .build();
+                reservationRepository.save(resC);
+
+                com.modu.office.entity.Reservation resD = com.modu.office.entity.Reservation.builder()
+                                .room(roomD) // 인원수 벗어남 (제외되어야 함)
+                                .office(office)
+                                .user(user)
+                                .startAt(now.plusDays(2))
+                                .endAt(now.plusDays(2).plusHours(1))
+                                .endAtIncludeBufferTime(now.plusDays(2).plusHours(1))
+                                .status(ReservationStatus.CONFIRMED)
+                                .build();
+                reservationRepository.save(resD);
+                
+                em.flush();
+                em.clear();
+
+                // When
+                java.util.List<Room> candidates = roomRepository.findSimilarRoomCandidates(room1.getId(), room1.getCapacity(), 10);
+
+                // Then
+                org.assertj.core.api.Assertions.assertThat(candidates).hasSize(1);
+                org.assertj.core.api.Assertions.assertThat(candidates.get(0).getName()).isEqualTo("Room C");
+        }
 }

@@ -202,4 +202,37 @@ public class RoomRepositoryCustomImpl implements RoomRepositoryCustom {
                 return room.id.desc();
         }
     }
+
+    @Override
+    public java.util.List<Room> findSimilarRoomCandidates(Long targetRoomId, Integer targetCapacity, int limit) {
+        com.modu.office.entity.QRoom room = com.modu.office.entity.QRoom.room;
+        com.modu.office.entity.QOffice office = com.modu.office.entity.QOffice.office;
+        com.modu.office.entity.QReservation res = com.modu.office.entity.QReservation.reservation;
+        com.modu.office.entity.QReservation subRes = new com.modu.office.entity.QReservation("subRes");
+
+        // 1. 타겟 회의실을 예약했던 사용자 ID 목록 서브쿼리
+        com.querydsl.jpa.JPQLQuery<Long> userIdsWhoBookedTarget = com.querydsl.jpa.JPAExpressions
+                .selectDistinct(subRes.user.id)
+                .from(subRes)
+                .where(subRes.room.id.eq(targetRoomId));
+
+        // 2. 인원수 필터 (±2명, 최소 1명)
+        int minCapacity = Math.max(1, targetCapacity - 2);
+        int maxCapacity = targetCapacity + 2;
+
+        return queryFactory
+                .selectFrom(room)
+                .join(room.office, office).fetchJoin() // 거리 계산용
+                .join(res).on(res.room.id.eq(room.id))   // 이 방의 예약 내역
+                .where(
+                        room.status.eq(com.modu.office.entity.enums.RoomStatus.AVAILABLE), // 무조건 예약 가능한 상태만
+                        room.capacity.between(minCapacity, maxCapacity), // 인원수 필터
+                        room.id.ne(targetRoomId), // 자기 자신 제외
+                        res.user.id.in(userIdsWhoBookedTarget) // 타겟 회의실을 예약했던 사용자의 예약 내역 한정
+                )
+                .groupBy(room.id, office.id)
+                .orderBy(res.id.count().desc()) // 예약 통계 기반 정렬 (협업 필터링 기본 점수)
+                .limit(limit)
+                .fetch();
+    }
 }

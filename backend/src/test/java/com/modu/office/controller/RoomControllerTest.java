@@ -398,4 +398,24 @@ class RoomControllerTest extends ControllerTestSupport {
                                                                                                 .description("삭제할 이미지 ID"))
                                                                 .build())));
         }
+
+        @Test
+        @org.junit.jupiter.api.DisplayName("유사 회의실 조회 - 200 반환")
+        void getSimilarRooms_success() throws Exception {
+                org.mockito.BDDMockito.given(roomService.getSimilarRooms(org.mockito.ArgumentMatchers.anyLong())).willReturn(java.util.List.of(roomResponse()));
+
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/rooms/{roomId}/similar", 1L))
+                                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+                                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.data.length()").value(1))
+                                .andDo(com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document("room-similar",
+                                                com.epages.restdocs.apispec.ResourceDocumentation.resource(com.epages.restdocs.apispec.ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("유사 회의실 목록 추천")
+                                                                .description("현재 회의실을 조회하고 있는 사용자에게 인원수, 위치, 시설 점수를 고려하여 유사한 회의실 목록을 추천합니다.")
+                                                                .pathParameters(
+                                                                                org.springframework.restdocs.request.RequestDocumentation.parameterWithName("roomId")
+                                                                                                .description("기준 회의실 ID"))
+                                                                .responseSchema(com.epages.restdocs.apispec.Schema.schema("RoomListResponse"))
+                                                                .build())));
+        }
 }
