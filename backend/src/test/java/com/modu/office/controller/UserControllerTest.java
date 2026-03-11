@@ -12,9 +12,11 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.util.Map;
 
-import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -23,6 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SuppressWarnings("null")
 @DisplayName("사용자 프로필 API 슬라이스 테스트")
 class UserControllerTest extends ControllerTestSupport {
+    
+    private static final String TAG = "User Profile";
 
         @Test
         @DisplayName("GET /api/users/me - 내 프로필 조회 - 성공")
@@ -48,27 +52,33 @@ class UserControllerTest extends ControllerTestSupport {
                                 .andExpect(jsonPath("$.data.email").value("user@test.com"))
                                 .andExpect(jsonPath("$.data.name").value("Test User"))
                                 .andDo(document("user-get-profile",
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("응답 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
-                                                                                .description("사용자 고유 아이디"),
-                                                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                                                                .description("이메일"),
-                                                                fieldWithPath("data.name").type(JsonFieldType.STRING)
-                                                                                .description("이름"),
-                                                                fieldWithPath("data.role").type(JsonFieldType.STRING)
-                                                                                .description("권한 (USER, MANAGER, ADMIN)"),
-                                                                fieldWithPath("data.loginType")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("로그인 유형 (LOCAL, KAKAO, NAVER, GOOGLE)"),
-                                                                fieldWithPath("data.createdAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("계정 생성일").optional())));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("내 프로필 조회")
+                                                                .description("현재 로그인한 사용자의 계정 정보(이름, 이메일, 권한 등)를 조회합니다.")
+                                                                .responseSchema(schema("UserProfileResponse"))
+                                                                .responseFields(
+                                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                                .description("응답 상태"),
+                                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                                .description("응답 코드"),
+                                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                                .description("응답 메시지"),
+                                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
+                                                                                                .description("사용자 고유 아이디"),
+                                                                                fieldWithPath("data.email").type(JsonFieldType.STRING)
+                                                                                                .description("이메일"),
+                                                                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                                                                                .description("이름"),
+                                                                                fieldWithPath("data.role").type(JsonFieldType.STRING)
+                                                                                                .description("권한 (USER, MANAGER, ADMIN)"),
+                                                                                fieldWithPath("data.loginType")
+                                                                                                .type(JsonFieldType.STRING)
+                                                                                                .description("로그인 유형 (LOCAL, KAKAO, NAVER, GOOGLE)"),
+                                                                                fieldWithPath("data.createdAt")
+                                                                                                .type(JsonFieldType.STRING)
+                                                                                                .description("계정 생성일").optional())
+                                                                .build())));
         }
 
         @Test
@@ -98,30 +108,37 @@ class UserControllerTest extends ControllerTestSupport {
                                 .andExpect(jsonPath("$.message").value("프로필이 수정되었습니다."))
                                 .andExpect(jsonPath("$.data.name").value("New Name"))
                                 .andDo(document("user-update-profile",
-                                                requestFields(
-                                                                fieldWithPath("name").type(JsonFieldType.STRING)
-                                                                                .description("변경할 이름")),
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("응답 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
-                                                                                .description("사용자 고유 아이디"),
-                                                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                                                                .description("이메일"),
-                                                                fieldWithPath("data.name").type(JsonFieldType.STRING)
-                                                                                .description("변경된 이름"),
-                                                                fieldWithPath("data.role").type(JsonFieldType.STRING)
-                                                                                .description("권한"),
-                                                                fieldWithPath("data.loginType")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("로그인 유형"),
-                                                                fieldWithPath("data.createdAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("계정 생성일").optional())));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("내 프로필 수정")
+                                                                .description("로그인한 사용자의 이름 등 프로필 정보를 수정합니다.")
+                                                                .requestSchema(schema("UserProfileRequest"))
+                                                                .responseSchema(schema("UserProfileResponse"))
+                                                                .requestFields(
+                                                                                fieldWithPath("name").type(JsonFieldType.STRING)
+                                                                                                .description("변경할 이름"))
+                                                                .responseFields(
+                                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                                .description("응답 상태"),
+                                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                                .description("응답 코드"),
+                                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                                .description("응답 메시지"),
+                                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
+                                                                                                .description("사용자 고유 아이디"),
+                                                                                fieldWithPath("data.email").type(JsonFieldType.STRING)
+                                                                                                .description("이메일"),
+                                                                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                                                                                .description("변경된 이름"),
+                                                                                fieldWithPath("data.role").type(JsonFieldType.STRING)
+                                                                                                .description("권한"),
+                                                                                fieldWithPath("data.loginType")
+                                                                                                .type(JsonFieldType.STRING)
+                                                                                                .description("로그인 유형"),
+                                                                                fieldWithPath("data.createdAt")
+                                                                                                .type(JsonFieldType.STRING)
+                                                                                                .description("계정 생성일").optional())
+                                                                .build())));
         }
 
         @Test
@@ -158,21 +175,26 @@ class UserControllerTest extends ControllerTestSupport {
                                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                                 .andExpect(jsonPath("$.message").value("비밀번호가 변경되었습니다."))
                                 .andDo(document("user-change-password",
-                                                requestFields(
-                                                                fieldWithPath("currentPassword")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("현재 비밀번호"),
-                                                                fieldWithPath("newPassword").type(JsonFieldType.STRING)
-                                                                                .description("새 비밀번호 (8자 이상)")),
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("응답 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data").type(JsonFieldType.NULL)
-                                                                                .description("없음").optional())));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("비밀번호 변경")
+                                                                .description("기존 비밀번호를 확인하고 새로운 비밀번호로 변경합니다. (Local 로그인 기준)")
+                                                                .requestFields(
+                                                                                fieldWithPath("currentPassword")
+                                                                                                .type(JsonFieldType.STRING)
+                                                                                                .description("현재 비밀번호"),
+                                                                                fieldWithPath("newPassword").type(JsonFieldType.STRING)
+                                                                                                .description("새 비밀번호 (8자 이상)"))
+                                                                .responseFields(
+                                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                                .description("응답 상태"),
+                                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                                .description("응답 코드"),
+                                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                                .description("응답 메시지"),
+                                                                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                                                                                .description("없음").optional())
+                                                                .build())));
         }
 
         @Test
@@ -209,27 +231,39 @@ class UserControllerTest extends ControllerTestSupport {
                                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                                 .andExpect(jsonPath("$.message").value("회원탈퇴가 완료되었습니다."))
                                 .andDo(document("user-delete-account",
-                                                requestFields(
-                                                                fieldWithPath("password").type(JsonFieldType.STRING)
-                                                                                .description("비밀번호 (oAuth 로그인의 경우 생략 가능)")
-                                                                                .optional()),
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("응답 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data").type(JsonFieldType.NULL)
-                                                                                .description("없음").optional())));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("회원 탈퇴")
+                                                                .description("사용자의 계정을 삭제 처리합니다 (Soft Delete).")
+                                                                .requestFields(
+                                                                                fieldWithPath("password").type(JsonFieldType.STRING)
+                                                                                                .description("비밀번호 (oAuth 로그인의 경우 생략 가능)")
+                                                                                                .optional())
+                                                                .responseFields(
+                                                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                                                                .description("응답 상태"),
+                                                                                fieldWithPath("code").type(JsonFieldType.STRING)
+                                                                                                .description("응답 코드"),
+                                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                                .description("응답 메시지"),
+                                                                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                                                                                .description("없음").optional())
+                                                                .build())));
         }
 
         @Test
-        @DisplayName("GET /api/users/me - 인증 없이 접근 시 - 실패 (403)")
+        @DisplayName("GET /api/users/me - 미인증 시 401 반환")
         void getMyProfile_WithoutAuth_Unauthorized() throws Exception {
                 // When & Then
                 mockMvc.perform(get("/api/users/me")
                                 .contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isUnauthorized())
+                                .andDo(document("user-get-profile-401",
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("내 프로필 조회 - 인증 필요")
+                                                                .description("로그인하지 않은 사용자가 프로필 조회를 시도할 경우 401 에러를 반환합니다.")
+                                                                .responseFields(commonErrorFields())
+                                                                .build())));
         }
 }

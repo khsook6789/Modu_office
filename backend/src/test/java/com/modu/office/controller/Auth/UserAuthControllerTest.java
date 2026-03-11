@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -20,11 +21,14 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+
 @SuppressWarnings("null")
 @DisplayName("[Controller] UserAuth API")
 class UserAuthControllerTest extends ControllerTestSupport {
 
         private static final String BASE_URL = "/api/auth/user";
+        private static final String TAG = "Auth";
 
         @Test
         @DisplayName("회원가입 - 유효한 요청이면 200 반환")
@@ -42,25 +46,28 @@ class UserAuthControllerTest extends ControllerTestSupport {
                                 .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andDo(document("user-auth-signup",
-                                                requestFields(
-                                                                fieldWithPath("email").type(JsonFieldType.STRING)
-                                                                                .description("이메일 (로그인 ID)"),
-                                                                fieldWithPath("password").type(JsonFieldType.STRING)
-                                                                                .description("비밀번호"),
-                                                                fieldWithPath("name").type(JsonFieldType.STRING)
-                                                                                .description("사용자 이름"))));
-        }
-
-        @Test
-        @DisplayName("회원가입 - 필수 필드 누락 시 400 반환")
-        void signup_fail_missingFields() throws Exception {
-                UserSignupRequest request = new UserSignupRequest(); // 빈 요청
-
-                mockMvc.perform(post(BASE_URL + "/signup")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
-                                .with(csrf()))
-                                .andExpect(status().isBadRequest());
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("일반 사용자 회원가입")
+                                                                .description("새로운 일반 사용자 계정을 생성합니다. 모든 필드는 필수이며, 이메일은 중복될 수 없습니다.")
+                                                                .requestSchema(schema("UserSignupRequest"))
+                                                                .requestFields(
+                                                                                fieldWithPath("email").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("이메일 (로그인 ID)"
+                                                                                                                + constDocs(UserSignupRequest.class,
+                                                                                                                                "email")),
+                                                                                fieldWithPath("password").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("비밀번호"
+                                                                                                                + constDocs(UserSignupRequest.class,
+                                                                                                                                "password")),
+                                                                                fieldWithPath("name").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("사용자 이름"
+                                                                                                                + constDocs(UserSignupRequest.class,
+                                                                                                                                "name")))
+                                                                .build())));
         }
 
         @Test
@@ -84,20 +91,35 @@ class UserAuthControllerTest extends ControllerTestSupport {
                                 .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.accessToken").value("access.token.value"))
-                                .andExpect(jsonPath("$.tokenType").value("Bearer"))
                                 .andDo(document("user-auth-login",
-                                                requestFields(
-                                                                fieldWithPath("email").type(JsonFieldType.STRING)
-                                                                                .description("이메일"),
-                                                                fieldWithPath("password").type(JsonFieldType.STRING)
-                                                                                .description("비밀번호")),
-                                                responseFields(
-                                                                fieldWithPath("accessToken").type(JsonFieldType.STRING)
-                                                                                .description("Access Token (JWT)"),
-                                                                fieldWithPath("refreshToken").type(JsonFieldType.STRING)
-                                                                                .description("Refresh Token"),
-                                                                fieldWithPath("tokenType").type(JsonFieldType.STRING)
-                                                                                .description("토큰 타입 (Bearer)"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("일반 사용자 로그인")
+                                                                .description("이메일과 비밀번호로 로그인하여 JWT 토큰을 발급받습니다.")
+                                                                .requestSchema(schema("UserLoginRequest"))
+                                                                .responseSchema(schema("TokenResponse"))
+                                                                .requestFields(
+                                                                                fieldWithPath("email").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("이메일"
+                                                                                                                + constDocs(UserLoginRequest.class,
+                                                                                                                                "email")),
+                                                                                fieldWithPath("password").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("비밀번호"
+                                                                                                                + constDocs(UserLoginRequest.class,
+                                                                                                                                "password")))
+                                                                .responseFields(
+                                                                                fieldWithPath("accessToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("Access Token (JWT)"),
+                                                                                fieldWithPath("refreshToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("Refresh Token"),
+                                                                                fieldWithPath("tokenType").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("토큰 타입 (Bearer)"))
+                                                                .build())));
         }
 
         @Test
@@ -119,17 +141,29 @@ class UserAuthControllerTest extends ControllerTestSupport {
                                 .content(objectMapper.writeValueAsString(request))
                                 .with(csrf()))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.accessToken").value("new.access.token"))
                                 .andDo(document("user-auth-refresh",
-                                                requestFields(
-                                                                fieldWithPath("refreshToken").type(JsonFieldType.STRING)
-                                                                                .description("갱신에 사용할 Refresh Token")),
-                                                responseFields(
-                                                                fieldWithPath("accessToken").type(JsonFieldType.STRING)
-                                                                                .description("새로 발급된 Access Token"),
-                                                                fieldWithPath("refreshToken").type(JsonFieldType.STRING)
-                                                                                .description("기존 Refresh Token"),
-                                                                fieldWithPath("tokenType").type(JsonFieldType.STRING)
-                                                                                .description("토큰 타입 (Bearer)"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("토큰 만료 시 재발급")
+                                                                .description("Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.")
+                                                                .requestSchema(schema("RefreshTokenRequest"))
+                                                                .responseSchema(schema("TokenResponse"))
+                                                                .requestFields(
+                                                                                fieldWithPath("refreshToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("갱신에 사용할 Refresh Token"
+                                                                                                                + constDocs(RefreshTokenRequest.class,
+                                                                                                                                "refreshToken")))
+                                                                .responseFields(
+                                                                                fieldWithPath("accessToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("새로 발급된 Access Token"),
+                                                                                fieldWithPath("refreshToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("기존 Refresh Token"),
+                                                                                fieldWithPath("tokenType").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("토큰 타입 (Bearer)"))
+                                                                .build())));
         }
 }

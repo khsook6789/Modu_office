@@ -15,11 +15,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-// removed import
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -29,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SuppressWarnings("null")
 @DisplayName("[Controller] Reservation API")
 class ReservationControllerTest extends ControllerTestSupport {
+
+        private static final String TAG = "Reservation";
 
         private ReservationRequest createRequest() {
                 return ReservationRequest.builder()
@@ -44,14 +48,14 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .build();
         }
 
-        private ReservationResponse createResponse() {
+        private ReservationResponse createResponse(Long id, String title, ReservationStatus status, String roomName) {
                 return ReservationResponse.builder()
-                                .id(100L)
-                                .title("팀 주간 회의")
+                                .id(id)
+                                .title(title)
                                 .officeId(1L)
                                 .officeName("강남 본점")
                                 .roomId(10L)
-                                .roomName("Alpha Room")
+                                .roomName(roomName)
                                 .roomCode("ROOM-A")
                                 .userId(1L)
                                 .userName("홍길동")
@@ -59,12 +63,16 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                 .withNano(0))
                                 .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0).withSecond(0)
                                                 .withNano(0))
-                                .status(ReservationStatus.PENDING_PAYMENT)
+                                .status(status)
                                 .totalPrice(new BigDecimal("20000"))
                                 .createdAt(LocalDateTime.now())
                                 .updatedAt(LocalDateTime.now())
                                 .version(0L)
                                 .build();
+        }
+
+        private ReservationResponse createResponse() {
+                return createResponse(100L, "팀 주간 회의", ReservationStatus.PENDING_PAYMENT, "Alpha Room");
         }
 
         @Test
@@ -78,81 +86,70 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .content(objectMapper.writeValueAsString(createRequest())))
                                 .andExpect(status().isCreated())
                                 .andDo(document("reservation-create",
-                                                requestFields(
-                                                                fieldWithPath("title").type(JsonFieldType.STRING)
-                                                                                .description("예약 제목"),
-                                                                fieldWithPath("officeId").type(JsonFieldType.NUMBER)
-                                                                                .description("지점 ID"),
-                                                                fieldWithPath("roomId").type(JsonFieldType.NUMBER)
-                                                                                .description("회의실 ID"),
-                                                                fieldWithPath("userId").type(JsonFieldType.NUMBER)
-                                                                                .description("예약자 ID"),
-                                                                fieldWithPath("startAt").type(JsonFieldType.STRING)
-                                                                                .description("시작 시간"),
-                                                                fieldWithPath("endAt").type(JsonFieldType.STRING)
-                                                                                .description("종료 시간"),
-                                                                // @AssertTrue 메서드가 Jackson에 의해 getter로 인식됨
-                                                                fieldWithPath("endAtAfterStartAt")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("종료 시간 > 시작 시간 검증 결과 (내부 검증 필드)")
-                                                                                .ignored()),
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("처리 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
-                                                                                .description("예약 ID"),
-                                                                fieldWithPath("data.title").type(JsonFieldType.STRING)
-                                                                                .description("예약 제목"),
-                                                                fieldWithPath("data.officeId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("지점 ID"),
-                                                                fieldWithPath("data.officeName")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("지점 이름"),
-                                                                fieldWithPath("data.roomId").type(JsonFieldType.NUMBER)
-                                                                                .description("회의실 ID"),
-                                                                fieldWithPath("data.roomName")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("회의실 이름"),
-                                                                fieldWithPath("data.roomCode")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("회의실 코드"),
-                                                                fieldWithPath("data.userId").type(JsonFieldType.NUMBER)
-                                                                                .description("사용자 ID"),
-                                                                fieldWithPath("data.userName")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("사용자 이름"),
-                                                                fieldWithPath("data.startAt").type(JsonFieldType.STRING)
-                                                                                .description("예약 시작 시간"),
-                                                                fieldWithPath("data.endAt").type(JsonFieldType.STRING)
-                                                                                .description("예약 종료 시간"),
-                                                                fieldWithPath("data.status").type(JsonFieldType.STRING)
-                                                                                .description("예약 상태"),
-                                                                fieldWithPath("data.totalPrice")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("총 결제 금액"),
-                                                                fieldWithPath("data.createdAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("생성 일시")
-                                                                                .optional(),
-                                                                fieldWithPath("data.updatedAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("수정 일시")
-                                                                                .optional(),
-                                                                fieldWithPath("data.version").type(JsonFieldType.NUMBER)
-                                                                                .description("낙관적 락 버전"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("새 예약 생성")
+                                                                .description("사용자가 특정 지점의 공간에 대해 새로운 예약을 신청합니다. (비즈니스 룰: 과거 시간 예약 불가, 종료 시간은 시작 시간 이후여야 함)")
+                                                                .requestSchema(schema("ReservationRequest"))
+                                                                .responseSchema(schema("ReservationResponse"))
+                                                                .requestFields(
+                                                                                fieldWithPath("title").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("예약 제목"
+                                                                                                                + constDocs(ReservationRequest.class,
+                                                                                                                                "title")),
+                                                                                fieldWithPath("officeId").type(
+                                                                                                JsonFieldType.NUMBER)
+                                                                                                .description("지점 ID"
+                                                                                                                + constDocs(ReservationRequest.class,
+                                                                                                                                "officeId")),
+                                                                                fieldWithPath("roomId").type(
+                                                                                                JsonFieldType.NUMBER)
+                                                                                                .description("회의실 ID"
+                                                                                                                + constDocs(ReservationRequest.class,
+                                                                                                                                "roomId")),
+                                                                                fieldWithPath("userId").type(
+                                                                                                JsonFieldType.NUMBER)
+                                                                                                .description("예약자 ID"
+                                                                                                                + constDocs(ReservationRequest.class,
+                                                                                                                                "userId")),
+                                                                                fieldWithPath("startAt").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("예약 시작 시간 (ISO_DATE_TIME)"),
+                                                                                fieldWithPath("endAt").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("예약 종료 시간 (ISO_DATE_TIME)"),
+                                                                                fieldWithPath("endAtAfterStartAt").type(
+                                                                                                JsonFieldType.BOOLEAN)
+                                                                                                .description("종료 시간 검증 로직용")
+                                                                                                .ignored())
+                                                                .build())));
         }
 
         @Test
-        @DisplayName("예약 목록 조회 (일반 사용자) - 성공")
-        void getReservations_User_Success() throws Exception {
+        @DisplayName("예약 생성 - 필수 값 누락 시 400 반환")
+        void createReservation_fail_validation() throws Exception {
+                mockMvc.perform(post("/api/reservations")
+                                .with(user(createTestUser("USER")))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(ReservationRequest.builder().build())))
+                                .andExpect(status().isBadRequest())
+                                .andDo(document("reservation-create-400",
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 생성 - 유효성 오류")
+                                                                .description("예약 제목, 시작/종료 시간 등 필수 정보가 누락되거나 잘못된 경우 400 에러를 반환합니다.")
+                                                                .responseFields(commonErrorFields())
+                                                                .build())));
+        }
+
+        @Test
+        @DisplayName("예약 목록 조회 API - 성공")
+        void getReservations_Success() throws Exception {
                 given(reservationService.searchReservations(any(), any(), any(), any(), any(), any(), any(), any()))
-                                .willReturn(new PageImpl<>(List.of(createResponse()),
-                                                org.springframework.data.domain.PageRequest.of(0, 20), 1));
+                                .willReturn(new PageImpl<>(List.of(
+                                                createResponse(100L, "팀 주간 회의", ReservationStatus.PENDING_PAYMENT, "Alpha Room"),
+                                                createResponse(101L, "고객 미팅", ReservationStatus.CONFIRMED, "Beta Room"))));
 
                 mockMvc.perform(get("/api/reservations")
                                 .with(user(createTestUser("USER")))
@@ -160,139 +157,37 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .param("size", "20")
                                 .param("status", "PENDING_PAYMENT"))
                                 .andExpect(status().isOk())
-                                .andDo(document("reservation-list-user",
-                                                queryParameters(
-                                                                parameterWithName("page").description("페이지 번호 (0부터 시작)")
-                                                                                .optional(),
-                                                                parameterWithName("size").description("페이지 크기")
-                                                                                .optional(),
-                                                                parameterWithName("status").description("예약 상태 필터")
-                                                                                .optional(),
-                                                                parameterWithName("customerId")
-                                                                                .description("사용자 ID (USER는 본인만 가능)")
-                                                                                .optional(),
-                                                                parameterWithName("roomId").description("회의실 ID 필터")
-                                                                                .optional()),
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("결과 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data.content[].id")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("예약 ID"),
-                                                                fieldWithPath("data.content[].title")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("예약 제목"),
-                                                                fieldWithPath("data.content[].officeId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("지점 ID"),
-                                                                fieldWithPath("data.content[].officeName")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("지점 이름"),
-                                                                fieldWithPath("data.content[].roomId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("회의실 ID"),
-                                                                fieldWithPath("data.content[].roomName")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("회의실 이름"),
-                                                                fieldWithPath("data.content[].roomCode")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("회의실 코드"),
-                                                                fieldWithPath("data.content[].userId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("사용자 ID"),
-                                                                fieldWithPath("data.content[].userName")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("사용자 이름"),
-                                                                fieldWithPath("data.content[].startAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("시작 시간"),
-                                                                fieldWithPath("data.content[].endAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("종료 시간"),
-                                                                fieldWithPath("data.content[].status")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("상태"),
-                                                                fieldWithPath("data.content[].totalPrice")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("금액"),
-                                                                fieldWithPath("data.content[].createdAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("생성 시간").optional(),
-                                                                fieldWithPath("data.content[].updatedAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("수정 시간").optional(),
-                                                                fieldWithPath("data.content[].version")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("버전 관리 번호"),
-                                                                fieldWithPath("data.pageable")
-                                                                                .type(JsonFieldType.OBJECT)
-                                                                                .description("페이징 정보"),
-                                                                fieldWithPath("data.pageable.sort")
-                                                                                .type(JsonFieldType.OBJECT)
-                                                                                .description("정렬 정보 (내부 객체)"),
-                                                                fieldWithPath("data.pageable.sort.empty")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("정렬 조건 존재 여부"),
-                                                                fieldWithPath("data.pageable.sort.unsorted")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("정렬되지 않았는지 여부"),
-                                                                fieldWithPath("data.pageable.sort.sorted")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("정렬되었는지 여부"),
-                                                                fieldWithPath("data.pageable.offset")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("오프셋"),
-                                                                fieldWithPath("data.pageable.pageNumber")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("현재 페이지 번호"),
-                                                                fieldWithPath("data.pageable.pageSize")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("한 페이지당 데이터 수"),
-                                                                fieldWithPath("data.pageable.paged")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("페이징 처리 여부"),
-                                                                fieldWithPath("data.pageable.unpaged")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("페이징 미처리 여부"),
-                                                                fieldWithPath("data.last").type(JsonFieldType.BOOLEAN)
-                                                                                .description("마지막 페이지 여부"),
-                                                                fieldWithPath("data.totalPages")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("전체 페이지 수"),
-                                                                fieldWithPath("data.totalElements")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("총 요소 수"),
-                                                                fieldWithPath("data.first").type(JsonFieldType.BOOLEAN)
-                                                                                .description("첫 번째 페이지 여부"),
-                                                                fieldWithPath("data.size").type(JsonFieldType.NUMBER)
-                                                                                .description("페이지 요소 수"),
-                                                                fieldWithPath("data.number").type(JsonFieldType.NUMBER)
-                                                                                .description("현재 페이지 번호"),
-                                                                fieldWithPath("data.sort.empty")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("정렬 여부"),
-                                                                fieldWithPath("data.sort.sorted")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("정렬되었는지 여부"),
-                                                                fieldWithPath("data.sort.unsorted")
-                                                                                .type(JsonFieldType.BOOLEAN)
-                                                                                .description("정렬되지 않았는지 여부"),
-                                                                fieldWithPath("data.numberOfElements")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("현재 페이지의 요소 수"),
-                                                                fieldWithPath("data.empty").type(JsonFieldType.BOOLEAN)
-                                                                                .description("빈 페이지 여부"))));
+                                .andDo(document("reservation-get-list",
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 목록 조회")
+                                                                .description("로그인한 사용자의 예약 내역을 조회합니다. 일반 사용자는 본인 내역만, 관리자는 전체 조회가 가능합니다.")
+                                                                .responseSchema(schema("ReservationPageResponse"))
+                                                                .queryParameters(
+                                                                                parameterWithName("page").description(
+                                                                                                "페이지 번호 (0부터)")
+                                                                                                .optional(),
+                                                                                parameterWithName("size").description(
+                                                                                                "페이지당 데이터 개수")
+                                                                                                .optional(),
+                                                                                parameterWithName("status")
+                                                                                                .description("예약 상태 필터")
+                                                                                                .optional(),
+                                                                                parameterWithName("customerId")
+                                                                                                .description("사용자 ID 필터 (USER는 본인만 가능)")
+                                                                                                .optional(),
+                                                                                parameterWithName("roomId").description(
+                                                                                                "회의실 ID 필터").optional())
+                                                                .build())));
         }
 
         @Test
         @DisplayName("관리자(MANAGER) 예약 검색 API - 성공")
         void searchReservations_Manager_Success() throws Exception {
                 given(reservationService.searchReservations(any(), any(), any(), any(), any(), any(), any(), any()))
-                                .willReturn(new PageImpl<>(List.of(createResponse())));
+                                .willReturn(new PageImpl<>(List.of(
+                                                createResponse(100L, "팀 주간 회의", ReservationStatus.PENDING_PAYMENT, "Alpha Room"),
+                                                createResponse(102L, "월간 보고", ReservationStatus.CANCELED, "Gamma Room"))));
 
                 mockMvc.perform(get("/api/reservations/search")
                                 .with(user(createTestUser("MANAGER")))
@@ -300,23 +195,34 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .param("startDate", "2025-01-01"))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-search-manager",
-                                                queryParameters(
-                                                                parameterWithName("officeId").description("지점 ID 필터")
-                                                                                .optional(),
-                                                                parameterWithName("guestName").description("예약자 이름 필터")
-                                                                                .optional(),
-                                                                parameterWithName("status").description("상태 필터")
-                                                                                .optional(),
-                                                                parameterWithName("startDate")
-                                                                                .description("검색 시작 날짜 (YYYY-MM-DD)")
-                                                                                .optional(),
-                                                                parameterWithName("endDate")
-                                                                                .description("검색 종료 날짜 (YYYY-MM-DD)")
-                                                                                .optional(),
-                                                                parameterWithName("page").description("페이지 번호")
-                                                                                .optional(),
-                                                                parameterWithName("size").description("페이지 크기")
-                                                                                .optional())));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 통합 검색 (운영자)")
+                                                                .description("운영자가 지점, 예약자명, 기간 등으로 예약 내역을 복합 검색합니다.")
+                                                                .responseSchema(schema("ReservationPageResponse"))
+                                                                .queryParameters(
+                                                                                parameterWithName("officeId")
+                                                                                                .description("지점 ID")
+                                                                                                .optional(),
+                                                                                parameterWithName("guestName")
+                                                                                                .description("예약자 이름")
+                                                                                                .optional(),
+                                                                                parameterWithName("status").description(
+                                                                                                "예약 상태 (PENDING, CONFIRMED, CANCELED 등)")
+                                                                                                .optional(),
+                                                                                parameterWithName("startDate")
+                                                                                                .description("검색 시작 날짜 (YYYY-MM-DD)")
+                                                                                                .optional(),
+                                                                                parameterWithName("endDate")
+                                                                                                .description("검색 종료 날짜 (YYYY-MM-DD)")
+                                                                                                .optional(),
+                                                                                parameterWithName("page").description(
+                                                                                                "페이지 번호 (0부터)")
+                                                                                                .optional(),
+                                                                                parameterWithName("size").description(
+                                                                                                "페이지당 데이터 개수")
+                                                                                                .optional())
+                                                                .build())));
         }
 
         @Test
@@ -325,19 +231,35 @@ class ReservationControllerTest extends ControllerTestSupport {
                 mockMvc.perform(get("/api/reservations/search")
                                 .with(user(createTestUser("USER")))
                                 .param("guestName", "홍길동"))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isForbidden())
+                                .andDo(document("reservation-search-403",
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 통합 검색 (운영자) - 권한 부족")
+                                                                .description("운영자 권한이 없는 사용자가 통합 검색을 시도할 경우 403 에러를 반환합니다.")
+                                                                .responseFields(commonErrorFields())
+                                                                .build())));
         }
 
         @Test
-        @DisplayName("예약 단건 조회 API - 성공")
-        void getReservationById_Success() throws Exception {
-                given(reservationService.getReservationById(eq(100L), any())).willReturn(createResponse());
+        @DisplayName("예약 단건 상세 조회 API - 성공")
+        void getReservation_Success() throws Exception {
+                given(reservationService.getReservationById(any(), any()))
+                                .willReturn(createResponse());
 
                 mockMvc.perform(get("/api/reservations/{id}", 100L)
                                 .with(user(createTestUser("USER"))))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-get-one",
-                                                pathParameters(parameterWithName("id").description("예약 ID"))));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 상세 조회")
+                                                                .description("특정 예약 ID에 대한 상세 정보를 조회합니다.")
+                                                                .responseSchema(schema("ReservationResponse"))
+                                                                .pathParameters(
+                                                                                parameterWithName("id")
+                                                                                                .description("예약 ID"))
+                                                                .build())));
         }
 
         @Test
@@ -348,10 +270,11 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                 .withNano(0))
                                 .endAt(LocalDateTime.now().plusDays(2).withHour(13).withMinute(0).withSecond(0)
                                                 .withNano(0))
-                                .status(ReservationStatus.PENDING_PAYMENT)
+                                .status(ReservationStatus.CANCELED)
                                 .build();
 
-                given(reservationService.updateReservation(eq(100L), any(), any())).willReturn(createResponse());
+                given(reservationService.updateReservation(any(), any(), any()))
+                                .willReturn(createResponse());
 
                 mockMvc.perform(put("/api/reservations/{id}", 100L)
                                 .with(user(createTestUser("USER")))
@@ -359,26 +282,56 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .content(objectMapper.writeValueAsString(updateRequest)))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-update",
-                                                pathParameters(parameterWithName("id").description("예약 ID")),
-                                                requestFields(
-                                                                fieldWithPath("startAt").type(JsonFieldType.STRING)
-                                                                                .description("변경할 시작 시간").optional(),
-                                                                fieldWithPath("endAt").type(JsonFieldType.STRING)
-                                                                                .description("변경할 종료 시간").optional(),
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("변경할 상태").optional())));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 정보 수정")
+                                                                .description("예약 시간 또는 예약 상태를 수정합니다.")
+                                                                .requestSchema(schema("ReservationUpdateRequest"))
+                                                                .responseSchema(schema("ReservationResponse"))
+                                                                .pathParameters(
+                                                                                parameterWithName("id")
+                                                                                                .description("예약 ID"))
+                                                                .requestFields(
+                                                                                fieldWithPath("startAt").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("변경할 시작 시간"
+                                                                                                                + constDocs(ReservationUpdateRequest.class,
+                                                                                                                                "startAt"))
+                                                                                                .optional(),
+                                                                                fieldWithPath("endAt").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("변경할 종료 시간"
+                                                                                                                + constDocs(ReservationUpdateRequest.class,
+                                                                                                                                "endAt"))
+                                                                                                .optional(),
+                                                                                fieldWithPath("status").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("변경할 예약 상태"
+                                                                                                                + constDocs(ReservationUpdateRequest.class,
+                                                                                                                                "status"))
+                                                                                                .optional())
+                                                                .build())));
         }
 
         @Test
         @DisplayName("예약 확정 API - PENDING_PAYMENT -> CONFIRMED (MANAGER 전용)")
         void confirmReservation_Success() throws Exception {
-                given(reservationService.confirmReservation(eq(100L), any())).willReturn(createResponse());
+                given(reservationService.confirmReservation(any(), any()))
+                                .willReturn(createResponse());
 
                 mockMvc.perform(patch("/api/reservations/{id}/confirm", 100L)
                                 .with(user(createTestUser("MANAGER"))))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-confirm",
-                                                pathParameters(parameterWithName("id").description("예약 ID"))));
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 확정 (운영자)")
+                                                                .description("운영자가 신청된 예약을 확정합니다. 상태가 CONFIRMED로 변경됩니다.")
+                                                                .responseSchema(schema("ReservationResponse"))
+                                                                .pathParameters(
+                                                                                parameterWithName("id")
+                                                                                                .description("예약 ID"))
+                                                                .build())));
         }
 
         @Test
@@ -386,11 +339,18 @@ class ReservationControllerTest extends ControllerTestSupport {
         void confirmReservation_Forbidden() throws Exception {
                 mockMvc.perform(patch("/api/reservations/{id}/confirm", 100L)
                                 .with(user(createTestUser("USER"))))
-                                .andExpect(status().isForbidden());
+                                .andExpect(status().isForbidden())
+                                .andDo(document("reservation-confirm-403",
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 확정 (운영자) - 권한 부족")
+                                                                .description("운영자 권한이 없는 사용자가 예약 확정을 시도할 경우 403 에러를 반환합니다.")
+                                                                .responseFields(commonErrorFields())
+                                                                .build())));
         }
 
         @Test
-        @DisplayName("예약 환불 예상액 조회 - 성공")
+        @DisplayName("예약 환불 예상액 조회 API - 성공")
         void getRefundPreview_Success() throws Exception {
                 com.modu.office.dto.response.RefundPreviewResponse response = com.modu.office.dto.response.RefundPreviewResponse
                                 .builder()
@@ -409,39 +369,19 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .with(user(createTestUser("USER"))))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-refund-preview",
-                                                pathParameters(parameterWithName("id").description("예약 ID")),
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("처리 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data.reservationId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("예약 ID"),
-                                                                fieldWithPath("data.totalPrice")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("기존 총 결제 금액"),
-                                                                fieldWithPath("data.refundRate")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("기본 환불 비율(%)"),
-                                                                fieldWithPath("data.refundAmount")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("실제 환불 금액"),
-                                                                fieldWithPath("data.cancellationPenalty")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("취소 위약금"),
-                                                                fieldWithPath("data.requestTime")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("조회 기준 시각"),
-                                                                fieldWithPath("data.reasonDescriptor")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("적용 사유 설명"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("환불 예상액 조회")
+                                                                .description("예약 취소 전 현재 시점의 환불 비율 및 환불 예정 금액을 미리 확인합니다.")
+                                                                .responseSchema(schema("RefundPreviewResponse"))
+                                                                .pathParameters(
+                                                                                parameterWithName("id")
+                                                                                                .description("예약 ID"))
+                                                                .build())));
         }
 
         @Test
-        @DisplayName("예약 취소 (Soft Delete) - 성공")
+        @DisplayName("예약 취소 API - 성공")
         void cancelReservation_Success() throws Exception {
                 com.modu.office.dto.response.CancelReservationResponse response = com.modu.office.dto.response.CancelReservationResponse
                                 .builder()
@@ -463,36 +403,14 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .with(user(createTestUser("USER"))))
                                 .andExpect(status().isOk())
                                 .andDo(document("reservation-cancel",
-                                                pathParameters(parameterWithName("id").description("예약 ID")),
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.STRING)
-                                                                                .description("처리 상태"),
-                                                                fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                .description("응답 코드"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("응답 메시지"),
-                                                                fieldWithPath("data.message").type(JsonFieldType.STRING)
-                                                                                .description("취소 처리 결과 메시지"),
-                                                                fieldWithPath("data.refundInfo.reservationId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("예약 ID"),
-                                                                fieldWithPath("data.refundInfo.totalPrice")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("총 결제 금액"),
-                                                                fieldWithPath("data.refundInfo.refundRate")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("환불 비율"),
-                                                                fieldWithPath("data.refundInfo.refundAmount")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("환불 금액"),
-                                                                fieldWithPath("data.refundInfo.cancellationPenalty")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("위약금"),
-                                                                fieldWithPath("data.refundInfo.requestTime")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("처리 시각"),
-                                                                fieldWithPath("data.refundInfo.reasonDescriptor")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("사유 설명"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("예약 취소")
+                                                                .description("사용자가 예약을 취소합니다. 환불 정책에 따라 환불 처리가 함께 진행됩니다.")
+                                                                .responseSchema(schema("CancelReservationResponse"))
+                                                                .pathParameters(
+                                                                                parameterWithName("id")
+                                                                                                .description("예약 ID"))
+                                                                .build())));
         }
 }

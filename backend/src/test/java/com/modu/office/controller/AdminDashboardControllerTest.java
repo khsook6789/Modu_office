@@ -15,6 +15,8 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -22,9 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SuppressWarnings("null")
 @DisplayName("[Controller] Admin - Dashboard Stats API")
 class AdminDashboardControllerTest extends ControllerTestSupport {
+
+    private static final String TAG = "Admin Stats";
 
     // ─────────────────────────────────────────────────────────────
     // 1. 실시간 점유율
@@ -58,22 +60,24 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.length()").value(2))
                     .andDo(document("admin-stats-occupancy",
-                            queryParameters(
-                                    parameterWithName("officeId").description("지점 ID (MANAGER 필수 / ADMIN 선택)")
-                                            .optional(),
-                                    parameterWithName("floor").description("층 (선택)").optional()),
-                            responseFields(
-                                    fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
-                                    fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-                                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                    fieldWithPath("data[].officeId").type(JsonFieldType.NUMBER).description("지점 ID"),
-                                    fieldWithPath("data[].floor").type(JsonFieldType.NUMBER).description("층")
-                                            .optional(),
-                                    fieldWithPath("data[].totalRooms").type(JsonFieldType.NUMBER).description("전체 방 수"),
-                                    fieldWithPath("data[].occupiedRooms").type(JsonFieldType.NUMBER)
-                                            .description("점유 중인 방 수"),
-                                    fieldWithPath("data[].occupancyRate").type(JsonFieldType.NUMBER)
-                                            .description("점유율 (%)"))));
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("실시간 점유율 조회")
+                                    .description("현재 지점의 층별 회의실 점유 현황과 점유율을 조회합니다.")
+                                    .responseSchema(schema("OccupancyResponse"))
+                                    .queryParameters(
+                                            parameterWithName("officeId").description("지점 ID (MANAGER 필수 / ADMIN 선택)").optional(),
+                                            parameterWithName("floor").description("층 (선택)").optional())
+                                    .responseFields(
+                                            fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
+                                            fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                            fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                            fieldWithPath("data[].officeId").type(JsonFieldType.NUMBER).description("지점 ID"),
+                                            fieldWithPath("data[].floor").type(JsonFieldType.NUMBER).description("층").optional(),
+                                            fieldWithPath("data[].totalRooms").type(JsonFieldType.NUMBER).description("전체 방 수"),
+                                            fieldWithPath("data[].occupiedRooms").type(JsonFieldType.NUMBER).description("점유 중인 방 수"),
+                                            fieldWithPath("data[].occupancyRate").type(JsonFieldType.NUMBER).description("점유율 (%)"))
+                                    .build())));
         }
 
         @Test
@@ -95,7 +99,14 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
             mockMvc.perform(get("/api/admin/stats/occupancy")
                     .param("officeId", "1")
                     .with(user(createTestUser("USER"))))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden())
+                    .andDo(document("admin-stats-occupancy-403",
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("실시간 점유율 조회 - 권한 부족")
+                                    .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseFields(commonErrorFields())
+                                    .build())));
         }
     }
 
@@ -123,20 +134,23 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     .andExpect(jsonPath("$.data.canceledCount").value(15))
                     .andExpect(jsonPath("$.data.cancellationRate").value(15.0))
                     .andDo(document("admin-stats-cancellations",
-                            queryParameters(
-                                    parameterWithName("officeId").description("지점 ID (선택)").optional(),
-                                    parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
-                                    parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional()),
-                            responseFields(
-                                    fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
-                                    fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-                                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                    fieldWithPath("data.totalReservations").type(JsonFieldType.NUMBER)
-                                            .description("전체 예약 수"),
-                                    fieldWithPath("data.canceledCount").type(JsonFieldType.NUMBER)
-                                            .description("취소된 예약 수"),
-                                    fieldWithPath("data.cancellationRate").type(JsonFieldType.NUMBER)
-                                            .description("취소율 (%)"))));
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("취소율 통계 조회")
+                                    .description("특정 기간 동안의 전체 예약 대비 취소 건수와 취소율을 조회합니다.")
+                                    .responseSchema(schema("CancellationStatsResponse"))
+                                    .queryParameters(
+                                            parameterWithName("officeId").description("지점 ID (선택)").optional(),
+                                            parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
+                                            parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional())
+                                    .responseFields(
+                                            fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
+                                            fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                            fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                            fieldWithPath("data.totalReservations").type(JsonFieldType.NUMBER).description("전체 예약 수"),
+                                            fieldWithPath("data.canceledCount").type(JsonFieldType.NUMBER).description("취소된 예약 수"),
+                                            fieldWithPath("data.cancellationRate").type(JsonFieldType.NUMBER).description("취소율 (%)"))
+                                    .build())));
         }
 
         @Test
@@ -144,7 +158,14 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         void getCancellationStats_User_Forbidden() throws Exception {
             mockMvc.perform(get("/api/admin/stats/cancellations")
                     .with(user(createTestUser("USER"))))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden())
+                    .andDo(document("admin-stats-cancellations-403",
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("취소율 통계 조회 - 권한 부족")
+                                    .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseFields(commonErrorFields())
+                                    .build())));
         }
     }
 
@@ -171,20 +192,24 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     .with(user(admin)))
                     .andExpect(status().isOk())
                     .andDo(document("admin-stats-popular-rooms",
-                            queryParameters(
-                                    parameterWithName("officeId").description("지점 ID (선택)").optional(),
-                                    parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
-                                    parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional()),
-                            responseFields(
-                                    fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
-                                    fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-                                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                    fieldWithPath("data[].roomId").type(JsonFieldType.NUMBER).description("회의실 ID"),
-                                    fieldWithPath("data[].roomName").type(JsonFieldType.STRING).description("회의실 이름"),
-                                    fieldWithPath("data[].officeLocation").type(JsonFieldType.STRING)
-                                            .description("지점 위치"),
-                                    fieldWithPath("data[].reservationCount").type(JsonFieldType.NUMBER)
-                                            .description("예약 건수"))));
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("인기 회의실 Top 5")
+                                    .description("예약 건수가 가장 많은 상위 5개 회의실 목록을 조회합니다.")
+                                    .responseSchema(schema("RoomRankingResponse"))
+                                    .queryParameters(
+                                            parameterWithName("officeId").description("지점 ID (선택)").optional(),
+                                            parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
+                                            parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional())
+                                    .responseFields(
+                                            fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
+                                            fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                            fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                            fieldWithPath("data[].roomId").type(JsonFieldType.NUMBER).description("회의실 ID"),
+                                            fieldWithPath("data[].roomName").type(JsonFieldType.STRING).description("회의실 이름"),
+                                            fieldWithPath("data[].officeLocation").type(JsonFieldType.STRING).description("지점 위치"),
+                                            fieldWithPath("data[].reservationCount").type(JsonFieldType.NUMBER).description("예약 건수"))
+                                    .build())));
         }
 
         @Test
@@ -192,7 +217,14 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         void getPopularRooms_User_Forbidden() throws Exception {
             mockMvc.perform(get("/api/admin/stats/rooms/popular")
                     .with(user(createTestUser("USER"))))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden())
+                    .andDo(document("admin-stats-popular-rooms-403",
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("인기 회의실 Top 5 - 권한 부족")
+                                    .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseFields(commonErrorFields())
+                                    .build())));
         }
     }
 
@@ -215,20 +247,24 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     .with(user(admin)))
                     .andExpect(status().isOk())
                     .andDo(document("admin-stats-unpopular-rooms",
-                            queryParameters(
-                                    parameterWithName("officeId").description("지점 ID (선택)").optional(),
-                                    parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
-                                    parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional()),
-                            responseFields(
-                                    fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
-                                    fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-                                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                    fieldWithPath("data[].roomId").type(JsonFieldType.NUMBER).description("회의실 ID"),
-                                    fieldWithPath("data[].roomName").type(JsonFieldType.STRING).description("회의실 이름"),
-                                    fieldWithPath("data[].officeLocation").type(JsonFieldType.STRING)
-                                            .description("지점 위치"),
-                                    fieldWithPath("data[].reservationCount").type(JsonFieldType.NUMBER)
-                                            .description("예약 건수"))));
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("비인기 회의실 Top 5")
+                                    .description("예약 건수가 가장 적은 하위 5개 회의실 목록을 조회합니다.")
+                                    .responseSchema(schema("RoomRankingResponse"))
+                                    .queryParameters(
+                                            parameterWithName("officeId").description("지점 ID (선택)").optional(),
+                                            parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
+                                            parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional())
+                                    .responseFields(
+                                            fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
+                                            fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                            fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                            fieldWithPath("data[].roomId").type(JsonFieldType.NUMBER).description("회의실 ID"),
+                                            fieldWithPath("data[].roomName").type(JsonFieldType.STRING).description("회의실 이름"),
+                                            fieldWithPath("data[].officeLocation").type(JsonFieldType.STRING).description("지점 위치"),
+                                            fieldWithPath("data[].reservationCount").type(JsonFieldType.NUMBER).description("예약 건수"))
+                                    .build())));
         }
 
         @Test
@@ -236,7 +272,14 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         void getUnpopularRooms_User_Forbidden() throws Exception {
             mockMvc.perform(get("/api/admin/stats/rooms/unpopular")
                     .with(user(createTestUser("USER"))))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden())
+                    .andDo(document("admin-stats-unpopular-rooms-403",
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("비인기 회의실 Top 5 - 권한 부족")
+                                    .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseFields(commonErrorFields())
+                                    .build())));
         }
     }
 
@@ -264,17 +307,22 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     .with(user(admin)))
                     .andExpect(status().isOk())
                     .andDo(document("admin-stats-peak-times",
-                            queryParameters(
-                                    parameterWithName("officeId").description("지점 ID (선택)").optional(),
-                                    parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
-                                    parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional()),
-                            responseFields(
-                                    fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
-                                    fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-                                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                    fieldWithPath("data[].hour").type(JsonFieldType.NUMBER).description("시간대 (0~23)"),
-                                    fieldWithPath("data[].reservationCount").type(JsonFieldType.NUMBER)
-                                            .description("예약 건수"))));
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("피크타임 분포 조회")
+                                    .description("시간대별(0~23시) 예약 분포를 조회하여 가장 붐비는 시간을 파악합니다.")
+                                    .responseSchema(schema("PeakTimeResponse"))
+                                    .queryParameters(
+                                            parameterWithName("officeId").description("지점 ID (선택)").optional(),
+                                            parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
+                                            parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional())
+                                    .responseFields(
+                                            fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
+                                            fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                            fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                            fieldWithPath("data[].hour").type(JsonFieldType.NUMBER).description("시간대 (0~23)"),
+                                            fieldWithPath("data[].reservationCount").type(JsonFieldType.NUMBER).description("예약 건수"))
+                                    .build())));
         }
 
         @Test
@@ -282,7 +330,14 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         void getPeakTimes_User_Forbidden() throws Exception {
             mockMvc.perform(get("/api/admin/stats/peak-times")
                     .with(user(createTestUser("USER"))))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden())
+                    .andDo(document("admin-stats-peak-times-403",
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("피크타임 분포 조회 - 권한 부족")
+                                    .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseFields(commonErrorFields())
+                                    .build())));
         }
     }
 
@@ -309,18 +364,22 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     .with(user(admin)))
                     .andExpect(status().isOk())
                     .andDo(document("admin-stats-daily-usage",
-                            queryParameters(
-                                    parameterWithName("officeId").description("지점 ID (선택)").optional(),
-                                    parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
-                                    parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional()),
-                            responseFields(
-                                    fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
-                                    fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-                                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                    fieldWithPath("data[].date").type(JsonFieldType.STRING)
-                                            .description("날짜 (yyyy-MM-dd)"),
-                                    fieldWithPath("data[].totalUsageMinutes").type(JsonFieldType.NUMBER)
-                                            .description("총 사용 시간 (분)"))));
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("일일 총 사용 시간 조회")
+                                    .description("날짜별 전체 회의실 사용 시간(분)의 추이를 조회합니다.")
+                                    .responseSchema(schema("DailyUsageResponse"))
+                                    .queryParameters(
+                                            parameterWithName("officeId").description("지점 ID (선택)").optional(),
+                                            parameterWithName("startDate").description("조회 시작 날짜 (yyyy-MM-dd)").optional(),
+                                            parameterWithName("endDate").description("조회 종료 날짜 (yyyy-MM-dd)").optional())
+                                    .responseFields(
+                                            fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
+                                            fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                            fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                            fieldWithPath("data[].date").type(JsonFieldType.STRING).description("날짜 (yyyy-MM-dd)"),
+                                            fieldWithPath("data[].totalUsageMinutes").type(JsonFieldType.NUMBER).description("총 사용 시간 (분)"))
+                                    .build())));
         }
 
         @Test
@@ -341,7 +400,14 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         void getDailyUsage_User_Forbidden() throws Exception {
             mockMvc.perform(get("/api/admin/stats/daily-usage")
                     .with(user(createTestUser("USER"))))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isForbidden())
+                    .andDo(document("admin-stats-daily-usage-403",
+                            resource(builder()
+                                    .tag(TAG)
+                                    .summary("일일 총 사용 시간 조회 - 권한 부족")
+                                    .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseFields(commonErrorFields())
+                                    .build())));
         }
     }
 }

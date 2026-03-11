@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -20,11 +21,14 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+
 @SuppressWarnings("null")
 @DisplayName("[Controller] ManagerAuth API")
 class ManagerAuthControllerTest extends ControllerTestSupport {
 
         private static final String BASE_URL = "/api/auth/manager";
+        private static final String TAG = "Auth";
 
         @Test
         @DisplayName("운영자 회원가입 - 유효한 요청이면 200 반환")
@@ -42,13 +46,28 @@ class ManagerAuthControllerTest extends ControllerTestSupport {
                                 .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andDo(document("manager-auth-signup",
-                                                requestFields(
-                                                                fieldWithPath("email").type(JsonFieldType.STRING)
-                                                                                .description("이메일 (로그인 ID)"),
-                                                                fieldWithPath("password").type(JsonFieldType.STRING)
-                                                                                .description("비밀번호"),
-                                                                fieldWithPath("name").type(JsonFieldType.STRING)
-                                                                                .description("운영자 이름"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("운영자 회원가입")
+                                                                .description("공간 운영자 계정을 생성합니다. 관리자 승인이 필요한 상태로 생성됩니다.")
+                                                                .requestSchema(schema("ManagerSignupRequest"))
+                                                                .requestFields(
+                                                                                fieldWithPath("email").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("이메일 (로그인 ID)"
+                                                                                                                + constDocs(ManagerSignupRequest.class,
+                                                                                                                                "email")),
+                                                                                fieldWithPath("password").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("비밀번호"
+                                                                                                                + constDocs(ManagerSignupRequest.class,
+                                                                                                                                "password")),
+                                                                                fieldWithPath("name").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("운영자 이름"
+                                                                                                                + constDocs(ManagerSignupRequest.class,
+                                                                                                                                "name")))
+                                                                .build())));
         }
 
         @Test
@@ -73,18 +92,34 @@ class ManagerAuthControllerTest extends ControllerTestSupport {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.accessToken").value("manager.access.token"))
                                 .andDo(document("manager-auth-login",
-                                                requestFields(
-                                                                fieldWithPath("email").type(JsonFieldType.STRING)
-                                                                                .description("이메일"),
-                                                                fieldWithPath("password").type(JsonFieldType.STRING)
-                                                                                .description("비밀번호")),
-                                                responseFields(
-                                                                fieldWithPath("accessToken").type(JsonFieldType.STRING)
-                                                                                .description("Access Token (JWT)"),
-                                                                fieldWithPath("refreshToken").type(JsonFieldType.STRING)
-                                                                                .description("Refresh Token"),
-                                                                fieldWithPath("tokenType").type(JsonFieldType.STRING)
-                                                                                .description("토큰 타입 (Bearer)"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("운영자 로그인")
+                                                                .description("운영자 계정으로 로그인하여 JWT 토큰을 발급받습니다.")
+                                                                .requestSchema(schema("ManagerLoginRequest"))
+                                                                .responseSchema(schema("TokenResponse"))
+                                                                .requestFields(
+                                                                                fieldWithPath("email").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("이메일"
+                                                                                                                + constDocs(ManagerLoginRequest.class,
+                                                                                                                                "email")),
+                                                                                fieldWithPath("password").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("비밀번호"
+                                                                                                                + constDocs(ManagerLoginRequest.class,
+                                                                                                                                "password")))
+                                                                .responseFields(
+                                                                                fieldWithPath("accessToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("Access Token (JWT)"),
+                                                                                fieldWithPath("refreshToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("Refresh Token"),
+                                                                                fieldWithPath("tokenType").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("토큰 타입 (Bearer)"))
+                                                                .build())));
         }
 
         @Test
@@ -108,15 +143,28 @@ class ManagerAuthControllerTest extends ControllerTestSupport {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.accessToken").value("new.manager.access.token"))
                                 .andDo(document("manager-auth-refresh",
-                                                requestFields(
-                                                                fieldWithPath("refreshToken").type(JsonFieldType.STRING)
-                                                                                .description("갱신에 사용할 Refresh Token")),
-                                                responseFields(
-                                                                fieldWithPath("accessToken").type(JsonFieldType.STRING)
-                                                                                .description("새로 발급된 Access Token"),
-                                                                fieldWithPath("refreshToken").type(JsonFieldType.STRING)
-                                                                                .description("기존 Refresh Token"),
-                                                                fieldWithPath("tokenType").type(JsonFieldType.STRING)
-                                                                                .description("토큰 타입 (Bearer)"))));
+                                                resource(ResourceSnippetParameters.builder()
+                                                                .tag(TAG)
+                                                                .summary("운영자 토큰 갱신")
+                                                                .description("운영자 전용 Refresh Token을 사용하여 Access Token을 재발급합니다.")
+                                                                .requestSchema(schema("RefreshTokenRequest"))
+                                                                .responseSchema(schema("TokenResponse"))
+                                                                .requestFields(
+                                                                                fieldWithPath("refreshToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("갱신에 사용할 Refresh Token"
+                                                                                                                + constDocs(RefreshTokenRequest.class,
+                                                                                                                                "refreshToken")))
+                                                                .responseFields(
+                                                                                fieldWithPath("accessToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("새로 발급된 Access Token"),
+                                                                                fieldWithPath("refreshToken").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("기존 Refresh Token"),
+                                                                                fieldWithPath("tokenType").type(
+                                                                                                JsonFieldType.STRING)
+                                                                                                .description("토큰 타입 (Bearer)"))
+                                                                .build())));
         }
 }

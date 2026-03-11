@@ -15,21 +15,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SuppressWarnings("null")
 @DisplayName("[Controller] Admin - Audit Log API")
 class AuditLogControllerTest extends ControllerTestSupport {
+
+        private static final String TAG = "Admin Audit Log";
 
         private UpdateLogResponse createLogResponse() {
                 return UpdateLogResponse.builder()
@@ -62,132 +64,50 @@ class AuditLogControllerTest extends ControllerTestSupport {
                                         .with(user(createTestUser("ADMIN"))))
                                         .andExpect(status().isOk())
                                         .andDo(document("admin-log-list",
-                                                        queryParameters(
-                                                                        parameterWithName("page")
-                                                                                        .description("페이지 번호 (0부터 시작)")
-                                                                                        .optional(),
-                                                                        parameterWithName("size").description("페이지 크기")
-                                                                                        .optional()),
-                                                        responseFields(
-                                                                        fieldWithPath("status")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("처리 상태"),
-                                                                        fieldWithPath("code").type(JsonFieldType.STRING)
-                                                                                        .description("응답 코드"),
-                                                                        fieldWithPath("message")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("응답 메시지"),
-                                                                        fieldWithPath("data.content[].id")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("로그 ID"),
-                                                                        fieldWithPath("data.content[].actorId")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("수행자 회원 ID"),
-                                                                        fieldWithPath("data.content[].actorName")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("수행자 이름"),
-                                                                        subsectionWithPath("data.content[].beforeData")
-                                                                                        .type(JsonFieldType.OBJECT)
-                                                                                        .description("변경 전 JSONB 데이터 (optional)")
-                                                                                        .optional(),
-                                                                        subsectionWithPath("data.content[].afterData")
-                                                                                        .type(JsonFieldType.OBJECT)
-                                                                                        .description("변경 후 JSONB 데이터"),
-                                                                        fieldWithPath("data.content[].occurredAt")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("발생 일시"),
-                                                                        fieldWithPath("data.content[].reservationId")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("대상 예약 ID"),
-                                                                        fieldWithPath("data.content[].reservationTitle")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("예약 제목"),
-                                                                        fieldWithPath("data.content[].action")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("로그 액션형 (CREATE, UPDATE, CANCEL)"),
-                                                                        fieldWithPath("data.content[].actorId")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("수행자 회원 ID"),
-                                                                        fieldWithPath("data.content[].actorName")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("수행자 이름"),
-                                                                        fieldWithPath("data.content[].beforeData")
-                                                                                        .type(JsonFieldType.OBJECT)
-                                                                                        .description("변경 전 JSONB 데이터 (optional)")
-                                                                                        .optional(),
-                                                                        fieldWithPath("data.content[].afterData")
-                                                                                        .type(JsonFieldType.OBJECT)
-                                                                                        .description("변경 후 JSONB 데이터"),
-                                                                        fieldWithPath("data.content[].occurredAt")
-                                                                                        .type(JsonFieldType.STRING)
-                                                                                        .description("발생 일시"),
-                                                                        fieldWithPath("data.pageable")
-                                                                                        .type(JsonFieldType.OBJECT)
-                                                                                        .description("페이징 정보"),
-                                                                        fieldWithPath("data.pageable.sort")
-                                                                                        .type(JsonFieldType.OBJECT)
-                                                                                        .description("정렬 정보 (ignored)")
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.sort.empty")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.sort.sorted")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.sort.unsorted")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.offset")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.pageNumber")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.pageSize")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.paged")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.pageable.unpaged")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.last")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .description("마지막 페이지 여부"),
-                                                                        fieldWithPath("data.totalElements")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("전체 데이터 수"),
-                                                                        fieldWithPath("data.totalPages")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("전체 페이지 수"),
-                                                                        fieldWithPath("data.size")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("현재 페이지 크기"),
-                                                                        fieldWithPath("data.number")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("현재 페이지 번호"),
-                                                                        fieldWithPath("data.sort")
-                                                                                        .type(JsonFieldType.OBJECT)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.sort.empty")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.sort.sorted")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.sort.unsorted")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .ignored(),
-                                                                        fieldWithPath("data.first")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .description("첫 번째 페이지 여부"),
-                                                                        fieldWithPath("data.numberOfElements")
-                                                                                        .type(JsonFieldType.NUMBER)
-                                                                                        .description("현재 페이지의 데이터 수"),
-                                                                        fieldWithPath("data.empty")
-                                                                                        .type(JsonFieldType.BOOLEAN)
-                                                                                        .description("데이터 비어있음 여부"))));
+                                                        resource(builder()
+                                                                        .tag(TAG)
+                                                                        .summary("전체 감사 로그 페이징 조회")
+                                                                        .description("시스템에서 발생하는 모든 데이터 변경 감사 로그(Audit Log)를 페이징하여 조회합니다. JSONB 형식의 변경 전/후 데이터를 포함합니다.")
+                                                                        .responseSchema(schema("UpdateLogResponse"))
+                                                                        .queryParameters(
+                                                                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+                                                                                        parameterWithName("size").description("페이지 크기").optional())
+                                                                        .responseFields(
+                                                                                        fieldWithPath("status").type(JsonFieldType.STRING).description("처리 상태"),
+                                                                                        fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                                                        fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("로그 ID"),
+                                                                                        fieldWithPath("data.content[].actorId").type(JsonFieldType.NUMBER).description("수행자 회원 ID"),
+                                                                                        fieldWithPath("data.content[].actorName").type(JsonFieldType.STRING).description("수행자 이름"),
+                                                                                        subsectionWithPath("data.content[].beforeData").type(JsonFieldType.OBJECT).description("변경 전 JSONB 데이터 (optional)").optional(),
+                                                                                        subsectionWithPath("data.content[].afterData").type(JsonFieldType.OBJECT).description("변경 후 JSONB 데이터"),
+                                                                                        fieldWithPath("data.content[].occurredAt").type(JsonFieldType.STRING).description("발생 일시"),
+                                                                                        fieldWithPath("data.content[].reservationId").type(JsonFieldType.NUMBER).description("대상 예약 ID"),
+                                                                                        fieldWithPath("data.content[].reservationTitle").type(JsonFieldType.STRING).description("예약 제목"),
+                                                                                        fieldWithPath("data.content[].action").type(JsonFieldType.STRING).description("로그 액션형 (CREATE, UPDATE, CANCEL)"),
+                                                                                        fieldWithPath("data.pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
+                                                                                        fieldWithPath("data.pageable.sort").type(JsonFieldType.OBJECT).description("정렬 정보 (ignored)").ignored(),
+                                                                                        fieldWithPath("data.pageable.sort.empty").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.pageable.sort.sorted").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.pageable.sort.unsorted").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.pageable.offset").type(JsonFieldType.NUMBER).ignored(),
+                                                                                        fieldWithPath("data.pageable.pageNumber").type(JsonFieldType.NUMBER).ignored(),
+                                                                                        fieldWithPath("data.pageable.pageSize").type(JsonFieldType.NUMBER).ignored(),
+                                                                                        fieldWithPath("data.pageable.paged").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.pageable.unpaged").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                                                                                        fieldWithPath("data.totalElements").type(JsonFieldType.NUMBER).description("전체 데이터 수"),
+                                                                                        fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                                                                                        fieldWithPath("data.size").type(JsonFieldType.NUMBER).description("현재 페이지 크기"),
+                                                                                        fieldWithPath("data.number").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                                                                                        fieldWithPath("data.sort").type(JsonFieldType.OBJECT).ignored(),
+                                                                                        fieldWithPath("data.sort.empty").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.sort.sorted").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.sort.unsorted").type(JsonFieldType.BOOLEAN).ignored(),
+                                                                                        fieldWithPath("data.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
+                                                                                        fieldWithPath("data.numberOfElements").type(JsonFieldType.NUMBER).description("현재 페이지의 데이터 수"),
+                                                                                        fieldWithPath("data.empty").type(JsonFieldType.BOOLEAN).description("데이터 비어있음 여부"))
+                                                                        .build())));
                 }
         }
 
@@ -210,20 +130,17 @@ class AuditLogControllerTest extends ControllerTestSupport {
                                         .with(user(createTestUser("ADMIN"))))
                                         .andExpect(status().isOk())
                                         .andDo(document("admin-log-search",
-                                                        queryParameters(
-                                                                        parameterWithName("reservationId")
-                                                                                        .description("대상 예약 ID")
-                                                                                        .optional(),
-                                                                        parameterWithName("action").description(
-                                                                                        "동작 유형 (CREATE, UPDATE, CANCEL)")
-                                                                                        .optional(),
-                                                                        parameterWithName("changedField").description(
-                                                                                        "비교할 JSONB 내 필드 키 (예: status)")
-                                                                                        .optional(),
-                                                                        parameterWithName("page").description("페이지 번호")
-                                                                                        .optional())
-                                        // responseFields는 위 목록 조회와 동일하므로 생략 (또는 일부 반복 가능하나 여기서는 생략)
-                                        ));
+                                                        resource(builder()
+                                                                        .tag(TAG)
+                                                                        .summary("감사 로그 정밀 검색")
+                                                                        .description("예약 ID, 특정 동작(action), 또는 JSONB 데이터 내 특정 필드의 변경 여부를 조건으로 감사 로그를 검색합니다.")
+                                                                        .responseSchema(schema("UpdateLogResponse"))
+                                                                        .queryParameters(
+                                                                                        parameterWithName("reservationId").description("대상 예약 ID").optional(),
+                                                                                        parameterWithName("action").description("동작 유형 (CREATE, UPDATE, CANCEL)").optional(),
+                                                                                        parameterWithName("changedField").description("비교할 JSONB 내 필드 키 (예: status)").optional(),
+                                                                                        parameterWithName("page").description("페이지 번호").optional())
+                                                                        .build())));
                 }
 
                 @Test
