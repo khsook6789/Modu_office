@@ -19,30 +19,32 @@
 
 ### Backend
 
-| category         | Technology               | Description                                       |
-| :--------------- | :----------------------- | :------------------------------------------------ |
-| **Framework**    | Spring Boot 3.5.10       | RESTful API 및 비즈니스 로직 핵심 프레임워크      |
-| **Language**     | Java 21                  | 현대적 자바 기능 기반의 안정적인 백엔드 코드      |
-| **Persistence**  | Spring Data JPA          | 객체 지향적 데이터 접근 및 관계 매핑 관리         |
-| **Database**     | PostgreSQL 15            | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재 |
-| **Security**     | Spring Security + JWT    | 무상태(Stateless) 기반의 보안 인증 및 권한 관리   |
-| **Real-time**    | Server-Sent Events (SSE) | 예약 현황 및 실시간 알림의 단방향 스트리밍 구현   |
-| **Validation**   | Jakarta Validation       | DTO 입력값 검증 및 데이터 무결성 보장             |
-| **Testing**      | JUnit 5                  | 단위/통합 테스트를 통한 코드 신뢰성 확보          |
-| **Logging**      | SLF4J                    | 시스템 동작 추적 및 디버깅을 위한 로깅            |
-| **DevOps**       | Spring Boot DevTools     | 핫 리로드 등 개발 생산성 향상 도구                |
-| **External API** | Google Maps API          | 지점 위치 정보 및 거리 기반 검색 서비스 제공      |
-|                  | Toss Payments            | 결제 위젯 및 API 연동을 통한 온라인 안전 결제 처리 |
-| **Auxiliary**    | Lombok                   | 보일러플레이트 코드 제거를 통한 생산성 향상       |
-| **Build Tool**   | Gradle                   | 프로젝트 빌드 및 의존성 라이프사이클 관리         |
-| **Documentation**| Spring REST Docs + Swagger| TDD 기반의 신뢰성 높은 자동화 API 명세서          |
+| category          | Technology                 | Description                                        |
+| :---------------- | :------------------------- | :------------------------------------------------- |
+| **Framework**     | Spring Boot 3.5.10         | RESTful API 및 비즈니스 로직 핵심 프레임워크       |
+| **Language**      | Java 21                    | 현대적 자바 기능 기반의 안정적인 백엔드 코드       |
+| **Persistence**   | Spring Data JPA            | 객체 지향적 데이터 접근 및 관계 매핑 관리          |
+| **Database**      | PostgreSQL 15              | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재  |
+| **Security**      | Spring Security + JWT      | 무상태(Stateless) 기반의 보안 인증 및 권한 관리    |
+| **Real-time**     | Server-Sent Events (SSE)   | 예약 현황 및 실시간 알림의 단방향 스트리밍 구현    |
+| **Validation**    | Jakarta Validation         | DTO 입력값 검증 및 데이터 무결성 보장              |
+| **Testing**       | JUnit 5                    | 단위/통합 테스트를 통한 코드 신뢰성 확보           |
+| **Logging**       | SLF4J                      | 시스템 동작 추적 및 디버깅을 위한 로깅             |
+| **DevOps**        | Spring Boot DevTools       | 핫 리로드 등 개발 생산성 향상 도구                 |
+| **External API**  | Google Maps API            | 지점 위치 정보 및 거리 기반 검색 서비스 제공       |
+|                   | Toss Payments              | 결제 위젯 및 API 연동을 통한 온라인 안전 결제 처리 |
+| **Auxiliary**     | Lombok                     | 보일러플레이트 코드 제거를 통한 생산성 향상        |
+| **Build Tool**    | Gradle                     | 프로젝트 빌드 및 의존성 라이프사이클 관리          |
+| **Documentation** | Spring REST Docs + Swagger | TDD 기반의 신뢰성 높은 자동화 API 명세서           |
 
 ---
 
 ## 🚀 시작하기 (Getting Started)
 
 ### API 문서 (Swagger UI)
+
 서버 실행 후 아래 주소에서 전체 API 명세 및 테스트 가이드를 확인할 수 있습니다.
+
 - **URL**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 - **참고**: `SWAGGER_TEST_GUIDE.md`의 최신 가이드 내용이 Swagger UI 상단에 자동으로 주입됩니다.
 
@@ -168,7 +170,7 @@ frontend/
 - **id**: PK, Auto Increment
 - **office_id**: 소속 지점 ID (FK)
 - **name**: 공간 이름
-- **room_code**: 공간 코드 (지점 내 Unique)
+- **room_code**: 공간 호수 (ex: 305호)
 - **description**: 공간 상세 설명 (TEXT)
 - **banner_image_url**: 메인 배너 이미지 URL
 - **floor**: 층수
@@ -332,6 +334,7 @@ frontend/
 - `GET /api/offices/{officeId}/rooms`: 특정 지점의 모든 회의실 조회 (상태/인원 필터링 지원)
 - `GET /api/rooms/{roomId}`: 특정 공간 상세 조회
 - `GET /api/rooms/search`: 고급 공간 검색 (예약 가능 여부, 날짜, 시간, 위치, 시설 등 복합 필터)
+- GET /api/rooms/{roomId}/similar: 유사 회의실 목록 추천 (Collaborative Filtering + 거리/시설 가중치 알고리즘 기반)
 - `PUT /api/rooms/{roomId}`: 공간 정보 수정 (Manager/Admin)
 - `DELETE /api/rooms/{roomId}`: 공간 삭제 (Manager/Admin)
 - `PATCH /api/offices/{id}/rooms/status`: 지점 내 회의실 상태 일괄 변경 (Manager/Admin)
@@ -378,7 +381,7 @@ frontend/
 
 - `POST /api/payments/confirm`: 토스페이먼츠 결제 승인 요청 (결제 위젯 인증 완료 후 호출)
 - `GET /api/payments/{reservationId}`: 특정 예약건의 결제 내역 조회 (접근 권한 확인 필수)
-  *(참고: 관리자의 예약 강제 취소 API 호출 시 내부적으로 토스 결제 환불 로직이 자동 실행됩니다.)*
+  _(참고: 관리자의 예약 강제 취소 API 호출 시 내부적으로 토스 결제 환불 로직이 자동 실행됩니다.)_
 
 ### 11. 사용자 프로필 (User Profile)
 
