@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +15,9 @@ import lombok.NoArgsConstructor;
  * 프론트에서 Toss successUrl로 받은 파라미터를 그대로 전달
  */
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class PaymentConfirmRequest {
 
     /**
