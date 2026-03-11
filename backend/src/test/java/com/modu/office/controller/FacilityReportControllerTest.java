@@ -81,7 +81,7 @@ class FacilityReportControllerTest extends ControllerTestSupport {
                                                                                                                                 "facilityId")),
                                                                                 fieldWithPath("issueType").type(
                                                                                                 JsonFieldType.STRING)
-                                                                                                .description("문제 유형 (BROKEN, MISSING, DIRTY, OTHER)"
+                                                                                                .description("문제 유형 (BROKEN, MALFUNCTION, NEEDS_SUPPLIES, DIRTY, MISSING, OTHER)"
                                                                                                                 + constDocs(FacilityReportCreateRequest.class,
                                                                                                                                 "issueType")))
                                                                 .build())));
@@ -156,9 +156,30 @@ class FacilityReportControllerTest extends ControllerTestSupport {
                                                                 .requestFields(
                                                                                 fieldWithPath("status").type(
                                                                                                 JsonFieldType.STRING)
-                                                                                                .description("변경할 처리 상태 (PENDING, IN_PROGRESS, RESOLVED, REJECTED)"
+                                                                                                .description("변경할 처리 상태 (REPORTED, IN_PROGRESS, RESOLVED, CANCELED)"
                                                                                                                 + constDocs(FacilityReportStatusUpdateRequest.class,
                                                                                                                                 "status")))
+                                                                .build())));
+        }
+
+        @Test
+        @DisplayName("신고 철회 API - 성공")
+        @WithMockUser(roles = "USER")
+        void cancelReport_Success() throws Exception {
+                given(facilityReportService.cancelReport(anyLong(), anyString()))
+                                .willReturn(createResponse());
+
+                mockMvc.perform(patch("/api/reports/{reportId}/cancel", 1L))
+                                .andExpect(status().isOk())
+                                .andDo(document("facility-report-cancel",
+                                                resource(builder()
+                                                                .tag(TAG)
+                                                                .summary("신고 철회 (사용자)")
+                                                                .description("사용자가 본인이 제출한 신고를 철회합니다.")
+                                                                .responseSchema(schema("FacilityReportResponse"))
+                                                                .pathParameters(
+                                                                                parameterWithName("reportId")
+                                                                                                .description("신고 ID"))
                                                                 .build())));
         }
 }

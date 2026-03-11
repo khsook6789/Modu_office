@@ -97,31 +97,20 @@ public class FacilityReportController {
                                 facilityReportService.updateReportStatus(reportId, request, userDetails.getUsername()));
         }
 
-        /*
-         * TODO: DB 스키마 수정 후 활성화
-         * /**
+        /**
          * [USER] 신고 철회
          * PATCH /api/reports/{reportId}/cancel
          */
-        /*
-         * @PatchMapping("/api/reports/{reportId}/cancel")
-         * 
-         * @Secured({"ROLE_USER"})
-         * 
-         * @Operation(summary = "신고 철회 (사용자)",
-         * description = "사용자가 본인이 제출한 신고를 철회합니다. REPORTED 상태에서만 철회 가능합니다.")
-         * 
-         * @ApiResponse(responseCode = "200", description = "철회 성공")
-         * 
-         * @ApiResponse(responseCode = "400", description = "이미 처리 중인 신고는 철회 불가")
-         * public ResponseEntity<FacilityReportResponse> cancelReport(
-         * 
-         * @PathVariable Long reportId,
-         * 
-         * @AuthenticationPrincipal UserDetails userDetails) {
-         * 
-         * return ResponseEntity.ok(
-         * facilityReportService.cancelReport(reportId, userDetails.getUsername()));
-         * }
-         */
+        @PatchMapping("/api/reports/{reportId}/cancel")
+        @Secured({ "ROLE_USER" })
+        @Operation(summary = "신고 철회 (사용자)", description = "사용자가 본인이 제출한 신고를 철회합니다. REPORTED 상태에서만 철회 가능합니다.")
+        @ApiResponse(responseCode = "200", description = "철회 성공")
+        @ApiResponse(responseCode = "400", description = "이미 처리 중인 신고는 철회 불가")
+        public ResponseEntity<FacilityReportResponse> cancelReport(
+                        @PathVariable Long reportId,
+                        @AuthenticationPrincipal UserDetails userDetails) {
+
+                return ResponseEntity.ok(
+                                facilityReportService.cancelReport(reportId, userDetails.getUsername()));
+        }
 }

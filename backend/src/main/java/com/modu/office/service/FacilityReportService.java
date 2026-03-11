@@ -206,37 +206,31 @@ public class FacilityReportService {
                 return FacilityReportResponse.from(report);
         }
 
-        /*
-         * TODO: CANCELED Enum DB 추가 후 활성화
-         */
         /**
          * 사용자의 신고 철회 (CANCELED 상태로 전환)
          *
          * Why: 오해 등으로 잘못 신고한 경우 운영자 리소스를 낭비하지 않도록 사용자가 직접 철회 가능
          */
-        /*
-         * @Transactional
-         * public FacilityReportResponse cancelReport(Long reportId, String userEmail) {
-         * FacilityReport report = facilityReportRepository.findById(reportId)
-         * .orElseThrow(() -> new
-         * ResourceNotFoundException(ErrorCode.FACILITY_REPORT_NOT_FOUND));
-         * 
-         * AppUser currentUser = appUserRepository.findByAccountEmail(userEmail)
-         * .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
-         * 
-         * // IDOR 검증: 본인이 신고한 건만 철회 가능
-         * if (!report.getReservation().getUser().getId().equals(currentUser.getId())) {
-         * throw new InvalidRequestException(ErrorCode.FORBIDDEN);
-         * }
-         * 
-         * // 상태 전이 검증 (REPORTED -> CANCELED만 허용)
-         * if (!report.getStatus().canTransitionTo(ReportStatus.CANCELED)) {
-         * throw new InvalidRequestException(ErrorCode.INVALID_STATUS_TRANSITION);
-         * }
-         * 
-         * report.setStatus(ReportStatus.CANCELED);
-         * 
-         * return FacilityReportResponse.from(report);
-         * }
-         */
+        @Transactional
+        public FacilityReportResponse cancelReport(Long reportId, String userEmail) {
+                FacilityReport report = facilityReportRepository.findById(java.util.Objects.requireNonNull(reportId, "reportId must not be null"))
+                                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.FACILITY_REPORT_NOT_FOUND));
+
+                AppUser currentUser = appUserRepository.findByAccountEmail(userEmail)
+                                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+
+                // IDOR 검증: 본인이 신고한 건만 철회 가능
+                if (!report.getReservation().getUser().getId().equals(currentUser.getId())) {
+                        throw new InvalidRequestException(ErrorCode.FORBIDDEN);
+                }
+
+                // 상태 전이 검증 (REPORTED -> CANCELED만 허용)
+                if (!report.getStatus().canTransitionTo(ReportStatus.CANCELED)) {
+                        throw new InvalidRequestException(ErrorCode.INVALID_STATUS_TRANSITION);
+                }
+
+                report.setStatus(ReportStatus.CANCELED);
+
+                return FacilityReportResponse.from(report);
+        }
 }
