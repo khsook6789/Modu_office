@@ -154,7 +154,7 @@ frontend/
 ### 3. Office (지점)
 
 - **id**: PK, Auto Increment
-- **owner_user_id**: 지점 소유자(운영자) AppUser FK
+- **manager_id**: 지점 소유자(운영자) AppUser FK
 - **name**: 지점명
 - **location**: 지점 위치 (주소)
 - **latitude / longitude**: 위도 / 경도
@@ -208,7 +208,7 @@ frontend/
 - **title**: 예약 제목
 - **office_id**: 지점 ID (FK)
 - **room_id**: 공간 ID (FK)
-- **customer_id**: 예약자(사용자) ID (FK)
+- **user_id**: 예약자(사용자) ID (FK)
 - **start_at**: 시작 시간
 - **end_at**: 종료 시간
 - **end_at_include_buffer_time**: 정비 시간을 포함한 종료 시간
@@ -231,8 +231,8 @@ frontend/
 - **reservation_id**: 예약 ID (FK)
 - **room_id**: 공간 ID (FK)
 - **facility_id**: 설비 ID (FK)
-- **issue_type**: 이슈 유형 Enum — `BROKEN`(고장), `MISSING`(비품 없음), `OTHER`(기타)
-- **status**: 처리 상태 — `REPORTED`(접수), `IN_PROGRESS`(처리 중), `RESOLVED`(해결)
+- **issue_type**: 이슈 유형 Enum — `BROKEN`(고장), `MALFUNCTION`(오작동), `NEEDS_SUPPLIES`(소모품 부족), `DIRTY`(청결불량), `MISSING`(비품 없음), `OTHER`(기타)
+- **status**: 처리 상태 — `REPORTED`(접수), `IN_PROGRESS`(처리 중), `RESOLVED`(해결), `CANCELED`(철회)
 - **created_at / updated_at**: 생성 / 수정 시각
 
 ### 11. UpdateLog (변경 로그)
@@ -426,6 +426,7 @@ frontend/
 - `GET /api/my-reports?reservationId={id}`: 내 예약 신고 내역 조회 (USER)
 - `GET /api/offices/{officeId}/reports`: 오피스 신고 내역 전체 조회 (MANAGER/ADMIN)
 - `PATCH /api/reports/{reportId}/status`: 신고 처리 상태 변경 (MANAGER/ADMIN, IN_PROGRESS 전환 시 시설 자동 비활성화)
+- `PATCH /api/reports/{reportId}/cancel`: 신고 철회 (USER, REPORTED 상태에서만 가능)
 
 ---
 
