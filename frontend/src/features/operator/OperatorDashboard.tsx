@@ -5,6 +5,7 @@ import { roomApi } from '../rooms/api/room.api';
 import { bookingApi, type Booking } from '../booking/api/booking.api';
 import { client } from '../../api/client';
 import StatsDashboard from './StatsDashboard';
+import OfficeMap from '../../components/Map/OfficeMap';
 import './OperatorDashboard.css';
 import './StatsDashboard.css';
 
@@ -261,6 +262,15 @@ export default function OperatorDashboard() {
                                         + 새 오피스 등록
                                     </button>
                                 </div>
+
+                                {/* 오피스 위치 지도 */}
+                                {offices.length > 0 && (
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem' }}>📍 오피스 위치 지도 — 마커를 클릭하면 상세 정보가 표시됩니다.</p>
+                                        <OfficeMap offices={offices} />
+                                    </div>
+                                )}
+
                                 {offices.length === 0 ? (
                                     <div className="op-empty"><p>등록된 오피스가 없습니다.</p></div>
                                 ) : (

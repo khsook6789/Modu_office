@@ -1,7 +1,17 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Autocomplete, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import Input from '../../components/Input';
 import { officeApi } from '../rooms/api/office.api';
+
+const LIBRARIES: ('places')[] = ['places'];
+
+const mapContainerStyle = {
+    width: '100%',
+    height: '250px',
+    borderRadius: '12px',
+    marginTop: '8px',
+};
 
 export default function OfficeFormPage() {
     const { id } = useParams();
@@ -15,9 +25,22 @@ export default function OfficeFormPage() {
     const [closeTime, setCloseTime] = useState('18:00');
     const [loading, setLoading] = useState(false);
 
+    // 좌표 state
+    const [latitude, setLatitude] = useState<number>(37.5665);
+    const [longitude, setLongitude] = useState<number>(126.9780);
+    const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.9780 });
+
+    // Autocomplete ref
+    const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+    // Google Maps 로드
+    const { isLoaded, loadError } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+        libraries: LIBRARIES,
+    });
+
     useEffect(() => {
         if (isEditMode) {
-            // Fetch existing office data
             setLoading(true);
             officeApi.getOfficeById(id!)
                 .then((data) => {
@@ -26,11 +49,31 @@ export default function OfficeFormPage() {
                     setLocation(data.location);
                     setOpenTime(data.openTime);
                     setCloseTime(data.closeTime);
+                    if (data.latitude && data.longitude) {
+                        setLatitude(data.latitude);
+                        setLongitude(data.longitude);
+                        setMapCenter({ lat: data.latitude, lng: data.longitude });
+                    }
                 })
-                .catch(err => console.error("Failed to fetch office", err))
+                .catch(err => console.error('Failed to fetch office', err))
                 .finally(() => setLoading(false));
         }
     }, [isEditMode, id]);
+
+    // Autocomplete에서 주소 선택됐을 때
+    const handlePlaceChanged = () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (!place || !place.geometry || !place.geometry.location) return;
+
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const formattedAddress = place.formatted_address || place.name || '';
+
+        setLocation(formattedAddress);
+        setLatitude(lat);
+        setLongitude(lng);
+        setMapCenter({ lat, lng });
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -40,10 +83,10 @@ export default function OfficeFormPage() {
             name,
             description,
             location,
-            latitude: 37.5,
-            longitude: 127.0,
+            latitude,
+            longitude,
             openTime,
-            closeTime
+            closeTime,
         };
 
         try {
@@ -81,7 +124,7 @@ export default function OfficeFormPage() {
                 />
 
                 <div className="form-group mb-sm">
-                    <label className="block text-sm font-medium mb-xs">오피스 설명 <span style={{color:'var(--color-error)'}}>*</span></label>
+                    <label className="block text-sm font-medium mb-xs">오피스 설명 <span style={{ color: 'var(--color-error)' }}>*</span></label>
                     <textarea
                         className="input-field w-full"
                         style={{ minHeight: '100px', resize: 'vertical' }}
@@ -93,15 +136,62 @@ export default function OfficeFormPage() {
                     />
                 </div>
 
-                <Input
-                    label="위치 (주소)"
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    required
-                    fullWidth
-                    placeholder="서울시 강남구 테헤란로..."
-                />
+                {/* 주소 검색 (Places Autocomplete) */}
+                <div className="form-group mb-sm">
+                    <label className="block text-sm font-medium mb-xs">
+                        위치 (주소) <span style={{ color: 'var(--color-error)' }}>*</span>
+                    </label>
+                    {isLoaded ? (
+                        <Autocomplete
+                            onLoad={(ac) => (autocompleteRef.current = ac)}
+                            onPlaceChanged={handlePlaceChanged}
+                            options={{ componentRestrictions: { country: 'kr' } }}
+                        >
+                            <input
+                                type="text"
+                                className="input-field w-full"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                placeholder="주소를 검색하세요... (예: 서울 강남구 테헤란로)"
+                                required
+                            />
+                        </Autocomplete>
+                    ) : (
+                        <input
+                            type="text"
+                            className="input-field w-full"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            placeholder={loadError ? '지도를 불러오지 못했습니다' : '지도 로딩 중...'}
+                            disabled={!loadError}
+                            required
+                        />
+                    )}
+                </div>
+
+                {/* 미니 지도 미리보기 */}
+                {isLoaded && (
+                    <div className="form-group mb-sm">
+                        <label className="block text-sm font-medium mb-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                            📍 선택된 위치 미리보기
+                        </label>
+                        <GoogleMap
+                            mapContainerStyle={mapContainerStyle}
+                            center={mapCenter}
+                            zoom={16}
+                            options={{
+                                disableDefaultUI: true,
+                                zoomControl: true,
+                                scrollwheel: false,
+                            }}
+                        >
+                            <Marker position={mapCenter} />
+                        </GoogleMap>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                            위도: {latitude.toFixed(6)}, 경도: {longitude.toFixed(6)}
+                        </p>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-md">
                     <Input

@@ -1,4 +1,5 @@
 import { roomApi } from './api/room.api';
+import { officeApi, type Office } from './api/office.api';
 import { client } from '../../api/client';
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -7,6 +8,7 @@ import ReviewList from '../reviews/components/ReviewList';
 import ReviewForm from '../reviews/components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
 import FavoriteButton from '../../components/FavoriteButton';
+import OfficeMap from '../../components/Map/OfficeMap';
 import './RoomDetailPage.css';
 
 export default function RoomDetailPage() {
@@ -19,6 +21,7 @@ export default function RoomDetailPage() {
 
     // Room State
     const [room, setRoom] = useState<any>(null); // Ideally use Room type
+    const [office, setOffice] = useState<Office | null>(null);
     const [loadingRoom, setLoadingRoom] = useState(true);
 
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -44,6 +47,7 @@ export default function RoomDetailPage() {
                 // Map to UI shape
                 setRoom({
                     id: data.id,
+                    officeId: data.officeId,
                     name: data.name,
                     location: `${data.floor}F - ${data.roomCode}`,
                     capacity: data.capacity,
@@ -53,8 +57,14 @@ export default function RoomDetailPage() {
                     pricePerHour: data.price ? Number(data.price) : 0,
                     rating: (data as any).rating || 0
                 });
+
+                // Fetch Office Data for Map
+                if (data.officeId) {
+                    const officeData = await officeApi.getOfficeById(data.officeId);
+                    setOffice(officeData);
+                }
             } catch (error) {
-                console.error("Failed to load room", error);
+                console.error("Failed to load room or office", error);
             } finally {
                 setLoadingRoom(false);
             }
@@ -214,20 +224,17 @@ export default function RoomDetailPage() {
                         </button>
                     </div>
 
-                    {/* Simple Map Widget Placeholder */}
+                    {/* Map Widget */}
                     <div className="info-section" style={{ marginTop: '2rem', padding: '1.5rem' }}>
                         <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>위치 정보</h3>
-                        <div style={{ width: '100%', height: '180px', background: '#f1f5f9', borderRadius: '1rem', overflow: 'hidden' }}>
-                            <iframe
-                                title="Google Map"
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.379047209633!2d127.02553757640697!3d37.49883582806316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca13768f54c31%3A0xe54972dd0cc459f!2z6rCV64Ko!5e0!3m2!1sko!2skr!4v1707920000000!5m2!1sko!2skr"
-                                width="100%"
-                                height="100%"
-                                style={{ border: 0 }}
-                                allowFullScreen
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                            />
+                        <div style={{ width: '100%', height: '240px', borderRadius: '1rem', overflow: 'hidden' }}>
+                            {office ? (
+                                <OfficeMap offices={[office]} />
+                            ) : (
+                                <div style={{ width: '100%', height: '100%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                                    위치 정보를 불러올 수 없습니다.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </aside>

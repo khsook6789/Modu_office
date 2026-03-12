@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRooms } from '../../contexts/RoomContext';
 import { OfficeProvider, useOfficeContext } from '../../contexts/OfficeContext';
 import { OfficeSelectorDropdown } from '../../components/OfficeSelectorDropdown';
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import RoomCard from './RoomCard';
 import Input from '../../components/Input';
 import { roomApi, type FacilityResponse } from './api/room.api';
 
+const LIBRARIES: ('places')[] = ['places'];
 
 import './RoomsListPage.css';
 
@@ -64,6 +66,22 @@ function RoomsListPageContent() {
         openTime: '09:00',
         closeTime: '18:00'
     });
+    const [officeLat, setOfficeLat] = useState(37.5665);
+    const [officeLng, setOfficeLng] = useState(126.9780);
+    const officeAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+    const { isLoaded: mapsLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+        libraries: LIBRARIES,
+    });
+
+    const handleOfficeAddressChange = () => {
+        const place = officeAutocompleteRef.current?.getPlace();
+        if (!place?.geometry?.location) return;
+        setOfficeLat(place.geometry.location.lat());
+        setOfficeLng(place.geometry.location.lng());
+        setNewOfficeData(prev => ({ ...prev, location: place.formatted_address || place.name || '' }));
+    };
 
     // Filter rooms by selected office AND availability
     const filteredRooms = rooms.filter(room => {
@@ -79,8 +97,8 @@ function RoomsListPageContent() {
                 name: newOfficeData.name,
                 description: newOfficeData.description,
                 location: newOfficeData.location,
-                latitude: 37.5665,
-                longitude: 126.9780,
+                latitude: officeLat,
+                longitude: officeLng,
                 openTime: newOfficeData.openTime || '09:00',
                 closeTime: newOfficeData.closeTime || '18:00',
                 openDays: [1, 2, 3, 4, 5]
@@ -246,7 +264,27 @@ function RoomsListPageContent() {
                                     minLength={20}
                                 />
                             </div>
-                            <Input label="위치 (주소)" value={newOfficeData.location} onChange={e => setNewOfficeData({...newOfficeData, location: e.target.value})} required fullWidth />
+                            {mapsLoaded ? (
+                                <div className="form-group mb-sm">
+                                    <label className="block text-sm font-medium mb-xs">위치 (주소) <span style={{color:'var(--color-error)'}}>*</span></label>
+                                    <Autocomplete
+                                        onLoad={ac => (officeAutocompleteRef.current = ac)}
+                                        onPlaceChanged={handleOfficeAddressChange}
+                                        options={{ componentRestrictions: { country: 'kr' } }}
+                                    >
+                                        <input
+                                            type="text"
+                                            className="input-field w-full"
+                                            value={newOfficeData.location}
+                                            onChange={e => setNewOfficeData({...newOfficeData, location: e.target.value})}
+                                            placeholder="주소를 검색하세요..."
+                                            required
+                                        />
+                                    </Autocomplete>
+                                </div>
+                            ) : (
+                                <Input label="위치 (주소)" value={newOfficeData.location} onChange={e => setNewOfficeData({...newOfficeData, location: e.target.value})} required fullWidth />
+                            )}
                             
                             <div className="flex gap-sm mt-lg justify-end">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsOfficeModalOpen(false)}>취소</button>
