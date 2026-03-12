@@ -28,7 +28,7 @@ public class RoomRequest {
     private String name;
 
     @NotBlank(message = "회의실 설명은 필수입니다.")
-    @Size(min = 20, max = 3000, message = "회의실 설명은 20자 이상 3,000자 이내여야 합니다.")
+    @Size(min = 5, max = 3000, message = "회의실 설명은 5자 이상 3,000자 이내여야 합니다.")
     private String description;
 
     @Min(value = 0, message = "정비 시간은 0분 이상이어야 합니다.")

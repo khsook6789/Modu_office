@@ -87,9 +87,9 @@ export default function OfficeFormPage() {
                         style={{ minHeight: '100px', resize: 'vertical' }}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="오피스에 대한 설명을 20자 이상 입력해주세요. (예: 강남역 도보 2분 거리의 프리미엄 공유오피스입니다.)"
+                        placeholder="오피스에 대한 설명을 5자 이상 입력해주세요. (예: 강남역 도보 2분 거리의 프리미엄 공유오피스입니다.)"
                         required
-                        minLength={20}
+                        minLength={5}
                     />
                 </div>
 

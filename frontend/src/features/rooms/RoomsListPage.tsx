@@ -241,9 +241,9 @@ function RoomsListPageContent() {
                                     style={{ minHeight: '80px', resize: 'vertical' }}
                                     value={newOfficeData.description}
                                     onChange={e => setNewOfficeData({...newOfficeData, description: e.target.value})}
-                                    placeholder="오피스 설명을 20자 이상 입력하세요."
+                                    placeholder="오피스 설명을 5자 이상 입력하세요."
                                     required
-                                    minLength={20}
+                                    minLength={5}
                                 />
                             </div>
                             <Input label="위치 (주소)" value={newOfficeData.location} onChange={e => setNewOfficeData({...newOfficeData, location: e.target.value})} required fullWidth />
@@ -280,9 +280,9 @@ function RoomsListPageContent() {
                                     style={{ minHeight: '80px', resize: 'vertical' }}
                                     value={newRoom.description}
                                     onChange={e => setNewRoom({...newRoom, description: e.target.value})}
-                                    placeholder="회의실 설명을 20자 이상 입력하세요."
+                                    placeholder="회의실 설명을 5자 이상 입력하세요."
                                     required
-                                    minLength={20}
+                                    minLength={5}
                                 />
                             </div>
                             <div className="flex gap-sm w-full mb-sm" style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
