@@ -194,9 +194,9 @@ export default function RoomFormPage() {
                         style={{ minHeight: '100px', resize: 'vertical' }}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="회의실에 대한 설명을 20자 이상 입력해주세요. (예: 최대 8인 수용 가능한 대형 회의실로 빔프로젝터와 화이트보드가 구비되어 있습니다.)"
+                        placeholder="회의실에 대한 설명을 5자 이상 입력해주세요. (예: 최대 8인 수용 가능한 대형 회의실로 빔프로젝터와 화이트보드가 구비되어 있습니다.)"
                         required
-                        minLength={20}
+                        minLength={5}
                     />
                 </div>
 

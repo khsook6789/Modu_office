@@ -25,7 +25,7 @@ public class OfficeRequest {
     private String name;
 
     @NotBlank(message = "지점 설명은 필수입니다.")
-    @Size(min = 20, max = 3000, message = "지점 설명은 20자 이상 3,000자 이내여야 합니다.")
+    @Size(min = 5, max = 3000, message = "지점 설명은 5자 이상 3,000자 이내여야 합니다.")
     private String description;
 
     @NotBlank(message = "위치 정보는 필수입니다.")
