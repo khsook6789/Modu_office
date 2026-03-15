@@ -1,5 +1,6 @@
 package com.modu.office.service;
 
+import com.modu.office.config.CacheConfig;
 import com.modu.office.dto.request.ReviewRequest;
 import com.modu.office.dto.request.ReviewUpdateRequest;
 import com.modu.office.dto.response.ReviewResponse;
@@ -11,6 +12,8 @@ import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.repository.ReservationRepository;
 import com.modu.office.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +31,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ReservationRepository reservationRepository;
+    private final CacheManager cacheManager;
 
     @Transactional
     public ReviewResponse createReview(AppUser user, ReviewRequest request) {
@@ -63,6 +67,7 @@ public class ReviewService {
                 .build();
 
         Review savedReview = reviewRepository.save(java.util.Objects.requireNonNull(review, "리뷰는 필수입니다."));
+        evictReviewSummary(reservation.getRoom().getId());
         return ReviewResponse.fromEntity(savedReview);
     }
 
@@ -83,6 +88,7 @@ public class ReviewService {
             review.updateContent(request.getContent());
         }
 
+        evictReviewSummary(review.getReservation().getRoom().getId());
         return ReviewResponse.fromEntity(review);
     }
 
@@ -99,6 +105,7 @@ public class ReviewService {
             throw new AccessDeniedException("본인이 작성한 후기만 삭제할 수 있습니다. (또는 관리자 권한 필요)");
         }
 
+        evictReviewSummary(review.getReservation().getRoom().getId());
         reviewRepository.delete(review);
     }
 
@@ -113,9 +120,17 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = CacheConfig.REVIEW_SUMMARY, key = "#roomId")
     public RoomReviewSummaryResponse getRoomReviewSummary(Long roomId) {
         Double averageRating = reviewRepository.findAverageRatingByRoomId(roomId).orElse(0.0);
         Long reviewCount = reviewRepository.countByRoomId(roomId);
         return RoomReviewSummaryResponse.of(roomId, averageRating, reviewCount);
+    }
+
+    private void evictReviewSummary(Long roomId) {
+        var cache = cacheManager.getCache(CacheConfig.REVIEW_SUMMARY);
+        if (cache != null) {
+            cache.evict(roomId);
+        }
     }
 }

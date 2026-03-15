@@ -1,5 +1,6 @@
 package com.modu.office.service;
 
+import com.modu.office.config.CacheConfig;
 import com.modu.office.dto.request.FacilityRequest;
 import com.modu.office.dto.response.FacilityResponse;
 import com.modu.office.entity.Facility;
@@ -7,6 +8,9 @@ import com.modu.office.repository.FacilityRepository;
 import com.modu.office.repository.RoomFacilityRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +36,7 @@ public class FacilityService {
      * @throws IllegalArgumentException 중복된 시설 코드인 경우
      */
     @Transactional
+    @CacheEvict(value = {CacheConfig.FACILITIES_ACTIVE, CacheConfig.FACILITIES_ALL}, allEntries = true)
     public FacilityResponse createFacility(FacilityRequest request) {
         java.util.Objects.requireNonNull(request, "요청 정보는 필수입니다.");
 
@@ -53,6 +58,7 @@ public class FacilityService {
     /**
      * ID로 시설 조회
      */
+    @Cacheable(value = CacheConfig.FACILITY, key = "#id")
     public FacilityResponse getFacilityById(Long id) {
         Facility facility = facilityRepository.findById(java.util.Objects.requireNonNull(id, "시설 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
@@ -62,6 +68,7 @@ public class FacilityService {
     /**
      * 모든 시설 조회 (Admin용)
      */
+    @Cacheable(CacheConfig.FACILITIES_ALL)
     public List<FacilityResponse> getAllFacilities() {
         return facilityRepository.findAll().stream()
                 .map(FacilityResponse::fromEntity)
@@ -71,6 +78,7 @@ public class FacilityService {
     /**
      * 활성 시설만 조회 (MANAGER/USER용)
      */
+    @Cacheable(CacheConfig.FACILITIES_ACTIVE)
     public List<FacilityResponse> getActiveFacilities() {
         return facilityRepository.findByIsActiveTrue().stream()
                 .map(FacilityResponse::fromEntity)
@@ -81,6 +89,11 @@ public class FacilityService {
      * 시설 정보 수정
      */
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = CacheConfig.FACILITY, key = "#id"),
+            @CacheEvict(value = CacheConfig.FACILITIES_ACTIVE, allEntries = true),
+            @CacheEvict(value = CacheConfig.FACILITIES_ALL, allEntries = true)
+    })
     public FacilityResponse updateFacility(Long id, FacilityRequest request) {
         Facility facility = facilityRepository.findById(java.util.Objects.requireNonNull(id, "시설 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
@@ -108,6 +121,11 @@ public class FacilityService {
      * @throws IllegalStateException   사용 중인 시설을 물리 삭제하려는 경우 (현재는 자동 비활성화 처리)
      */
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = CacheConfig.FACILITY, key = "#id"),
+            @CacheEvict(value = CacheConfig.FACILITIES_ACTIVE, allEntries = true),
+            @CacheEvict(value = CacheConfig.FACILITIES_ALL, allEntries = true)
+    })
     public void deleteFacility(Long id) {
         Facility facility = facilityRepository.findById(java.util.Objects.requireNonNull(id, "시설 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다. ID: " + id));
