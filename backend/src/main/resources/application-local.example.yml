@@ -7,7 +7,7 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/modu_office?stringtype=unspecified
+    url: jdbc:postgresql://localhost:5433/modu_office?stringtype=unspecified
     username: "{ postgres_username }"
     password: "{ postgres_password }"
     driver-class-name: org.postgresql.Driver
@@ -16,7 +16,7 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        format_sql: true
+        format-sql: true
 
   security:
     oauth2:
