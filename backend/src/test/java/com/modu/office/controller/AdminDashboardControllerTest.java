@@ -7,21 +7,25 @@ import com.modu.office.dto.response.PeakTimeResponse;
 import com.modu.office.dto.response.RoomRankingResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.support.ControllerTestSupport;
+import com.modu.office.support.TestSecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.context.annotation.Import;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
-import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -30,6 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SuppressWarnings("null")
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@Import(TestSecurityConfig.class)
 @DisplayName("[Controller] Admin - Dashboard Stats API")
 class AdminDashboardControllerTest extends ControllerTestSupport {
 
@@ -51,7 +58,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     new OccupancyResponse(1L, 1, 5, 3, 60.0),
                     new OccupancyResponse(1L, 2, 4, 1, 25.0));
 
-            given(adminDashboardService.getOccupancy(eq(1L), isNull(), any(AppUser.class)))
+            given(adminDashboardService.getOccupancy(any(), any(), any()))
                     .willReturn(result);
 
             mockMvc.perform(get("/api/admin/stats/occupancy")
@@ -84,7 +91,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         @DisplayName("MANAGER 성공 — 본인 officeId 지정")
         void getOccupancy_Manager_Success() throws Exception {
             AppUser manager = createTestUser("MANAGER");
-            given(adminDashboardService.getOccupancy(eq(1L), isNull(), any(AppUser.class)))
+            given(adminDashboardService.getOccupancy(any(), any(), any()))
                     .willReturn(List.of(new OccupancyResponse(1L, 1, 5, 2, 40.0)));
 
             mockMvc.perform(get("/api/admin/stats/occupancy")
@@ -124,7 +131,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
             AppUser admin = createTestUser("ADMIN");
             CancellationStatsResponse result = new CancellationStatsResponse(100L, 15L, 15.0);
 
-            given(adminDashboardService.getCancellationStats(isNull(), any(), any(), any(AppUser.class)))
+            given(adminDashboardService.getCancellationStats(any(), any(), any(), any()))
                     .willReturn(result);
 
             mockMvc.perform(get("/api/admin/stats/cancellations")
@@ -185,7 +192,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     new RoomRankingResponse(1L, "대회의실A", "서울 강남점", 42L),
                     new RoomRankingResponse(2L, "소회의실B", "서울 강남점", 35L));
 
-            given(adminDashboardService.getPopularRooms(isNull(), any(), any(), any(AppUser.class)))
+            given(adminDashboardService.getPopularRooms(any(), any(), any(), any()))
                     .willReturn(result);
 
             mockMvc.perform(get("/api/admin/stats/rooms/popular")
@@ -240,7 +247,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         @DisplayName("ADMIN 성공")
         void getUnpopularRooms_Admin_Success() throws Exception {
             AppUser admin = createTestUser("ADMIN");
-            given(adminDashboardService.getUnpopularRooms(isNull(), any(), any(), any(AppUser.class)))
+            given(adminDashboardService.getUnpopularRooms(any(), any(), any(), any()))
                     .willReturn(List.of(new RoomRankingResponse(10L, "소회의실Z", "부산 해운대점", 1L)));
 
             mockMvc.perform(get("/api/admin/stats/rooms/unpopular")
@@ -300,7 +307,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     new PeakTimeResponse(10, 24L),
                     new PeakTimeResponse(14, 18L));
 
-            given(adminDashboardService.getPeakTimeDistribution(isNull(), any(), any(), any(AppUser.class)))
+            given(adminDashboardService.getPeakTimeDistribution(any(), any(), any(), any()))
                     .willReturn(result);
 
             mockMvc.perform(get("/api/admin/stats/peak-times")
@@ -357,7 +364,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                     new DailyUsageResponse(LocalDate.of(2026, 3, 1), 480L),
                     new DailyUsageResponse(LocalDate.of(2026, 3, 2), 360L));
 
-            given(adminDashboardService.getDailyUsage(isNull(), any(), any(), any(AppUser.class)))
+            given(adminDashboardService.getDailyUsage(any(), any(), any(), any()))
                     .willReturn(result);
 
             mockMvc.perform(get("/api/admin/stats/daily-usage")
@@ -386,7 +393,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
         @DisplayName("MANAGER 성공 — 본인 officeId 지정")
         void getDailyUsage_Manager_Success() throws Exception {
             AppUser manager = createTestUser("MANAGER");
-            given(adminDashboardService.getDailyUsage(eq(1L), any(), any(), any(AppUser.class)))
+            given(adminDashboardService.getDailyUsage(any(), any(), any(), any()))
                     .willReturn(List.of(new DailyUsageResponse(LocalDate.of(2026, 3, 1), 300L)));
 
             mockMvc.perform(get("/api/admin/stats/daily-usage")

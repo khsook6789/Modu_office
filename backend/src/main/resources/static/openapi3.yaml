@@ -122,13 +122,13 @@ paths:
                     \n    \"capacity\" : 10,\r\n    \"category\" : \"MEETING\",\r\n\
                     \    \"price\" : 5000,\r\n    \"officeId\" : 100,\r\n    \"officeName\"\
                     \ : \"강남 지점\",\r\n    \"officeLocation\" : \"서울시 강남구\",\r\n  \
-                    \  \"createdAt\" : \"2026-03-12T00:43:13.2060531\"\r\n  }, {\r\
+                    \  \"createdAt\" : \"2026-03-19T16:17:34.6651025\"\r\n  }, {\r\
                     \n    \"favoriteId\" : 2,\r\n    \"roomId\" : 11,\r\n    \"roomName\"\
                     \ : \"회의실 B\",\r\n    \"roomCode\" : \"B-201\",\r\n    \"capacity\"\
                     \ : 20,\r\n    \"category\" : \"MEETING\",\r\n    \"price\" :\
                     \ 8000,\r\n    \"officeId\" : 100,\r\n    \"officeName\" : \"강\
                     남 지점\",\r\n    \"officeLocation\" : \"서울시 강남구\",\r\n    \"createdAt\"\
-                    \ : \"2026-03-12T00:43:13.2060531\"\r\n  } ]\r\n}"
+                    \ : \"2026-03-19T16:17:34.6651025\"\r\n  } ]\r\n}"
     post:
       tags:
       - Favorite
@@ -159,7 +159,7 @@ paths:
                     \ : 10,\r\n    \"category\" : \"MEETING\",\r\n    \"price\" :\
                     \ 5000,\r\n    \"officeId\" : 100,\r\n    \"officeName\" : \"강\
                     남 지점\",\r\n    \"officeLocation\" : \"서울시 강남구\",\r\n    \"createdAt\"\
-                    \ : \"2026-03-12T00:43:13.2595949\"\r\n  }\r\n}"
+                    \ : \"2026-03-19T16:17:34.7553858\"\r\n  }\r\n}"
   /api/my-reports:
     get:
       tags:
@@ -187,7 +187,7 @@ paths:
                     \n  \"facilityId\" : 5,\r\n  \"facilityName\" : \"화이트보드\",\r\n\
                     \  \"issueType\" : \"BROKEN\",\r\n  \"issueTypeName\" : \"파손/고\
                     장\",\r\n  \"status\" : \"REPORTED\",\r\n  \"statusName\" : \"접\
-                    수완료\",\r\n  \"createdAt\" : \"2026-03-12T00:43:11.3342385\"\r\n\
+                    수완료\",\r\n  \"createdAt\" : \"2026-03-19T16:17:31.6778391\"\r\n\
                     } ]"
   /api/notifications:
     get:
@@ -208,16 +208,16 @@ paths:
                   value: "{\r\n  \"content\" : [ {\r\n    \"id\" : 1,\r\n    \"message\"\
                     \ : \"[강남 본점] 예약이 접수되었습니다.\",\r\n    \"type\" : \"RESERVATION_CREATED\"\
                     ,\r\n    \"targetUrl\" : \"/reservations/100\",\r\n    \"createdAt\"\
-                    \ : \"2026-03-12T00:43:11.5862272\",\r\n    \"read\" : false\r\
+                    \ : \"2026-03-19T16:17:31.9524935\",\r\n    \"read\" : false\r\
                     \n  }, {\r\n    \"id\" : 2,\r\n    \"message\" : \"[강남 본점] 예약이\
                     \ 취소되었습니다.\",\r\n    \"type\" : \"RESERVATION_CANCELED\",\r\n\
                     \    \"targetUrl\" : \"/reservations/100\",\r\n    \"createdAt\"\
-                    \ : \"2026-03-12T00:43:11.5862272\",\r\n    \"read\" : true\r\n\
-                    \  } ],\r\n  \"pageable\" : \"INSTANCE\",\r\n  \"totalElements\"\
-                    \ : 2,\r\n  \"last\" : true,\r\n  \"totalPages\" : 1,\r\n  \"\
-                    size\" : 2,\r\n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\"\
+                    \ : \"2026-03-19T16:17:31.9524935\",\r\n    \"read\" : true\r\n\
+                    \  } ],\r\n  \"pageable\" : \"INSTANCE\",\r\n  \"last\" : true,\r\
+                    \n  \"totalElements\" : 2,\r\n  \"totalPages\" : 1,\r\n  \"size\"\
+                    \ : 2,\r\n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\"\
                     \ : true,\r\n    \"sorted\" : false,\r\n    \"unsorted\" : true\r\
-                    \n  },\r\n  \"numberOfElements\" : 2,\r\n  \"first\" : true,\r\
+                    \n  },\r\n  \"first\" : true,\r\n  \"numberOfElements\" : 2,\r\
                     \n  \"empty\" : false\r\n}"
   /api/offices:
     get:
@@ -307,13 +307,13 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 office-create-400:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"400\",\r\
                     \n  \"message\" : \"입력값 검증에 실패했습니다\",\r\n  \"data\" : {\r\n  \
-                    \  \"name\" : \"지점 이름은 필수입니다.\",\r\n    \"closeTime\" : \"영업 종\
-                    료 시간은 필수입니다.\",\r\n    \"description\" : \"지점 설명은 필수입니다.\",\r\n\
+                    \  \"closeTime\" : \"영업 종료 시간은 필수입니다.\",\r\n    \"name\" : \"지\
+                    점 이름은 필수입니다.\",\r\n    \"description\" : \"지점 설명은 필수입니다.\",\r\n\
                     \    \"location\" : \"위치 정보는 필수입니다.\",\r\n    \"openTime\" : \"\
                     영업 시작 시간은 필수입니다.\"\r\n  }\r\n}"
         "401":
@@ -321,7 +321,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 office-create-401:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"401\",\r\
@@ -332,7 +332,7 @@ paths:
       - Reservation
       summary: 예약 목록 조회
       description: "로그인한 사용자의 예약 내역을 조회합니다. 일반 사용자는 본인 내역만, 관리자는 전체 조회가 가능합니다."
-      operationId: reservation-
+      operationId: reservation-get-list
       parameters:
       - name: page
         in: query
@@ -380,50 +380,27 @@ paths:
                     \ : \"강남 본점\",\r\n      \"roomId\" : 10,\r\n      \"roomName\"\
                     \ : \"Alpha Room\",\r\n      \"roomCode\" : \"ROOM-A\",\r\n  \
                     \    \"userId\" : 1,\r\n      \"userName\" : \"홍길동\",\r\n    \
-                    \  \"startAt\" : \"2026-03-13T10:00:00\",\r\n      \"endAt\" :\
-                    \ \"2026-03-13T12:00:00\",\r\n      \"status\" : \"PENDING_PAYMENT\"\
+                    \  \"startAt\" : \"2026-03-20T10:00:00\",\r\n      \"endAt\" :\
+                    \ \"2026-03-20T12:00:00\",\r\n      \"status\" : \"PENDING_PAYMENT\"\
                     ,\r\n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"\
-                    2026-03-12T00:43:12.4863282\",\r\n      \"updatedAt\" : \"2026-03-12T00:43:12.4863282\"\
+                    2026-03-19T16:17:33.6539319\",\r\n      \"updatedAt\" : \"2026-03-19T16:17:33.6539319\"\
                     ,\r\n      \"version\" : 0\r\n    }, {\r\n      \"id\" : 101,\r\
                     \n      \"title\" : \"고객 미팅\",\r\n      \"officeId\" : 1,\r\n\
                     \      \"officeName\" : \"강남 본점\",\r\n      \"roomId\" : 10,\r\
                     \n      \"roomName\" : \"Beta Room\",\r\n      \"roomCode\" :\
                     \ \"ROOM-A\",\r\n      \"userId\" : 1,\r\n      \"userName\" :\
-                    \ \"홍길동\",\r\n      \"startAt\" : \"2026-03-13T10:00:00\",\r\n\
-                    \      \"endAt\" : \"2026-03-13T12:00:00\",\r\n      \"status\"\
+                    \ \"홍길동\",\r\n      \"startAt\" : \"2026-03-20T10:00:00\",\r\n\
+                    \      \"endAt\" : \"2026-03-20T12:00:00\",\r\n      \"status\"\
                     \ : \"CONFIRMED\",\r\n      \"totalPrice\" : 20000,\r\n      \"\
-                    createdAt\" : \"2026-03-12T00:43:12.4863282\",\r\n      \"updatedAt\"\
-                    \ : \"2026-03-12T00:43:12.4863282\",\r\n      \"version\" : 0\r\
-                    \n    } ],\r\n    \"pageable\" : \"INSTANCE\",\r\n    \"totalElements\"\
-                    \ : 2,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 2,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
-                    \ : 2,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    createdAt\" : \"2026-03-19T16:17:33.6539319\",\r\n      \"updatedAt\"\
+                    \ : \"2026-03-19T16:17:33.6539319\",\r\n      \"version\" : 0\r\
+                    \n    } ],\r\n    \"pageable\" : \"INSTANCE\",\r\n    \"last\"\
+                    \ : true,\r\n    \"totalElements\" : 2,\r\n    \"totalPages\"\
+                    \ : 1,\r\n    \"size\" : 2,\r\n    \"number\" : 0,\r\n    \"sort\"\
+                    \ : {\r\n      \"empty\" : true,\r\n      \"sorted\" : false,\r\
+                    \n      \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\
+                    \n    \"numberOfElements\" : 2,\r\n    \"empty\" : false\r\n \
                     \ }\r\n}"
-                reservation-list-user:
-                  value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
-                    ,\r\n  \"message\" : \"요청이 성공적으로 처리되었습니다.\",\r\n  \"data\" : {\r\
-                    \n    \"content\" : [ {\r\n      \"id\" : 100,\r\n      \"title\"\
-                    \ : \"팀 주간 회의\",\r\n      \"officeId\" : 1,\r\n      \"officeName\"\
-                    \ : \"강남 본점\",\r\n      \"roomId\" : 10,\r\n      \"roomName\"\
-                    \ : \"Alpha Room\",\r\n      \"roomCode\" : \"ROOM-A\",\r\n  \
-                    \    \"userId\" : 1,\r\n      \"userName\" : \"홍길동\",\r\n    \
-                    \  \"startAt\" : \"2026-03-11T10:00:00\",\r\n      \"endAt\" :\
-                    \ \"2026-03-11T12:00:00\",\r\n      \"status\" : \"PENDING\",\r\
-                    \n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"2026-03-10T00:30:16.9611477\"\
-                    ,\r\n      \"updatedAt\" : \"2026-03-10T00:30:16.9611477\",\r\n\
-                    \      \"version\" : 0\r\n    } ],\r\n    \"pageable\" : {\r\n\
-                    \      \"pageNumber\" : 0,\r\n      \"pageSize\" : 20,\r\n   \
-                    \   \"sort\" : {\r\n        \"empty\" : true,\r\n        \"sorted\"\
-                    \ : false,\r\n        \"unsorted\" : true\r\n      },\r\n    \
-                    \  \"offset\" : 0,\r\n      \"paged\" : true,\r\n      \"unpaged\"\
-                    \ : false\r\n    },\r\n    \"totalElements\" : 1,\r\n    \"last\"\
-                    \ : true,\r\n    \"totalPages\" : 1,\r\n    \"size\" : 20,\r\n\
-                    \    \"number\" : 0,\r\n    \"sort\" : {\r\n      \"empty\" :\
-                    \ true,\r\n      \"sorted\" : false,\r\n      \"unsorted\" : true\r\
-                    \n    },\r\n    \"numberOfElements\" : 1,\r\n    \"first\" : true,\r\
-                    \n    \"empty\" : false\r\n  }\r\n}"
     post:
       tags:
       - Reservation
@@ -439,8 +416,8 @@ paths:
             examples:
               reservation-create:
                 value: "{\r\n  \"title\" : \"팀 주간 회의\",\r\n  \"officeId\" : 1,\r\n\
-                  \  \"roomId\" : 10,\r\n  \"userId\" : 1,\r\n  \"startAt\" : \"2026-03-13T10:00:00\"\
-                  ,\r\n  \"endAt\" : \"2026-03-13T12:00:00\"\r\n}"
+                  \  \"roomId\" : 10,\r\n  \"userId\" : 1,\r\n  \"startAt\" : \"2026-03-20T10:00:00\"\
+                  ,\r\n  \"endAt\" : \"2026-03-20T12:00:00\"\r\n}"
               reservation-create-400:
                 value: "{\r\n  \"title\" : null,\r\n  \"officeId\" : null,\r\n  \"\
                   roomId\" : null,\r\n  \"userId\" : null,\r\n  \"startAt\" : null,\r\
@@ -460,25 +437,25 @@ paths:
                     \ : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\" :\
                     \ 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-13T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-13T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-12T00:43:12.1501511\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-12T00:43:12.1501511\",\r\n\
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-20T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-20T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-19T16:17:32.9124706\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-19T16:17:32.9124706\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
         "400":
           description: "400"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 reservation-create-400:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"400\",\r\
                     \n  \"message\" : \"입력값 검증에 실패했습니다\",\r\n  \"data\" : {\r\n  \
-                    \  \"officeId\" : \"지점 ID는 필수입니다.\",\r\n    \"title\" : \"예약 제\
-                    목은 필수입니다.\",\r\n    \"endAt\" : \"종료 시간은 필수입니다.\",\r\n    \"userId\"\
-                    \ : \"예약자 ID는 필수입니다.\",\r\n    \"roomId\" : \"회의실 ID는 필수입니다.\"\
-                    ,\r\n    \"startAt\" : \"시작 시간은 필수입니다.\"\r\n  }\r\n}"
+                    \  \"officeId\" : \"지점 ID는 필수입니다.\",\r\n    \"endAt\" : \"종료 시\
+                    간은 필수입니다.\",\r\n    \"title\" : \"예약 제목은 필수입니다.\",\r\n    \"userId\"\
+                    \ : \"예약자 ID는 필수입니다.\",\r\n    \"startAt\" : \"시작 시간은 필수입니다.\"\
+                    ,\r\n    \"roomId\" : \"회의실 ID는 필수입니다.\"\r\n  }\r\n}"
   /api/reviews:
     post:
       tags:
@@ -514,14 +491,14 @@ paths:
                   value: "{\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n  \"\
                     authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"rating\"\
                     \ : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\
-                    \n  \"createdAt\" : \"2026-03-12T00:43:12.6481141\",\r\n  \"updatedAt\"\
-                    \ : \"2026-03-12T00:43:12.6481141\"\r\n}"
+                    \n  \"createdAt\" : \"2026-03-19T16:17:33.8414888\",\r\n  \"updatedAt\"\
+                    \ : \"2026-03-19T16:17:33.8414888\"\r\n}"
         "401":
           description: "401"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 review-create-401:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"401\",\r\
@@ -602,18 +579,18 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 facility-create-400:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"400\",\r\
                     \n  \"message\" : \"입력값 검증에 실패했습니다\",\r\n  \"data\" : {\r\n  \
-                    \  \"facilityName\" : \"시설 표시명은 1~100자 이내여야 합니다.\"\r\n  }\r\n}"
+                    \  \"facilityName\" : \"시설 표시명은 필수입니다.\"\r\n  }\r\n}"
         "401":
           description: "401"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 facility-create-401:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"401\",\r\
@@ -623,7 +600,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 facility-create-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -664,20 +641,20 @@ paths:
                     \ : 100,\r\n      \"reservationTitle\" : \"프로젝트 A 회의실 예약\",\r\n\
                     \      \"action\" : \"UPDATE\",\r\n      \"actorId\" : 2,\r\n\
                     \      \"actorName\" : \"김실무\",\r\n      \"beforeData\" : {\r\n\
-                    \        \"status\" : \"AVAILABLE\",\r\n        \"participants\"\
-                    \ : 4\r\n      },\r\n      \"afterData\" : {\r\n        \"status\"\
-                    \ : \"IN_USE\",\r\n        \"participants\" : 5\r\n      },\r\n\
-                    \      \"occurredAt\" : \"2026-03-12T00:43:10.8030119\"\r\n  \
-                    \  } ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\
-                    \n      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
-                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \        \"participants\" : 4,\r\n        \"status\" : \"AVAILABLE\"\
+                    \r\n      },\r\n      \"afterData\" : {\r\n        \"participants\"\
+                    \ : 5,\r\n        \"status\" : \"IN_USE\"\r\n      },\r\n    \
+                    \  \"occurredAt\" : \"2026-03-19T16:17:30.9220741\"\r\n    } ],\r\
+                    \n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"\
+                    pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"empty\" :\
+                    \ true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
                     \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"paged\"\
-                    \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
-                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
-                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"last\"\
+                    \ : true,\r\n    \"totalElements\" : 1,\r\n    \"totalPages\"\
+                    \ : 1,\r\n    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"\
+                    sort\" : {\r\n      \"empty\" : true,\r\n      \"sorted\" : false,\r\
+                    \n      \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\
+                    \n    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n \
                     \ }\r\n}"
   /api/admin/users:
     get:
@@ -699,7 +676,7 @@ paths:
                     ,\r\n  \"message\" : \"사용자 목록을 조회했습니다.\",\r\n  \"data\" : [ {\r\
                     \n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\",\r\n\
                     \    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n    \"\
-                    accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"2026-03-12T00:43:10.4559735\"\
+                    accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"2026-03-19T16:17:30.2695869\"\
                     \r\n  } ]\r\n}"
   /api/favorites/{roomId}:
     delete:
@@ -823,11 +800,11 @@ paths:
                     \       \"empty\" : true,\r\n        \"sorted\" : false,\r\n \
                     \       \"unsorted\" : true\r\n      },\r\n      \"offset\" :\
                     \ 0,\r\n      \"paged\" : true,\r\n      \"unpaged\" : false\r\
-                    \n    },\r\n    \"totalElements\" : 2,\r\n    \"last\" : true,\r\
+                    \n    },\r\n    \"last\" : true,\r\n    \"totalElements\" : 2,\r\
                     \n    \"totalPages\" : 1,\r\n    \"size\" : 10,\r\n    \"number\"\
                     \ : 0,\r\n    \"sort\" : {\r\n      \"empty\" : true,\r\n    \
                     \  \"sorted\" : false,\r\n      \"unsorted\" : true\r\n    },\r\
-                    \n    \"numberOfElements\" : 2,\r\n    \"first\" : true,\r\n \
+                    \n    \"first\" : true,\r\n    \"numberOfElements\" : 2,\r\n \
                     \   \"empty\" : false\r\n  }\r\n}"
   /api/offices/{id}:
     get:
@@ -968,15 +945,15 @@ paths:
                     \   \"id\" : 1,\r\n    \"reservationId\" : 1,\r\n    \"orderId\"\
                     \ : \"rev-1-abc123\",\r\n    \"paymentKey\" : \"testPaymentKey_ABC123\"\
                     ,\r\n    \"amount\" : 10000,\r\n    \"status\" : \"DONE\",\r\n\
-                    \    \"method\" : \"카드\",\r\n    \"approvedAt\" : \"2026-03-12T00:43:12.0199646\"\
-                    ,\r\n    \"canceledAt\" : null,\r\n    \"createdAt\" : \"2026-03-12T00:43:12.0199646\"\
+                    \    \"method\" : \"카드\",\r\n    \"approvedAt\" : \"2026-03-19T16:17:32.6298343\"\
+                    ,\r\n    \"canceledAt\" : null,\r\n    \"createdAt\" : \"2026-03-19T16:17:32.6298343\"\
                     \r\n  }\r\n}"
         "401":
           description: "401"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 payment-confirm-401:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"401\",\r\
@@ -1009,8 +986,8 @@ paths:
                     \n    \"id\" : 1,\r\n    \"reservationId\" : 1,\r\n    \"orderId\"\
                     \ : \"rev-1-abc123\",\r\n    \"paymentKey\" : \"testPaymentKey_ABC123\"\
                     ,\r\n    \"amount\" : 10000,\r\n    \"status\" : \"DONE\",\r\n\
-                    \    \"method\" : \"카드\",\r\n    \"approvedAt\" : \"2026-03-12T00:43:12.116728\"\
-                    ,\r\n    \"canceledAt\" : null,\r\n    \"createdAt\" : \"2026-03-12T00:43:12.116728\"\
+                    \    \"method\" : \"카드\",\r\n    \"approvedAt\" : \"2026-03-19T16:17:32.7700316\"\
+                    ,\r\n    \"canceledAt\" : null,\r\n    \"createdAt\" : \"2026-03-19T16:17:32.7700316\"\
                     \r\n  }\r\n}"
   /api/reservations/search:
     get:
@@ -1068,7 +1045,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 reservation-search-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -1088,26 +1065,26 @@ paths:
                     \ : \"강남 본점\",\r\n      \"roomId\" : 10,\r\n      \"roomName\"\
                     \ : \"Alpha Room\",\r\n      \"roomCode\" : \"ROOM-A\",\r\n  \
                     \    \"userId\" : 1,\r\n      \"userName\" : \"홍길동\",\r\n    \
-                    \  \"startAt\" : \"2026-03-13T10:00:00\",\r\n      \"endAt\" :\
-                    \ \"2026-03-13T12:00:00\",\r\n      \"status\" : \"PENDING_PAYMENT\"\
+                    \  \"startAt\" : \"2026-03-20T10:00:00\",\r\n      \"endAt\" :\
+                    \ \"2026-03-20T12:00:00\",\r\n      \"status\" : \"PENDING_PAYMENT\"\
                     ,\r\n      \"totalPrice\" : 20000,\r\n      \"createdAt\" : \"\
-                    2026-03-12T00:43:12.4331986\",\r\n      \"updatedAt\" : \"2026-03-12T00:43:12.4331986\"\
+                    2026-03-19T16:17:33.5330949\",\r\n      \"updatedAt\" : \"2026-03-19T16:17:33.5330949\"\
                     ,\r\n      \"version\" : 0\r\n    }, {\r\n      \"id\" : 102,\r\
                     \n      \"title\" : \"월간 보고\",\r\n      \"officeId\" : 1,\r\n\
                     \      \"officeName\" : \"강남 본점\",\r\n      \"roomId\" : 10,\r\
                     \n      \"roomName\" : \"Gamma Room\",\r\n      \"roomCode\" :\
                     \ \"ROOM-A\",\r\n      \"userId\" : 1,\r\n      \"userName\" :\
-                    \ \"홍길동\",\r\n      \"startAt\" : \"2026-03-13T10:00:00\",\r\n\
-                    \      \"endAt\" : \"2026-03-13T12:00:00\",\r\n      \"status\"\
+                    \ \"홍길동\",\r\n      \"startAt\" : \"2026-03-20T10:00:00\",\r\n\
+                    \      \"endAt\" : \"2026-03-20T12:00:00\",\r\n      \"status\"\
                     \ : \"CANCELED\",\r\n      \"totalPrice\" : 20000,\r\n      \"\
-                    createdAt\" : \"2026-03-12T00:43:12.4331986\",\r\n      \"updatedAt\"\
-                    \ : \"2026-03-12T00:43:12.4331986\",\r\n      \"version\" : 0\r\
-                    \n    } ],\r\n    \"pageable\" : \"INSTANCE\",\r\n    \"totalElements\"\
-                    \ : 2,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 2,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
-                    \ : 2,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    createdAt\" : \"2026-03-19T16:17:33.5330949\",\r\n      \"updatedAt\"\
+                    \ : \"2026-03-19T16:17:33.5330949\",\r\n      \"version\" : 0\r\
+                    \n    } ],\r\n    \"pageable\" : \"INSTANCE\",\r\n    \"last\"\
+                    \ : true,\r\n    \"totalElements\" : 2,\r\n    \"totalPages\"\
+                    \ : 1,\r\n    \"size\" : 2,\r\n    \"number\" : 0,\r\n    \"sort\"\
+                    \ : {\r\n      \"empty\" : true,\r\n      \"sorted\" : false,\r\
+                    \n      \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\
+                    \n    \"numberOfElements\" : 2,\r\n    \"empty\" : false\r\n \
                     \ }\r\n}"
   /api/reservations/{id}:
     get:
@@ -1138,10 +1115,10 @@ paths:
                     officeId\" : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\"\
                     \ : 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-13T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-13T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-12T00:43:12.3653103\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-12T00:43:12.3653103\",\r\n\
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-20T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-20T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-19T16:17:33.3610193\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-19T16:17:33.3610193\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
     put:
       tags:
@@ -1163,8 +1140,8 @@ paths:
               $ref: "#/components/schemas/ReservationUpdateRequest"
             examples:
               reservation-update:
-                value: "{\r\n  \"startAt\" : \"2026-03-14T11:00:00\",\r\n  \"endAt\"\
-                  \ : \"2026-03-14T13:00:00\",\r\n  \"status\" : \"CANCELED\"\r\n}"
+                value: "{\r\n  \"startAt\" : \"2026-03-21T11:00:00\",\r\n  \"endAt\"\
+                  \ : \"2026-03-21T13:00:00\",\r\n  \"status\" : \"CANCELED\"\r\n}"
       responses:
         "200":
           description: "200"
@@ -1180,10 +1157,10 @@ paths:
                     \ : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\" :\
                     \ 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-13T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-13T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-12T00:43:12.2432621\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-12T00:43:12.2432621\",\r\n\
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-20T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-20T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-19T16:17:33.0767489\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-19T16:17:33.0767489\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
   /api/reviews/me:
     get:
@@ -1204,8 +1181,8 @@ paths:
                   value: "[ {\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n\
                     \  \"authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"\
                     rating\" : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입\
-                    니다.\",\r\n  \"createdAt\" : \"2026-03-12T00:43:12.5279223\",\r\
-                    \n  \"updatedAt\" : \"2026-03-12T00:43:12.5279223\"\r\n} ]"
+                    니다.\",\r\n  \"createdAt\" : \"2026-03-19T16:17:33.7199525\",\r\
+                    \n  \"updatedAt\" : \"2026-03-19T16:17:33.7199525\"\r\n} ]"
   /api/reviews/{reviewId}:
     delete:
       tags:
@@ -1257,8 +1234,8 @@ paths:
                   value: "{\r\n  \"id\" : 100,\r\n  \"reservationId\" : 10,\r\n  \"\
                     authorUserId\" : 1,\r\n  \"authorName\" : \"홍길동\",\r\n  \"rating\"\
                     \ : 5,\r\n  \"content\" : \"공간이 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\
-                    \n  \"createdAt\" : \"2026-03-12T00:43:12.5796178\",\r\n  \"updatedAt\"\
-                    \ : \"2026-03-12T00:43:12.5796178\"\r\n}"
+                    \n  \"createdAt\" : \"2026-03-19T16:17:33.7617219\",\r\n  \"updatedAt\"\
+                    \ : \"2026-03-19T16:17:33.7628689\"\r\n}"
   /api/rooms/search:
     get:
       tags:
@@ -1311,11 +1288,11 @@ paths:
                     \       \"empty\" : true,\r\n        \"sorted\" : false,\r\n \
                     \       \"unsorted\" : true\r\n      },\r\n      \"offset\" :\
                     \ 0,\r\n      \"paged\" : true,\r\n      \"unpaged\" : false\r\
-                    \n    },\r\n    \"totalElements\" : 2,\r\n    \"last\" : true,\r\
+                    \n    },\r\n    \"last\" : true,\r\n    \"totalElements\" : 2,\r\
                     \n    \"totalPages\" : 1,\r\n    \"size\" : 10,\r\n    \"number\"\
                     \ : 0,\r\n    \"sort\" : {\r\n      \"empty\" : true,\r\n    \
                     \  \"sorted\" : false,\r\n      \"unsorted\" : true\r\n    },\r\
-                    \n    \"numberOfElements\" : 2,\r\n    \"first\" : true,\r\n \
+                    \n    \"first\" : true,\r\n    \"numberOfElements\" : 2,\r\n \
                     \   \"empty\" : false\r\n  }\r\n}"
   /api/rooms/{roomId}:
     get:
@@ -1456,7 +1433,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 user-get-profile-401:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"401\",\r\
@@ -1566,7 +1543,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 facility-update-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -1601,7 +1578,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 facility-delete-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -1654,20 +1631,20 @@ paths:
                     \ : 100,\r\n      \"reservationTitle\" : \"프로젝트 A 회의실 예약\",\r\n\
                     \      \"action\" : \"UPDATE\",\r\n      \"actorId\" : 2,\r\n\
                     \      \"actorName\" : \"김실무\",\r\n      \"beforeData\" : {\r\n\
-                    \        \"status\" : \"AVAILABLE\",\r\n        \"participants\"\
-                    \ : 4\r\n      },\r\n      \"afterData\" : {\r\n        \"status\"\
-                    \ : \"IN_USE\",\r\n        \"participants\" : 5\r\n      },\r\n\
-                    \      \"occurredAt\" : \"2026-03-12T00:43:10.5499184\"\r\n  \
-                    \  } ],\r\n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\
-                    \n      \"pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"\
-                    empty\" : true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
+                    \        \"participants\" : 4,\r\n        \"status\" : \"AVAILABLE\"\
+                    \r\n      },\r\n      \"afterData\" : {\r\n        \"participants\"\
+                    \ : 5,\r\n        \"status\" : \"IN_USE\"\r\n      },\r\n    \
+                    \  \"occurredAt\" : \"2026-03-19T16:17:30.4961394\"\r\n    } ],\r\
+                    \n    \"pageable\" : {\r\n      \"pageNumber\" : 0,\r\n      \"\
+                    pageSize\" : 20,\r\n      \"sort\" : {\r\n        \"empty\" :\
+                    \ true,\r\n        \"sorted\" : false,\r\n        \"unsorted\"\
                     \ : true\r\n      },\r\n      \"offset\" : 0,\r\n      \"paged\"\
-                    \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"totalElements\"\
-                    \ : 1,\r\n    \"last\" : true,\r\n    \"totalPages\" : 1,\r\n\
-                    \    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"sort\" : {\r\
-                    \n      \"empty\" : true,\r\n      \"sorted\" : false,\r\n   \
-                    \   \"unsorted\" : true\r\n    },\r\n    \"numberOfElements\"\
-                    \ : 1,\r\n    \"first\" : true,\r\n    \"empty\" : false\r\n \
+                    \ : true,\r\n      \"unpaged\" : false\r\n    },\r\n    \"last\"\
+                    \ : true,\r\n    \"totalElements\" : 1,\r\n    \"totalPages\"\
+                    \ : 1,\r\n    \"size\" : 20,\r\n    \"number\" : 0,\r\n    \"\
+                    sort\" : {\r\n      \"empty\" : true,\r\n      \"sorted\" : false,\r\
+                    \n      \"unsorted\" : true\r\n    },\r\n    \"first\" : true,\r\
+                    \n    \"numberOfElements\" : 1,\r\n    \"empty\" : false\r\n \
                     \ }\r\n}"
   /api/admin/managers/pending:
     get:
@@ -1689,7 +1666,7 @@ paths:
                     ,\r\n  \"message\" : \"승인 대기 중인 Manager 목록을 조회했습니다.\",\r\n  \"\
                     data\" : [ {\r\n    \"userId\" : 2,\r\n    \"name\" : \"강감찬\"\
                     ,\r\n    \"email\" : \"manager@example.com\",\r\n    \"approvalStatus\"\
-                    \ : \"PENDING\",\r\n    \"createdAt\" : \"2026-03-12T00:43:10.1232054\"\
+                    \ : \"PENDING\",\r\n    \"createdAt\" : \"2026-03-19T16:17:29.0315717\"\
                     \r\n  } ]\r\n}"
   /api/admin/stats/cancellations:
     get:
@@ -1735,7 +1712,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 admin-stats-cancellations-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -1785,7 +1762,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 admin-stats-daily-usage-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -1831,7 +1808,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 admin-stats-occupancy-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -1882,7 +1859,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 admin-stats-peak-times-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -2176,7 +2153,7 @@ paths:
                     \n  \"facilityId\" : 5,\r\n  \"facilityName\" : \"화이트보드\",\r\n\
                     \  \"issueType\" : \"BROKEN\",\r\n  \"issueTypeName\" : \"파손/고\
                     장\",\r\n  \"status\" : \"REPORTED\",\r\n  \"statusName\" : \"접\
-                    수완료\",\r\n  \"createdAt\" : \"2026-03-12T00:43:11.3910678\"\r\n\
+                    수완료\",\r\n  \"createdAt\" : \"2026-03-19T16:17:31.7731989\"\r\n\
                     } ]"
   /api/offices/{officeId}/rooms:
     get:
@@ -2299,7 +2276,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 room-create-400:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"400\",\r\
@@ -2335,7 +2312,7 @@ paths:
                     \  \"facilityId\" : 5,\r\n  \"facilityName\" : \"화이트보드\",\r\n\
                     \  \"issueType\" : \"BROKEN\",\r\n  \"issueTypeName\" : \"파손/고\
                     장\",\r\n  \"status\" : \"REPORTED\",\r\n  \"statusName\" : \"접\
-                    수완료\",\r\n  \"createdAt\" : \"2026-03-12T00:43:11.3115434\"\r\n\
+                    수완료\",\r\n  \"createdAt\" : \"2026-03-19T16:17:31.6437401\"\r\n\
                     }"
   /api/reports/{reportId}/status:
     patch:
@@ -2372,7 +2349,7 @@ paths:
                     \  \"facilityId\" : 5,\r\n  \"facilityName\" : \"화이트보드\",\r\n\
                     \  \"issueType\" : \"BROKEN\",\r\n  \"issueTypeName\" : \"파손/고\
                     장\",\r\n  \"status\" : \"REPORTED\",\r\n  \"statusName\" : \"접\
-                    수완료\",\r\n  \"createdAt\" : \"2026-03-12T00:43:11.3557699\"\r\n\
+                    수완료\",\r\n  \"createdAt\" : \"2026-03-19T16:17:31.7163967\"\r\n\
                     }"
   /api/reservations/{id}/cancel:
     post:
@@ -2403,7 +2380,7 @@ paths:
                     \ : {\r\n      \"reservationId\" : 100,\r\n      \"totalPrice\"\
                     \ : 20000,\r\n      \"refundRate\" : 100,\r\n      \"refundAmount\"\
                     \ : 20000,\r\n      \"cancellationPenalty\" : 0,\r\n      \"requestTime\"\
-                    \ : \"2026-03-12T00:43:12.3896942\",\r\n      \"reasonDescriptor\"\
+                    \ : \"2026-03-19T16:17:33.4171585\",\r\n      \"reasonDescriptor\"\
                     \ : \"이용 시작 7일 이전 취소: 100% 환불\"\r\n    }\r\n  }\r\n}"
   /api/reservations/{id}/confirm:
     patch:
@@ -2434,17 +2411,17 @@ paths:
                     \ : 1,\r\n    \"officeName\" : \"강남 본점\",\r\n    \"roomId\" :\
                     \ 10,\r\n    \"roomName\" : \"Alpha Room\",\r\n    \"roomCode\"\
                     \ : \"ROOM-A\",\r\n    \"userId\" : 1,\r\n    \"userName\" : \"\
-                    홍길동\",\r\n    \"startAt\" : \"2026-03-13T10:00:00\",\r\n    \"\
-                    endAt\" : \"2026-03-13T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
-                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-12T00:43:12.4128399\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-12T00:43:12.4128399\",\r\n\
+                    홍길동\",\r\n    \"startAt\" : \"2026-03-20T10:00:00\",\r\n    \"\
+                    endAt\" : \"2026-03-20T12:00:00\",\r\n    \"status\" : \"PENDING_PAYMENT\"\
+                    ,\r\n    \"totalPrice\" : 20000,\r\n    \"createdAt\" : \"2026-03-19T16:17:33.4820168\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-19T16:17:33.4820168\",\r\n\
                     \    \"version\" : 0\r\n  }\r\n}"
         "403":
           description: "403"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 reservation-confirm-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -2477,7 +2454,7 @@ paths:
                     \   \"reservationId\" : 100,\r\n    \"totalPrice\" : 20000,\r\n\
                     \    \"refundRate\" : 50,\r\n    \"refundAmount\" : 10000,\r\n\
                     \    \"cancellationPenalty\" : 10000,\r\n    \"requestTime\" :\
-                    \ \"2026-03-12T00:43:12.2863048\",\r\n    \"reasonDescriptor\"\
+                    \ \"2026-03-19T16:17:33.1516464\",\r\n    \"reasonDescriptor\"\
                     \ : \"이용 시작 1일 전 취소: 50% 환불\"\r\n  }\r\n}"
   /api/reviews/room/{roomId}:
     get:
@@ -2517,18 +2494,18 @@ paths:
                   value: "{\r\n  \"content\" : [ {\r\n    \"id\" : 100,\r\n    \"\
                     reservationId\" : 10,\r\n    \"authorUserId\" : 1,\r\n    \"authorName\"\
                     \ : \"홍길동\",\r\n    \"rating\" : 5,\r\n    \"content\" : \"공간이\
-                    \ 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\n    \"createdAt\" : \"2026-03-12T00:43:12.766769\"\
-                    ,\r\n    \"updatedAt\" : \"2026-03-12T00:43:12.766769\"\r\n  }\
-                    \ ],\r\n  \"pageable\" : {\r\n    \"pageNumber\" : 0,\r\n    \"\
-                    pageSize\" : 10,\r\n    \"sort\" : {\r\n      \"empty\" : false,\r\
-                    \n      \"sorted\" : true,\r\n      \"unsorted\" : false\r\n \
-                    \   },\r\n    \"offset\" : 0,\r\n    \"paged\" : true,\r\n   \
-                    \ \"unpaged\" : false\r\n  },\r\n  \"totalElements\" : 1,\r\n\
-                    \  \"last\" : true,\r\n  \"totalPages\" : 1,\r\n  \"size\" : 10,\r\
-                    \n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\" : false,\r\
-                    \n    \"sorted\" : true,\r\n    \"unsorted\" : false\r\n  },\r\
-                    \n  \"numberOfElements\" : 1,\r\n  \"first\" : true,\r\n  \"empty\"\
-                    \ : false\r\n}"
+                    \ 넓고 청결했습니다. 다음에도 이용할 예정입니다.\",\r\n    \"createdAt\" : \"2026-03-19T16:17:34.0172574\"\
+                    ,\r\n    \"updatedAt\" : \"2026-03-19T16:17:34.0172574\"\r\n \
+                    \ } ],\r\n  \"pageable\" : {\r\n    \"pageNumber\" : 0,\r\n  \
+                    \  \"pageSize\" : 10,\r\n    \"sort\" : {\r\n      \"empty\" :\
+                    \ false,\r\n      \"sorted\" : true,\r\n      \"unsorted\" : false\r\
+                    \n    },\r\n    \"offset\" : 0,\r\n    \"paged\" : true,\r\n \
+                    \   \"unpaged\" : false\r\n  },\r\n  \"last\" : true,\r\n  \"\
+                    totalElements\" : 1,\r\n  \"totalPages\" : 1,\r\n  \"size\" :\
+                    \ 10,\r\n  \"number\" : 0,\r\n  \"sort\" : {\r\n    \"empty\"\
+                    \ : false,\r\n    \"sorted\" : true,\r\n    \"unsorted\" : false\r\
+                    \n  },\r\n  \"first\" : true,\r\n  \"numberOfElements\" : 1,\r\
+                    \n  \"empty\" : false\r\n}"
   /api/rooms/{roomId}/images:
     put:
       tags:
@@ -2593,7 +2570,7 @@ paths:
                     \  \"facilityId\" : 5,\r\n  \"facilityName\" : \"화이트보드\",\r\n\
                     \  \"issueType\" : \"BROKEN\",\r\n  \"issueTypeName\" : \"파손/고\
                     장\",\r\n  \"status\" : \"REPORTED\",\r\n  \"statusName\" : \"접\
-                    수완료\",\r\n  \"createdAt\" : \"2026-03-12T00:43:11.2433972\"\r\n\
+                    수완료\",\r\n  \"createdAt\" : \"2026-03-19T16:17:31.547647\"\r\n\
                     }"
   /api/rooms/{roomId}/similar:
     get:
@@ -2687,7 +2664,7 @@ paths:
                     ,\r\n  \"message\" : \"Manager가 승인되었습니다.\",\r\n  \"data\" : {\r\
                     \n    \"userId\" : 2,\r\n    \"name\" : \"강감찬\",\r\n    \"email\"\
                     \ : \"manager@example.com\",\r\n    \"approvalStatus\" : \"APPROVED\"\
-                    ,\r\n    \"createdAt\" : \"2026-03-12T00:43:10.0482443\"\r\n \
+                    ,\r\n    \"createdAt\" : \"2026-03-19T16:17:28.6315624\"\r\n \
                     \ }\r\n}"
   /api/admin/reservations/{id}/force-cancel:
     post:
@@ -2724,7 +2701,7 @@ paths:
                   value: "{\r\n  \"status\" : \"SUCCESS\",\r\n  \"code\" : \"200\"\
                     ,\r\n  \"message\" : \"예약이 관리자 권한으로 취소되었습니다.\",\r\n  \"data\"\
                     \ : {\r\n    \"reservationId\" : 1,\r\n    \"userEmail\" : \"\
-                    user1@example.com\",\r\n    \"canceledAt\" : \"2026-03-12T00:43:10.2387774\"\
+                    user1@example.com\",\r\n    \"canceledAt\" : \"2026-03-19T16:17:29.481949\"\
                     ,\r\n    \"adminReason\" : \"침수 피해로 인한 지점 임시 휴업\"\r\n  }\r\n}"
   /api/admin/stats/rooms/popular:
     get:
@@ -2773,7 +2750,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 admin-stats-popular-rooms-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -2823,7 +2800,7 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/api-offices-officeId-rooms-1128305525"
+                $ref: "#/components/schemas/api-admin-stats-rooms-popular-1128305525"
               examples:
                 admin-stats-unpopular-rooms-403:
                   value: "{\r\n  \"status\" : \"ERROR\",\r\n  \"code\" : \"403\",\r\
@@ -2856,7 +2833,7 @@ paths:
                     \ {\r\n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\"\
                     ,\r\n    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n \
                     \   \"accountStatus\" : \"ACTIVE\",\r\n    \"createdAt\" : \"\
-                    2026-03-12T00:43:10.366843\"\r\n  }\r\n}"
+                    2026-03-19T16:17:29.9038161\"\r\n  }\r\n}"
   /api/admin/users/{id}/suspend:
     patch:
       tags:
@@ -2884,7 +2861,7 @@ paths:
                     ,\r\n  \"message\" : \"사용자 계정이 정지되었습니다.\",\r\n  \"data\" : {\r\
                     \n    \"id\" : 2,\r\n    \"email\" : \"user1@example.com\",\r\n\
                     \    \"name\" : \"김이름\",\r\n    \"role\" : \"USER\",\r\n    \"\
-                    accountStatus\" : \"SUSPENDED\",\r\n    \"createdAt\" : \"2026-03-12T00:43:10.4126975\"\
+                    accountStatus\" : \"SUSPENDED\",\r\n    \"createdAt\" : \"2026-03-19T16:17:30.0318135\"\
                     \r\n  }\r\n}"
   /api/offices/{id}/rooms/status:
     patch:
@@ -3012,7 +2989,7 @@ components:
           description: "공간 이름 (Must not be blank, Size must be between 1 and 100 inclusive)"
         description:
           type: string
-          description: "공간 상세 설명 (Must not be blank, Size must be between 20 and 3000\
+          description: "공간 상세 설명 (Must not be blank, Size must be between 5 and 3000\
             \ inclusive)"
           nullable: true
         facilityIds:
@@ -3135,6 +3112,50 @@ components:
           type: string
           description: 비밀번호 (oAuth 로그인의 경우 생략 가능)
           nullable: true
+    OfficeRequest:
+      title: OfficeRequest
+      required:
+      - closeTime
+      - location
+      - name
+      - openTime
+      type: object
+      properties:
+        openDays:
+          type: array
+          description: 영업 요일 목록 (Size must be between 1 and 7 inclusive)
+          nullable: true
+          items:
+            oneOf:
+            - type: object
+            - type: boolean
+            - type: string
+            - type: number
+        latitude:
+          type: number
+          description: 위도
+          nullable: true
+        closeTime:
+          type: string
+          description: 영업 종료 시간 (Must not be null)
+        name:
+          type: string
+          description: "지점 이름 (Must not be blank, Size must be between 1 and 150 inclusive)"
+        description:
+          type: string
+          description: "지점 설명 (Must not be blank, Size must be between 5 and 3000\
+            \ inclusive)"
+          nullable: true
+        location:
+          type: string
+          description: "상세 주소 (Must not be blank, Size must be between 1 and 255 inclusive)"
+        openTime:
+          type: string
+          description: 영업 시작 시간 (Must not be null)
+        longitude:
+          type: number
+          description: 경도
+          nullable: true
     UserProfileResponse:
       title: UserProfileResponse
       required:
@@ -3180,50 +3201,6 @@ components:
         status:
           type: string
           description: 응답 상태
-    OfficeRequest:
-      title: OfficeRequest
-      required:
-      - closeTime
-      - location
-      - name
-      - openTime
-      type: object
-      properties:
-        openDays:
-          type: array
-          description: 영업 요일 목록 (Size must be between 1 and 7 inclusive)
-          nullable: true
-          items:
-            oneOf:
-            - type: object
-            - type: boolean
-            - type: string
-            - type: number
-        latitude:
-          type: number
-          description: 위도
-          nullable: true
-        closeTime:
-          type: string
-          description: 영업 종료 시간 (Must not be null)
-        name:
-          type: string
-          description: "지점 이름 (Must not be blank, Size must be between 1 and 150 inclusive)"
-        description:
-          type: string
-          description: "지점 설명 (Must not be blank, Size must be between 20 and 3000\
-            \ inclusive)"
-          nullable: true
-        location:
-          type: string
-          description: "상세 주소 (Must not be blank, Size must be between 1 and 255 inclusive)"
-        openTime:
-          type: string
-          description: 영업 시작 시간 (Must not be null)
-        longitude:
-          type: number
-          description: 경도
-          nullable: true
     AdminUserResponse:
       title: AdminUserResponse
       required:
@@ -3298,9 +3275,6 @@ components:
         roomId:
           type: number
           description: 회의실 ID (Must not be null)
-    FacilityRequest:
-      title: FacilityRequest
-      type: object
     AdminLoginRequest:
       title: AdminLoginRequest
       required:
@@ -3316,6 +3290,9 @@ components:
           type: string
           description: "관리자 이메일 (Must be a well-formed email address, Must not be\
             \ blank)"
+    FacilityRequest:
+      title: FacilityRequest
+      type: object
     ReviewUpdateRequest:
       title: ReviewUpdateRequest
       required:
@@ -3346,9 +3323,6 @@ components:
           description: 변경할 이름
     ImageUploadRequest:
       title: ImageUploadRequest
-      type: object
-    ReservationPageResponse:
-      title: ReservationPageResponse
       type: object
     AdminCancelRequest:
       title: AdminCancelRequest
@@ -3539,9 +3513,6 @@ components:
         content:
           type: string
           description: 리뷰 내용 (Must not be blank)
-    FacilityReportResponse:
-      title: FacilityReportResponse
-      type: object
     OfficeResponse:
       title: OfficeResponse
       required:
@@ -3613,6 +3584,26 @@ components:
         status:
           type: string
           description: 응답 상태 (SUCCESS)
+    FacilityReportResponse:
+      title: FacilityReportResponse
+      type: object
+    TokenResponse:
+      title: TokenResponse
+      required:
+      - accessToken
+      - refreshToken
+      - tokenType
+      type: object
+      properties:
+        tokenType:
+          type: string
+          description: 토큰 타입 (Bearer)
+        accessToken:
+          type: string
+          description: Access Token (JWT)
+        refreshToken:
+          type: string
+          description: Refresh Token
     FacilityReportCreateRequest:
       title: FacilityReportCreateRequest
       required:
@@ -3631,23 +3622,6 @@ components:
         reservationId:
           type: number
           description: 지정된 예약 ID (Must not be null)
-    TokenResponse:
-      title: TokenResponse
-      required:
-      - accessToken
-      - refreshToken
-      - tokenType
-      type: object
-      properties:
-        tokenType:
-          type: string
-          description: 토큰 타입 (Bearer)
-        accessToken:
-          type: string
-          description: Access Token (JWT)
-        refreshToken:
-          type: string
-          description: Refresh Token
     OccupancyResponse:
       title: OccupancyResponse
       required:
@@ -3691,7 +3665,7 @@ components:
         status:
           type: string
           description: 처리 상태
-    api-offices-officeId-rooms-1128305525:
+    api-admin-stats-rooms-popular-1128305525:
       required:
       - code
       - message
@@ -3921,6 +3895,9 @@ components:
     PaymentResponse:
       title: PaymentResponse
       type: object
+    ReservationPageResponse:
+      title: ReservationPageResponse
+      type: object
     UserLoginRequest:
       title: UserLoginRequest
       required:
@@ -4044,14 +4021,6 @@ components:
     ReviewResponse:
       title: ReviewResponse
       type: object
-    api-favorites-1828756579:
-      required:
-      - roomId
-      type: object
-      properties:
-        roomId:
-          type: number
-          description: 즐겨찾기할 회의실 ID (Must not be null)
     ReservationUpdateRequest:
       title: ReservationUpdateRequest
       type: object
@@ -4068,6 +4037,14 @@ components:
           type: string
           description: 변경할 예약 상태
           nullable: true
+    api-favorites-1828756579:
+      required:
+      - roomId
+      type: object
+      properties:
+        roomId:
+          type: number
+          description: 즐겨찾기할 회의실 ID (Must not be null)
     UpdateLogResponse:
       title: UpdateLogResponse
       type: object
@@ -4102,52 +4079,15 @@ components:
         status:
           type: string
           description: 처리 상태
-    FacilityResponse:
-      title: FacilityResponse
-      type: object
     ReviewPageResponse:
       title: ReviewPageResponse
+      type: object
+    FacilityResponse:
+      title: FacilityResponse
       type: object
     ReviewListResponse:
       title: ReviewListResponse
       type: object
-    AdminCancelResponse:
-      title: AdminCancelResponse
-      required:
-      - code
-      - message
-      - status
-      type: object
-      properties:
-        code:
-          type: string
-          description: 응답 코드
-        data:
-          required:
-          - adminReason
-          - canceledAt
-          - reservationId
-          - userEmail
-          type: object
-          properties:
-            reservationId:
-              type: number
-              description: 취소된 예약 ID
-            canceledAt:
-              type: string
-              description: 취소 처리 일시
-            userEmail:
-              type: string
-              description: 예약자 이메일
-            adminReason:
-              type: string
-              description: 관리자 강제 취소 사유
-        message:
-          type: string
-          description: 응답 메시지
-        status:
-          type: string
-          description: 처리 상태
     api-favorites1643048602:
       required:
       - code
@@ -4208,6 +4148,43 @@ components:
               capacity:
                 type: number
                 description: 수용 인원
+        message:
+          type: string
+          description: 응답 메시지
+        status:
+          type: string
+          description: 처리 상태
+    AdminCancelResponse:
+      title: AdminCancelResponse
+      required:
+      - code
+      - message
+      - status
+      type: object
+      properties:
+        code:
+          type: string
+          description: 응답 코드
+        data:
+          required:
+          - adminReason
+          - canceledAt
+          - reservationId
+          - userEmail
+          type: object
+          properties:
+            reservationId:
+              type: number
+              description: 취소된 예약 ID
+            canceledAt:
+              type: string
+              description: 취소 처리 일시
+            userEmail:
+              type: string
+              description: 예약자 이메일
+            adminReason:
+              type: string
+              description: 관리자 강제 취소 사유
         message:
           type: string
           description: 응답 메시지

@@ -12,6 +12,7 @@ import com.modu.office.controller.Auth.UserAuthController;
 import com.modu.office.security.JwtAuthenticationFilter;
 import com.modu.office.security.OAuth2AuthenticationSuccessHandler;
 import com.modu.office.service.*;
+import org.springframework.cache.CacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -106,6 +107,9 @@ public abstract class ControllerTestSupport extends RestDocsSupport {
 
     @MockitoBean
     protected PaymentService paymentService;
+
+    @MockitoBean
+    protected CacheManager cacheManager;
 
     // --- Security Infrastructure ---
     @MockitoBean

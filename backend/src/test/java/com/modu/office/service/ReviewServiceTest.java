@@ -16,6 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.Cache;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -39,6 +42,17 @@ class ReviewServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private CacheManager cacheManager;
+
+    @Mock
+    private Cache cache;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(cacheManager.getCache(anyString())).thenReturn(cache);
+    }
+
     @Test
     @DisplayName("리뷰 작성 성공")
     void createReview_success() {
@@ -47,9 +61,13 @@ class ReviewServiceTest {
         given(user.getId()).willReturn(1L);
         given(user.getName()).willReturn("Tester");
 
+        com.modu.office.entity.Room room = mock(com.modu.office.entity.Room.class);
+        given(room.getId()).willReturn(50L);
+
         Reservation reservation = mock(Reservation.class);
         given(reservation.getId()).willReturn(10L);
         given(reservation.getUser()).willReturn(user);
+        given(reservation.getRoom()).willReturn(room);
         given(reservation.getStatus()).willReturn(ReservationStatus.CONFIRMED);
         given(reservation.getEndAt()).willReturn(LocalDateTime.now().minusHours(1)); // 이용 시간 경과 필수
 
@@ -154,8 +172,12 @@ class ReviewServiceTest {
         given(author.getId()).willReturn(1L);
         given(author.getName()).willReturn("Tester");
 
+        com.modu.office.entity.Room room = mock(com.modu.office.entity.Room.class);
+        given(room.getId()).willReturn(50L);
+
         Reservation reservation = mock(Reservation.class);
         given(reservation.getId()).willReturn(10L);
+        given(reservation.getRoom()).willReturn(room);
 
         Review review = spy(Review.builder()
                 .reservation(reservation)
