@@ -26,6 +26,7 @@ services:
       NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
       NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
     ports:
       - "8080:8080"  # Swagger UI 직접 접근: http://localhost:8080/swagger-ui/index.html
     depends_on:

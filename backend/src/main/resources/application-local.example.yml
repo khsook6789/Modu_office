@@ -14,9 +14,6 @@ spring:
 
   jpa:
     show-sql: true
-    properties:
-      hibernate:
-        format-sql: true
 
   security:
     oauth2:
@@ -26,27 +23,40 @@ spring:
             provider: naver
             client-id: "{ naver_client_id }"
             client-secret: "{ naver_client_secret }"
+            client-name: Naver (USER)
+            authorization-grant-type: authorization_code
             # {baseUrl}을 사용하면 http://localhost:8080 등으로 자동 매핑됩니다.
             redirect-uri: "{baseUrl}/login/oauth2/code/naver-user"
-            authorization-grant-type: authorization_code
-            scope: name,email
-            client-name: Naver (USER)
+            scope:
+              - name
+              - email
 
           naver-manager:
             provider: naver
             client-id: "{ naver_client_id }"
             client-secret: "{ naver_client_secret }"
-            redirect-uri: "{baseUrl}/login/oauth2/code/naver-manager"
-            authorization-grant-type: authorization_code
-            scope: name,email
             client-name: Naver (MANAGER)
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-manager"
+            scope:
+              - name
+              - email
 
 app:
   jwt:
     secret: "{ jwt_secret_key_base64 }" # Base64 인코딩된 32바이트 이상 문자열
     access-token-expiration-milliseconds: 3600000 # 1 hour
     refresh-token-expiration-milliseconds: 604800000 # 7 days
+  toss-payments:
+    base-url: https://api.tosspayments.com
+    secret-key: "{ toss_secret_key }" # 토스페이먼츠 시크릿 키
 
 google:
   maps:
     api-key: "{ google_maps_api_key }"
+
+logging:
+  level:
+    "[com.modu.office]": DEBUG
+    "[org.hibernate.SQL]": DEBUG
+    "[org.hibernate.type.descriptor.sql.BasicBinder]": TRACE
