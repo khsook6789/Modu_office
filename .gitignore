@@ -6,6 +6,9 @@
 # DB: PostgreSQL
 # ==========================================
 
+# --- Claude Code ---
+.claude/
+
 # --- OS Specific Files ---
 .DS_Store
 .DS_Store?
