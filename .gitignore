@@ -6,8 +6,15 @@
 # DB: PostgreSQL
 # ==========================================
 
-# --- Claude Code ---
+# --- Claude Code & Agent Framework ---
 .claude/
+.agent/
+CLAUDE.md
+AGENTS.md
+
+# --- Local Development & Scripts ---
+scripts/
+docs/
 
 # --- OS Specific Files ---
 .DS_Store
@@ -101,4 +108,3 @@ tmp/
 
 # --- Tools & Assistant ---
 .antigravity/
-.agent/
