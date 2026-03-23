@@ -40,7 +40,7 @@ public class ReservationController {
             @Valid @RequestBody ReservationRequest request) {
         ReservationResponse response = reservationService.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("예약이 생성되었습니다.", response));
+                .body(ApiResponse.created("예약이 생성되었습니다.", response));
     }
 
     @GetMapping

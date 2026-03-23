@@ -29,7 +29,7 @@ public class FacilityController {
     public ResponseEntity<ApiResponse<FacilityResponse>> createFacility(@Valid @RequestBody FacilityRequest request) {
         FacilityResponse response = facilityService.createFacility(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("시설이 등록되었습니다.", response));
+                .body(ApiResponse.created("시설이 등록되었습니다.", response));
     }
 
     /**

@@ -37,7 +37,7 @@ public class RoomController {
             @AuthenticationPrincipal AppUser currentUser) {
         RoomResponse response = roomService.createRoom(officeId, request, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("회의실이 생성되었습니다.", response));
+                .body(ApiResponse.created("회의실이 생성되었습니다.", response));
     }
 
     /**

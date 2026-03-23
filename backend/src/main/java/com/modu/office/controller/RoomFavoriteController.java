@@ -38,7 +38,7 @@ public class RoomFavoriteController {
                 request.getRoomId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("즐겨찾기에 추가되었습니다.", response));
+                .body(ApiResponse.created("즐겨찾기에 추가되었습니다.", response));
     }
 
     /**

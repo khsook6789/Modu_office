@@ -35,7 +35,7 @@ public class OfficeController {
             @AuthenticationPrincipal AppUser currentUser) {
         OfficeResponse response = officeService.createOffice(request, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("지점이 생성되었습니다.", response));
+                .body(ApiResponse.created("지점이 생성되었습니다.", response));
     }
 
     /**
