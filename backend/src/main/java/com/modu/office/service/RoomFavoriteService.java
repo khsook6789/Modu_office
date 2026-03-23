@@ -4,6 +4,9 @@ import com.modu.office.dto.response.RoomFavoriteResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Room;
 import com.modu.office.entity.RoomFavorite;
+import com.modu.office.exception.DuplicateResourceException;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidValueException;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.RoomRepository;
 import com.modu.office.repository.RoomFavoriteRepository;
@@ -35,13 +38,13 @@ public class RoomFavoriteService {
     @Transactional
     public RoomFavoriteResponse addFavorite(Long userId, Long roomId) {
         if (userId == null)
-            throw new IllegalArgumentException("userId must not be null");
+            throw new InvalidValueException(ErrorCode.INVALID_INPUT_VALUE);
         if (roomId == null)
-            throw new IllegalArgumentException("roomId must not be null");
+            throw new InvalidValueException(ErrorCode.INVALID_INPUT_VALUE);
 
         // 1. 중복 체크
         if (favoriteRepository.existsByUserIdAndRoomId(userId, roomId)) {
-            throw new IllegalStateException("이미 즐겨찾기에 추가된 회의실입니다.");
+            throw new DuplicateResourceException("이미 즐겨찾기에 추가된 회의실입니다.");
         }
 
         // 2. 사용자 존재 확인
@@ -72,10 +75,10 @@ public class RoomFavoriteService {
     public void removeFavorite(Long userId, Long roomId) {
         RoomFavorite favorite = favoriteRepository
                 .findByUserIdAndRoomId(userId, roomId)
-                .orElseThrow(() -> new EntityNotFoundException("즐겨찾기를 찾을 수 없습니다."));
+                .orElseThrow(() -> new com.modu.office.exception.ResourceNotFoundException(ErrorCode.ROOM_FAVORITE_NOT_FOUND));
 
         if (favorite == null)
-            throw new EntityNotFoundException("즐겨찾기를 찾을 수 없습니다.");
+            throw new com.modu.office.exception.ResourceNotFoundException(ErrorCode.ROOM_FAVORITE_NOT_FOUND);
 
         favoriteRepository.delete(favorite);
 

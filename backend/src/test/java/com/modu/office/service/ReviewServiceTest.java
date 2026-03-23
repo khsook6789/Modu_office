@@ -117,8 +117,7 @@ class ReviewServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reviewService.createReview(user, request))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("확정된");
+                .isInstanceOf(com.modu.office.exception.InvalidRequestException.class);
     }
 
     @Test
@@ -139,8 +138,7 @@ class ReviewServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reviewService.createReview(user, request))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("종료된 후");
+                .isInstanceOf(com.modu.office.exception.InvalidRequestException.class);
     }
 
     @Test
@@ -160,8 +158,7 @@ class ReviewServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reviewService.deleteReview(100L, anotherUser))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessageContaining("본인이 작성한 후기만");
+                .isInstanceOf(com.modu.office.exception.InvalidRequestException.class);
     }
 
     @Test

@@ -9,6 +9,9 @@ import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Reservation;
 import com.modu.office.entity.Review;
 import com.modu.office.entity.enums.ReservationStatus;
+import com.modu.office.exception.DuplicateResourceException;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
 import com.modu.office.repository.ReservationRepository;
 import com.modu.office.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,22 +44,22 @@ public class ReviewService {
 
         // 예약자 본인 확인
         if (!reservation.getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("본인의 예약에만 후기를 작성할 수 있습니다.");
+            throw new InvalidRequestException(ErrorCode.REVIEW_FORBIDDEN);
         }
 
         // 예약 상태 확인 (CONFIRMED)
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            throw new IllegalStateException("이용 완료된(확정된) 예약만 후기를 작성할 수 있습니다. 현재 상태: " + reservation.getStatus());
+            throw new InvalidRequestException(ErrorCode.REVIEW_INVALID_STATUS);
         }
 
         // 이용 시간 경과 확인
         if (reservation.getEndAt().isAfter(LocalDateTime.now())) {
-            throw new IllegalStateException("예약 이용 시간이 종료된 후에만 후기를 작성할 수 있습니다.");
+            throw new InvalidRequestException(ErrorCode.REVIEW_TIME_NOT_ELAPSED);
         }
 
         // 중복 후기 확인
         if (reviewRepository.findByReservationId(reservation.getId()).isPresent()) {
-            throw new IllegalStateException("이미 이 예약에 대한 후기가 존재합니다.");
+            throw new DuplicateResourceException("이미 이 예약에 대한 후기가 존재합니다.");
         }
 
         Review review = Review.builder()
@@ -78,7 +81,7 @@ public class ReviewService {
 
         // 작성자 본인 확인
         if (!review.getAuthor().getId().equals(user.getId())) {
-            throw new AccessDeniedException("본인이 작성한 후기만 수정할 수 있습니다.");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN);
         }
 
         if (request.getRating() != null) {
@@ -102,7 +105,7 @@ public class ReviewService {
         boolean isAdmin = user.getRole() == com.modu.office.entity.enums.UserRole.ADMIN;
 
         if (!isOwner && !isAdmin) {
-            throw new AccessDeniedException("본인이 작성한 후기만 삭제할 수 있습니다. (또는 관리자 권한 필요)");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN);
         }
 
         evictReviewSummary(review.getReservation().getRoom().getId());
