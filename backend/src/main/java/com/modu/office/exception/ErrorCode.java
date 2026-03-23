@@ -44,7 +44,10 @@ public enum ErrorCode {
     FACILITY_REPORT_NOT_FOUND(404, "F002", "시설 신고 내역을 찾을 수 없습니다"),
     DUPLICATE_REPORT(409, "F003", "해당 시설에 이미 처리 중인 신고가 존재합니다"),
     INVALID_STATUS_TRANSITION(400, "F004", "허용되지 않는 상태 전환입니다"),
-    INVALID_REQUEST(400, "E007", "잘못된 요청입니다");
+    INVALID_REQUEST(400, "E007", "잘못된 요청입니다"),
+
+    // 비즈니스 로직 에러 - 예약 시간 단위
+    INVALID_TIME_UNIT(400, "R005", "예약 시간 단위가 올바르지 않습니다");
 
     private final int status;
     private final String code;

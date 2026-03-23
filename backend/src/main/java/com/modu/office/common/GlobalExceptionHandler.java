@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handleOptimisticLockingFailure(OptimisticLockingFailureException e) {
                 log.error("Concurrency conflict: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                                .body(ApiResponse.error("E004", "다른 사용자에 의해 데이터가 이미 수정되었습니다. 다시 시도해주세요."));
+                                .body(ApiResponse.error(ErrorCode.OPTIMISTIC_LOCK_CONFLICT.getCode(), "다른 사용자에 의해 데이터가 이미 수정되었습니다. 다시 시도해주세요."));
         }
 
         /**
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handleEntityNotFound(jakarta.persistence.EntityNotFoundException e) {
                 log.error("Entity not found: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(ApiResponse.error("E002", e.getMessage()));
+                                .body(ApiResponse.error(ErrorCode.RESOURCE_NOT_FOUND.getCode(), e.getMessage()));
         }
 
         /**
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
                         org.springframework.dao.DataIntegrityViolationException e) {
                 log.error("Data integrity violation: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                                .body(ApiResponse.error("E003", "데이터 무결성 제약 조건 위반입니다. 중복된 값이 존재하거나 필수 조건을 만족하지 않습니다."));
+                                .body(ApiResponse.error(ErrorCode.DUPLICATE_RESOURCE));
         }
 
         /**
@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handleInvalidTimeUnit(InvalidTimeUnitException e) {
                 log.error("Invalid time unit: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body(ApiResponse.error("E005", e.getMessage()));
+                                .body(ApiResponse.error(ErrorCode.INVALID_TIME_UNIT.getCode(), e.getMessage()));
         }
 
         /**
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
                 log.error("Bad request: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body(ApiResponse.error("400", e.getMessage()));
+                                .body(ApiResponse.error(ErrorCode.INVALID_REQUEST.getCode(), e.getMessage()));
         }
 
         /**
@@ -116,7 +116,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException e) {
                 log.error("Illegal state: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body(ApiResponse.error("400", e.getMessage()));
+                                .body(ApiResponse.error(ErrorCode.INVALID_REQUEST.getCode(), e.getMessage()));
         }
 
         /**
@@ -126,7 +126,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handleNotFound(NoHandlerFoundException e) {
                 log.error("Not found: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(ApiResponse.error("404", "요청하신 페이지를 찾을 수 없습니다."));
+                                .body(ApiResponse.error(ErrorCode.RESOURCE_NOT_FOUND));
         }
 
         /**
@@ -141,12 +141,12 @@ public class GlobalExceptionHandler {
                 if (auth == null || auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
                         log.error("Authentication required: {}", e.getMessage());
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                        .body(ApiResponse.error("401", "인증이 필요합니다."));
+                                        .body(ApiResponse.error(ErrorCode.UNAUTHORIZED));
                 }
 
                 log.error("Access denied: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                .body(ApiResponse.error("403", "접근 권한이 없습니다."));
+                                .body(ApiResponse.error(ErrorCode.FORBIDDEN));
         }
 
         /**
@@ -156,6 +156,6 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception e) {
                 log.error("Internal server error", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(ApiResponse.error("S001", "서버 내부 오류가 발생했습니다."));
+                                .body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));
         }
 }
