@@ -10,6 +10,9 @@ import com.modu.office.entity.Room;
 import com.modu.office.entity.Reservation;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
+import com.modu.office.exception.InvalidValueException;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.RoomRepository;
@@ -61,7 +64,7 @@ public class ReservationService {
         try {
             // 1. 과거 예약 여부 검증 (DTO에서 못하는 TimeRange 일부)
             if (request.getStartAt() != null && request.getStartAt().isBefore(LocalDateTime.now())) {
-                throw new IllegalArgumentException("시작 시간은 현재 시간 이후여야 합니다.");
+                throw new InvalidRequestException(ErrorCode.RESERVATION_PAST_START_TIME);
             }
 
             // 2. 관련 엔티티 존재 확인
@@ -97,7 +100,7 @@ public class ReservationService {
                     activeStatuses);
 
             if (!conflicts.isEmpty()) {
-                throw new IllegalStateException("해당 시간대에 이미 예약이 존재합니다.");
+                throw new InvalidRequestException(ErrorCode.RESERVATION_TIME_CONFLICT);
             }
 
             // 7. 예약 생성
@@ -130,7 +133,7 @@ public class ReservationService {
 
         } catch (org.springframework.dao.OptimisticLockingFailureException e) {
             // 낙관적 락 충돌 발생 시 - 다른 사용자가 먼저 예약함
-            throw new IllegalStateException("다른 사용자가 먼저 예약했습니다. 잠시 후 다시 시도해주세요.", e);
+            throw new InvalidRequestException(ErrorCode.OPTIMISTIC_LOCK_CONFLICT);
         }
     }
 
@@ -180,7 +183,7 @@ public class ReservationService {
 
             // 취소된 예약은 수정 불가
             if (reservation.isCancelled()) {
-                throw new IllegalStateException("취소된 예약은 수정할 수 없습니다.");
+                throw new InvalidRequestException(ErrorCode.RESERVATION_NOT_MODIFIABLE);
             }
 
             // 변경 전 데이터 캐폀 (이벤트 발행용)
@@ -189,7 +192,7 @@ public class ReservationService {
             // 시간 수정
             if (request.getStartAt() != null && request.getEndAt() != null) {
                 if (request.getStartAt().isBefore(LocalDateTime.now())) {
-                    throw new IllegalArgumentException("시작 시간은 현재 시간 이후여야 합니다.");
+                    throw new InvalidRequestException(ErrorCode.RESERVATION_PAST_START_TIME);
                 }
 
                 // Rule Validator를 통한 비즈니스 규칙 검증
@@ -216,7 +219,7 @@ public class ReservationService {
                                 activeStatuses);
 
                 if (!conflicts.isEmpty()) {
-                    throw new IllegalStateException("해당 시간대에 이미 예약이 존재합니다.");
+                    throw new InvalidRequestException(ErrorCode.RESERVATION_TIME_CONFLICT);
                 }
 
                 reservation.updateTimeRange(request.getStartAt(), request.getEndAt());
@@ -244,7 +247,7 @@ public class ReservationService {
             return ReservationResponse.fromEntity(reservation);
 
         } catch (org.springframework.dao.OptimisticLockingFailureException e) {
-            throw new IllegalStateException("다른 사용자가 이 예약을 수정했습니다. 다시 시도해주세요.", e);
+            throw new InvalidRequestException(ErrorCode.OPTIMISTIC_LOCK_CONFLICT);
         }
     }
 
@@ -259,10 +262,10 @@ public class ReservationService {
         // 소유권 및 권한 검증 (MANAGER는 자신의 지점 예약만 확정 가능)
         if (requester.getRole() == UserRole.MANAGER) {
             if (!reservation.getOffice().getManager().getId().equals(requester.getId())) {
-                throw new AccessDeniedException("담당 지점의 예약이 아닙니다.");
+                throw new InvalidRequestException(ErrorCode.FORBIDDEN);
             }
         } else if (requester.getRole() != UserRole.ADMIN) {
-            throw new AccessDeniedException("예약을 확정할 권한이 없습니다.");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN);
         }
 
         // 이미 확정된 경우 중복 처리 방지 (선택 사항이나 권장)
@@ -315,7 +318,7 @@ public class ReservationService {
         // 관리자 커스텀 환불률 우선 적용
         if (customRefundRate != null) {
             if (customRefundRate < 0 || customRefundRate > 100) {
-                throw new IllegalArgumentException("환불 비율은 0~100 사이여야 합니다.");
+                throw new InvalidValueException(ErrorCode.INVALID_INPUT_VALUE);
             }
             refundRate = customRefundRate;
             reasonDescriptor = "관리자 재량 예외 환불 적용 (" + customRefundRate + "%)";
@@ -374,7 +377,7 @@ public class ReservationService {
         validateOwnership(reservation, requester);
 
         if (reservation.isCancelled()) {
-            throw new IllegalStateException("이미 취소된 예약입니다.");
+            throw new InvalidRequestException(ErrorCode.RESERVATION_ALREADY_CANCELLED);
         }
 
         return calculateRefund(reservation, LocalDateTime.now(), null);
@@ -392,13 +395,13 @@ public class ReservationService {
         validateOwnership(reservation, requester);
 
         if (reservation.isCancelled()) {
-            throw new IllegalStateException("이미 취소된 예약입니다.");
+            throw new InvalidRequestException(ErrorCode.RESERVATION_ALREADY_CANCELLED);
         }
 
         LocalDateTime now = LocalDateTime.now();
         // 시간차 공격 방어 (클라이언트 환불 예상액 조회 시간과 실제 취소 시간 비교, 5분 초과 시 예외)
         if (clientRequestTime != null && java.time.Duration.between(clientRequestTime, now).toMinutes() > 5) {
-            throw new IllegalStateException("환불 정보 조회 후 너무 많은 시간이 경과했습니다. 취소 전 다시 확인해주세요.");
+            throw new InvalidRequestException(ErrorCode.RESERVATION_CANCEL_WINDOW_EXPIRED);
         }
 
         com.modu.office.dto.response.RefundPreviewResponse refundInfo = calculateRefund(reservation,
@@ -511,13 +514,13 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다. ID: " + reservationId));
 
         if (reservation.isCancelled()) {
-            throw new IllegalStateException("이미 취소된 예약입니다.");
+            throw new InvalidRequestException(ErrorCode.RESERVATION_ALREADY_CANCELLED);
         }
 
         // MANAGER는 자신이 소유한 지점의 예약만 취소 가능 (confirmReservation과 동일한 기준)
         if (adminUser.getRole() == UserRole.MANAGER) {
             if (!reservation.getOffice().getManager().getId().equals(adminUser.getId())) {
-                throw new AccessDeniedException("담당 지점의 예약만 취소할 수 있습니다.");
+                throw new InvalidRequestException(ErrorCode.FORBIDDEN);
             }
         }
 
@@ -572,7 +575,7 @@ public class ReservationService {
         boolean isAdmin = requester.getRole() == UserRole.ADMIN;
         boolean isOwner = reservation.getUser().getId().equals(requester.getId());
         if (!isAdmin && !isOwner) {
-            throw new AccessDeniedException("해당 예약에 접근할 권한이 없습니다.");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN);
         }
     }
 }

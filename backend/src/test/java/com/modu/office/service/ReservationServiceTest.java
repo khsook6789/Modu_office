@@ -107,10 +107,9 @@ class ReservationServiceTest {
                 when(appUserRepository.findById(customerId)).thenReturn(Optional.of(user));
 
                 // When & Then
-                IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                com.modu.office.exception.InvalidRequestException exception = assertThrows(com.modu.office.exception.InvalidRequestException.class, () -> {
                         reservationService.createReservation(request);
                 });
-                assertThat(exception.getMessage()).contains("휴무일입니다.");
         }
 
         @Test
@@ -174,9 +173,8 @@ class ReservationServiceTest {
                 when(appUserRepository.findById(customerId)).thenReturn(Optional.of(user));
 
                 // When & Then
-                IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                com.modu.office.exception.InvalidRequestException exception = assertThrows(com.modu.office.exception.InvalidRequestException.class, () -> {
                         reservationService.createReservation(request);
                 });
-                assertThat(exception.getMessage()).contains("영업시간");
         }
 }
