@@ -13,7 +13,7 @@
 
 ### 고객 사용자
 
-- **회의실 검색 및 예약**: QueryDSL 기반 다중 조건 필터링(위치, 인원, 제공 항목, 가격)과 Google Maps API 연동 반경 검색으로 회의실을 탐색하고 예약합니다.
+- **회의실 검색 및 예약**: QueryDSL 기반 다중 조건 필터링(위치, 인원, 편의 시설, 가격)과 Google Maps API 연동 반경 검색으로 회의실을 탐색하고 예약합니다.
 - **유사 회의실 추천**: 거리(Haversine), 시설 유사도, 과거 예약 통계를 결합한 가중치 기반 대안 회의실을 추천합니다.
 - **실시간 예약 현황**: SSE(Server-Sent Events)로 다른 사용자의 예약/취소를 새로고침 없이 즉시 반영합니다.
 - **결제 및 환불**: 토스페이먼츠 결제 위젯 연동과 지점별 취소 정책에 따른 차등 환불을 제공합니다.
@@ -169,30 +169,30 @@ frontend/
 
 ```mermaid
 erDiagram
-    ACCOUNT ||--|| APPUSER : has
-    ACCOUNT ||--o{ REFRESHTOKEN : generates
-    APPUSER ||--o{ OFFICE : manages
-    APPUSER ||--o{ RESERVATION : creates
-    APPUSER ||--o{ REVIEW : writes
-    APPUSER ||--o{ ROOMFAVORITE : saves
-    APPUSER ||--o{ UPDATELOG : records
+    ACCOUNT ||--|| APP_USER : has
+    ACCOUNT ||--|| REFRESH_TOKEN : generates
+    APP_USER ||--o{ OFFICE : owns
+    APP_USER ||--o{ RESERVATION : creates
+    APP_USER ||--o{ REVIEW : writes
+    APP_USER ||--o{ ROOM_FAVORITE : saves
+    APP_USER ||--o{ UPDATE_LOG : records
 
     OFFICE ||--o{ ROOM : contains
-    OFFICE ||--o{ CANCELLATIONPOLICY : defines
+    OFFICE ||--o{ CANCELLATION_POLICY : defines
 
-    ROOM ||--o{ ROOMIMAGE : has
-    ROOM ||--o{ ROOMFACILITY : includes
+    ROOM ||--o{ ROOM_IMAGE : has
+    ROOM ||--o{ ROOM_FACILITY : includes
     ROOM ||--o{ RESERVATION : available_for
 
-    FACILITY ||--o{ ROOMFACILITY : belongs_to
-    FACILITY ||--o{ FACILITYREPORT : reported_for
+    FACILITY ||--o{ ROOM_FACILITY : belongs_to
+    FACILITY ||--o{ FACILITY_REPORT : reported_for
 
-    RESERVATION ||--o{ PAYMENT : related_to
+    RESERVATION ||--|| PAYMENT : related_to
     RESERVATION ||--o{ REVIEW : has
-    RESERVATION ||--o{ FACILITYREPORT : triggers
-    RESERVATION ||--o{ UPDATELOG : changes_tracked
+    RESERVATION ||--o{ FACILITY_REPORT : triggers
+    RESERVATION ||--o{ UPDATE_LOG : changes_tracked
 
-    APPUSER ||--o{ NOTIFICATION : receives
+    APP_USER ||--o{ NOTIFICATION : receives
 
     ACCOUNT {
         bigint id PK
@@ -203,17 +203,17 @@ erDiagram
         string status "ACTIVE, SUSPENDED, DELETED"
     }
 
-    APPUSER {
+    APP_USER {
         bigint id PK
         bigint account_id FK
         string name
-        string role "USER, MANAGER, ADMIN"
+        string role "CUSTOMER, OPERATOR, PLATFORM_ADMIN"
         string approval_status "PENDING, APPROVED"
     }
 
     OFFICE {
         bigint id PK
-        bigint manager_id FK
+        bigint owner_user_id FK
         string name
         string location
         double latitude
@@ -236,7 +236,7 @@ erDiagram
         long version
     }
 
-    ROOMIMAGE {
+    ROOM_IMAGE {
         bigint id PK
         bigint room_id FK
         string image_url
@@ -250,7 +250,7 @@ erDiagram
         boolean is_active
     }
 
-    ROOMFACILITY {
+    ROOM_FACILITY {
         bigint room_id FK
         bigint facility_id FK
     }
@@ -270,13 +270,13 @@ erDiagram
 
     REVIEW {
         bigint id PK
-        bigint reservation_id FK UK
+        bigint reservation_id FK
         bigint author_user_id FK
         int rating
         text content
     }
 
-    FACILITYREPORT {
+    FACILITY_REPORT {
         bigint id PK
         bigint reservation_id FK
         bigint room_id FK
@@ -285,7 +285,7 @@ erDiagram
         string status "REPORTED, IN_PROGRESS, RESOLVED, CANCELED"
     }
 
-    UPDATELOG {
+    UPDATE_LOG {
         bigint id PK
         bigint reservation_id FK
         bigint actor_user_id FK
@@ -301,7 +301,7 @@ erDiagram
         boolean is_read
     }
 
-    CANCELLATIONPOLICY {
+    CANCELLATION_POLICY {
         bigint id PK
         bigint office_id FK
         int days_before
@@ -310,23 +310,23 @@ erDiagram
 
     PAYMENT {
         bigint id PK
-        bigint reservation_id FK UK
+        bigint reservation_id FK
         string order_id
         string payment_key
         decimal amount
         string status "READY, APPROVED, CANCELED, FAILED"
     }
 
-    ROOMFAVORITE {
+    ROOM_FAVORITE {
         bigint id PK
         bigint user_id FK
         bigint room_id FK
     }
 
-    REFRESHTOKEN {
+    REFRESH_TOKEN {
         bigint id PK
         string token UK
-        bigint account_id FK UK
+        bigint account_id FK
         timestamp expiry_date
     }
 ```
@@ -337,6 +337,6 @@ erDiagram
 
 | 역할         | 이름               | 담당 영역       | GitHub                                  |
 | ------------ | ------------------ | --------------- | --------------------------------------- |
-| **Backend**  | 오준서(piker0925)  | 백엔드 개발     | [GitHub](https://github.com/piker0925)  |
-| **Backend**  | 이진환(khsook6789) | 백엔드 개발     | [GitHub](https://github.com/khsook6789) |
-| **Frontend** | 문윤성(mys0423)    | 프론트엔드 개발 | [GitHub](https://github.com/mys0423)    |
+| **Backend**  | 오준서(piker0925)  | 백엔드 개발     | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/piker0925)  |
+| **Backend**  | 이진환(khsook6789) | 백엔드 개발     | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/khsook6789) |
+| **Frontend** | 문윤성(mys0423)    | 프론트엔드 개발 | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/mys0423)    |
