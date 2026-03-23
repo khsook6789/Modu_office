@@ -7,6 +7,8 @@ import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -149,7 +151,7 @@ public class OfficeService {
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING_PAYMENT,
                 ReservationStatus.PENDING_APPROVAL, ReservationStatus.CONFIRMED);
         if (reservationRepository.existsByOfficeIdAndStatusIn(id, activeStatuses)) {
-            throw new IllegalStateException("활성 상태의 예약이 있는 지점은 삭제할 수 없습니다. 지점 ID: " + id);
+            throw new InvalidRequestException(ErrorCode.OFFICE_HAS_ACTIVE_RESERVATION);
         }
 
         reservationRepository.deleteAllByOfficeId(id);
@@ -176,10 +178,10 @@ public class OfficeService {
     private void validateManagerAccess(AppUser currentUser, Office office) {
         if (currentUser.getRole() == UserRole.MANAGER) {
             if (!office.getManager().getId().equals(currentUser.getId())) {
-                throw new AccessDeniedException("담당 지점이 아닙니다.");
+                throw new InvalidRequestException(ErrorCode.FORBIDDEN);
             }
         } else if (currentUser.getRole() != UserRole.ADMIN) {
-            throw new AccessDeniedException("접근 권한이 없습니다.");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN);
         }
     }
 

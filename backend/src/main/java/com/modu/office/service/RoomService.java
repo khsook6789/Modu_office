@@ -12,6 +12,8 @@ import com.modu.office.entity.RoomFacility;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
 import com.modu.office.repository.FacilityRepository;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.RoomFacilityRepository;
@@ -105,7 +107,7 @@ public class RoomService {
     public List<RoomResponse> getRoomsByOfficeId(Long officeId) {
         // 지점 존재 여부 확인
         if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
-            throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
+            throw new com.modu.office.exception.ResourceNotFoundException(ErrorCode.OFFICE_NOT_FOUND);
         }
 
         return roomRepository.findByOfficeId(officeId).stream()
@@ -194,7 +196,7 @@ public class RoomService {
     public List<RoomResponse> searchRoomsByFacilities(Long officeId, List<Long> facilityIds) {
         // 지점 존재 여부 확인
         if (!officeRepository.existsById(java.util.Objects.requireNonNull(officeId, "지점 ID는 필수입니다."))) {
-            throw new EntityNotFoundException("지점을 찾을 수 없습니다. ID: " + officeId);
+            throw new com.modu.office.exception.ResourceNotFoundException(ErrorCode.OFFICE_NOT_FOUND);
         }
 
         // facilityIds가 비어있으면 전체 검색
@@ -285,7 +287,7 @@ public class RoomService {
         List<ReservationStatus> activeStatuses = List.of(ReservationStatus.PENDING_PAYMENT,
                 ReservationStatus.PENDING_APPROVAL, ReservationStatus.CONFIRMED);
         if (reservationRepository.existsByRoomIdAndStatusIn(roomId, activeStatuses)) {
-            throw new IllegalStateException("활성 상태의 예약이 있는 회의실은 삭제할 수 없습니다. 회의실 ID: " + roomId);
+            throw new InvalidRequestException(ErrorCode.ROOM_HAS_ACTIVE_RESERVATION);
         }
 
         // 활성 예약이 없다면, 나머지(취소된/완료된) 예약은 모두 삭제 (Cascade Delete)
@@ -381,7 +383,7 @@ public class RoomService {
                 .findAllById(java.util.Objects.requireNonNull(facilityIds, "시설 ID 목록은 필수입니다."));
 
         if (facilities.size() != facilityIds.size()) {
-            throw new EntityNotFoundException("일부 시설을 찾을 수 없습니다.");
+            throw new com.modu.office.exception.ResourceNotFoundException(ErrorCode.FACILITY_NOT_FOUND);
         }
 
         List<RoomFacility> roomFacilities = facilities.stream()
@@ -434,10 +436,10 @@ public class RoomService {
     private void validateManagerAccess(AppUser currentUser, Office office) {
         if (currentUser.getRole() == UserRole.MANAGER) {
             if (!office.getManager().getId().equals(currentUser.getId())) {
-                throw new AccessDeniedException("담당 지점의 회의실이 아닙니다.");
+                throw new InvalidRequestException(ErrorCode.FORBIDDEN);
             }
         } else if (currentUser.getRole() != UserRole.ADMIN) {
-            throw new AccessDeniedException("접근 권한이 없습니다.");
+            throw new InvalidRequestException(ErrorCode.FORBIDDEN);
         }
     }
 
@@ -504,7 +506,7 @@ public class RoomService {
 
         boolean removed = room.getRoomImages().removeIf(img -> img.getId() != null && img.getId().equals(imageId));
         if (!removed) {
-            throw new EntityNotFoundException("해당 회의실 이미지를 찾을 수 없습니다. ID: " + imageId);
+            throw new com.modu.office.exception.ResourceNotFoundException(ErrorCode.ROOM_IMAGE_NOT_FOUND);
         }
     }
 }

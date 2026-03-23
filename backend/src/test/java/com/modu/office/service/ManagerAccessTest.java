@@ -164,8 +164,7 @@ class ManagerAccessTest {
 
                 // When & Then
                 assertThatThrownBy(() -> officeService.updateOffice(office2.getId(), request, manager1))
-                                .isInstanceOf(AccessDeniedException.class)
-                                .hasMessage("담당 지점이 아닙니다.");
+                                .isInstanceOf(com.modu.office.exception.InvalidRequestException.class);
         }
 
         @Test
@@ -211,8 +210,7 @@ class ManagerAccessTest {
 
                 // When & Then
                 assertThatThrownBy(() -> officeService.deleteOffice(office2.getId(), manager1))
-                                .isInstanceOf(AccessDeniedException.class)
-                                .hasMessage("담당 지점이 아닙니다.");
+                                .isInstanceOf(com.modu.office.exception.InvalidRequestException.class);
         }
 
         @Test
