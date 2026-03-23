@@ -1,6 +1,8 @@
 package com.modu.office.service.validator.rule;
 
 import com.modu.office.entity.Office;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
 import com.modu.office.service.validator.ReservationRule;
 import com.modu.office.service.validator.ReservationValidationContext;
 import org.springframework.core.annotation.Order;
@@ -39,7 +41,8 @@ public class OpenDaysRule implements ReservationRule {
         }
 
         if (!isOpen) {
-            throw new IllegalArgumentException(String.format("해당 요일(%s)은 지점의 휴무일입니다.", startAt.getDayOfWeek()));
+            throw new InvalidRequestException(ErrorCode.INVALID_REQUEST,
+                    String.format("해당 요일(%s)은 지점의 휴무일입니다.", startAt.getDayOfWeek()));
         }
     }
 }

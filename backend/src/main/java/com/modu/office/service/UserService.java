@@ -7,6 +7,9 @@ import com.modu.office.dto.response.UserProfileResponse;
 import com.modu.office.entity.Account;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.enums.LoginType;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
+import com.modu.office.exception.InvalidValueException;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.RefreshTokenRepository;
 import com.modu.office.repository.RoomFavoriteRepository;
@@ -63,11 +66,11 @@ public class UserService {
         Account account = appUser.getAccount();
 
         if (account.getLoginType() != LoginType.LOCAL) {
-            throw new IllegalArgumentException("소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다.");
+            throw new InvalidRequestException(ErrorCode.PASSWORD_CHANGE_NOT_ALLOWED);
         }
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPasswordHash())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            throw new InvalidRequestException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         account.changePassword(passwordEncoder.encode(request.getNewPassword()));
@@ -88,10 +91,10 @@ public class UserService {
         // LOCAL 로그인 사용자는 비밀번호 확인 필요
         if (account.getLoginType() == LoginType.LOCAL) {
             if (request.getPassword() == null || request.getPassword().isBlank()) {
-                throw new IllegalArgumentException("비밀번호를 입력해주세요.");
+                throw new InvalidValueException(ErrorCode.INVALID_INPUT_VALUE);
             }
             if (!passwordEncoder.matches(request.getPassword(), account.getPasswordHash())) {
-                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                throw new InvalidRequestException(ErrorCode.PASSWORD_MISMATCH);
             }
         }
 

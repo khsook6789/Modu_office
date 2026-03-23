@@ -10,6 +10,7 @@ import com.modu.office.entity.Reservation;
 import com.modu.office.entity.enums.LoginType;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.exception.InvalidRequestException;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.OfficeRepository;
 import com.modu.office.repository.ReservationRepository;
@@ -209,9 +210,7 @@ class BusinessHoursValidationTest {
 
                 // When & Then
                 assertThatThrownBy(() -> reservationService.createReservation(request))
-                                .isInstanceOf(IllegalArgumentException.class)
-                                .hasMessageContaining("영업시간")
-                                .hasMessageContaining("외 예약은 불가능합니다");
+                                .isInstanceOf(InvalidRequestException.class);
         }
 
         @Test
@@ -237,9 +236,7 @@ class BusinessHoursValidationTest {
 
                 // When & Then
                 assertThatThrownBy(() -> reservationService.createReservation(request))
-                                .isInstanceOf(IllegalArgumentException.class)
-                                .hasMessageContaining("영업시간")
-                                .hasMessageContaining("외 예약은 불가능합니다");
+                                .isInstanceOf(InvalidRequestException.class);
         }
 
         @Test
@@ -261,9 +258,7 @@ class BusinessHoursValidationTest {
                 // Then
                 assertThatThrownBy(() -> reservationService.updateReservation(
                                 1L, updateRequest, user))
-                                .isInstanceOf(IllegalArgumentException.class)
-                                .hasMessageContaining("영업시간")
-                                .hasMessageContaining("외 예약은 불가능합니다");
+                                .isInstanceOf(InvalidRequestException.class);
         }
 
         @Test

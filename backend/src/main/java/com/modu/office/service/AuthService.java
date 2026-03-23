@@ -11,6 +11,8 @@ import com.modu.office.entity.AppUser;
 import com.modu.office.entity.RefreshToken;
 import com.modu.office.entity.enums.ManagerApprovalStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
 import com.modu.office.repository.AccountRepository;
 import com.modu.office.repository.AppUserRepository;
 import com.modu.office.repository.RefreshTokenRepository;
@@ -85,7 +87,7 @@ public class AuthService {
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
                 if (appUser.getRole() != UserRole.USER) {
-                        throw new IllegalArgumentException("Not authorized as User");
+                        throw new InvalidRequestException(ErrorCode.FORBIDDEN);
                 }
 
                 return createTokenResponse(authentication, account);
@@ -103,11 +105,11 @@ public class AuthService {
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
                 if (appUser.getRole() != UserRole.MANAGER) {
-                        throw new IllegalArgumentException("Not authorized as Manager");
+                        throw new InvalidRequestException(ErrorCode.FORBIDDEN);
                 }
 
                 if (appUser.getApprovalStatus() != ManagerApprovalStatus.APPROVED) {
-                        throw new IllegalArgumentException("관리자 승인 대기 중입니다. 승인 후 로그인할 수 있습니다.");
+                        throw new InvalidRequestException(ErrorCode.MANAGER_PENDING_APPROVAL);
                 }
 
                 return createTokenResponse(authentication, account);
@@ -125,7 +127,7 @@ public class AuthService {
                                 .orElseThrow(() -> new IllegalArgumentException("User profile not found"));
 
                 if (appUser.getRole() != UserRole.ADMIN) {
-                        throw new IllegalArgumentException("Not authorized as Admin");
+                        throw new InvalidRequestException(ErrorCode.FORBIDDEN);
                 }
 
                 return createTokenResponse(authentication, account);
@@ -139,7 +141,7 @@ public class AuthService {
 
                 if (refreshToken.isExpired()) {
                         refreshTokenRepository.delete(refreshToken);
-                        throw new IllegalArgumentException("Refresh token expired");
+                        throw new InvalidRequestException(ErrorCode.TOKEN_EXPIRED);
                 }
 
                 Account account = refreshToken.getAccount();
@@ -198,7 +200,7 @@ public class AuthService {
 
         private void validateEmail(String email) {
                 if (accountRepository.existsByEmail(email)) {
-                        throw new IllegalArgumentException("Email already in use");
+                        throw new InvalidRequestException(ErrorCode.EMAIL_ALREADY_IN_USE);
                 }
         }
 

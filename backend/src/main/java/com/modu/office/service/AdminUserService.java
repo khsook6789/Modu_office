@@ -5,6 +5,8 @@ import com.modu.office.entity.Account;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.enums.AccountStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.exception.ErrorCode;
+import com.modu.office.exception.InvalidRequestException;
 import com.modu.office.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -75,24 +77,24 @@ public class AdminUserService {
 
     private void validateSuspendable(AppUser targetUser, AppUser currentAdmin) {
         if (targetUser.getId().equals(currentAdmin.getId())) {
-            throw new IllegalArgumentException("자기 자신의 계정은 정지할 수 없습니다.");
+            throw new InvalidRequestException(ErrorCode.ACCOUNT_SUSPEND_SELF_FORBIDDEN);
         }
         if (targetUser.getRole() == UserRole.ADMIN) {
-            throw new IllegalArgumentException("ADMIN 계정은 정지할 수 없습니다.");
+            throw new InvalidRequestException(ErrorCode.ACCOUNT_SUSPEND_ADMIN_FORBIDDEN);
         }
         Account account = targetUser.getAccount();
         if (account.getStatus() == AccountStatus.SUSPENDED) {
-            throw new IllegalArgumentException("이미 정지된 계정입니다.");
+            throw new InvalidRequestException(ErrorCode.ACCOUNT_ALREADY_SUSPENDED);
         }
         if (account.getStatus() == AccountStatus.DELETED) {
-            throw new IllegalArgumentException("삭제된 계정은 정지할 수 없습니다.");
+            throw new InvalidRequestException(ErrorCode.ACCOUNT_DELETED_SUSPEND_FORBIDDEN);
         }
     }
 
     private void validateReactivatable(AppUser targetUser) {
         Account account = targetUser.getAccount();
         if (account.getStatus() != AccountStatus.SUSPENDED) {
-            throw new IllegalArgumentException("정지 상태인 계정만 해제할 수 있습니다. 현재 상태: " + account.getStatus());
+            throw new InvalidRequestException(ErrorCode.ACCOUNT_NOT_SUSPENDED);
         }
     }
 }
