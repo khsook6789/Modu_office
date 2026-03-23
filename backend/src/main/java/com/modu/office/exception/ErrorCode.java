@@ -47,7 +47,49 @@ public enum ErrorCode {
     INVALID_REQUEST(400, "E007", "잘못된 요청입니다"),
 
     // 비즈니스 로직 에러 - 예약 시간 단위
-    INVALID_TIME_UNIT(400, "R005", "예약 시간 단위가 올바르지 않습니다");
+    INVALID_TIME_UNIT(400, "R005", "예약 시간 단위가 올바르지 않습니다"),
+
+    // 예약 도메인 추가 (R006~R009)
+    RESERVATION_ALREADY_CANCELLED(400, "R006", "이미 취소된 예약입니다"),
+    RESERVATION_CANCEL_WINDOW_EXPIRED(400, "R007", "환불 정보 조회 후 너무 많은 시간이 경과했습니다. 취소 전 다시 확인해주세요"),
+    RESERVATION_OVERNIGHT_NOT_ALLOWED(400, "R008", "자정을 넘기는 예약은 불가능합니다"),
+    RESERVATION_PAST_START_TIME(400, "R009", "시작 시간은 현재 시간 이후여야 합니다"),
+
+    // 오피스/회의실 도메인 추가 (O003~O008)
+    OFFICE_HAS_ACTIVE_RESERVATION(409, "O003", "활성 상태의 예약이 있는 지점은 삭제할 수 없습니다"),
+    ROOM_HAS_ACTIVE_RESERVATION(409, "O004", "활성 상태의 예약이 있는 회의실은 삭제할 수 없습니다"),
+    ROOM_IMAGE_NOT_FOUND(404, "O005", "회의실 이미지를 찾을 수 없습니다"),
+    ROOM_FAVORITE_NOT_FOUND(404, "O006", "즐겨찾기를 찾을 수 없습니다"),
+    ROOM_FAVORITE_ALREADY_EXISTS(409, "O007", "이미 즐겨찾기에 추가된 회의실입니다"),
+    OFFICE_NOT_FOUND(404, "O008", "지점을 찾을 수 없습니다"),
+
+    // 결제 도메인 신규 (P001~P003)
+    PAYMENT_ALREADY_APPROVED(409, "P001", "이미 승인된 결제입니다"),
+    PAYMENT_APPROVAL_FAILED(502, "P002", "결제 승인 중 오류가 발생했습니다"),
+    PAYMENT_CANCEL_FAILED(502, "P003", "결제 취소 중 오류가 발생했습니다"),
+
+    // 후기 도메인 신규 (RV001~RV004)
+    REVIEW_FORBIDDEN(403, "RV001", "본인의 예약에만 후기를 작성할 수 있습니다"),
+    REVIEW_INVALID_STATUS(400, "RV002", "이용 완료된 예약만 후기를 작성할 수 있습니다"),
+    REVIEW_TIME_NOT_ELAPSED(400, "RV003", "예약 이용 시간이 종료된 후에만 후기를 작성할 수 있습니다"),
+    REVIEW_ALREADY_EXISTS(409, "RV004", "이미 이 예약에 대한 후기가 존재합니다"),
+
+    // 사용자/인증 도메인 추가 (U002~U007)
+    MANAGER_PENDING_APPROVAL(403, "U002", "관리자 승인 대기 중입니다. 승인 후 로그인할 수 있습니다"),
+    OAUTH2_PROVIDER_NOT_SUPPORTED(400, "U003", "지원하지 않는 OAuth2 공급자입니다"),
+    PASSWORD_CHANGE_NOT_ALLOWED(400, "U004", "소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다"),
+    PASSWORD_MISMATCH(400, "U005", "비밀번호가 일치하지 않습니다"),
+    TOKEN_EXPIRED(401, "U006", "토큰이 만료되었습니다"),
+    EMAIL_ALREADY_IN_USE(409, "U007", "이미 사용 중인 이메일입니다"),
+
+    // 관리자 도메인 신규 (A001~A007)
+    MANAGER_APPROVAL_INVALID_ROLE(400, "A001", "Manager 역할의 사용자만 승인할 수 있습니다"),
+    MANAGER_APPROVAL_INVALID_STATUS(400, "A002", "승인 대기 상태인 Manager만 승인할 수 있습니다"),
+    ACCOUNT_SUSPEND_SELF_FORBIDDEN(403, "A003", "자기 자신의 계정은 정지할 수 없습니다"),
+    ACCOUNT_SUSPEND_ADMIN_FORBIDDEN(403, "A004", "ADMIN 계정은 정지할 수 없습니다"),
+    ACCOUNT_ALREADY_SUSPENDED(409, "A005", "이미 정지된 계정입니다"),
+    ACCOUNT_DELETED_SUSPEND_FORBIDDEN(400, "A006", "삭제된 계정은 정지할 수 없습니다"),
+    ACCOUNT_NOT_SUSPENDED(400, "A007", "정지 상태인 계정만 해제할 수 있습니다");
 
     private final int status;
     private final String code;
