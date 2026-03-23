@@ -1,5 +1,6 @@
 package com.modu.office.common;
 
+import com.modu.office.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,6 +53,19 @@ public class ApiResponse<T> {
                 .code("500")
                 .message(message)
                 .data(null)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(ErrorCode errorCode) {
+        return error(errorCode.getCode(), errorCode.getMessage());
+    }
+
+    public static <T> ApiResponse<T> created(String message, T data) {
+        return ApiResponse.<T>builder()
+                .status("SUCCESS")
+                .code("201")
+                .message(message)
+                .data(data)
                 .build();
     }
 
