@@ -1,17 +1,51 @@
 # 모두의 오피스 (Modu_office)
 
-**Modu_office**는 기업 내 회의실과 공용 공간을 예약·관리할 수 있는 **자원 관리 플랫폼**입니다.
-이중 예약 방지, 실시간 알림, 결제 연동까지 갖춘 풀스택 예약 시스템입니다.
+**Modu_office**는 회의실과 공용 공간을 예약하고 관리하는 **웹 기반 예약 및 운영 관리 시스템**입니다.
+동시성 제어, 실시간 알림, 결제 연동, 운영 대시보드를 갖춘 완전한 예약 서비스입니다.
 
 ---
 
-## 핵심 목표 (Core Objectives)
+<!-- 📸 스크린샷/데모 자리 — 추후 추가 예정 -->
 
-- **서비스 안정성 (Stability)**: `@Version` 기반 낙관적 락(Optimistic Locking)으로 동시 예약 요청 간 데이터 충돌 없이 중복 예약을 차단합니다.
-- **성능 최적화 (Performance)**: JPA `@EntityGraph`와 Fetch Join으로 N+1 문제를 해소하고, Caffeine 캐시로 빈번한 조회 응답 속도를 개선했습니다.
-- **실시간 응답성 (Responsiveness)**: SSE(Server-Sent Events)를 통해 예약 현황 변화와 알림을 새로고침 없이 즉시 전달합니다.
-- **데이터 신뢰성 (Reliability)**: PostgreSQL JSONB를 활용해 예약 변경 이력의 Before/After 스냅샷을 감사 로그로 기록합니다.
-- **역할 기반 접근 제어 (RBAC)**: 계정(Account)과 프로필(AppUser)을 분리하고, USER / MANAGER / ADMIN 세 역할로 기능 접근을 제어합니다.
+---
+
+## 주요 기능 (Features)
+
+### 고객 사용자
+
+- **회의실 검색 및 예약**: QueryDSL 기반 다중 조건 필터링(위치, 인원, 제공 항목, 가격)과 Google Maps API 연동 반경 검색으로 회의실을 탐색하고 예약합니다.
+- **유사 회의실 추천**: 거리(Haversine), 시설 유사도, 과거 예약 통계를 결합한 가중치 기반 대안 회의실을 추천합니다.
+- **실시간 예약 현황**: SSE(Server-Sent Events)로 다른 사용자의 예약/취소를 새로고침 없이 즉시 반영합니다.
+- **결제 및 환불**: 토스페이먼츠 결제 위젯 연동과 지점별 취소 정책에 따른 차등 환불을 제공합니다.
+- **Naver OAuth 로그인**: 네이버 소셜 로그인을 통한 간편 회원가입 및 인증을 지원합니다.
+- **후기 및 즐겨찾기**: 이용 완료된 예약에 대한 후기 작성과 회의실 즐겨찾기 기능을 제공합니다.
+
+### 운영자 (Manager)
+
+- **공간 관리**: 담당 지점의 회의실 정보, 가격, 장비, 이미지를 관리합니다.
+- **예약 Buffer Time 설정**: 회의실별 정비 시간을 설정하여 예약 간 자동으로 여유 시간을 확보합니다.
+- **운영 대시보드**: 점유율, 취소율, 인기 회의실, 피크타임 등 통계를 조회합니다.
+- **시설 신고 관리**: 고객의 시설 고장 신고를 접수하고 처리 상태를 추적합니다.
+
+### 관리자 (Admin)
+
+- **사용자 관리**: 회원 조회, 운영자 승인, 계정 정지/복구를 처리합니다.
+- **감사 로그**: PostgreSQL JSONB 기반 Before/After 스냅샷으로 예약 변경 이력을 추적합니다.
+- **예약 강제 취소**: 사유 기록과 함께 관리자 권한으로 예약을 강제 취소합니다.
+
+---
+
+## 기술 하이라이트
+
+| 해결한 문제                  | 적용 기술                                                  |
+| ---------------------------- | ---------------------------------------------------------- |
+| 동시 예약 요청 시 중복 발생  | JPA `@Version` 낙관적 락 + DB 레벨 이중 검증               |
+| 예약 현황의 실시간 동기화    | SSE 기반 이벤트 스트리밍 (WebSocket에서 전환)              |
+| 예약 검증 규칙의 산발적 분산 | 전략 패턴(Strategy Pattern) 기반 규칙 엔진                 |
+| API 문서의 신뢰성과 편의성   | Spring REST Docs(테스트 검증) + Swagger UI(탐색) 이중 구조 |
+| 예약 변경 이력 추적          | PostgreSQL JSONB Before/After 스냅샷 감사 로그             |
+| 역할별 기능 접근 제어        | Spring Security RBAC (USER / MANAGER / ADMIN)              |
+| 연관 엔티티 조회 시 N+1 쿼리 | EntityGraph + Fetch Join + @BatchSize 선택적 적용          |
 
 ---
 
@@ -19,38 +53,36 @@
 
 ### Backend
 
-| category          | Technology                    | Description                                                                           |
-| :---------------- | :---------------------------- | :------------------------------------------------------------------------------------ |
-| **Framework**     | Spring Boot 3.5.10            | RESTful API 및 비즈니스 로직 핵심 프레임워크                                          |
-| **Language**      | Java 21                       | 현대적 자바 기능 기반의 안정적인 백엔드 코드                                          |
-| **Persistence**   | Spring Data JPA               | 객체 지향적 데이터 접근 및 관계 매핑 관리                                             |
-| **Database**      | PostgreSQL 15                 | 고성능 동시성 제어 및 JSONB 타입을 통한 로그 적재                                     |
-| **Security**      | Spring Security + JWT         | 무상태(Stateless) 기반의 보안 인증 및 권한 관리                                       |
-| **Real-time**     | Server-Sent Events (SSE)      | 예약 현황 및 실시간 알림의 단방향 스트리밍 구현                                       |
-| **Validation**    | Jakarta Validation            | DTO 입력값 검증 및 데이터 무결성 보장                                                 |
-| **Testing**       | JUnit 5                       | 단위/통합 테스트를 통한 코드 신뢰성 확보                                              |
-| **Logging**       | SLF4J                         | 시스템 동작 추적 및 디버깅을 위한 로깅                                                |
-| **Cache**         | Caffeine                      | 로컬 인메모리 캐시를 통한 빈번한 조회 성능 최적화                                     |
-| **Query**         | QueryDSL                      | 복잡한 동적 조건 검색을 타입 안전하게 처리                                            |
-| **Migration**     | Flyway                        | DB 스키마 버전 관리 및 마이그레이션 자동화                                            |
-| **Infra**         | Docker / Docker Compose       | 백엔드·DB·프론트엔드 컨테이너 통합 개발 환경 구성                                     |
-| **DevOps**        | Spring Boot DevTools          | 핫 리로드 등 개발 생산성 향상 도구                                                    |
-| **External API**  | Google Maps API               | 지점 위치 정보 및 거리 기반 검색 서비스 제공                                          |
-|                   | Toss Payments                 | 결제 위젯 및 API 연동을 통한 온라인 안전 결제 처리                                    |
-| **Auxiliary**     | Lombok                        | 보일러플레이트 코드 제거를 통한 생산성 향상                                           |
-| **Build Tool**    | Gradle                        | 프로젝트 빌드 및 의존성 라이프사이클 관리                                             |
-| **Documentation** | Spring REST Docs + Swagger UI | 테스트 기반으로 검증된 API 명세를 OpenAPI 3.0 YAML로 자동 생성 후 Swagger UI로 렌더링 |
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.5-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
+![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=flat-square&logo=spring&logoColor=white)
+![Spring REST Docs](https://img.shields.io/badge/REST_Docs-6DB33F?style=flat-square&logo=spring&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL_15-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![QueryDSL](https://img.shields.io/badge/QueryDSL-4285F4?style=flat-square&logoColor=white)
+![Caffeine](https://img.shields.io/badge/Caffeine_Cache-FF6B6B?style=flat-square&logoColor=white)
+![Flyway](https://img.shields.io/badge/Flyway-CC0000?style=flat-square&logo=flyway&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
+![SSE](https://img.shields.io/badge/SSE-FF6600?style=flat-square&logoColor=white)
+![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=flat-square&logo=junit5&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger_UI-85EA2D?style=flat-square&logo=swagger&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A?style=flat-square&logo=gradle&logoColor=white)
 
 ### Frontend
 
-| category          | Technology     | Description                                     |
-| :---------------- | :------------- | :---------------------------------------------- |
-| **Framework**     | React 19       | 컴포넌트 기반의 직관적인 사용자 인터페이스 구현 |
-| **Environment**   | Vite 7         | 현대적이고 빠른 빌드/HMR 환경 제공              |
-| **Language**      | TypeScript     | 엄격한 타입 체크를 통한 코드 안정성 향상        |
-| **Styling**       | Vanilla CSS    | 프로젝트 고유의 스타일 테마 및 일관된 UI 구성   |
-| **Routing**       | React Router 7 | 싱글 페이지 애플리케이션(SPA) 내비게이션 관리   |
-| **Communication** | Axios          | 백엔드 API와의 효율적인 비동기 통신             |
+![React](https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite_7-646CFF?style=flat-square&logo=vite&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router_7-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white)
+![Vanilla CSS](https://img.shields.io/badge/Vanilla_CSS-1572B6?style=flat-square&logo=css3&logoColor=white)
+
+### External API
+
+![Google Maps API](https://img.shields.io/badge/Google_Maps-4285F4?style=flat-square&logo=googlemaps&logoColor=white)
+![Toss Payments](https://img.shields.io/badge/Toss_Payments-0066FF?style=flat-square&logoColor=white)
+![Naver OAuth](https://img.shields.io/badge/Naver_OAuth-03C75A?style=flat-square&logo=naver&logoColor=white)
 
 ---
 
@@ -58,11 +90,11 @@
 
 ### 1. 환경변수 준비
 
-| 파일 | 용도 | 참고 |
-| :--- | :--- | :--- |
-| `.env` | Docker DB 컨테이너 | `.env.example` 참고 |
-| `backend/src/main/resources/application-local.yml` | 백엔드 실행 | `application-local.example.yml` 참고 |
-| `frontend/.env` | 프론트엔드 지도 API | `VITE_GOOGLE_MAPS_API_KEY` 입력 |
+| 파일                                               | 용도                | 참고                                 |
+| :------------------------------------------------- | :------------------ | :----------------------------------- |
+| `.env`                                             | Docker DB 컨테이너  | `.env.example` 참고                  |
+| `backend/src/main/resources/application-local.yml` | 백엔드 실행         | `application-local.example.yml` 참고 |
+| `frontend/.env`                                    | 프론트엔드 지도 API | `VITE_GOOGLE_MAPS_API_KEY` 입력      |
 
 ### 2. DB 실행 (Docker)
 
@@ -131,197 +163,180 @@ frontend/
 
 ---
 
-## 주요 기능 (Major Features)
+## 데이터베이스 스키마 (Database Schema)
 
-### 자원 관리 (Resource Management)
+### ERD
 
-- **계층 구조 자원 관리**: 지점(Office)과 하위 공간(Room)의 1:N 관계로 기업 내 공간을 체계적으로 구성합니다.
-- **복합 조건 필터링**: 수용 인원, 층수, 카테고리, 편의시설 등 다양한 조건으로 공간을 검색할 수 있습니다.
-- **위치 기반 탐색**: Google Maps API와 연동된 위경도 기반 반경 검색으로 가까운 지점을 찾을 수 있습니다.
+```mermaid
+erDiagram
+    ACCOUNT ||--|| APPUSER : has
+    ACCOUNT ||--o{ REFRESHTOKEN : generates
+    APPUSER ||--o{ OFFICE : manages
+    APPUSER ||--o{ RESERVATION : creates
+    APPUSER ||--o{ REVIEW : writes
+    APPUSER ||--o{ ROOMFAVORITE : saves
+    APPUSER ||--o{ UPDATELOG : records
 
-### 예약 엔진 (Reservation Engine)
+    OFFICE ||--o{ ROOM : contains
+    OFFICE ||--o{ CANCELLATIONPOLICY : defines
 
-- **동시성 제어**: JPA `@Version` 기반 낙관적 락으로 동시 예약 요청 중 하나만 수용하고, 나머지는 `OptimisticLockingFailureException`으로 처리합니다.
-- **시간대 중복 방지**: DB 제약 조건과 서비스 레이어 이중 검증으로 동일 시간대 중복 예약을 차단합니다.
-- **실시간 상태 전파**: SSE로 타 사용자의 예약/취소를 새로고침 없이 즉시 반영합니다.
-- **예약 시간 정책**: 30분 단위(00분, 30분)만 허용하며, 자정을 넘기는 예약은 차단됩니다.
-- **IDOR 방어**: 예약 조회·수정·취소 시 인증된 사용자와 예약 소유자 일치 여부를 검증합니다.
+    ROOM ||--o{ ROOMIMAGE : has
+    ROOM ||--o{ ROOMFACILITY : includes
+    ROOM ||--o{ RESERVATION : available_for
 
-### 권한 및 보안 체계 (RBAC)
+    FACILITY ||--o{ ROOMFACILITY : belongs_to
+    FACILITY ||--o{ FACILITYREPORT : reported_for
 
-- **계정·프로필 분리**: 인증 계정(Account)과 사용자 프로필(AppUser)을 별도 엔티티로 분리하여 OAuth2 연동과 역할 관리를 유연하게 처리합니다.
-- **3단계 역할 제어**:
-  - **USER**: 본인 예약 생성·조회·취소
-  - **MANAGER**: 담당 지점의 공간 관리, 예약 현황 조회, 점유율 통계
-  - **ADMIN**: 전체 사용자 관리, 감사 로그 조회, Manager 승인, 강제 취소
+    RESERVATION ||--o{ PAYMENT : related_to
+    RESERVATION ||--o{ REVIEW : has
+    RESERVATION ||--o{ FACILITYREPORT : triggers
+    RESERVATION ||--o{ UPDATELOG : changes_tracked
 
-### 감사 로그 및 대시보드 (Audit & Dashboard)
+    APPUSER ||--o{ NOTIFICATION : receives
 
-- **감사 로그**: PostgreSQL JSONB로 예약 변경의 Before/After 스냅샷을 기록하여 변경 이력을 추적합니다.
-- **운영 대시보드**: 점유율, 취소율, 인기 회의실, 피크타임 등 통계를 관리자 대시보드에서 조회할 수 있습니다.
+    ACCOUNT {
+        bigint id PK
+        string email UK
+        string password_hash
+        string login_type "LOCAL, NAVER"
+        string oauth_id
+        string status "ACTIVE, SUSPENDED, DELETED"
+    }
+
+    APPUSER {
+        bigint id PK
+        bigint account_id FK
+        string name
+        string role "USER, MANAGER, ADMIN"
+        string approval_status "PENDING, APPROVED"
+    }
+
+    OFFICE {
+        bigint id PK
+        bigint manager_id FK
+        string name
+        string location
+        double latitude
+        double longitude
+        time open_time
+        time close_time
+    }
+
+    ROOM {
+        bigint id PK
+        bigint office_id FK
+        string name
+        string room_code
+        int floor
+        int capacity
+        string category
+        decimal price
+        int buffer_time
+        string status "AVAILABLE, INACTIVE"
+        long version
+    }
+
+    ROOMIMAGE {
+        bigint id PK
+        bigint room_id FK
+        string image_url
+        int display_order
+    }
+
+    FACILITY {
+        bigint id PK
+        string facility_code UK
+        string facility_name
+        boolean is_active
+    }
+
+    ROOMFACILITY {
+        bigint room_id FK
+        bigint facility_id FK
+    }
+
+    RESERVATION {
+        bigint id PK
+        string title
+        bigint office_id FK
+        bigint room_id FK
+        bigint user_id FK
+        timestamp start_at
+        timestamp end_at
+        timestamp end_at_include_buffer_time
+        string status "PENDING_PAYMENT, PENDING_APPROVAL, CONFIRMED, CANCELED"
+        long version
+    }
+
+    REVIEW {
+        bigint id PK
+        bigint reservation_id FK UK
+        bigint author_user_id FK
+        int rating
+        text content
+    }
+
+    FACILITYREPORT {
+        bigint id PK
+        bigint reservation_id FK
+        bigint room_id FK
+        bigint facility_id FK
+        string issue_type "BROKEN, MALFUNCTION, NEEDS_SUPPLIES, DIRTY, MISSING, OTHER"
+        string status "REPORTED, IN_PROGRESS, RESOLVED, CANCELED"
+    }
+
+    UPDATELOG {
+        bigint id PK
+        bigint reservation_id FK
+        bigint actor_user_id FK
+        string action "CREATE, UPDATE, CANCEL"
+        jsonb before_data
+        jsonb after_data
+    }
+
+    NOTIFICATION {
+        bigint id PK
+        bigint user_id FK
+        text content
+        boolean is_read
+    }
+
+    CANCELLATIONPOLICY {
+        bigint id PK
+        bigint office_id FK
+        int days_before
+        int refund_rate
+    }
+
+    PAYMENT {
+        bigint id PK
+        bigint reservation_id FK UK
+        string order_id
+        string payment_key
+        decimal amount
+        string status "READY, APPROVED, CANCELED, FAILED"
+    }
+
+    ROOMFAVORITE {
+        bigint id PK
+        bigint user_id FK
+        bigint room_id FK
+    }
+
+    REFRESHTOKEN {
+        bigint id PK
+        string token UK
+        bigint account_id FK UK
+        timestamp expiry_date
+    }
+```
 
 ---
 
-## 데이터베이스 스키마 (Database Schema)
+## 팀원 (Team)
 
-## ERD
-
-<img width="2755" height="1290" alt="Image" src="https://github.com/user-attachments/assets/f5b08439-8d44-4f0b-b07b-cd86975b4ad2" />
-
-### 1. Account (계정)
-
-- **id**: PK, Auto Increment
-- **email**: 사용자 이메일 (Unique)
-- **password_hash**: 암호화된 비밀번호(LOCAL 로그인 시 사용, OAuth면 NULL 가능)
-- **login_type**: 로그인 타입 (LOCAL, NAVER 등)
-- **oauth_id**: OAuth 제공자 사용자 식별자 (NAVER user id )
-- **status**: 계정 상태 (ACTIVE, SUSPENDED, DELETED)
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 2. AppUser (사용자 프로필)
-
-- **id**: PK, Auto Increment
-- **account_id**: Account 테이블 FK (1:1 관계)
-- **name**: 사용자 이름
-- **role**: 사용자 권한 (USER, MANAGER, ADMIN)
-- **approval_status**: 운영자 승인 상태 (PENDING, APPROVED)
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 3. Office (지점)
-
-- **id**: PK, Auto Increment
-- **manager_id**: 지점 소유자(운영자) AppUser FK
-- **name**: 지점명
-- **location**: 지점 위치 (주소)
-- **latitude / longitude**: 위도 / 경도
-- **open_time / close_time**: 영업 시간
-- **open_days**: 영업 요일 배열 (1=월요일, 7=일요일)
-- **description**: 지점 상세 설명 (TEXT)
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 4. Room (공간)
-
-- **id**: PK, Auto Increment
-- **office_id**: 소속 지점 ID (FK)
-- **name**: 공간 이름
-- **room_code**: 공간 호수 (ex: 305호)
-- **description**: 공간 상세 설명 (TEXT)
-- **banner_image_url**: 메인 배너 이미지 URL
-- **floor**: 층수
-- **capacity**: 수용 인원
-- **category**: 공간 카테고리
-- **price**: 시간당 가격
-- **buffer_time**: 정비 시간 (분 단위)
-- **status**: 공간 상태 (AVAILABLE, INACTIVE)
-- **version**: 낙관적 락(Optimistic Lock) 버전 관리
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 5. RoomImage (공간 이미지)
-
-- **id**: PK, Auto Increment
-- **room_id**: Room FK
-- **image_url**: 이미지 경로
-- **display_order**: 노출 순서
-- **created_at**: 등록 시각
-
-### 6. Facility (설비)
-
-- **id**: PK, Auto Increment
-- **facility_code**: 시설 고유 코드 (Unique)
-- **facility_name**: 사용자에게 표시될 시설명
-- **is_active**: 활성 여부
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 7. Room_Facility (공간-설비 매핑)
-
-- **room_id**: Room FK
-- **facility_id**: Facility FK
-- **created_at**: 매핑 등록 시각
-
-### 8. Reservation (예약)
-
-- **id**: PK, Auto Increment
-- **title**: 예약 제목
-- **office_id**: 지점 ID (FK)
-- **room_id**: 공간 ID (FK)
-- **user_id**: 예약자(사용자) ID (FK)
-- **start_at**: 시작 시간
-- **end_at**: 종료 시간
-- **end_at_include_buffer_time**: 정비 시간을 포함한 종료 시간
-- **status**: 예약 상태 (PENDING, CONFIRMED, CANCELED 등)
-- **version**: 낙관적 락 버전 관리
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 9. Review (후기)
-
-- **id**: PK, Auto Increment
-- **reservation_id**: Reservation FK (Unique → 예약 1건당 후기 1개)
-- **author_user_id**: 작성자 AppUser FK
-- **rating**: 평점 (1~5)
-- **content**: 후기 내용
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 10. FacilityReport (시설 신고)
-
-- **id**: PK, Auto Increment
-- **reservation_id**: 예약 ID (FK)
-- **room_id**: 공간 ID (FK)
-- **facility_id**: 설비 ID (FK)
-- **issue_type**: 이슈 유형 Enum — `BROKEN`(고장), `MALFUNCTION`(오작동), `NEEDS_SUPPLIES`(소모품 부족), `DIRTY`(청결불량), `MISSING`(비품 없음), `OTHER`(기타)
-- **status**: 처리 상태 — `REPORTED`(접수), `IN_PROGRESS`(처리 중), `RESOLVED`(해결), `CANCELED`(철회)
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 11. UpdateLog (변경 로그)
-
-- **id**: PK, Auto Increment
-- **reservation_id**: 관련 예약 ID (FK)
-- **actor_user_id**: 변경을 수행한 사용자 ID (FK)
-- **action**: 수행된 작업 (CREATE, UPDATE, CANCEL 등)
-- **before_data**: 변경 전 데이터 (JSONB)
-- **after_data**: 변경 후 데이터 (JSONB)
-- **occurred_at**: 발생 시각
-
-### 12. Notification (알림)
-
-- **id**: PK, Auto Increment
-- **user_id**: 알림 수신자 ID (FK)
-- **content**: 알림 메시지 내용
-- **is_read**: 읽음 여부
-- **created_at**: 생성 시각
-
-### 13. CancellationPolicy (취소 정책)
-
-- **id**: PK, Auto Increment
-- **office_id**: 지점 ID (FK)
-- **days_before**: 취소 기준일
-- **refund_rate**: 환불 비율 (0~100)
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 14. RefreshToken ( JWT 토큰)
-
-- **id**: PK, Auto Increment
-- **token**: RefreshToken (Unique)
-- **account_id**: Account FK (Unique → 계정당 Refresh Token 1개 보장)
-- **expiry_date**: 만료 시각
-- **created_at**: 생성 시각
-
-### 15. RoomFavorite (즐겨찾기)
-
-- **id**: PK, Auto Increment
-- **user_id**: 사용자 ID (AppUser FK)
-- **room_id**: 공간 ID (Room FK)
-- **created_at / updated_at**: 생성 / 수정 시각
-
-### 16. Payment (결제)
-
-- **id**: PK, Auto Increment
-- **reservation_id**: Reservation FK (Unique → 결제 1건당 예약 1건)
-- **order_id**: 토스페이먼츠 주문 번호 (`rev-{reservation_id}-{random}`)
-- **payment_key**: 토스 결제 승인 후 발급되는 고유 키
-- **amount**: 실제 결제된 금액
-- **status**: 결제 처리 상태 (READY, IN_PROGRESS, DONE, CANCELED, ABORTED 등)
-- **method**: 결제 수단 (카드 등)
-- **approved_at**: 결제 최종 승인 시각
-- **canceled_at**: 결제 취소(환불) 처리 시각
-- **fail_reason**: 결제 또는 취소 실패 시 원인 기록
-- **created_at / updated_at**: 생성 / 수정 시각
+| 역할         | 이름               | 담당 영역       | GitHub                                  |
+| ------------ | ------------------ | --------------- | --------------------------------------- |
+| **Backend**  | 오준서(piker0925)  | 백엔드 개발     | [GitHub](https://github.com/piker0925)  |
+| **Backend**  | 이진환(khsook6789) | 백엔드 개발     | [GitHub](https://github.com/khsook6789) |
+| **Frontend** | 문윤성(mys0423)    | 프론트엔드 개발 | [GitHub](https://github.com/mys0423)    |
