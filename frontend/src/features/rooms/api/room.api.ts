@@ -43,13 +43,6 @@ interface PageResponse<T> {
     number: number;
 }
 
-// Define RoomFilter interface if it's not already defined elsewhere
-// Assuming RoomFilter might look something like this based on the commented code
-interface RoomFilter {
-    capacity?: number;
-    // Add other filter properties as needed
-}
-
 // Helper to map API response to Frontend Room type
 export const mapToRoom = (apiRoom: RoomResponse): Room => ({
     id: apiRoom.id.toString(),
@@ -67,26 +60,22 @@ export const mapToRoom = (apiRoom: RoomResponse): Room => ({
     bufferTime: apiRoom.bufferTime
 });
 
-export const roomApi = {
-    getAllRooms: async (filter?: RoomFilter): Promise<Room[]> => { 
-        const params = new URLSearchParams();
-        
-        if (filter?.capacity) params.append('capacity', filter.capacity.toString());
+export interface RoomSearchParams {
+    keyword?: string;
+    minCapacity?: number;
+    facilityNames?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    size?: number;
+}
 
-        // Use real backend search endpoint
-        // Backend default page size might be 20. We use 100 to get "all".
-        // 응답 구조: axios response.data = { status, message, data: { content: [...] } }
+export const roomApi = {
+    getAllRooms: async (): Promise<Room[]> => {
         try {
             const response = await client.get<ApiResponse<PageResponse<RoomResponse>>>('/rooms/search?size=100');
-            
-            // ApiResponse wrapper: response.data.data.content
-            const pageData = (response.data as any)?.data;
-            if (pageData && pageData.content) {
+            const pageData = response.data;
+            if (pageData && Array.isArray(pageData.content)) {
                 return pageData.content.map(mapToRoom);
-            }
-            // Fallback: 혹시 data가 바로 PageResponse인 경우
-            if (response.data && (response.data as any).content) {
-                return (response.data as any).content.map(mapToRoom);
             }
             return [];
         } catch (error) {
@@ -94,16 +83,49 @@ export const roomApi = {
             return [];
         }
     },
+    searchRooms: async (params: RoomSearchParams): Promise<Room[]> => {
+        try {
+            // facilityNames는 배열이므로 URLSearchParams로 수동 직렬화
+            const query = new URLSearchParams();
+            if (params.keyword) query.append('keyword', params.keyword);
+            if (params.minCapacity) query.append('minCapacity', String(params.minCapacity));
+            if (params.minPrice !== undefined) query.append('minPrice', String(params.minPrice));
+            if (params.maxPrice !== undefined) query.append('maxPrice', String(params.maxPrice));
+            if (params.facilityNames && params.facilityNames.length > 0) {
+                params.facilityNames.forEach(name => query.append('facilityNames', name));
+            }
+            query.append('size', String(params.size ?? 100));
+
+            const response = await client.get<ApiResponse<PageResponse<RoomResponse>>>(`/rooms/search?${query.toString()}`);
+            const pageData = response.data;
+            if (pageData && Array.isArray(pageData.content)) {
+                return pageData.content.map(mapToRoom);
+            }
+            return [];
+        } catch (error) {
+            console.error("Failed to search rooms", error);
+            return [];
+        }
+    },
+    getSimilarRooms: async (roomId: number): Promise<Room[]> => {
+        try {
+            const response = await client.get<ApiResponse<RoomResponse[]>>(`/rooms/${roomId}/similar`);
+            const data = response.data;
+            if (Array.isArray(data)) {
+                return data.map(mapToRoom);
+            }
+            return [];
+        } catch (error) {
+            console.error("Failed to fetch similar rooms", error);
+            return [];
+        }
+    },
     getActiveFacilities: async (): Promise<FacilityResponse[]> => {
         try {
             const response = await client.get<ApiResponse<FacilityResponse[]>>('/facilities');
-            // Depending on interceptor, response might be the data itself or AxiosResponse
-            const resData = response.data as any;
-            if (resData && resData.data) {
-                return resData.data;
-            }
-            if (Array.isArray(resData)) {
-                return resData;
+            const data = response.data;
+            if (Array.isArray(data)) {
+                return data;
             }
             return [];
         } catch (error) {
@@ -117,9 +139,7 @@ export const roomApi = {
     },
     getRoomById: async (roomId: number | string) => {
         const response = await client.get<ApiResponse<RoomResponse>>(`/rooms/${roomId}`);
-        // Return inner data if wrapped in ApiResponse
-        const resData = response.data as any;
-        return resData?.data || resData;
+        return response.data;
     },
     createRoom: async (officeId: number, data: any) => {
         const response = await client.post<ApiResponse<RoomResponse>>(`/offices/${officeId}/rooms`, data);
@@ -133,3 +153,4 @@ export const roomApi = {
         await client.delete<ApiResponse<void>>(`/rooms/${roomId}`);
     }
 };
+
