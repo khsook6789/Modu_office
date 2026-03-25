@@ -263,6 +263,7 @@ class UserControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("내 프로필 조회 - 인증 필요")
                                                                 .description("로그인하지 않은 사용자가 프로필 조회를 시도할 경우 401 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }

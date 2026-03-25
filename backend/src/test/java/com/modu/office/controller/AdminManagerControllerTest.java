@@ -34,7 +34,7 @@ class AdminManagerControllerTest extends ControllerTestSupport {
                                 .name("강감찬")
                                 .email("manager@example.com")
                                 .approvalStatus(ManagerApprovalStatus.PENDING)
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(LocalDateTime.of(2026, 3, 25, 10, 0, 0))
                                 .build();
         }
 
@@ -44,7 +44,7 @@ class AdminManagerControllerTest extends ControllerTestSupport {
                                 .name("강감찬")
                                 .email("manager@example.com")
                                 .approvalStatus(ManagerApprovalStatus.APPROVED)
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(LocalDateTime.of(2026, 3, 25, 10, 0, 0))
                                 .build();
         }
 

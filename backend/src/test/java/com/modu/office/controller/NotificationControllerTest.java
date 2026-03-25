@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
@@ -37,7 +36,7 @@ class NotificationControllerTest extends ControllerTestSupport {
                                 .targetUrl("/reservations/100")
                                 .message(message)
                                 .isRead(isRead)
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(FIXED_DATE_TIME)
                                 .build();
         }
 

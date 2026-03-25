@@ -127,6 +127,7 @@ class PaymentControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("결제 승인 - 인증 필요")
                                                                 .description("로그인하지 않은 사용자가 결제 승인을 요청할 경우 401 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }

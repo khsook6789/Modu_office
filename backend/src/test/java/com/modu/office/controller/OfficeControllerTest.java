@@ -195,6 +195,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("지점 생성 - 유효성 오류")
                                                                 .description("필수 값이 누락되거나 형식에 맞지 않는 경우 400 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -211,6 +212,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("지점 생성 - 인증 필요")
                                                                 .description("로그인하지 않은 사용자가 지점 생성을 시도할 경우 401 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }

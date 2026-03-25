@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +54,7 @@ class RoomFavoriteControllerTest extends ControllerTestSupport {
                 .officeId(100L)
                 .officeName("강남 지점")
                 .officeLocation("서울시 강남구")
-                .createdAt(LocalDateTime.now())
+                .createdAt(FIXED_DATE_TIME)
                 .build();
     }
 

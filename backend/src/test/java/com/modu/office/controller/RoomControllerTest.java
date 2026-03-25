@@ -174,6 +174,7 @@ class RoomControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("공간 생성 - 유효성 오류")
                                                                 .description("필수 값이 누락되거나 형식에 맞지 않는 경우 400 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }

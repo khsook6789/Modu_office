@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
@@ -43,7 +42,7 @@ class FacilityReportControllerTest extends ControllerTestSupport {
                                 .issueTypeName("파손/고장")
                                 .status(ReportStatus.REPORTED)
                                 .statusName("접수완료")
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(FIXED_DATE_TIME)
                                 .build();
         }
 

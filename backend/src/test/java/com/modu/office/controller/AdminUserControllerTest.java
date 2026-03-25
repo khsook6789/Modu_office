@@ -39,7 +39,7 @@ class AdminUserControllerTest extends ControllerTestSupport {
                                 .name("김이름")
                                 .role(UserRole.USER)
                                 .accountStatus(AccountStatus.ACTIVE)
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(LocalDateTime.of(2026, 3, 25, 10, 0, 0))
                                 .build();
         }
 
@@ -50,7 +50,7 @@ class AdminUserControllerTest extends ControllerTestSupport {
                                 .name("김이름")
                                 .role(UserRole.USER)
                                 .accountStatus(AccountStatus.SUSPENDED)
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(LocalDateTime.of(2026, 3, 25, 10, 0, 0))
                                 .build();
         }
 

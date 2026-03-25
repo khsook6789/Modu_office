@@ -99,6 +99,7 @@ class FacilityControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("새 시설 등록 (관리자) - 유효성 오류")
                                                                 .description("필수 값이 누락되거나 빈 값인 경우 400 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -159,6 +160,7 @@ class FacilityControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("시설 정보 수정 (관리자) - 권한 부족")
                                                                 .description("관리자 권한이 없는 사용자가 시설 정보 수정을 시도할 경우 403 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -193,6 +195,7 @@ class FacilityControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("시설 삭제 (관리자) - 권한 부족")
                                                                 .description("관리자 권한이 없는 사용자가 시설 삭제를 시도할 경우 403 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -231,6 +234,7 @@ class FacilityControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("새 시설 등록 (관리자) - 권한 부족")
                                                                 .description("관리자 권한이 없는 사용자가 시설 등록을 시도할 경우 403 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -247,6 +251,7 @@ class FacilityControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("새 시설 등록 (관리자) - 인증 누락")
                                                                 .description("로그인하지 않은 사용자가 시설 등록을 시도할 경우 401 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
