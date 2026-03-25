@@ -5,11 +5,10 @@ import com.modu.office.entity.enums.*;
 import com.modu.office.event.ReservationChangedEvent;
 import com.modu.office.event.ReservationCreatedEvent;
 import com.modu.office.repository.*;
+import com.modu.office.support.IntegrationTestSupport;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
@@ -25,10 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 
  * 예약 이벤트 발생 시 감사 로그가 올바르게 저장되는지 검증합니다.
  */
-@SpringBootTest
-@ActiveProfiles("test")
 @SuppressWarnings("null")
-class ReservationEventListenerTest {
+class ReservationEventListenerTest extends IntegrationTestSupport {
 
         @Autowired
         private ApplicationEventPublisher eventPublisher;
@@ -109,6 +106,7 @@ class ReservationEventListenerTest {
                                 .longitude(126.9780)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
+                                .openDays(new Short[]{1, 2, 3, 4, 5})
                                 .build();
                 officeRepository.save(office);
 
@@ -197,9 +195,12 @@ class ReservationEventListenerTest {
                 beforeData.put("startAt", originalStart.toString());
 
                 // when - 트랜잭션 내에서 예약 수정 및 이벤트 발행
+                // 참고: updateTimeRange()는 endAtIncludeBufferTime을 갱신하지 않으므로
+                // EXCLUDE 제약조건(tstzrange(start_at, end_at_include_buffer_time)) 위반 방지를 위해
+                // 새 시간 범위를 endAtIncludeBufferTime(day+1 12:00) 이내로 설정
                 transactionTemplate.execute(status -> {
-                        LocalDateTime newStart = LocalDateTime.now().plusDays(2).withHour(14).withMinute(0);
-                        LocalDateTime newEnd = LocalDateTime.now().plusDays(2).withHour(16).withMinute(0);
+                        LocalDateTime newStart = originalStart.plusMinutes(30);  // day+1 10:30
+                        LocalDateTime newEnd = originalEnd.minusMinutes(30);     // day+1 11:30
                         reservation.updateTimeRange(newStart, newEnd);
                         reservationRepository.save(reservation);
 
