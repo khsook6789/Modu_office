@@ -180,7 +180,7 @@ public class AdminDashboardService {
                 .toList();
 
         if (!myOfficeIds.contains(officeId)) {
-            throw new AccessDeniedException("본인이 담당하는 지점의 통계만 조회할 수 있습니다. officeId: " + officeId);
+            throw new AccessDeniedException("본인이 담당하는 지점의 통계만 조회할 수 있습니다.");
         }
 
         return officeId;

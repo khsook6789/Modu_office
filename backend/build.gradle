@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.5.11'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.epages.restdocs-api-spec' version '0.19.4'
+    id 'jacoco'
 }
 
 group = 'com.modu'
@@ -50,7 +51,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.19.4'
-    testRuntimeOnly 'com.h2database:h2'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Swagger UI (OpenAPI 3 YAML 렌더링)
@@ -73,6 +75,22 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+// Jacoco 커버리지 리포트 설정
+jacoco {
+    toolVersion = '0.8.10'
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
+    }
 }
 
 // REST Docs → OpenAPI 3 YAML 자동 생성 태스크
@@ -101,16 +119,16 @@ tasks.register('enhanceOpenApi') {
             def content = openapiFile.getText('UTF-8')
             
             // 1. SecuritySchemes 추가
-            if (!content.contains('securitySchemes:')) {
-                if (content.contains('components:')) {
-                    content = content.replace('components:', "components:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT")
+            if (!(content =~ /(?m)^  securitySchemes:/)) {
+                if (content =~ /(?m)^components:/) {
+                    content = content.replaceFirst(/(?m)^components:.*/, "components:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT")
                 } else {
                     content += "\ncomponents:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT"
                 }
             }
             
             // 2. 전역 보안 요구사항 추가
-            if (!content.contains('security:')) {
+            if (!(content =~ /(?m)^security:/)) {
                 content += "\nsecurity:\n  - bearerAuth: []"
             }
             
@@ -144,7 +162,7 @@ tasks.register('enhanceOpenApi') {
             openapiFile.setText(content, 'UTF-8')
             println "Successfully enhanced openapi3.yaml (Size: ${content.length()} bytes)"
         } else {
-            println "Error: openapi3.yaml not found at any expected location."
+            throw new GradleException("Error: openapi3.yaml not found at any expected location.")
         }
     }
 }

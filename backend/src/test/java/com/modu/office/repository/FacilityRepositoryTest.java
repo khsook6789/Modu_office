@@ -1,35 +1,24 @@
 package com.modu.office.repository;
 
 import com.modu.office.entity.Facility;
+import com.modu.office.support.RepositoryTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import com.modu.office.config.JpaConfig;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import com.modu.office.config.SecurityConfig;
-
 /**
  * Facility Repository 통합 테스트
  * - DB 연동 테스트 (@DataJpaTest)
- * - H2 in-memory DB 사용
+ * - TestContainers PostgreSQL 사용
  */
-@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
-                SecurityConfig.class }))
-@ActiveProfiles("test")
-@Import({ JpaConfig.class, com.modu.office.config.QueryDslConfig.class })
 @DisplayName("FacilityRepository 통합 테스트")
 @SuppressWarnings("null")
-class FacilityRepositoryTest {
+class FacilityRepositoryTest extends RepositoryTestSupport {
 
         @Autowired
         private FacilityRepository facilityRepository;

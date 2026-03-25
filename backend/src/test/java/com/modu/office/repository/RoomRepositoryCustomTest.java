@@ -2,24 +2,17 @@ package com.modu.office.repository;
 
 import com.modu.office.dto.request.RoomSearchCondition;
 
-import com.modu.office.config.QueryDslConfig;
-import com.modu.office.config.SecurityConfig;
-
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import com.modu.office.config.JpaConfig;
 import java.time.LocalTime;
 import com.modu.office.entity.*;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.support.RepositoryTestSupport;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -29,13 +22,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
-                SecurityConfig.class }))
-@Import({ QueryDslConfig.class, JpaConfig.class })
-@org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase(replace = org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE)
-@org.springframework.test.context.ActiveProfiles("test")
 @SuppressWarnings("null")
-class RoomRepositoryCustomTest {
+class RoomRepositoryCustomTest extends RepositoryTestSupport {
 
         @Autowired
         private RoomRepository roomRepository;
@@ -444,5 +432,242 @@ class RoomRepositoryCustomTest {
                 // Then
                 org.assertj.core.api.Assertions.assertThat(candidates).hasSize(1);
                 org.assertj.core.api.Assertions.assertThat(candidates.get(0).getName()).isEqualTo("Room C");
+        }
+
+        // ==================== Task 1: 예약 시간 겹침 경계값 테스트 ====================
+
+        @Test
+        @DisplayName("예약 경계값 - 기존 예약 종료 == 검색 시작이면 포함")
+        void should_includeRoom_when_reservationEndsExactlyAtSearchStart() {
+                // Given: room1에 10:00-12:00 예약
+                AppUser user = appUserRepository.findAll().get(0);
+                LocalDateTime resEnd = LocalDateTime.of(2027, 1, 10, 12, 0);
+                Reservation reservation = Reservation.builder()
+                                .room(room1).office(office).user(user)
+                                .startAt(LocalDateTime.of(2027, 1, 10, 10, 0))
+                                .endAt(resEnd).endAtIncludeBufferTime(resEnd)
+                                .status(ReservationStatus.CONFIRMED)
+                                .build();
+                reservationRepository.save(reservation);
+                em.flush();
+                em.clear();
+
+                // When: 검색 시작 = 예약 종료 시각 (12:00 ~ 14:00) → 반개방 구간 [resStart, resEnd)
+                // endAt.gt(searchStart): 12:00 > 12:00 = FALSE → 겹침 없음 → room1 포함
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .startDate(resEnd)
+                                .endDate(LocalDateTime.of(2027, 1, 10, 14, 0))
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: room1도 포함 (경계값 - 정확히 접하는 시각은 겹침 없음)
+                assertThat(result.getContent()).extracting("name").contains("Room A");
+        }
+
+        @Test
+        @DisplayName("예약 경계값 - 기존 예약 시작 == 검색 종료이면 포함")
+        void should_includeRoom_when_reservationStartsExactlyAtSearchEnd() {
+                // Given: room1에 14:00-16:00 예약
+                AppUser user = appUserRepository.findAll().get(0);
+                LocalDateTime resStart = LocalDateTime.of(2027, 1, 10, 14, 0);
+                Reservation reservation = Reservation.builder()
+                                .room(room1).office(office).user(user)
+                                .startAt(resStart)
+                                .endAt(LocalDateTime.of(2027, 1, 10, 16, 0))
+                                .endAtIncludeBufferTime(LocalDateTime.of(2027, 1, 10, 16, 0))
+                                .status(ReservationStatus.CONFIRMED)
+                                .build();
+                reservationRepository.save(reservation);
+                em.flush();
+                em.clear();
+
+                // When: 검색 종료 = 예약 시작 시각 (12:00 ~ 14:00)
+                // startAt.lt(searchEnd): 14:00 < 14:00 = FALSE → 겹침 없음 → room1 포함
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .startDate(LocalDateTime.of(2027, 1, 10, 12, 0))
+                                .endDate(resStart)
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: room1도 포함
+                assertThat(result.getContent()).extracting("name").contains("Room A");
+        }
+
+        @Test
+        @DisplayName("예약 경계값 - 동일 시간대 검색 시 제외")
+        void should_excludeRoom_when_searchExactlySameSlot() {
+                // Given: room1에 10:00-12:00 예약
+                AppUser user = appUserRepository.findAll().get(0);
+                LocalDateTime slot = LocalDateTime.of(2027, 1, 10, 10, 0);
+                Reservation reservation = Reservation.builder()
+                                .room(room1).office(office).user(user)
+                                .startAt(slot).endAt(slot.plusHours(2))
+                                .endAtIncludeBufferTime(slot.plusHours(2))
+                                .status(ReservationStatus.CONFIRMED)
+                                .build();
+                reservationRepository.save(reservation);
+                em.flush();
+                em.clear();
+
+                // When: 동일 시간대 검색 (10:00 ~ 12:00)
+                // startAt.lt(searchEnd) AND endAt.gt(searchStart): 둘 다 TRUE → 겹침 → room1 제외
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .startDate(slot)
+                                .endDate(slot.plusHours(2))
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: room1 제외, room2 포함
+                assertThat(result.getContent()).extracting("name")
+                                .doesNotContain("Room A")
+                                .contains("Room B");
+        }
+
+        @Test
+        @DisplayName("예약 경계값 - 자정 걸치는 예약 제외")
+        void should_excludeRoom_when_reservationSpansMidnight() {
+                // Given: room1에 23:00 ~ 익일 01:00 예약
+                AppUser user = appUserRepository.findAll().get(0);
+                LocalDateTime resStart = LocalDateTime.of(2027, 1, 10, 23, 0);
+                LocalDateTime resEnd = LocalDateTime.of(2027, 1, 11, 1, 0);
+                Reservation reservation = Reservation.builder()
+                                .room(room1).office(office).user(user)
+                                .startAt(resStart).endAt(resEnd).endAtIncludeBufferTime(resEnd)
+                                .status(ReservationStatus.CONFIRMED)
+                                .build();
+                reservationRepository.save(reservation);
+                em.flush();
+                em.clear();
+
+                // When: 자정 이후 구간 검색 (00:30 ~ 02:00) → 예약과 겹침
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .startDate(LocalDateTime.of(2027, 1, 11, 0, 30))
+                                .endDate(LocalDateTime.of(2027, 1, 11, 2, 0))
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: room1 제외, room2 포함
+                assertThat(result.getContent()).extracting("name")
+                                .doesNotContain("Room A")
+                                .contains("Room B");
+        }
+
+        // ==================== Task 2: 거리순 정렬 경계값 테스트 ====================
+
+        @Test
+        @DisplayName("거리순 정렬 - 동일 거리 오피스 모두 반환")
+        void should_returnBothRooms_when_twoOfficesAtSameDistance() {
+                // Given: (0,0) 기준 대칭 위치에 두 오피스 생성 (Gangnam은 bounding box 밖)
+                AppUser manager = office.getManager();
+
+                Office officeEast = Office.builder()
+                                .name("East Branch").location("East").manager(manager)
+                                .latitude(0.0).longitude(0.001) // ≈ 111m east
+                                .openTime(LocalTime.of(9, 0)).closeTime(LocalTime.of(18, 0))
+                                .build();
+                Office officeWest = Office.builder()
+                                .name("West Branch").location("West").manager(manager)
+                                .latitude(0.0).longitude(-0.001) // ≈ 111m west
+                                .openTime(LocalTime.of(9, 0)).closeTime(LocalTime.of(18, 0))
+                                .build();
+                officeRepository.saveAll(List.of(officeEast, officeWest));
+
+                roomRepository.saveAll(List.of(
+                                Room.builder().office(officeEast).name("Room East").roomCode("E001")
+                                                .capacity(10).status(RoomStatus.AVAILABLE).build(),
+                                Room.builder().office(officeWest).name("Room West").roomCode("W001")
+                                                .capacity(10).status(RoomStatus.AVAILABLE).build()));
+                em.flush();
+                em.clear();
+
+                // When: user at (0, 0) with radius 5km — Gangnam은 bounding box 밖으로 제외
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .lat(0.0).lng(0.0).radius(5.0).sortBy("DISTANCE")
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: 동일 거리 두 방 모두 포함
+                assertThat(result.getContent()).extracting("name")
+                                .contains("Room East", "Room West");
+        }
+
+        @Test
+        @DisplayName("거리순 정렬 - 반경 경계 오피스 포함")
+        void should_includeRoom_when_officeExactlyOnRadiusBoundary() {
+                // Given: (0,0) 에서 ≈0.999km 거리 오피스 생성 (radius=1.1km 내)
+                AppUser manager = office.getManager();
+                Office nearOffice = Office.builder()
+                                .name("Near Boundary Office").location("Near").manager(manager)
+                                .latitude(0.009).longitude(0.0) // ≈ 0.009 * 111 ≈ 0.999km
+                                .openTime(LocalTime.of(9, 0)).closeTime(LocalTime.of(18, 0))
+                                .build();
+                officeRepository.save(nearOffice);
+                roomRepository.save(Room.builder()
+                                .office(nearOffice).name("Room Near").roomCode("N001")
+                                .capacity(10).status(RoomStatus.AVAILABLE).build());
+                em.flush();
+                em.clear();
+
+                // When: radius = 1.1km (반경 내에 포함)
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .lat(0.0).lng(0.0).radius(1.1).sortBy("DISTANCE")
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: nearRoom 포함 (Gangnam은 bounding box 밖)
+                assertThat(result.getContent()).extracting("name").contains("Room Near");
+        }
+
+        @Test
+        @DisplayName("거리순 정렬 - 반경 밖 오피스 제외")
+        void should_excludeRoom_when_officeJustOutsideRadius() {
+                // Given: (0,0) 에서 ≈2.22km 거리 오피스 (radius=1.0km 밖)
+                AppUser manager = office.getManager();
+                Office farOffice = Office.builder()
+                                .name("Far Office").location("Far").manager(manager)
+                                .latitude(0.02).longitude(0.0) // ≈ 2.22km
+                                .openTime(LocalTime.of(9, 0)).closeTime(LocalTime.of(18, 0))
+                                .build();
+                officeRepository.save(farOffice);
+                roomRepository.save(Room.builder()
+                                .office(farOffice).name("Room Far").roomCode("F001")
+                                .capacity(10).status(RoomStatus.AVAILABLE).build());
+                em.flush();
+                em.clear();
+
+                // When: radius = 1.0km
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .lat(0.0).lng(0.0).radius(1.0).sortBy("DISTANCE")
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: farRoom 제외 (Gangnam도 반경 밖)
+                assertThat(result.getContent()).extracting("name").doesNotContain("Room Far");
+        }
+
+        @Test
+        @DisplayName("거리순 정렬 - 위치 미제공 시 id DESC 기본 정렬")
+        void should_fallbackToDefaultSort_when_noLatLngProvided() {
+                // Given: room1(먼저 저장 → 낮은 id), room2(나중 저장 → 높은 id)
+                // lat/lng 미설정 → DISTANCE case에서 room.id.desc()로 폴백
+
+                // When
+                RoomSearchCondition condition = RoomSearchCondition.builder()
+                                .sortBy("DISTANCE") // lat, lng 미설정 → null
+                                .build();
+                Page<Room> result = roomRepository.searchRooms(condition, PageRequest.of(0, 10));
+
+                // Then: id DESC → room2(높은 id)가 room1(낮은 id)보다 앞
+                List<Room> content = result.getContent();
+                assertThat(content).hasSizeGreaterThanOrEqualTo(2);
+
+                int indexRoom1 = -1, indexRoom2 = -1;
+                for (int i = 0; i < content.size(); i++) {
+                        if (content.get(i).getId().equals(room1.getId()))
+                                indexRoom1 = i;
+                        if (content.get(i).getId().equals(room2.getId()))
+                                indexRoom2 = i;
+                }
+                assertThat(indexRoom2).isLessThan(indexRoom1);
         }
 }

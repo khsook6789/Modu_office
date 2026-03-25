@@ -1,24 +1,15 @@
 package com.modu.office;
 
-import com.modu.office.config.JpaConfig;
-import com.modu.office.config.QueryDslConfig;
-import com.modu.office.config.SecurityConfig;
-
 import com.modu.office.dto.response.ReservationResponse;
 import com.modu.office.entity.*;
 import com.modu.office.entity.enums.*;
 import com.modu.office.repository.*;
+import com.modu.office.support.RepositoryTestSupport;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,14 +19,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
-                SecurityConfig.class
-}))
-@Import({ QueryDslConfig.class, JpaConfig.class })
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
 @SuppressWarnings("null")
-class SchemaSyncIntegrationTest {
+class SchemaSyncIntegrationTest extends RepositoryTestSupport {
 
         @Autowired
         private EntityManager em;
