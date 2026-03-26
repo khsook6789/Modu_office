@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
  * 각 테스트 파일이 테스트 로직에만 집중하도록 관심사를 분리.
  * </p>
  */
+@ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
 @WebMvcTest(controllers = {
         UserAuthController.class,

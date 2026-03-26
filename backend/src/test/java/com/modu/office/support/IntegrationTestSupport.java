@@ -30,8 +30,8 @@ public abstract class IntegrationTestSupport {
     @ServiceConnection
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("modu_office_test")
-            .withUsername("modu_user")
-            .withPassword("modu_office_pw123!")
+            .withUsername("postgres")
+            .withPassword("postgres")
             .withUrlParam("stringtype", "unspecified");
 
     static {

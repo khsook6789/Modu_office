@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.util.List;
 import com.modu.office.dto.request.ImageUploadRequest.ImageInfo;
 
@@ -21,6 +23,10 @@ import com.modu.office.dto.request.ImageUploadRequest.ImageInfo;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonPropertyOrder({
+    "name", "description", "roomCode", "category", "floor", 
+    "capacity", "price", "bufferTime", "status", "facilityIds", "images"
+})
 public class RoomRequest {
 
     @NotBlank(message = "회의실 이름은 필수입니다.")

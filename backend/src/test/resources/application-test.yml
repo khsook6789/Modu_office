@@ -5,6 +5,8 @@ spring:
 
   flyway:
     enabled: false  # @DataJpaTest 기본값: Flyway 비활성 (IntegrationTestSupport에서 오버라이드)
+    baseline-on-migrate: true
+    baseline-version: 1
 
   jpa:
     hibernate:

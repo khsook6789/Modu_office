@@ -1,8 +1,8 @@
 spring:
-  application:
-    name: modu_office
   profiles:
     active: local
+  application:
+    name: modu_office
 
   # 파일 업로드 표준 설정
   servlet:

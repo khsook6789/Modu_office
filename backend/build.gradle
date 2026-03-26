@@ -75,6 +75,7 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
     finalizedBy jacocoTestReport
 }
 
@@ -98,60 +99,42 @@ openapi3 {
     server = 'http://localhost:8080'
     title = 'Modu Office API'
     description = '모두의 오피스 통합 API 명세서'
-    version = '0.1.0'
+    version = '1.0.0'
     format = 'yaml'
     outputDirectory = 'src/main/resources/static'
     outputFileNamePrefix = 'openapi3'
 }
 
-// openapi3.yaml 파일에 JWT 인증 설정 및 에러 사전을 추가하는 후처리 태스크
+// openapi3.yaml 파일에 JWT 인증 설정(Authorize)을 주입하는 후처리 태스크
 tasks.register('enhanceOpenApi') {
     dependsOn 'openapi3'
     doLast {
-        // 경로 확인 (openapi3 태스크 설정에 따라 다를 수 있음)
         def openapiFile = file("${projectDir}/src/main/resources/static/openapi3.yaml")
         if (!openapiFile.exists()) {
             openapiFile = file("${buildDir}/api-spec/openapi3.yaml")
         }
         
         if (openapiFile.exists()) {
-            println "Enhancing OpenAPI spec at: ${openapiFile.absolutePath}"
-            def content = openapiFile.getText('UTF-8')
+            def content = openapiFile.getText('UTF-8').replace("\r\n", "\n")
             
-            // 2.5. 날짜/시간(LocalDateTime) 가변성 제거 (Idempotency 확보) - 일시 중단 (데이터 훼손 방지)
-            /*
-            content = content.replaceAll(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?/, "2026-03-25T10:00:00")
-            content = content.replaceAll(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/, "2026-03-25 10:00:00")
-            */
-            
-            // 3. SWAGGER_TEST_GUIDE.md 주입 (YAML Block Scalar 방식)
-            def guideFile = file("${projectDir}/../SWAGGER_TEST_GUIDE.md")
-            if (guideFile.exists()) {
-                def guideContent = guideFile.getText("UTF-8")
-                def indentedGuide = guideContent.split("\n").collect { "    ${it}" }.join("\n")
-                
-                def lines = content.split("\n")
-                def newLines = []
-                def infoFound = false
-                
-                for (int i = 0; i < lines.length; i++) {
-                    newLines << lines[i]
-                    if (lines[i].startsWith("  title:")) {
-                        newLines << "  description: |"
-                        newLines << indentedGuide
-                        infoFound = true
-                    }
-                }
-                
-                if (infoFound) {
-                    content = newLines.join("\n")
-                }
+            // 1. 전역 보안 요구사항 주입 (openapi: 3.0.1 바로 아래)
+            if (!content.contains("security:")) {
+                content = content.replace("openapi: 3.0.1", "openapi: 3.0.1\nsecurity:\n  - BearerAuth: []")
             }
             
+            // 2. SecuritySchemes 주입 (components 섹션 도입부)
+            if (!content.contains("securitySchemes:")) {
+                def securitySchemes = "components:\n  securitySchemes:\n    BearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT"
+                content = content.replace("components:", securitySchemes)
+            }
+            
+            // 3. 트레일링 공백 및 개행 정리 (파서 오류 방지)
+            content = content.split("\n").collect { it.stripTrailing() }.join("\n")
+            
             openapiFile.setText(content, 'UTF-8')
-            println "Successfully enhanced openapi3.yaml (Size: ${content.length()} bytes)"
+            println "Successfully enhanced openapi3.yaml with robust Security Config."
         } else {
-            throw new GradleException("Error: openapi3.yaml not found at any expected location.")
+            throw new RuntimeException("Error: openapi3.yaml not found at any expected location.")
         }
     }
 }
