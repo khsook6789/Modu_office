@@ -160,6 +160,7 @@ class ReservationEventListenerTest extends IntegrationTestSupport {
                 assertThat(logs).hasSize(1);
 
                 UpdateLog log = logs.get(0);
+                assertThat(log.getReservation()).as("UpdateLog should have a Reservation reference").isNotNull();
                 assertThat(log.getReservation().getId()).isEqualTo(reservation.getId());
                 assertThat(log.getAction()).isEqualTo(LogAction.CREATE);
                 assertThat(log.getActor().getId()).isEqualTo(user.getId());
@@ -292,6 +293,7 @@ class ReservationEventListenerTest extends IntegrationTestSupport {
                 });
 
                 // then
+                assertThat(room).as("Test setup: room should not be null").isNotNull();
                 org.mockito.Mockito.verify(notificationService).notifyRoomReservationCreated(
                                 org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.any(Reservation.class));
@@ -301,20 +303,22 @@ class ReservationEventListenerTest extends IntegrationTestSupport {
         @DisplayName("예약 취소 시 WebSocket 알림이 전송된다")
         void 예약_취소_시_WebSocket_알림이_전송된다() {
                 // given
-                Reservation reservation = transactionTemplate.execute(status -> {
-                        Reservation res = Reservation.builder()
-                                        .user(user)
-                                        .office(office)
-                                        .room(room)
-                                        .title("Cancel Test")
-                                        .startAt(LocalDateTime.now().plusDays(1))
-                                        .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
-                                        .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(2))
-                                        .status(ReservationStatus.CONFIRMED)
-                                        .build();
-                        reservationRepository.save(res);
-                        return res;
-                });
+                Reservation reservation = java.util.Objects.requireNonNull(
+                        transactionTemplate.execute(status -> {
+                                Reservation res = Reservation.builder()
+                                                .user(user)
+                                                .office(office)
+                                                .room(room)
+                                                .title("Cancel Test")
+                                                .startAt(LocalDateTime.now().plusDays(1))
+                                                .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
+                                                .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(2))
+                                                .status(ReservationStatus.CONFIRMED)
+                                                .build();
+                                reservationRepository.save(res);
+                                return res;
+                        }),
+                        "Test setup failed: transactionTemplate.execute() should not return null");
 
                 // when
                 transactionTemplate.execute(status -> {
@@ -324,6 +328,7 @@ class ReservationEventListenerTest extends IntegrationTestSupport {
                 });
 
                 // then
+                assertThat(room).as("Test setup: room should not be null").isNotNull();
                 org.mockito.Mockito.verify(notificationService).notifyRoomReservationCancelled(
                                 org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.eq(reservation.getId()));

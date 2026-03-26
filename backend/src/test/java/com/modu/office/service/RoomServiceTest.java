@@ -5,7 +5,6 @@ import com.modu.office.dto.response.BulkStatusUpdateResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.entity.Office;
 import com.modu.office.entity.Room;
-import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.entity.enums.UserRole;
 import com.modu.office.exception.ErrorCode;
@@ -23,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 

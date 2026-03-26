@@ -20,7 +20,6 @@ import com.modu.office.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -324,8 +323,9 @@ public class ReservationService {
             reasonDescriptor = "관리자 재량 예외 환불 적용 (" + customRefundRate + "%)";
         } else {
             LocalDateTime calculationTime = clientRequestTime != null ? clientRequestTime : LocalDateTime.now();
+            LocalDateTime startAt = java.util.Objects.requireNonNull(reservation.getStartAt(), "reservation.startAt is null");
             long daysBefore = java.time.Duration.between(calculationTime.toLocalDate().atStartOfDay(),
-                    reservation.getStartAt().toLocalDate().atStartOfDay()).toDays();
+                    startAt.toLocalDate().atStartOfDay()).toDays();
 
             if (daysBefore < 0) {
                 // 이미 예약 날짜가 지난 경우

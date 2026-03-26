@@ -209,22 +209,24 @@ class ReservationConcurrencyTest extends IntegrationTestSupport {
     @RepeatedTest(3)
     @DisplayName("동일 예약 동시 확정 시 낙관적 잠금이 충돌을 방어한다")
     void should_preventConflict_whenConcurrentConfirmation() throws InterruptedException {
-        Reservation reservation = transactionTemplate.execute(status -> {
-            Reservation res = Reservation.builder()
-                    .user(user)
-                    .office(office)
-                    .room(room)
-                    .title("확정 동시성 테스트")
-                    .startAt(LocalDateTime.now().plusDays(2)
-                            .withHour(10).withMinute(0).withSecond(0).withNano(0))
-                    .endAt(LocalDateTime.now().plusDays(2)
-                            .withHour(11).withMinute(0).withSecond(0).withNano(0))
-                    .endAtIncludeBufferTime(LocalDateTime.now().plusDays(2)
-                            .withHour(11).withMinute(0).withSecond(0).withNano(0))
-                    .status(ReservationStatus.PENDING_APPROVAL)
-                    .build();
-            return reservationRepository.save(res);
-        });
+        Reservation reservation = java.util.Objects.requireNonNull(
+                transactionTemplate.execute(status -> {
+                    Reservation res = Reservation.builder()
+                            .user(user)
+                            .office(office)
+                            .room(room)
+                            .title("확정 동시성 테스트")
+                            .startAt(LocalDateTime.now().plusDays(2)
+                                    .withHour(10).withMinute(0).withSecond(0).withNano(0))
+                            .endAt(LocalDateTime.now().plusDays(2)
+                                    .withHour(11).withMinute(0).withSecond(0).withNano(0))
+                            .endAtIncludeBufferTime(LocalDateTime.now().plusDays(2)
+                                    .withHour(11).withMinute(0).withSecond(0).withNano(0))
+                            .status(ReservationStatus.PENDING_APPROVAL)
+                            .build();
+                    return reservationRepository.save(res);
+                }),
+                "Test setup failed: transactionTemplate.execute() should not return null");
 
         int threadCount = 3;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);

@@ -74,7 +74,9 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                 // floor 별로 그룹핑 — floor=null인 방은 sentinel(-1)로 처리 (floor=0과 구분)
                 java.util.Map<Integer, List<Tuple>> byFloor = rooms.stream()
                                 .collect(Collectors.groupingBy(
-                                                t -> t.get(room.floor) != null ? t.get(room.floor) : NULL_FLOOR_SENTINEL));
+                                                t -> java.util.Optional.ofNullable(t.get(room.floor))
+                                                        .map(Integer.class::cast)
+                                                        .orElse(NULL_FLOOR_SENTINEL)));
 
                 return byFloor.entrySet().stream()
                                 .map(entry -> {
@@ -114,8 +116,9 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                                                 dateBetween(startDate, endDate))
                                 .fetchOne();
 
-                long total = result != null && result.get(0, Long.class) != null ? result.get(0, Long.class) : 0L;
-                long canceled = result != null && result.get(1, Long.class) != null ? result.get(1, Long.class) : 0L;
+                // GROUP BY 없는 COUNT(*)는 무조건 1행 반환, fetchOne()은 null을 반환하지 않음
+                long total = result.get(0, Long.class);
+                long canceled = result.get(1, Long.class);
                 double rate = total == 0 ? 0.0 : Math.round((double) canceled / total * 1000) / 10.0;
                 return new CancellationStatsResponse(total, canceled, rate);
         }
