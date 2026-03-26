@@ -142,7 +142,7 @@ class ApiClient {
         data = text;
       }
 
-      console.log(`[API Response] ${endpoint}:`, data);
+
       return data;
     } catch (error) {
       console.error("API Request Failed:", error);

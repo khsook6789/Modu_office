@@ -47,7 +47,7 @@ export default function BookingSuccessPage() {
                 // 1. URL 파라미터 확인
                 if (reservationIdFromUrl && reservationIdFromUrl !== 'undefined') {
                     finalReservationId = Number(reservationIdFromUrl);
-                    console.log('Using reservationId from URL:', finalReservationId);
+
                 } 
                 
                 // 2. URL에 없으면 sessionStorage의 lastReservationId 확인
@@ -55,7 +55,7 @@ export default function BookingSuccessPage() {
                     const savedId = sessionStorage.getItem('lastReservationId');
                     if (savedId) {
                         finalReservationId = Number(savedId);
-                        console.log('Using reservationId from sessionStorage (lastReservationId):', finalReservationId);
+
                     }
                 }
 
@@ -63,7 +63,7 @@ export default function BookingSuccessPage() {
                 if (!finalReservationId || isNaN(finalReservationId)) {
                     const raw = sessionStorage.getItem('pendingReservation');
                     if (raw) {
-                        console.log('No reservationId found, attempting to create from pendingReservation');
+
                         const info: PendingReservationInfo = JSON.parse(raw);
                         const resRes = await client.post<ApiResponse<ReservationResponse>>('/reservations', {
                             roomId: info.roomId,
@@ -76,7 +76,7 @@ export default function BookingSuccessPage() {
                         });
                         const data = (resRes as any).data ?? resRes;
                         finalReservationId = data.id;
-                        console.log('Created new reservation during recovery:', finalReservationId);
+
                     }
                 }
 
@@ -84,9 +84,7 @@ export default function BookingSuccessPage() {
                     throw new Error('예약 번호를 확인할 수 없습니다.');
                 }
 
-                console.log('[SuccessPage] Sending confirm request:', {
-                    paymentKey, orderId, amount, reservationId: finalReservationId
-                });
+
 
                 // 2. 백엔드 결제 승인 (이 과정에서 결제 정보 검증 및 예약 확정 처리)
                 await paymentApi.confirm({

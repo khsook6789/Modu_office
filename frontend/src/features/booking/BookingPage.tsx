@@ -123,6 +123,10 @@ export default function BookingPage() {
             alert('날짜와 시간을 선택해주세요.');
             return;
         }
+        if (Number(guestCount) < 1 || Number(guestCount) > room.capacity) {
+            alert(`참여 인원은 1명 이상 ${room.capacity}명 이하여야 합니다.`);
+            return;
+        }
 
         const endAt = calculateEndDateTimeISO(date, startTime, Number(duration));
         const startAt = `${date}T${startTime}:00`;
@@ -169,9 +173,9 @@ export default function BookingPage() {
                 guestCount: info.guestCount,
             });
 
-            console.log('[BookingPage] Reservation Response Raw:', res);
+
             const reservationId = res.data?.id ?? (res as any).id;
-            console.log('[BookingPage] Extracted reservationId:', reservationId);
+
             
             if (!reservationId) throw new Error('예약 생성에 실패했습니다.');
 

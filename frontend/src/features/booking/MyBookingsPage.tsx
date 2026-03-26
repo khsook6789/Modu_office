@@ -77,22 +77,15 @@ export default function MyBookingsPage() {
         return map;
     }, []);
 
-    useEffect(() => {
-        if (user?.id) loadBookings();
-    }, [user]);
-
-    const loadBookings = async () => {
+    const loadBookings = useCallback(async () => {
         try {
             setIsLoading(true);
             setError(null);
             const response = await client.get<ApiResponse<ReservationResponse[]>>(
                 `/reservations?userId=${user!.id}`
             );
-            const raw = response as any;
-            const list: ReservationResponse[] = Array.isArray(raw) ? raw
-                : Array.isArray(raw?.data) ? raw.data
-                    : Array.isArray(raw?.data?.content) ? raw.data.content
-                        : [];
+            // client는 raw JSON({ status, message, data: [...] })을 반환
+            const list: ReservationResponse[] = Array.isArray(response.data) ? response.data : [];
             const sorted = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             setBookings(sorted);
 
@@ -101,9 +94,15 @@ export default function MyBookingsPage() {
             const hasPending = sorted.some(b => b.status === 'PENDING_PAYMENT');
             if (hasPending) {
                 setCountdowns(calcCountdowns(sorted));
+                // stale closure 방지: setInterval 내에서 현재 bookings state를 직접 참조
                 timerRef.current = setInterval(() => {
-                    setCountdowns(calcCountdowns(sorted));
+                    setBookings(prev => {
+                        setCountdowns(calcCountdowns(prev));
+                        return prev;
+                    });
                 }, 1000);
+            } else {
+                setCountdowns({});
             }
         } catch (err: any) {
             console.error('Failed to load bookings:', err);
@@ -112,7 +111,12 @@ export default function MyBookingsPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [user, calcCountdowns]);
+
+    useEffect(() => {
+        if (user?.id) loadBookings();
+    }, [user, loadBookings]);
+
 
     // 언마운트 시 인터밸 정리
     useEffect(() => {
