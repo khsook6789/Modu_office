@@ -118,47 +118,36 @@ tasks.register('enhanceOpenApi') {
             println "Enhancing OpenAPI spec at: ${openapiFile.absolutePath}"
             def content = openapiFile.getText('UTF-8')
             
-            // 1. SecuritySchemes 추가
-            if (!(content =~ /(?m)^  securitySchemes:/)) {
-                if (content =~ /(?m)^components:/) {
-                    content = content.replaceFirst(/(?m)^components:.*/, "components:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT")
-                } else {
-                    content += "\ncomponents:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT"
-                }
-            }
-            
-            // 2. 전역 보안 요구사항 추가
-            if (!(content =~ /(?m)^security:/)) {
-                content += "\nsecurity:\n  - bearerAuth: []"
-            }
+            // 2.5. 날짜/시간(LocalDateTime) 가변성 제거 (Idempotency 확보) - 일시 중단 (데이터 훼손 방지)
+            /*
+            content = content.replaceAll(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?/, "2026-03-25T10:00:00")
+            content = content.replaceAll(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/, "2026-03-25 10:00:00")
+            */
             
             // 3. SWAGGER_TEST_GUIDE.md 주입 (YAML Block Scalar 방식)
             def guideFile = file("${projectDir}/../SWAGGER_TEST_GUIDE.md")
-            println "Searching for guide file at: ${guideFile.absolutePath}"
             if (guideFile.exists()) {
                 def guideContent = guideFile.getText("UTF-8")
-                // 4칸 인벤팅 (Yaml format)
                 def indentedGuide = guideContent.split("\n").collect { "    ${it}" }.join("\n")
                 
                 def lines = content.split("\n")
-                def descriptionIndex = -1
-                for (int i = 0; i < Math.min(30, lines.length); i++) {
-                    if (lines[i].contains("description:") && (lines[i].contains("모두의") || lines[i].contains("통합"))) {
-                        descriptionIndex = i
-                        break
+                def newLines = []
+                def infoFound = false
+                
+                for (int i = 0; i < lines.length; i++) {
+                    newLines << lines[i]
+                    if (lines[i].startsWith("  title:")) {
+                        newLines << "  description: |"
+                        newLines << indentedGuide
+                        infoFound = true
                     }
                 }
-
-                if (descriptionIndex != -1) {
-                    println "Found description at line ${descriptionIndex + 1}, injecting guide..."
-                    lines[descriptionIndex] = "  description: |\n" + indentedGuide
-                    content = lines.join("\n")
-                } else {
-                    println "Warning: Targeted description line not found. Fallback to replaceFirst."
-                    content = content.replaceFirst(/(?m)^[ ]*description: .*/, "  description: |\n" + indentedGuide)
+                
+                if (infoFound) {
+                    content = newLines.join("\n")
                 }
             }
-
+            
             openapiFile.setText(content, 'UTF-8')
             println "Successfully enhanced openapi3.yaml (Size: ${content.length()} bytes)"
         } else {

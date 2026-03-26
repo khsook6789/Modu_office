@@ -52,8 +52,8 @@ import java.time.LocalDateTime;
 })
 public abstract class ControllerTestSupport extends RestDocsSupport {
 
-    protected static final LocalDateTime FIXED_DATE_TIME = LocalDateTime.of(2026, 3, 25, 10, 0, 0);
-    protected static final LocalDate FIXED_DATE = LocalDate.of(2026, 3, 25);
+    protected static final LocalDateTime FIXED_DATE_TIME = LocalDateTime.of(2026, 12, 25, 10, 0, 0);
+    protected static final LocalDate FIXED_DATE = LocalDate.of(2026, 12, 25);
     protected static final LocalDateTime FIXED_RESERVATION_START = FIXED_DATE_TIME.plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
 
     @Autowired

@@ -75,6 +75,7 @@ class MyOfficesApiTest extends ControllerTestSupport {
                                                                 .tag("Office")
                                                                 .summary("내 담당 지점 목록 조회")
                                                                 .description("운영자(MANAGER) 권한을 가진 사용자가 자신이 관리하는 지점 목록을 조회합니다.")
+                                                                .responseSchema(schema("OfficeListResponse"))
                                                                 .responseFields(
                                                                                 fieldWithPath("status").description("응답 상태"),
                                                                                 fieldWithPath("code").description("응답 코드"),

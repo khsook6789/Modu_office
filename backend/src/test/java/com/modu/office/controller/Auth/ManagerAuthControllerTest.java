@@ -67,6 +67,7 @@ class ManagerAuthControllerTest extends ControllerTestSupport {
                                                                                                 .description("운영자 이름"
                                                                                                                 + constDocs(ManagerSignupRequest.class,
                                                                                                                                 "name")))
+                                                                .responseSchema(schema("ApiResponse"))
                                                                 .build())));
         }
 

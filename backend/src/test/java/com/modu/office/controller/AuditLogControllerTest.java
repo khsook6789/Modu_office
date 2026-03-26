@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +42,7 @@ class AuditLogControllerTest extends ControllerTestSupport {
                                 .actorName("김실무")
                                 .beforeData(Map.of("status", "AVAILABLE", "participants", 4))
                                 .afterData(Map.of("status", "IN_USE", "participants", 5))
-                                .occurredAt(LocalDateTime.now())
+                                .occurredAt(FIXED_DATE_TIME)
                                 .build();
         }
 

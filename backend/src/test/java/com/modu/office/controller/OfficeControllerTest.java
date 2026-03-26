@@ -212,6 +212,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("지점 생성 - 인증 필요")
                                                                 .description("로그인하지 않은 사용자가 지점 생성을 시도할 경우 401 에러를 반환합니다.")
+                                                                .requestSchema(schema("OfficeRequest"))
                                                                 .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
@@ -375,6 +376,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                                                                                 parameterWithName("keyword")
                                                                                                 .description("검색 키워드 (이름/위치)")
                                                                                                 .optional())
+                                                                .responseSchema(schema("OfficePageResponse"))
                                                                 .build())));
         }
 
@@ -391,6 +393,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("내 담당 지점 목록")
                                                                 .description("현재 로그인한 운영자(MANAGER)가 담당하고 있는 지점 목록을 조회합니다.")
+                                                                .responseSchema(schema("OfficeListResponse"))
                                                                 .build())));
         }
 
@@ -456,6 +459,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                                                                                                                 + constDocs(OfficeRequest.class,
                                                                                                                                 "openDays"))
                                                                                                 .optional())
+                                                                .responseSchema(schema("OfficeResponse"))
                                                                 .build())));
         }
 
@@ -477,6 +481,7 @@ class OfficeControllerTest extends ControllerTestSupport {
                                                                 .pathParameters(
                                                                                 parameterWithName("id").description(
                                                                                                 "삭제할 지점 ID"))
+                                                                .responseSchema(schema("ApiResponse"))
                                                                 .build())));
         }
 }

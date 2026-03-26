@@ -179,6 +179,8 @@ class UserControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("비밀번호 변경")
                                                                 .description("기존 비밀번호를 확인하고 새로운 비밀번호로 변경합니다. (Local 로그인 기준)")
+                                                                .requestSchema(schema("PasswordChangeRequest"))
+                                                                .responseSchema(schema("EmptyResponse"))
                                                                 .requestFields(
                                                                                 fieldWithPath("currentPassword")
                                                                                                 .type(JsonFieldType.STRING)
@@ -235,6 +237,8 @@ class UserControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("회원 탈퇴")
                                                                 .description("사용자의 계정을 삭제 처리합니다 (Soft Delete).")
+                                                                .requestSchema(schema("AccountDeleteRequest"))
+                                                                .responseSchema(schema("EmptyResponse"))
                                                                 .requestFields(
                                                                                 fieldWithPath("password").type(JsonFieldType.STRING)
                                                                                                 .description("비밀번호 (oAuth 로그인의 경우 생략 가능)")

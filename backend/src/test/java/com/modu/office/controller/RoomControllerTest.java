@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -276,6 +277,7 @@ class RoomControllerTest extends ControllerTestSupport {
                                                                                 parameterWithName("keyword")
                                                                                                 .description("검색 키워드")
                                                                                                 .optional())
+                                                                .responseSchema(schema("RoomPageResponse"))
                                                                 .build())));
         }
 
@@ -298,6 +300,7 @@ class RoomControllerTest extends ControllerTestSupport {
                                                                                 parameterWithName("roomId").description(
                                                                                                 "수정할 회의실 ID"))
                                                                 .requestSchema(schema("RoomRequest"))
+                                                                .responseSchema(schema("RoomResponse"))
                                                                 .build())));
         }
 
@@ -317,6 +320,7 @@ class RoomControllerTest extends ControllerTestSupport {
                                                                 .pathParameters(
                                                                                 parameterWithName("roomId").description(
                                                                                                 "삭제할 회의실 ID"))
+                                                                .responseSchema(schema("ApiResponse"))
                                                                 .build())));
         }
 
@@ -397,6 +401,7 @@ class RoomControllerTest extends ControllerTestSupport {
                                                                                                 .description("회의실 ID"),
                                                                                 parameterWithName("imageId")
                                                                                                 .description("삭제할 이미지 ID"))
+                                                                .responseSchema(schema("ApiResponse"))
                                                                 .build())));
         }
 
@@ -408,15 +413,15 @@ class RoomControllerTest extends ControllerTestSupport {
                 mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/rooms/{roomId}/similar", 1L))
                                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
                                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.data.length()").value(1))
-                                .andDo(com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document("room-similar",
-                                                com.epages.restdocs.apispec.ResourceDocumentation.resource(com.epages.restdocs.apispec.ResourceSnippetParameters.builder()
+                                .andDo(document("room-similar",
+                                                resource(builder()
                                                                 .tag(TAG)
                                                                 .summary("유사 회의실 목록 추천")
                                                                 .description("현재 회의실을 조회하고 있는 사용자에게 인원수, 위치, 시설 점수를 고려하여 유사한 회의실 목록을 추천합니다.")
                                                                 .pathParameters(
-                                                                                org.springframework.restdocs.request.RequestDocumentation.parameterWithName("roomId")
+                                                                                parameterWithName("roomId")
                                                                                                 .description("기준 회의실 ID"))
-                                                                .responseSchema(com.epages.restdocs.apispec.Schema.schema("RoomListResponse"))
+                                                                .responseSchema(schema("RoomListResponse"))
                                                                 .build())));
         }
 }

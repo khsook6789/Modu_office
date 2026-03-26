@@ -68,7 +68,8 @@ public class GlobalExceptionHandler {
                                                 error -> error.getDefaultMessage() != null
                                                                 ? error.getDefaultMessage()
                                                                 : "Invalid value",
-                                                (existing, replacement) -> existing // 중복 키 처리
+                                                (existing, replacement) -> existing, // 중복 키 처리
+                                                java.util.TreeMap::new // 알파벳 순 정렬 고정
                                 ));
 
                 log.error("Validation failed: {}", fieldErrors);
