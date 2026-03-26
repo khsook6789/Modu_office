@@ -132,7 +132,7 @@ class ReservationServiceTest {
                 when(appUserRepository.findById(customerId)).thenReturn(Optional.of(user));
 
                 // When & Then
-                com.modu.office.exception.InvalidRequestException exception = assertThrows(com.modu.office.exception.InvalidRequestException.class, () -> {
+                assertThrows(com.modu.office.exception.InvalidRequestException.class, () -> {
                         reservationService.createReservation(request);
                 });
         }
@@ -198,7 +198,7 @@ class ReservationServiceTest {
                 when(appUserRepository.findById(customerId)).thenReturn(Optional.of(user));
 
                 // When & Then
-                com.modu.office.exception.InvalidRequestException exception = assertThrows(com.modu.office.exception.InvalidRequestException.class, () -> {
+                assertThrows(com.modu.office.exception.InvalidRequestException.class, () -> {
                         reservationService.createReservation(request);
                 });
         }

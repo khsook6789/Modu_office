@@ -119,7 +119,7 @@ public class RoomService {
      * 인원수 ±2명 필터, 예약 통계(협업 필터링), 위치(거리) 가점, 시설 유사도 가점 반영
      */
     public List<RoomResponse> getSimilarRooms(Long roomId) {
-        Room targetRoom = roomRepository.findById(roomId)
+        Room targetRoom = roomRepository.findById(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."))
                 .orElseThrow(() -> new EntityNotFoundException("회의실을 찾을 수 없습니다. ID: " + roomId));
 
         // 1. 후보군 추출 (DB 단계: 무조건 AVAILABLE, 인원수 필터, 예약 통계 순으로 정렬되어 옴)

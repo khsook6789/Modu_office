@@ -31,6 +31,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public abstract class RepositoryTestSupport {
 
     @ServiceConnection
+    @SuppressWarnings("resource")
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("modu_office_test")
             .withUsername("postgres")

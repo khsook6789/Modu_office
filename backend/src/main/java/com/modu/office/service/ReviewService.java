@@ -132,7 +132,7 @@ public class ReviewService {
     private void evictReviewSummary(Long roomId) {
         var cache = cacheManager.getCache(CacheConfig.REVIEW_SUMMARY);
         if (cache != null) {
-            cache.evict(roomId);
+            cache.evict(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."));
         }
     }
 }
