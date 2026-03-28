@@ -9,8 +9,10 @@
 # --- Claude Code & Agent Framework ---
 .claude/
 .agent/
+.gemini/
 CLAUDE.md
 AGENTS.md
+GEMINI.md
 
 # --- Local Development & Scripts ---
 scripts/

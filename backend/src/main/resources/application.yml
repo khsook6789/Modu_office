@@ -37,6 +37,23 @@ spring:
   security:
     oauth2:
       client:
+        registration:
+          naver-user:
+            provider: naver
+            client-name: Naver (USER)
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-user"
+            scope:
+              - name
+              - email
+          naver-manager:
+            provider: naver
+            client-name: Naver (MANAGER)
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/naver-manager"
+            scope:
+              - name
+              - email
         provider:
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize
@@ -49,9 +66,12 @@ app:
   cors:
     allowed-origins:
       - "http://localhost:5173"
+  jwt:
+    access-token-expiration-milliseconds: 3600000 # 1 hour
+    refresh-token-expiration-milliseconds: 604800000 # 7 days
   toss-payments:
     base-url: https://api.tosspayments.com
-    secret-key: "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6" # docs 테스트 키 쌍 (client key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm)
+
 # Swagger / OpenAPI 설정
 springdoc:
   swagger-ui:

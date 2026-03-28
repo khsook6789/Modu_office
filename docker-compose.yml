@@ -15,34 +15,5 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
-    build: ./backend
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      DB_URL: jdbc:postgresql://db:5432/modu_office?stringtype=unspecified
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
-      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
-      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
-      TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
-    ports:
-      - "8080:8080"  # Swagger UI 직접 접근: http://localhost:8080/swagger-ui/index.html
-    depends_on:
-      db:
-        condition: service_healthy
-
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_API_BASE_URL: /api
-        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
-    ports:
-      - "3000:80"  # http://localhost:3000 으로 접속
-    depends_on:
-      - backend
-
 volumes:
   postgres_data:

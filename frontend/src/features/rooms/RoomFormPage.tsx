@@ -27,23 +27,33 @@ export default function RoomFormPage() {
     const [price, setPrice] = useState('10000');
     const [category, setCategory] = useState('MEETING_ROOM');
     const [equipment, setEquipment] = useState<string[]>([]);
+    const [allFacilities, setAllFacilities] = useState<any[]>([]); // To map codes to IDs
     const [imageUrl, setImageUrl] = useState('');
     const [fetchedOfficeId, setFetchedOfficeId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        // Fetch all active facilities for mapping codes to IDs
+        roomApi.getActiveFacilities()
+            .then(data => setAllFacilities(data))
+            .catch(err => console.error("Failed to fetch facilities", err));
+
         if (isEditMode) {
             setLoading(true);
             roomApi.getRoomById(Number(roomId))
                 .then(room => {
                     setName(room.name);
-                    setDescription((room as any).description || '');
+                    setDescription(room.description || '');
                     setFloor(String(room.floor));
                     setRoomCode(room.roomCode);
                     setCapacity(String(room.capacity));
-                    setPrice('10000'); // Price is not in API response yet, using default
+                    setPrice(String(room.price)); 
                     setCategory(room.category);
-                    setEquipment(room.equipment || []); // Use equipment from room data (need to ensure getRoomById returns it)
+                    
+                    // Map FacilityResponse[] to facilityCode string[]
+                    const codes = room.facilities?.map(f => f.facilityCode) || [];
+                    setEquipment(codes);
+                    
                     setImageUrl(room.imageUrl || '');
                     setFetchedOfficeId(room.officeId);
                 })
@@ -69,6 +79,11 @@ export default function RoomFormPage() {
 
         const currentOfficeId = officeId ? Number(officeId) : fetchedOfficeId;
         
+        // Map selected equipment codes (string[]) to facility IDs (number[]) for backend
+        const facilityIds = equipment.map(code => 
+            allFacilities.find(f => f.facilityCode === code)?.id
+        ).filter(id => id !== undefined);
+
         const roomData = {
             officeId: currentOfficeId,
             name,
@@ -76,9 +91,9 @@ export default function RoomFormPage() {
             floor: Number(floor),
             roomCode,
             capacity: Number(capacity),
-            price,
+            price: Number(price),
             category,
-            equipment,
+            facilityIds, // Map string[] to ID[]
             imageUrl
         };
 

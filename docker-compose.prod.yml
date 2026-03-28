@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: modu_office
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d modu_office"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - modu-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: prod  # prod 프로파일로 승격
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/modu_office?stringtype=unspecified
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
+    # 포트 노출 없음 (Nginx를 통해서만 접근)
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    networks:
+      - modu-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
+    ports:
+      - "3000:80"  # 부하 테스트 및 최종 확인용 사용자 접속점
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - modu-network
+
+networks:
+  modu-network:
+    driver: bridge
+
+volumes:
+  postgres_staging_data:
