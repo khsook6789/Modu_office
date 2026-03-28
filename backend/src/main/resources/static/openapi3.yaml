@@ -1281,14 +1281,14 @@ paths:
               $ref: "#/components/schemas/RoomRequest"
             examples:
               room-update:
-                value: "{\r\n  \"bufferTime\" : 30,\r\n  \"capacity\" : 10,\r\n  \"\
-                  category\" : null,\r\n  \"description\" : \"화이트보드, 빔 프로젝터, 초고속 와\
-                  이파이가 완비된 최고급 회의실입니다.\",\r\n  \"facilityIds\" : null,\r\n  \"floor\"\
-                  \ : 3,\r\n  \"images\" : [ {\r\n    \"displayOrder\" : 0,\r\n  \
-                  \  \"imageUrl\" : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
-                  \r\n  } ],\r\n  \"name\" : \"세미나룸 A\",\r\n  \"price\" : 30000,\r\
-                  \n  \"roomCode\" : \"ROOM-001\",\r\n  \"status\" : \"AVAILABLE\"\
-                  \r\n}"
+                  value: "{\r\n  \"name\" : \"세미나룸 A\",\r\n  \"description\" : \"화이트\
+                  보드, 빔 프로젝터, 초고속 와이파이가 완비된 최고급 회의실입니다.\",\r\n  \"roomCode\" : \"\
+                  ROOM-001\",\r\n  \"category\" : null,\r\n  \"floor\" : 3,\r\n  \"\
+                  capacity\" : 10,\r\n  \"price\" : 30000,\r\n  \"bufferTime\" : 30,\r\
+                  \n  \"status\" : \"AVAILABLE\",\r\n  \"facilityIds\" : null,\r\n\
+                  \  \"images\" : [ {\r\n    \"displayOrder\" : 0,\r\n    \"imageUrl\"\
+                  \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                  \r\n  } ]\r\n}"
       responses:
         "200":
           description: "200"
@@ -2162,20 +2162,20 @@ paths:
               $ref: "#/components/schemas/RoomRequest"
             examples:
               room-create:
-                value: "{\r\n  \"bufferTime\" : 30,\r\n  \"capacity\" : 10,\r\n  \"\
-                  category\" : null,\r\n  \"description\" : \"화이트보드, 빔 프로젝터, 초고속 와\
-                  이파이가 완비된 최고급 회의실입니다.\",\r\n  \"facilityIds\" : null,\r\n  \"floor\"\
-                  \ : 3,\r\n  \"images\" : [ {\r\n    \"displayOrder\" : 0,\r\n  \
-                  \  \"imageUrl\" : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
-                  \r\n  } ],\r\n  \"name\" : \"세미나룸 A\",\r\n  \"price\" : 30000,\r\
-                  \n  \"roomCode\" : \"ROOM-001\",\r\n  \"status\" : \"AVAILABLE\"\
-                  \r\n}"
+                value: "{\r\n  \"name\" : \"세미나룸 A\",\r\n  \"description\" : \"화이트\
+                  보드, 빔 프로젝터, 초고속 와이파이가 완비된 최고급 회의실입니다.\",\r\n  \"roomCode\" : \"\
+                  ROOM-001\",\r\n  \"category\" : null,\r\n  \"floor\" : 3,\r\n  \"\
+                  capacity\" : 10,\r\n  \"price\" : 30000,\r\n  \"bufferTime\" : 30,\r\
+                  \n  \"status\" : \"AVAILABLE\",\r\n  \"facilityIds\" : null,\r\n\
+                  \  \"images\" : [ {\r\n    \"displayOrder\" : 0,\r\n    \"imageUrl\"\
+                  \ : \"https://images.unsplash.com/photo-1497366216548-37526070297c\"\
+                  \r\n  } ]\r\n}"
               room-create-400:
-                value: "{\r\n  \"bufferTime\" : null,\r\n  \"capacity\" : null,\r\n\
-                  \  \"category\" : null,\r\n  \"description\" : null,\r\n  \"facilityIds\"\
-                  \ : null,\r\n  \"floor\" : null,\r\n  \"images\" : null,\r\n  \"\
-                  name\" : null,\r\n  \"price\" : null,\r\n  \"roomCode\" : null,\r\
-                  \n  \"status\" : null\r\n}"
+                value: "{\r\n  \"name\" : null,\r\n  \"description\" : null,\r\n \
+                  \ \"roomCode\" : null,\r\n  \"category\" : null,\r\n  \"floor\"\
+                  \ : null,\r\n  \"capacity\" : null,\r\n  \"price\" : null,\r\n \
+                  \ \"bufferTime\" : null,\r\n  \"status\" : null,\r\n  \"facilityIds\"\
+                  \ : null,\r\n  \"images\" : null\r\n}"
       responses:
         "201":
           description: "201"

@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +39,20 @@ public class SecurityConfig {
         private final AppProperties appProperties;
 
         @Bean
+        public WebSecurityCustomizer webSecurityCustomizer() {
+                // Why: 정적 리소스들은 보안 필터를 아예 타지 않도록 설정하여 성능 향상 및 불필요한 401/500 에러 방지
+                return (web) -> web.ignoring().requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/swagger-ui/**",
+                                "/api/v3/api-docs/**",
+                                "/api/openapi3.yaml",
+                                "/openapi3.yaml",
+                                "/favicon.ico",
+                                "/static/**");
+        }
+
+        @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -47,8 +62,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/auth/*/logout").authenticated()
                                                 .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**",
-                                                                "/swagger-ui/**",
-                                                                "/v3/api-docs/**", "/openapi3.yaml")
+                                                                "/actuator/**")
                                                 .permitAll()
 
                                                 // Office management - ADMIN or MANAGER only for write operations
