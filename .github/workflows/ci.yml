@@ -1,0 +1,36 @@
+# Modu Office CI Workflow
+# 1. 백엔드 단위/통합 테스트 검증
+# 2. docker-compose.prod.yml을 이용한 풀스택 도커 빌드 및 헬스체크 검증 (Staging Simulation)
+
+name: Modu Office CI
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+      
+      - name: Grant execute permission for gradlew
+        run: chmod +x backend/gradlew
+        
+      - name: Run Backend Tests
+        run: cd backend && ./gradlew test
+        
+      - name: Verify Full Stack Docker Build (via Compose)
+        run: |
+          docker compose -f docker-compose.prod.yml build
+          docker compose -f docker-compose.prod.yml up -d
+          # Healthcheck 대기 (최대 60초)
+          timeout 60s sh -c 'until [ "$(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))" == "healthy" ]; do sleep 5; done'
