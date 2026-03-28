@@ -1,6 +1,6 @@
 # Modu Office CI Workflow
-# 1. 백엔드 단위/통합 테스트 검증
-# 2. docker-compose.prod.yml을 이용한 풀스택 도커 빌드 및 헬스체크 검증 (Staging Simulation)
+# 1. 백엔드 빌드 및 테스트 (Gradle)
+# 2. 도커 컴포즈를 이용한 전체 시스템 빌드 및 실행 확인 (Healthcheck)
 
 name: Modu Office CI
 
@@ -15,22 +15,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 21
+
+      # 1. JDK 설정
+      - name: Set up JDK 21 (Corretto)
         uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin'
+          distribution: 'corretto'
           cache: 'gradle'
-      
+
+      # 2. 실행 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x backend/gradlew
-        
+
+      # 3. 백엔드 테스트 (더미 환경변수 주입 상태)
       - name: Run Backend Tests
         run: cd backend && ./gradlew test
-        
+
+      # 4. 도커 컴포즈 빌드 및 실행 테스트
       - name: Verify Full Stack Docker Build (via Compose)
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME || 'postgres' }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'dummy_secret_key_for_ci_build_verification_32_chars' }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID || 'dummy_id' }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET || 'dummy_secret' }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'dummy_key' }}
+          TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY || 'dummy_toss_key' }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY || 'dummy_vite_key' }}
         run: |
+          # 기존 컨테이너가 있다면 정리
+          docker compose -f docker-compose.prod.yml down
+          
+          # 빌드 및 백그라운드 실행
           docker compose -f docker-compose.prod.yml build
           docker compose -f docker-compose.prod.yml up -d
-          # Healthcheck 대기 (최대 60초)
-          timeout 60s sh -c 'until [ "$(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))" == "healthy" ]; do sleep 5; done'
+          
+          echo "Waiting for backend healthcheck..."
+          # 60초 동안 5초 간격으로 backend 컨테이너의 상태가 'healthy'인지 확인
+          timeout 60s sh -c 'until [ "$(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))" == "healthy" ]; do 
+            sleep 5
+            echo "Checking backend health... current status: $(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))"
+          done'
+
+      # 5. 리소스 정리 (성공/실패 상관없이 실행)
+      - name: Stop and Clean up
+        if: always()
+        run: docker compose -f docker-compose.prod.yml down
