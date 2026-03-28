@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { favoriteApi, type Favorite } from './api/favorite.api';
 import { roomApi } from '../rooms/api/room.api';
+import { useToast } from '../../components/Toast';
+import { SkeletonCard } from '../../components/Skeleton';
 import './FavoritesPage.css';
 
 // Extend Favorite locally to hold the fetched image
@@ -13,6 +15,7 @@ export default function FavoritesPage() {
     const [favorites, setFavorites] = useState<FavoriteWithImage[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const toast = useToast();
 
     useEffect(() => {
         loadFavorites();
@@ -53,7 +56,7 @@ export default function FavoritesPage() {
             await favoriteApi.removeFavorite(roomId);
             setFavorites(prev => prev.filter(f => f.roomId !== roomId));
         } catch {
-            alert('삭제에 실패했습니다.');
+            toast.error('삭제에 실패했습니다.');
         }
     };
 
@@ -65,9 +68,8 @@ export default function FavoritesPage() {
             </div>
 
             {loading ? (
-                <div className="favorites-empty">
-                    <div className="favorites-empty-icon">⏳</div>
-                    <p>불러오는 중...</p>
+                <div className="favorites-grid">
+                    {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
             ) : favorites.length === 0 ? (
                 <div className="favorites-empty">

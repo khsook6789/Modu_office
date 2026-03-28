@@ -1,0 +1,93 @@
+.toast-container {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 420px;
+  width: calc(100% - var(--spacing-xl) * 2);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid;
+  animation: toastSlideIn 0.3s ease-out;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.toast--success { border-left-color: var(--color-success); }
+.toast--error   { border-left-color: var(--color-error); }
+.toast--warning { border-left-color: var(--color-warning); }
+.toast--info    { border-left-color: var(--color-primary); }
+
+.toast__icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.toast__icon--success { background: var(--color-success); }
+.toast__icon--error   { background: var(--color-error); }
+.toast__icon--warning { background: var(--color-warning); }
+.toast__icon--info    { background: var(--color-primary); }
+
+.toast__message {
+  flex: 1;
+  color: var(--color-text-main);
+}
+
+.toast__close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+
+.toast__close:hover {
+  color: var(--color-text-main);
+  background: var(--color-bg-hover);
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-container {
+    top: auto;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-md);
+    left: var(--spacing-md);
+    max-width: none;
+    width: auto;
+  }
+}

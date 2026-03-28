@@ -9,6 +9,8 @@ import ReviewForm from '../reviews/components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
 import FavoriteButton from '../../components/FavoriteButton';
 import OfficeMap from '../../components/Map/OfficeMap';
+import { useToast } from '../../components/Toast';
+import { Skeleton } from '../../components/Skeleton';
 import './RoomDetailPage.css';
 
 export default function RoomDetailPage() {
@@ -18,6 +20,7 @@ export default function RoomDetailPage() {
 
     const navigate = useNavigate();
     const { user } = useAuth();
+    const toast = useToast();
 
     // Room State
     const [room, setRoom] = useState<any>(null); // Ideally use Room type
@@ -85,7 +88,31 @@ export default function RoomDetailPage() {
     }, [roomId, user]);
 
     if (loadingRoom) {
-        return <div className="text-center py-20">Loading room details...</div>;
+        return (
+            <div className="room-detail-page">
+                <Skeleton width="150px" height="1rem" />
+                <div style={{ marginTop: '1.5rem' }}>
+                    <Skeleton width="60%" height="2rem" />
+                    <Skeleton width="40%" height="1rem" className="mt-sm" />
+                </div>
+                <Skeleton height="400px" borderRadius="var(--radius-lg)" className="mt-md" />
+                <div className="room-detail-grid" style={{ marginTop: '2rem' }}>
+                    <div className="room-main-content">
+                        <Skeleton height="1.2rem" width="30%" />
+                        <Skeleton height="4rem" className="mt-sm" />
+                        <Skeleton height="1.2rem" width="40%" className="mt-lg" />
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                            <Skeleton width="80px" height="2rem" borderRadius="var(--radius-full)" />
+                            <Skeleton width="100px" height="2rem" borderRadius="var(--radius-full)" />
+                            <Skeleton width="90px" height="2rem" borderRadius="var(--radius-full)" />
+                        </div>
+                    </div>
+                    <aside className="booking-sidebar">
+                        <Skeleton height="250px" borderRadius="var(--radius-lg)" />
+                    </aside>
+                </div>
+            </div>
+        );
     }
 
     if (!room) {
@@ -94,7 +121,7 @@ export default function RoomDetailPage() {
 
     const handleReviewSubmit = async (rating: number, comment: string) => {
         if (!user) {
-            alert('로그인이 필요합니다.');
+            toast.warning('로그인이 필요합니다.');
             navigate('/login');
             return;
         }
@@ -108,7 +135,7 @@ export default function RoomDetailPage() {
             await loadReviews();
         } catch (error) {
             console.error("Failed to submit review", error);
-            alert('리뷰 등록에 실패했습니다.');
+            toast.error('리뷰 등록에 실패했습니다.');
         }
     };
 

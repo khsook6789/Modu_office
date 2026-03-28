@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { adminApi, type AdminUser, type PendingManager, type UpdateLogResponse } from './api/admin.api';
 import { facilityApi, type Facility } from './api/facility.api';
+import { useToast } from '../../components/Toast';
+import { SkeletonTable } from '../../components/Skeleton';
 import './AdminDashboard.css';
 
 type Tab = 'OVERVIEW' | 'USERS' | 'MANAGERS' | 'AUDIT_LOG' | 'FACILITIES';
 
 export default function AdminDashboard() {
+    const toast = useToast();
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [pendingManagers, setPendingManagers] = useState<PendingManager[]>([]);
     const [auditLogs, setAuditLogs] = useState<UpdateLogResponse[]>([]);
@@ -47,7 +50,7 @@ export default function AdminDashboard() {
         try {
             const updated = await adminApi.suspendUser(user.id);
             setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
-        } catch { alert('계정 정지에 실패했습니다.'); }
+        } catch { toast.error('계정 정지에 실패했습니다.'); }
     };
 
     const handleReactivate = async (user: AdminUser) => {
@@ -55,7 +58,7 @@ export default function AdminDashboard() {
         try {
             const updated = await adminApi.reactivateUser(user.id);
             setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
-        } catch { alert('계정 복원에 실패했습니다.'); }
+        } catch { toast.error('계정 복원에 실패했습니다.'); }
     };
 
     const handleApprove = async (manager: PendingManager) => {
@@ -65,8 +68,8 @@ export default function AdminDashboard() {
             setPendingManagers(prev => prev.filter(m => m.userId !== manager.userId));
             const usersData = await adminApi.getAllUsers();
             setUsers(usersData);
-            alert('승인되었습니다.');
-        } catch { alert('승인에 실패했습니다.'); }
+            toast.success('승인되었습니다.');
+        } catch { toast.error('승인에 실패했습니다.'); }
     };
 
     const handleDeleteFacility = async (id: number) => {
@@ -75,7 +78,7 @@ export default function AdminDashboard() {
             await facilityApi.deleteFacility(id);
             setFacilities(prev => prev.filter(f => f.id !== id));
         } catch (err) {
-            alert('시설 삭제에 실패했습니다.');
+            toast.error('시설 삭제에 실패했습니다.');
         }
     };
 
@@ -97,7 +100,7 @@ export default function AdminDashboard() {
             setIsFacilityModalOpen(false);
             setEditingFacility(null);
         } catch (err) {
-            alert('시설 저장에 실패했습니다.');
+            toast.error('시설 저장에 실패했습니다.');
         }
     };
 
@@ -160,7 +163,7 @@ export default function AdminDashboard() {
             </div>
 
             {loading ? (
-                <div className="empty-state"><p>로딩 중...</p></div>
+                <div className="admin-table-wrap"><SkeletonTable rows={6} cols={5} /></div>
             ) : (
                 <>
                     {/* 개요 */}

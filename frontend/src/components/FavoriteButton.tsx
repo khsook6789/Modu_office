@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { favoriteApi } from '../features/favorites/api/favorite.api';
+import { useToast } from './Toast';
 import './FavoriteButton.css';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
  * 회의실 목록/상세 페이지에서 공유해서 사용
  */
 export default function FavoriteButton({ roomId }: Props) {
+    const toast = useToast();
     const [isFav, setIsFav] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -35,7 +37,7 @@ export default function FavoriteButton({ roomId }: Props) {
                 setIsFav(true);
             }
         } catch {
-            alert('즐겨찾기 처리에 실패했습니다.');
+            toast.error('즐겨찾기 처리에 실패했습니다.');
         } finally {
             setLoading(false);
         }

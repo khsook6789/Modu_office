@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Input from '../../components/Input';
 import { roomApi } from './api/room.api';
+import { useToast } from '../../components/Toast';
 
 // Enum for Room Category
 const CHECK_OPTIONS = [
@@ -15,6 +16,7 @@ const CHECK_OPTIONS = [
 export default function RoomFormPage() {
     const { officeId, roomId } = useParams();
     const navigate = useNavigate();
+    const toast = useToast();
     const isEditMode = !!roomId;
 
     const [name, setName] = useState('');
@@ -47,7 +49,7 @@ export default function RoomFormPage() {
                 })
                 .catch(err => {
                     console.error("Failed to fetch room", err);
-                    alert('회의실 정보를 불러오지 못했습니다.');
+                    toast.error('회의실 정보를 불러오지 못했습니다.');
                 })
                 .finally(() => setLoading(false));
         }
@@ -83,10 +85,10 @@ export default function RoomFormPage() {
         try {
             if (isEditMode) {
                 await roomApi.updateRoom(Number(roomId), roomData);
-                alert('회의실 정보가 수정되었습니다.');
+                toast.success('회의실 정보가 수정되었습니다.');
             } else {
                 await roomApi.createRoom(Number(currentOfficeId), roomData);
-                alert('회의실이 추가되었습니다.');
+                toast.success('회의실이 추가되었습니다.');
             }
 
             // Navigate back logic
@@ -98,7 +100,7 @@ export default function RoomFormPage() {
             }
         } catch (error) {
             console.error(error);
-            alert('저장 중 오류가 발생했습니다.');
+            toast.error('저장 중 오류가 발생했습니다.');
         } finally {
             setLoading(false);
         }

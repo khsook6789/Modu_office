@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Autocomplete, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import Input from '../../components/Input';
 import { officeApi } from '../rooms/api/office.api';
+import { useToast } from '../../components/Toast';
 
 const LIBRARIES: ('places')[] = ['places'];
 
@@ -16,6 +17,7 @@ const mapContainerStyle = {
 export default function OfficeFormPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const toast = useToast();
     const isEditMode = !!id;
 
     const [name, setName] = useState('');
@@ -92,15 +94,15 @@ export default function OfficeFormPage() {
         try {
             if (isEditMode) {
                 await officeApi.updateOffice(id!, officeData);
-                alert('오피스 정보가 수정되었습니다.');
+                toast.success('오피스 정보가 수정되었습니다.');
             } else {
                 await officeApi.createOffice(officeData);
-                alert('새로운 오피스가 등록되었습니다.');
+                toast.success('새로운 오피스가 등록되었습니다.');
             }
             navigate('/operator');
         } catch (error) {
             console.error(error);
-            alert('오피스 저장 중 오류가 발생했습니다.');
+            toast.error('오피스 저장 중 오류가 발생했습니다.');
         } finally {
             setLoading(false);
         }

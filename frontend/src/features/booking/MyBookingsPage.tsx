@@ -4,6 +4,8 @@ import { client } from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { reportApi, type FacilityReport } from '../reports/api/report.api';
 import FacilityReportModal from '../reports/components/FacilityReportModal';
+import { useToast } from '../../components/Toast';
+import { Skeleton } from '../../components/Skeleton';
 import './MyBookings.css';
 import '../reports/components/FacilityReportModal.css';
 
@@ -39,6 +41,7 @@ interface ReportModalTarget {
 export default function MyBookingsPage() {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const toast = useToast();
     const [bookings, setBookings] = useState<ReservationResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -64,6 +67,9 @@ export default function MyBookingsPage() {
     const [countdowns, setCountdowns] = useState<Record<number, number>>({});
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+    // 자동 취소 중복 방지용
+    const cancellingIdsRef = useRef<Set<number>>(new Set());
+
     // 10분(600초) 카운트다운 계산
     const calcCountdowns = useCallback((list: ReservationResponse[]) => {
         const now = Date.now();
@@ -76,6 +82,27 @@ export default function MyBookingsPage() {
         });
         return map;
     }, []);
+
+    // 카운트다운 0인 예약 자동 취소
+    const autoCancelExpired = useCallback(async (list: ReservationResponse[]) => {
+        const now = Date.now();
+        for (const b of list) {
+            if (b.status !== 'PENDING_PAYMENT') continue;
+            if (cancellingIdsRef.current.has(b.id)) continue;
+            const expiry = new Date(b.createdAt).getTime() + 10 * 60 * 1000;
+            if (now >= expiry) {
+                cancellingIdsRef.current.add(b.id);
+                try {
+                    await client.post(`/reservations/${b.id}/cancel`, null);
+                    setBookings(prev => prev.map(r => r.id === b.id ? { ...r, status: 'CANCELED' as const } : r));
+                    toast.info(`"${b.roomName}" 예약이 결제 시간 초과로 자동 취소되었습니다.`);
+                } catch {
+                    // 서버에서 이미 취소됐거나 에러 — 목록 새로고침
+                }
+                cancellingIdsRef.current.delete(b.id);
+            }
+        }
+    }, [toast]);
 
     const loadBookings = useCallback(async () => {
         try {
@@ -94,10 +121,10 @@ export default function MyBookingsPage() {
             const hasPending = sorted.some(b => b.status === 'PENDING_PAYMENT');
             if (hasPending) {
                 setCountdowns(calcCountdowns(sorted));
-                // stale closure 방지: setInterval 내에서 현재 bookings state를 직접 참조
                 timerRef.current = setInterval(() => {
                     setBookings(prev => {
                         setCountdowns(calcCountdowns(prev));
+                        autoCancelExpired(prev);
                         return prev;
                     });
                 }, 1000);
@@ -111,7 +138,7 @@ export default function MyBookingsPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [user, calcCountdowns]);
+    }, [user, calcCountdowns, autoCancelExpired]);
 
     useEffect(() => {
         if (user?.id) loadBookings();
@@ -156,7 +183,7 @@ export default function MyBookingsPage() {
             await reportApi.cancelReport(reportId);
             await loadReports(reservationId);
         } catch (err: any) {
-            alert('신고 철회 실패: ' + (err?.message || '서버 오류'));
+            toast.error('신고 철회 실패: ' + (err?.message || '서버 오류'));
         }
     };
 
@@ -201,7 +228,7 @@ export default function MyBookingsPage() {
             setRefundModal(null);
             await loadBookings();
         } catch (err: any) {
-            alert('예약 취소 실패: ' + (err?.message || '서버 오류'));
+            toast.error('예약 취소 실패: ' + (err?.message || '서버 오류'));
         } finally {
             setCancellingId(null);
         }
@@ -229,7 +256,29 @@ export default function MyBookingsPage() {
         canceled: bookings.filter(b => b.status === 'CANCELED').length,
     };
 
-    if (isLoading) return <div className="my-bookings-page"><div className="booking-empty"><p>로딩 중...</p></div></div>;
+    if (isLoading) return (
+        <div className="my-bookings-page">
+            <div className="bookings-header">
+                <Skeleton width="200px" height="2rem" />
+                <Skeleton width="120px" height="2.5rem" borderRadius="var(--radius-md)" />
+            </div>
+            <div className="bookings-stats">
+                {Array.from({ length: 5 }).map((_, i) => (
+                    <div className="book-stat-card" key={i}>
+                        <Skeleton width="40px" height="40px" borderRadius="var(--radius-md)" />
+                        <div><Skeleton width="50px" height="1.5rem" /><Skeleton width="40px" height="0.8rem" /></div>
+                    </div>
+                ))}
+            </div>
+            {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} style={{ background: 'var(--color-bg-card)', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.5rem', marginBottom: '1rem' }}>
+                    <Skeleton width="80px" height="1.5rem" borderRadius="var(--radius-full)" />
+                    <Skeleton width="60%" height="1.2rem" className="mt-sm" />
+                    <Skeleton width="40%" height="0.9rem" className="mt-sm" />
+                </div>
+            ))}
+        </div>
+    );
 
     return (
         <div className="my-bookings-page">

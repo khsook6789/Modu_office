@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Input from '../../components/Input';
+import { useToast } from '../../components/Toast';
 import './AuthStyles.css';
 
 export default function AdminSignupPage() {
@@ -12,6 +13,7 @@ export default function AdminSignupPage() {
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const toast = useToast();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -19,7 +21,7 @@ export default function AdminSignupPage() {
 
         // Security check
         if (adminCode !== 'admin1234') {
-            alert('관리자 인증 코드가 올바르지 않습니다.');
+            toast.error('관리자 인증 코드가 올바르지 않습니다.');
             setLoading(false);
             return;
         }
@@ -31,7 +33,7 @@ export default function AdminSignupPage() {
             const existingUser = users.find((u: any) => u.email === email);
 
             if (existingUser) {
-                alert('이미 가입된 이메일 주소입니다.');
+                toast.error('이미 가입된 이메일 주소입니다.');
                 setLoading(false);
                 return;
             }

@@ -4,6 +4,8 @@ import { loadPaymentWidget, type PaymentWidgetInstance } from '@tosspayments/pay
 import { type RoomResponse } from '../rooms/api/room.api';
 import { client } from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../components/Toast';
+import Calendar from '../../components/Calendar/Calendar';
 import './BookingPage.css';
 
 // 토스 테스트 클라이언트 키 (공개값)
@@ -27,6 +29,7 @@ export default function BookingPage() {
     const { roomId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const toast = useToast();
     const [room, setRoom] = useState<RoomResponse | null>(null);
 
     const [date, setDate] = useState('');
@@ -52,7 +55,7 @@ export default function BookingPage() {
                 setRoom(data);
                 setDate(new Date().toISOString().split('T')[0]);
             })
-            .catch(() => { alert('존재하지 않는 회의실입니다.'); navigate('/rooms'); });
+            .catch(() => { toast.error('존재하지 않는 회의실입니다.'); navigate('/rooms'); });
     }, [roomId, navigate]);
 
     // 가격 계산
@@ -86,7 +89,7 @@ export default function BookingPage() {
             .catch((err) => {
                 if (!cancelled) {
                     console.error('위젯 로드 실패', err);
-                    alert('결제 위젯 로드에 실패했습니다. 다시 시도해 주세요.');
+                    toast.error('결제 위젯 로드에 실패했습니다. 다시 시도해 주세요.');
                     setStep('form');
                     setIsWidgetLoading(false);
                 }
@@ -120,11 +123,11 @@ export default function BookingPage() {
     // 1단계: 폼 유효성 검사 후 결제 UI 표시 (예약 생성 X)
     const handleProceedToPayment = () => {
         if (!date || !startTime || !room) {
-            alert('날짜와 시간을 선택해주세요.');
+            toast.warning('날짜와 시간을 선택해주세요.');
             return;
         }
         if (Number(guestCount) < 1 || Number(guestCount) > room.capacity) {
-            alert(`참여 인원은 1명 이상 ${room.capacity}명 이하여야 합니다.`);
+            toast.warning(`참여 인원은 1명 이상 ${room.capacity}명 이하여야 합니다.`);
             return;
         }
 
@@ -153,7 +156,7 @@ export default function BookingPage() {
 
         const raw = sessionStorage.getItem('pendingReservation');
         if (!raw) {
-            alert('예약 정보가 유실되었습니다. 다시 시도해주세요.');
+            toast.error('예약 정보가 유실되었습니다. 다시 시도해주세요.');
             setStep('form');
             return;
         }
@@ -200,7 +203,7 @@ export default function BookingPage() {
         } catch (err: any) {
             console.error('결제/예약 준비 오류', err);
             if (err?.code !== 'USER_CANCEL') {
-                alert('처리 중 오류가 발생했습니다: ' + (err?.message || '잠시 후 다시 시도해주세요.'));
+                toast.error('처리 중 오류가 발생했습니다: ' + (err?.message || '잠시 후 다시 시도해주세요.'));
             }
         } finally {
             setIsProcessing(false);
@@ -267,17 +270,16 @@ export default function BookingPage() {
                             </div>
                         </div>
 
+                        <div className="form-group">
+                            <label className="input-label booking-label">이용 날짜</label>
+                            <Calendar
+                                value={date}
+                                onChange={setDate}
+                                minDate={new Date().toISOString().split('T')[0]}
+                            />
+                        </div>
+
                         <div className="booking-input-row">
-                            <div className="form-group" style={{ width: '100%' }}>
-                                <label className="input-label booking-label">이용 날짜</label>
-                                <input
-                                    type="date"
-                                    className="input-field booking-custom-input"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    min={new Date().toISOString().split('T')[0]}
-                                />
-                            </div>
                             <div className="form-group" style={{ width: '100%' }}>
                                 <label className="input-label booking-label">시작 시간</label>
                                 <input

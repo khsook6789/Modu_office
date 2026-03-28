@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { roomApi, type RoomResponse } from './api/room.api';
 import { officeApi } from './api/office.api';
+import { useToast } from '../../components/Toast';
+import { SkeletonTable } from '../../components/Skeleton';
 
 export default function RoomManagementPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const toast = useToast();
     const [rooms, setRooms] = useState<RoomResponse[]>([]);
     const [officeName, setOfficeName] = useState('');
     const [loading, setLoading] = useState(true);
@@ -27,7 +30,7 @@ export default function RoomManagementPage() {
             setRooms(roomData);
         }).catch(err => {
             console.error("Failed to load data", err);
-            alert('오피스 정보를 불러오는데 실패했습니다.');
+            toast.error('오피스 정보를 불러오는데 실패했습니다.');
             navigate('/operator');
         }).finally(() => {
             setLoading(false);
@@ -39,10 +42,10 @@ export default function RoomManagementPage() {
             try {
                 await roomApi.deleteRoom(roomId);
                 setRooms(prev => prev.filter(r => r.id !== roomId));
-                alert('삭제되었습니다.');
+                toast.success('삭제되었습니다.');
             } catch (error) {
                 console.error("Failed to delete room", error);
-                alert('삭제에 실패했습니다.');
+                toast.error('삭제에 실패했습니다.');
             }
         }
     };
@@ -63,7 +66,7 @@ export default function RoomManagementPage() {
             </div>
 
             {loading ? (
-                <div className="text-center p-xl">로딩 중...</div>
+                <div className="bg-white rounded-lg shadow-sm" style={{ padding: '1rem' }}><SkeletonTable rows={5} cols={6} /></div>
             ) : (
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                     <table className="w-full text-left border-collapse">

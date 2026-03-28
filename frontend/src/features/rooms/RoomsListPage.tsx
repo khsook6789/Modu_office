@@ -7,6 +7,7 @@ import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
 import RoomCard from './RoomCard';
 import Input from '../../components/Input';
 import { roomApi, type FacilityResponse } from './api/room.api';
+import { useToast } from '../../components/Toast';
 
 const LIBRARIES: ('places')[] = ['places'];
 
@@ -29,6 +30,7 @@ function RoomsListPageContent() {
     const { user } = useAuth();
     const { rooms, addRoom, deleteRoom } = useRooms();
     const { selectedOfficeId, selectedOffice, offices, createOffice, deleteOffice } = useOfficeContext();
+    const toast = useToast();
     const [filter, setFilter] = useState<'ALL' | 'AVAILABLE'>('ALL');
 
     
@@ -105,35 +107,40 @@ function RoomsListPageContent() {
             });
             setIsOfficeModalOpen(false);
             setNewOfficeData({ name: '', description: '', location: '', openTime: '09:00', closeTime: '18:00' });
-            alert('오피스가 성공적으로 생성되었습니다!');
+            toast.success('오피스가 성공적으로 생성되었습니다!');
         } catch (err: any) {
             console.error('Office creation error:', err);
-            alert('오피스 생성에 실패했습니다.\n원인: ' + (err?.message || '알 수 없는 오류'));
+            toast.error('오피스 생성에 실패했습니다: ' + (err?.message || '알 수 없는 오류'));
         }
     };
 
-    const handleAddRoom = (e: React.FormEvent) => {
+    const handleAddRoom = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!selectedOfficeId) {
-            alert('오피스를 먼저 선택해주세요.');
+            toast.warning('오피스를 먼저 선택해주세요.');
             return;
         }
-        
-        addRoom(selectedOfficeId, {
-            name: newRoom.name,
-            description: newRoom.description,
-            floor: Number(newRoom.floor),
-            roomCode: newRoom.roomCode,
-            capacity: Number(newRoom.capacity),
-            facilityIds: selectedFacilities,
-            imageUrl: newRoom.imageUrl || undefined,
-            price: Number(newRoom.price) || 0,
-            bufferTime: Number(newRoom.bufferTime) || 0
-        });
-        setIsModalOpen(false);
-        setNewRoom({ name: '', description: '', floor: 1, roomCode: '', capacity: 4, imageUrl: '', price: 0, bufferTime: 0 });
-        setSelectedFacilities([]);
+
+        try {
+            await addRoom(selectedOfficeId, {
+                name: newRoom.name,
+                description: newRoom.description,
+                floor: Number(newRoom.floor),
+                roomCode: newRoom.roomCode,
+                capacity: Number(newRoom.capacity),
+                facilityIds: selectedFacilities,
+                imageUrl: newRoom.imageUrl || undefined,
+                price: Number(newRoom.price) || 0,
+                bufferTime: Number(newRoom.bufferTime) || 0
+            });
+            toast.success('회의실이 성공적으로 추가되었습니다!');
+            setIsModalOpen(false);
+            setNewRoom({ name: '', description: '', floor: 1, roomCode: '', capacity: 4, imageUrl: '', price: 0, bufferTime: 0 });
+            setSelectedFacilities([]);
+        } catch (err: any) {
+            toast.error('회의실 추가 실패: ' + (err?.message || '서버 오류'));
+        }
     };
 
     return (
@@ -191,9 +198,9 @@ function RoomsListPageContent() {
                                     if (confirm(`"${selectedOffice.name}" 오피스를 삭제하시겠습니까?\n⚠️ 소속 회의실이 없어야 삭제 가능합니다.`)) {
                                         try {
                                             await deleteOffice(selectedOffice.id);
-                                            alert('오피스가 삭제되었습니다.');
+                                            toast.success('오피스가 삭제되었습니다.');
                                         } catch (err: any) {
-                                            alert('오피스 삭제 실패: ' + (err?.message || '서버 오류'));
+                                            toast.error('오피스 삭제 실패: ' + (err?.message || '서버 오류'));
                                         }
                                     }
                                 }}

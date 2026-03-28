@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { client } from '../../api/client';
 import { reviewApi, type Review } from '../reviews/api/review.api';
+import { useToast } from '../../components/Toast';
 import './MyPage.css';
 
 type Tab = 'PROFILE' | 'PASSWORD' | 'REVIEWS';
@@ -10,6 +11,7 @@ type Tab = 'PROFILE' | 'PASSWORD' | 'REVIEWS';
 export default function MyPage() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const toast = useToast();
 
     const [activeTab, setActiveTab] = useState<Tab>('PROFILE');
 
@@ -81,11 +83,11 @@ export default function MyPage() {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.message || '탈퇴에 실패했습니다.');
             }
-            alert('회원탈퇴가 완료되었습니다.');
+            toast.success('회원탈퇴가 완료되었습니다.');
             logout();
             navigate('/login');
         } catch (err: any) {
-            alert(`❌ ${err.message}`);
+            toast.error(err.message);
         }
     };
 
@@ -94,7 +96,7 @@ export default function MyPage() {
         try {
             await reviewApi.deleteReview(reviewId);
             setReviews(prev => prev.filter(r => r.id !== reviewId));
-        } catch { alert('리뷰 삭제에 실패했습니다.'); }
+        } catch { toast.error('리뷰 삭제에 실패했습니다.'); }
     };
 
     if (!user) return <div className="mypage-container"><p>로딩 중이거나 로그인이 필요합니다.</p></div>;

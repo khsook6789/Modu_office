@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/Input';
 import { authApi } from './api/auth.api';
+import { useToast } from '../../components/Toast';
 import './AuthStyles.css';
 
 export default function SignupPage() {
@@ -12,6 +13,7 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const toast = useToast();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -21,11 +23,11 @@ export default function SignupPage() {
         try {
             if (userType === 'USER') {
                 await authApi.signup({ name, email, password });
-                alert('회원가입이 완료되었습니다. 로그인해주세요.');
+                toast.success('회원가입이 완료되었습니다. 로그인해주세요.');
                 navigate('/login');
             } else {
                 await authApi.signupOperator({ name, email, password });
-                alert('파트너(운영자) 가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.');
+                toast.success('파트너(운영자) 가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.');
                 navigate('/login');
             }
         } catch (err: any) {

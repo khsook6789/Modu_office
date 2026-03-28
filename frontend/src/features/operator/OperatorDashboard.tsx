@@ -6,6 +6,8 @@ import { bookingApi, type Booking } from '../booking/api/booking.api';
 import { client } from '../../api/client';
 import StatsDashboard from './StatsDashboard';
 import OfficeMap from '../../components/Map/OfficeMap';
+import { useToast } from '../../components/Toast';
+import { SkeletonTable } from '../../components/Skeleton';
 import './OperatorDashboard.css';
 import './StatsDashboard.css';
 
@@ -34,6 +36,7 @@ type ReservationStatus = 'ALL' | 'PENDING_PAYMENT' | 'PENDING_APPROVAL' | 'CONFI
 
 export default function OperatorDashboard() {
     const navigate = useNavigate();
+    const toast = useToast();
     const [offices, setOffices] = useState<Office[]>([]);
     const [reservations, setReservations] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
@@ -110,7 +113,7 @@ export default function OperatorDashboard() {
         try {
             await officeApi.deleteOffice(office.id);
             setOffices(prev => prev.filter(o => o.id !== office.id));
-        } catch { alert('삭제에 실패했습니다.'); }
+        } catch { toast.error('삭제에 실패했습니다.'); }
     };
 
     // 신고 내역 조회
@@ -135,7 +138,7 @@ export default function OperatorDashboard() {
             setReports(prev => prev.map(r =>
                 r.reportId === reportId ? { ...r, status: newStatus, statusName: newStatus === 'IN_PROGRESS' ? '처리 중' : '해결' } : r
             ));
-        } catch { alert('상태 변경에 실패했습니다.'); }
+        } catch { toast.error('상태 변경에 실패했습니다.'); }
     };
 
     const handleConfirm = async (id: number) => {
@@ -143,7 +146,7 @@ export default function OperatorDashboard() {
         try {
             await bookingApi.confirmBooking(id);
             setReservations(prev => prev.map(r => r.id === id ? { ...r, status: 'CONFIRMED' as const } : r));
-        } catch { alert('확정에 실패했습니다.'); }
+        } catch { toast.error('확정에 실패했습니다.'); }
     };
 
     const handleForceCancel = async (id: number) => {
@@ -152,7 +155,7 @@ export default function OperatorDashboard() {
         try {
             await client.post(`/admin/reservations/${id}/force-cancel`, { adminReason: reason });
             setReservations(prev => prev.map(r => r.id === id ? { ...r, status: 'CANCELED' as const } : r));
-        } catch { alert('취소에 실패했습니다.'); }
+        } catch { toast.error('취소에 실패했습니다.'); }
     };
 
     const statusLabel = (s: string) => ({ PENDING_PAYMENT: '결제 대기', PENDING_APPROVAL: '승인 대기', CONFIRMED: '확정', CANCELED: '취소' }[s] || s);
@@ -251,7 +254,7 @@ export default function OperatorDashboard() {
             )}
             {activeTab !== 'STATS' && (
                 loading ? (
-                    <div className="op-empty"><p>로딩 중...</p></div>
+                    <div className="op-table-wrap"><SkeletonTable rows={5} cols={5} /></div>
                 ) : (
                     <>
                         {/* 오피스 관리 */}

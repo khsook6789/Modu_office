@@ -77,11 +77,9 @@ export function RoomProvider({ children }: { children: ReactNode }) {
 
             // 4. Update state
             setRooms(prev => [...prev, newRoom]);
-            alert('회의실이 성공적으로 추가되었습니다! (DB 저장 완료)');
         } catch (error: any) {
             console.error("Failed to create room", error);
-            const msg = error.response?.data?.message || error.message || "서버 오류가 발생했습니다.";
-            alert(`회의실 추가 실패: ${msg}`);
+            throw error;
         }
     };
 
@@ -91,8 +89,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
             setRooms(prev => prev.filter(room => room.id !== id));
         } catch (error: any) {
             console.error("Failed to delete room", error);
-            const msg = error.response?.data?.message || error.message || "서버 오류가 발생했습니다.";
-            alert(`회의실 삭제 실패: ${msg}`);
+            throw error;
         }
     };
 
