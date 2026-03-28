@@ -160,3 +160,43 @@ body {
 }
 ::view-transition-new(root) { z-index: 9999; }
 ::view-transition-old(root) { z-index: 1; }
+
+/* ─────── Google Places Autocomplete ─────── */
+.pac-container {
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-family-main);
+  margin-top: 4px;
+  padding: 4px 0;
+  overflow: hidden;
+}
+
+.pac-item {
+  padding: 10px 14px;
+  font-size: 0;           /* 텍스트 노드(South Korea 등) 숨김 */
+  color: var(--color-text-main);
+  cursor: pointer;
+  border-top: none;
+  line-height: 1.5;
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background: var(--color-bg-hover);
+}
+
+.pac-item-query {
+  font-size: 0.875rem;    /* 한글 주소만 복원 */
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.pac-matched {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.pac-icon {
+  display: none;
+}

@@ -34,7 +34,7 @@
     font-size: 0.875rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(27, 89, 248, 0.3);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
     transition: all 0.2s;
 }
 
@@ -123,7 +123,7 @@
 .book-filter-btn.active {
     background: var(--color-primary);
     color: #fff;
-    box-shadow: 0 2px 6px rgba(27, 89, 248, 0.3);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
 }
 
 /* Bookings List */

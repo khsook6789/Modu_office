@@ -58,7 +58,7 @@ export const OfficeSelectorDropdown: React.FC = () => {
                         justifyContent: 'center',
                         fontSize: '1.25rem',
                         transition: 'all 0.2s ease',
-                        boxShadow: !selectedOfficeId ? '0 4px 12px rgba(27, 89, 248, 0.2)' : '0 2px 4px rgba(0,0,0,0.05)',
+                        boxShadow: !selectedOfficeId ? '0 4px 12px rgba(37, 99, 235, 0.2)' : '0 2px 4px rgba(0,0,0,0.05)',
                         border: !selectedOfficeId ? 'none' : '1px solid #e2e8f0'
                     }}
                     onMouseEnter={(e) => {
@@ -112,7 +112,7 @@ export const OfficeSelectorDropdown: React.FC = () => {
                                 justifyContent: 'center',
                                 fontSize: '1.25rem',
                                 transition: 'all 0.2s ease',
-                                boxShadow: isSelected ? '0 4px 12px rgba(27, 89, 248, 0.2)' : '0 2px 5px rgba(0,0,0,0.06)',
+                                boxShadow: isSelected ? '0 4px 12px rgba(37, 99, 235, 0.2)' : '0 2px 5px rgba(0,0,0,0.06)',
                                 border: isSelected ? 'none' : '1px solid #e2e8f0',
                                 position: 'relative'
                             }}

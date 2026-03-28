@@ -35,6 +35,25 @@ export default function OfficeFormPage() {
     // Autocomplete ref
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
+    // pac-container에서 한자 제거
+    useEffect(() => {
+        const removeKanji = (node: Node) => {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+                node.textContent = node.textContent.replace(/[\u4E00-\u9FFF\u3400-\u4DBF]+/g, '').trim();
+            } else {
+                node.childNodes.forEach(removeKanji);
+            }
+        };
+
+        const observer = new MutationObserver(() => {
+            const container = document.querySelector('.pac-container');
+            if (container) removeKanji(container);
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+        return () => observer.disconnect();
+    }, []);
+
     // Google Maps 로드
     const { isLoaded, loadError } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
@@ -147,7 +166,14 @@ export default function OfficeFormPage() {
                         <Autocomplete
                             onLoad={(ac) => (autocompleteRef.current = ac)}
                             onPlaceChanged={handlePlaceChanged}
-                            options={{ componentRestrictions: { country: 'kr' } }}
+                            options={{
+                                componentRestrictions: { country: 'kr' },
+                                bounds: new window.google.maps.LatLngBounds(
+                                    new window.google.maps.LatLng(33.0, 124.5), // 한국 남서단
+                                    new window.google.maps.LatLng(38.6, 131.9)  // 한국 북동단
+                                ),
+                                strictBounds: false,
+                            }}
                         >
                             <input
                                 type="text"

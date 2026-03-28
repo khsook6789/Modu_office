@@ -33,13 +33,13 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #1b59f8, #6366f1);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
     flex-shrink: 0;
 }
 
 /* 네비 링크 */
 .nav-link {
-    color: #64748b;
+    color: var(--color-text-sub);
     text-decoration: none;
     font-weight: 500;
     font-size: 0.875rem;
@@ -50,13 +50,13 @@
 }
 
 .nav-link:hover {
-    color: #0f172a;
+    color: var(--color-text-main);
     background: rgba(0, 0, 0, 0.04);
 }
 
 .nav-link.active {
-    color: #1b59f8;
-    background: rgba(27, 89, 248, 0.08);
+    color: var(--color-primary);
+    background: var(--color-primary-glow);
     font-weight: 600;
 }
 
@@ -80,12 +80,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #64748b;
+    color: var(--color-text-sub);
 }
 
 .btn-icon:hover {
     background: rgba(0, 0, 0, 0.05);
-    color: #0f172a;
+    color: var(--color-text-main);
 }
 
 .hover\:text-primary {
@@ -93,5 +93,5 @@
 }
 
 .hover\:text-primary:hover {
-    color: #1b59f8;
+    color: var(--color-primary);
 }

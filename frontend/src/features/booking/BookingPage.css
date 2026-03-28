@@ -136,7 +136,7 @@
 .booking-form-section .input-field:focus,
 .booking-custom-select:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 4px rgba(27, 89, 248, 0.15);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
     outline: none;
     background: var(--color-bg-card);
 }
@@ -288,13 +288,13 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 15px rgba(27, 89, 248, 0.25);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
 }
 
 .btn-book-submit:hover {
     background: var(--color-primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(27, 89, 248, 0.35);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.35);
 }
 
 /* Modal Enhancements */
@@ -336,7 +336,7 @@
 
 .payment-method-btn.selected {
     border-color: var(--color-primary);
-    background: rgba(27, 89, 248, 0.1);
+    background: rgba(37, 99, 235, 0.1);
 }
 
 .payment-method-icon {
