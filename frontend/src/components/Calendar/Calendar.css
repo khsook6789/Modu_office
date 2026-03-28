@@ -1,0 +1,105 @@
+.cal {
+  background: var(--color-bg-card);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  user-select: none;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.cal-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.cal-nav {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid #e2e8f0;
+  background: var(--color-bg-main);
+  color: var(--color-text-sub);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.cal-nav:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-glow);
+}
+
+.cal-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-day-label {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 6px 0;
+}
+
+.cal-day-label.sun { color: var(--color-error); }
+.cal-day-label.sat { color: var(--color-primary); }
+
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cal-cell.empty {
+  cursor: default;
+}
+
+.cal-cell:hover:not(.disabled):not(.empty):not(.selected) {
+  background: var(--color-bg-hover);
+}
+
+.cal-cell.today:not(.selected) {
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-primary-glow);
+}
+
+.cal-cell.selected {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.cal-cell.disabled {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
