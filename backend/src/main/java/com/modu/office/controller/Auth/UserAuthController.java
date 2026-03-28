@@ -1,5 +1,6 @@
 package com.modu.office.controller.Auth;
 
+import com.modu.office.common.ApiResponse;
 import com.modu.office.dto.request.RefreshTokenRequest;
 import com.modu.office.dto.request.user.UserLoginRequest;
 import com.modu.office.dto.request.user.UserSignupRequest;
@@ -23,9 +24,9 @@ public class UserAuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody UserSignupRequest request) {
+    public ApiResponse<String> signup(@Valid @RequestBody UserSignupRequest request) {
         authService.signupUser(request);
-        return ResponseEntity.ok("가입이 완료되었습니다.");
+        return ApiResponse.success("가입이 완료되었습니다.");
     }
 
     @PostMapping("/login")
