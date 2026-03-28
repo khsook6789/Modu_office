@@ -6,8 +6,10 @@ import com.modu.office.dto.response.OccupancyResponse;
 import com.modu.office.dto.response.PeakTimeResponse;
 import com.modu.office.dto.response.RoomRankingResponse;
 import com.modu.office.entity.enums.ReservationStatus;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.modu.office.entity.QReservation.reservation;
 import static com.modu.office.entity.QRoom.room;
@@ -32,6 +36,9 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
 
         private final JPAQueryFactory queryFactory;
 
+        // floor=null인 방을 groupingBy에서 다루기 위한 sentinel (floor=-1은 실제 층으로 사용 불가)
+        private static final int NULL_FLOOR_SENTINEL = -1;
+
         // ─────────────────────────────────────────────────────────────
         // 1. 실시간 점유율
         // ─────────────────────────────────────────────────────────────
@@ -40,8 +47,8 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
         public List<OccupancyResponse> getOccupancy(Long officeId, Integer floor) {
                 LocalDateTime now = LocalDateTime.now();
 
-                // 현재 점유 중인 회의실 ID 목록 (PENDING/CONFIRMED 이고 시간 범위 내)
-                List<Long> occupiedRoomIds = queryFactory
+                // 현재 점유 중인 회의실 ID 집합 (PENDING/CONFIRMED 이고 시간 범위 내) — Set으로 contains() O(1)
+                Set<Long> occupiedRoomIds = queryFactory
                                 .select(reservation.room.id)
                                 .from(reservation)
                                 .where(
@@ -51,36 +58,40 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                                                                 ReservationStatus.CONFIRMED),
                                                 reservation.startAt.loe(now),
                                                 reservation.endAtIncludeBufferTime.gt(now))
-                                .fetch();
+                                .fetch()
+                                .stream()
+                                .collect(Collectors.toSet());
 
-                // 해당 오피스의 전체 방 목록 (floor 필터 포함)
-                List<RoomInfo> rooms = queryFactory
-                                .select(Projections.constructor(RoomInfo.class, room.id, room.floor))
+                // 해당 오피스의 전체 방 목록 (floor 필터 포함) — Tuple로 조회하여 private record 리플렉션 이슈 회피
+                List<Tuple> rooms = queryFactory
+                                .select(room.id, room.floor)
                                 .from(room)
                                 .where(
                                                 room.office.id.eq(officeId),
                                                 floorEq(floor))
                                 .fetch();
 
-                // floor 별로 그룹핑하여 OccupancyResponse 생성
-                java.util.Map<Integer, List<RoomInfo>> byFloor = rooms.stream()
-                                .collect(java.util.stream.Collectors.groupingBy(
-                                                r -> r.floor() != null ? r.floor() : 0));
+                // floor 별로 그룹핑 — floor=null인 방은 sentinel(-1)로 처리 (floor=0과 구분)
+                java.util.Map<Integer, List<Tuple>> byFloor = rooms.stream()
+                                .collect(Collectors.groupingBy(
+                                                t -> java.util.Optional.ofNullable(t.get(room.floor))
+                                                        .map(Integer.class::cast)
+                                                        .orElse(NULL_FLOOR_SENTINEL)));
 
                 return byFloor.entrySet().stream()
                                 .map(entry -> {
                                         int floorKey = entry.getKey();
-                                        List<RoomInfo> floorRooms = entry.getValue();
+                                        List<Tuple> floorRooms = entry.getValue();
                                         int total = floorRooms.size();
                                         int occupied = (int) floorRooms.stream()
-                                                        .filter(r -> occupiedRoomIds.contains(r.roomId()))
+                                                        .filter(t -> occupiedRoomIds.contains(t.get(room.id)))
                                                         .count();
                                         double rate = total == 0 ? 0.0
                                                         : Math.round((double) occupied / total * 1000) / 10.0;
-                                        return new OccupancyResponse(officeId, floorKey == 0 ? null : floorKey, total,
-                                                        occupied, rate);
+                                        Integer resolvedFloor = floorKey == NULL_FLOOR_SENTINEL ? null : floorKey;
+                                        return new OccupancyResponse(officeId, resolvedFloor, total, occupied, rate);
                                 })
-                                .sorted(java.util.Comparator.comparingInt(r -> r.floor() != null ? r.floor() : 0))
+                                .sorted(java.util.Comparator.comparingInt(r -> r.floor() != null ? r.floor() : NULL_FLOOR_SENTINEL))
                                 .toList();
         }
 
@@ -90,25 +101,24 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
 
         @Override
         public CancellationStatsResponse getCancellationStats(Long officeId, LocalDate startDate, LocalDate endDate) {
-                Long totalCount = queryFactory
-                                .select(reservation.count())
+                // 단일 쿼리로 total/canceled 동시 집계 — 두 쿼리 사이 신규 예약 생성 시 불일치 방지
+                var canceledCountExpr = new CaseBuilder()
+                                .when(reservation.status.eq(ReservationStatus.CANCELED))
+                                .then(1L)
+                                .otherwise(0L)
+                                .sum();
+
+                Tuple result = queryFactory
+                                .select(reservation.count(), canceledCountExpr)
                                 .from(reservation)
                                 .where(
                                                 officeIdEq(officeId),
                                                 dateBetween(startDate, endDate))
                                 .fetchOne();
-                long total = totalCount != null ? totalCount : 0L;
 
-                Long canceledCount = queryFactory
-                                .select(reservation.count())
-                                .from(reservation)
-                                .where(
-                                                officeIdEq(officeId),
-                                                reservation.status.eq(ReservationStatus.CANCELED),
-                                                dateBetween(startDate, endDate))
-                                .fetchOne();
-                long canceled = canceledCount != null ? canceledCount : 0L;
-
+                // GROUP BY 없는 COUNT(*)는 무조건 1행 반환, fetchOne()은 null을 반환하지 않음
+                long total = result.get(0, Long.class);
+                long canceled = result.get(1, Long.class);
                 double rate = total == 0 ? 0.0 : Math.round((double) canceled / total * 1000) / 10.0;
                 return new CancellationStatsResponse(total, canceled, rate);
         }
@@ -137,8 +147,9 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
 
         @Override
         public List<PeakTimeResponse> getPeakTimeDistribution(Long officeId, LocalDate startDate, LocalDate endDate) {
-                NumberTemplate<Integer> hourExpr = Expressions.numberTemplate(Integer.class, "function('hour', {0})",
-                                reservation.startAt);
+                // PostgreSQL: date_part('hour', timestamp) — MySQL HOUR()와 동일
+                NumberTemplate<Integer> hourExpr = Expressions.numberTemplate(Integer.class,
+                                "CAST(date_part('hour', {0}) AS integer)", reservation.startAt);
 
                 return queryFactory
                                 .select(Projections.constructor(PeakTimeResponse.class,
@@ -162,19 +173,18 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
 
         @Override
         public List<DailyUsageResponse> getDailyUsage(Long officeId, LocalDate startDate, LocalDate endDate) {
-                // date(startAt) 기준 분 합계: TIMESTAMPDIFF(MINUTE, startAt, endAt)
+                // PostgreSQL: 각 타임스탬프의 epoch를 별도 추출 후 차이(초) / 60 = 분
+                // Hibernate 6.x EXTRACT는 Double 반환 → Tuple 인덱스 기반 조회 후 longValue() 수동 변환
                 NumberTemplate<Long> minutesDiff = Expressions.numberTemplate(Long.class,
-                                "function('timestampdiff', minute, {0}, {1})",
+                                "(EXTRACT(EPOCH FROM {1}) - EXTRACT(EPOCH FROM {0})) / 60",
                                 reservation.startAt, reservation.endAt);
 
-                // date() 함수로 날짜 추출
+                // PostgreSQL: CAST(startAt AS date) — JDBC가 java.sql.Date로 반환 → toLocalDate() 변환
                 var dateExpr = Expressions.dateTemplate(java.time.LocalDate.class,
-                                "function('date', {0})", reservation.startAt);
+                                "CAST({0} AS date)", reservation.startAt);
 
                 return queryFactory
-                                .select(Projections.constructor(DailyUsageResponse.class,
-                                                dateExpr,
-                                                minutesDiff.sum()))
+                                .select(dateExpr, minutesDiff.sum())
                                 .from(reservation)
                                 .where(
                                                 officeIdEq(officeId),
@@ -184,7 +194,16 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                                                 dateBetween(startDate, endDate))
                                 .groupBy(dateExpr)
                                 .orderBy(dateExpr.asc())
-                                .fetch();
+                                .fetch()
+                                .stream()
+                                .map(t -> {
+                                        java.sql.Date sqlDate = t.get(0, java.sql.Date.class);
+                                        java.time.LocalDate date = sqlDate != null ? sqlDate.toLocalDate() : null;
+                                        Number minutes = t.get(1, Number.class);
+                                        long totalMinutes = minutes != null ? minutes.longValue() : 0L;
+                                        return new DailyUsageResponse(date, totalMinutes);
+                                })
+                                .toList();
         }
 
         // ─────────────────────────────────────────────────────────────
@@ -230,10 +249,11 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
         private BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate) {
                 if (startDate == null && endDate == null)
                         return null;
+                // BETWEEN 사용 금지: 상한이 inclusive → endDate 자정에 시작하는 예약이 포함되는 버그
+                // goe(startOfDay) + lt(nextDayStartOfDay) 로 반개방 구간 [start, end+1) 적용
                 if (startDate != null && endDate != null) {
-                        return reservation.startAt.between(
-                                        startDate.atStartOfDay(),
-                                        endDate.plusDays(1).atStartOfDay());
+                        return reservation.startAt.goe(startDate.atStartOfDay())
+                                        .and(reservation.startAt.lt(endDate.plusDays(1).atStartOfDay()));
                 }
                 if (startDate != null) {
                         return reservation.startAt.goe(startDate.atStartOfDay());
@@ -244,10 +264,4 @@ public class AdminDashboardRepositoryCustomImpl implements AdminDashboardReposit
                 return null;
         }
 
-        // ─────────────────────────────────────────────────────────────
-        // Inner helper record
-        // ─────────────────────────────────────────────────────────────
-
-        private record RoomInfo(Long roomId, Integer floor) {
-        }
 }

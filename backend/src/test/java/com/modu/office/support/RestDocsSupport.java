@@ -72,6 +72,11 @@ public abstract class RestDocsSupport {
 	/**
 	 * 공통 에러 응답 필드 (ErrorCode 체계)
 	 * 
+	 * <p>
+	 * 필수: 안정적인 OpenAPI 명세 생성을 위해 사용 지점에서 반드시 
+	 * .responseSchema(schema("ErrorResponse"))를 지정하십시오.
+	 * </p>
+	 * 
 	 * @return FieldDescriptor[]
 	 */
 	protected org.springframework.restdocs.payload.FieldDescriptor[] commonErrorFields() {

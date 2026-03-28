@@ -7,15 +7,9 @@ import com.modu.office.dto.response.PeakTimeResponse;
 import com.modu.office.dto.response.RoomRankingResponse;
 import com.modu.office.entity.AppUser;
 import com.modu.office.support.ControllerTestSupport;
-import com.modu.office.support.TestSecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.context.annotation.Import;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.time.LocalDate;
@@ -34,9 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SuppressWarnings("null")
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-@Import(TestSecurityConfig.class)
 @DisplayName("[Controller] Admin - Dashboard Stats API")
 class AdminDashboardControllerTest extends ControllerTestSupport {
 
@@ -112,6 +103,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("실시간 점유율 조회 - 권한 부족")
                                     .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseSchema(schema("ErrorResponse"))
                                     .responseFields(commonErrorFields())
                                     .build())));
         }
@@ -171,6 +163,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("취소율 통계 조회 - 권한 부족")
                                     .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseSchema(schema("ErrorResponse"))
                                     .responseFields(commonErrorFields())
                                     .build())));
         }
@@ -230,6 +223,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("인기 회의실 Top 5 - 권한 부족")
                                     .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseSchema(schema("ErrorResponse"))
                                     .responseFields(commonErrorFields())
                                     .build())));
         }
@@ -285,6 +279,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("비인기 회의실 Top 5 - 권한 부족")
                                     .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseSchema(schema("ErrorResponse"))
                                     .responseFields(commonErrorFields())
                                     .build())));
         }
@@ -343,6 +338,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("피크타임 분포 조회 - 권한 부족")
                                     .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseSchema(schema("ErrorResponse"))
                                     .responseFields(commonErrorFields())
                                     .build())));
         }
@@ -413,6 +409,7 @@ class AdminDashboardControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("일일 총 사용 시간 조회 - 권한 부족")
                                     .description("일반 사용자가 관리자 전용 통계 기능을 이용하려 할 경우 403 에러를 반환합니다.")
+                                    .responseSchema(schema("ErrorResponse"))
                                     .responseFields(commonErrorFields())
                                     .build())));
         }

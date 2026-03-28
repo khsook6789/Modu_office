@@ -22,6 +22,7 @@ public class CacheConfig {
     public static final String REVIEW_SUMMARY    = "review:summary";
 
     @Bean
+    @SuppressWarnings("null")
     public CacheManager cacheManager() {
         SimpleCacheManager manager = new SimpleCacheManager();
         manager.setCaches(List.of(
@@ -35,6 +36,7 @@ public class CacheConfig {
         return manager;
     }
 
+    @SuppressWarnings("null")
     private CaffeineCache buildCache(String name, long duration, TimeUnit unit, long maxSize) {
         return new CaffeineCache(name,
                 Caffeine.newBuilder()

@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import java.time.LocalDateTime;
-
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.ResourceSnippetParameters.builder;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +39,7 @@ class AdminReservationControllerTest extends ControllerTestSupport {
                 return new AdminCancelResponse(
                                 1L,
                                 "user1@example.com",
-                                LocalDateTime.now(),
+                                FIXED_DATE_TIME,
                                 "침수 피해로 인한 지점 임시 휴업");
         }
 

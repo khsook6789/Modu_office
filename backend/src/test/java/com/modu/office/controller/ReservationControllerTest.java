@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
@@ -41,10 +40,8 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .roomId(10L)
                                 .userId(1L)
                                 // 반드시 미래 시간이어야 @Future 검증 통과
-                                .startAt(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0)
-                                                .withNano(0))
-                                .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0).withSecond(0)
-                                                .withNano(0))
+                                .startAt(FIXED_RESERVATION_START)
+                                .endAt(FIXED_RESERVATION_START.plusHours(2))
                                 .build();
         }
 
@@ -59,14 +56,12 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .roomCode("ROOM-A")
                                 .userId(1L)
                                 .userName("홍길동")
-                                .startAt(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0)
-                                                .withNano(0))
-                                .endAt(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0).withSecond(0)
-                                                .withNano(0))
+                                .startAt(FIXED_RESERVATION_START)
+                                .endAt(FIXED_RESERVATION_START.plusHours(2))
                                 .status(status)
                                 .totalPrice(new BigDecimal("20000"))
-                                .createdAt(LocalDateTime.now())
-                                .updatedAt(LocalDateTime.now())
+                                .createdAt(FIXED_DATE_TIME)
+                                .updatedAt(FIXED_DATE_TIME)
                                 .version(0L)
                                 .build();
         }
@@ -135,6 +130,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("예약 생성 - 유효성 오류")
                                                                 .description("예약 제목, 시작/종료 시간 등 필수 정보가 누락되거나 잘못된 경우 400 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -233,6 +229,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("예약 통합 검색 (운영자) - 권한 부족")
                                                                 .description("운영자 권한이 없는 사용자가 통합 검색을 시도할 경우 403 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -262,10 +259,8 @@ class ReservationControllerTest extends ControllerTestSupport {
         @DisplayName("예약 수정 API - 성공")
         void updateReservation_Success() throws Exception {
                 ReservationUpdateRequest updateRequest = ReservationUpdateRequest.builder()
-                                .startAt(LocalDateTime.now().plusDays(2).withHour(11).withMinute(0).withSecond(0)
-                                                .withNano(0))
-                                .endAt(LocalDateTime.now().plusDays(2).withHour(13).withMinute(0).withSecond(0)
-                                                .withNano(0))
+                                .startAt(FIXED_RESERVATION_START.plusDays(1).plusHours(1))
+                                .endAt(FIXED_RESERVATION_START.plusDays(1).plusHours(3))
                                 .status(ReservationStatus.CANCELED)
                                 .build();
 
@@ -341,6 +336,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("예약 확정 (운영자) - 권한 부족")
                                                                 .description("운영자 권한이 없는 사용자가 예약 확정을 시도할 경우 403 에러를 반환합니다.")
+                                                                .responseSchema(schema("ErrorResponse"))
                                                                 .responseFields(commonErrorFields())
                                                                 .build())));
         }
@@ -355,7 +351,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                 .refundRate(50)
                                 .refundAmount(new BigDecimal("10000"))
                                 .cancellationPenalty(new BigDecimal("10000"))
-                                .requestTime(LocalDateTime.now())
+                                .requestTime(FIXED_DATE_TIME)
                                 .reasonDescriptor("이용 시작 1일 전 취소: 50% 환불")
                                 .build();
 
@@ -388,7 +384,7 @@ class ReservationControllerTest extends ControllerTestSupport {
                                                 .refundRate(100)
                                                 .refundAmount(new BigDecimal("20000"))
                                                 .cancellationPenalty(java.math.BigDecimal.ZERO)
-                                                .requestTime(LocalDateTime.now())
+                                                .requestTime(FIXED_DATE_TIME)
                                                 .reasonDescriptor("이용 시작 7일 이전 취소: 100% 환불")
                                                 .build())
                                 .build();

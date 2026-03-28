@@ -1,21 +1,12 @@
 package com.modu.office.repository;
 
-import com.modu.office.config.JpaConfig;
 import com.modu.office.entity.*;
 import com.modu.office.entity.enums.RoomStatus;
+import com.modu.office.support.RepositoryTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-
-import com.modu.office.config.SecurityConfig;
-
-import com.modu.office.config.QueryDslConfig;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -26,13 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * RoomRepository 통합 테스트
  * - 다중 시설 필터링 커스텀 쿼리 검증
  */
-@DataJpaTest(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
-                SecurityConfig.class }))
-@ActiveProfiles("test")
-@Import({ JpaConfig.class, QueryDslConfig.class })
 @DisplayName("RoomRepository 통합 테스트")
 @SuppressWarnings("null")
-class RoomRepositoryTest {
+class RoomRepositoryTest extends RepositoryTestSupport {
 
         @Autowired
         private RoomRepository roomRepository;

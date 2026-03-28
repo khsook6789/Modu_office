@@ -1,18 +1,15 @@
 package com.modu.office.repository;
 
-import com.modu.office.config.JpaConfig;
-import com.modu.office.config.QueryDslConfig;
 import com.modu.office.entity.*;
 import com.modu.office.entity.enums.ReservationStatus;
 import com.modu.office.entity.enums.RoomStatus;
 import com.modu.office.entity.enums.UserRole;
+import com.modu.office.support.RepositoryTestSupport;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -22,12 +19,8 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Import({ QueryDslConfig.class, JpaConfig.class })
-@org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase(replace = org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE)
-@org.springframework.test.context.ActiveProfiles("test")
 @SuppressWarnings("null")
-class ReservationRepositoryCustomTest {
+class ReservationRepositoryCustomTest extends RepositoryTestSupport {
 
         @Autowired
         private ReservationRepository reservationRepository;

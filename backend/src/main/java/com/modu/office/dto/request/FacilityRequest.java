@@ -1,5 +1,6 @@
 package com.modu.office.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonPropertyOrder({"facilityCode", "facilityName", "isActive"})
 public class FacilityRequest {
 
     @NotBlank(message = "시설 식별 코드는 필수입니다.")

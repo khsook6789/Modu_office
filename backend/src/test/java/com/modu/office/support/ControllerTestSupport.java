@@ -3,21 +3,24 @@ package com.modu.office.support;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modu.office.controller.*;
 import com.modu.office.controller.Auth.AdminAuthController;
-import com.modu.office.entity.AppUser;
-import com.modu.office.entity.enums.UserRole;
-import org.mockito.Mockito;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import com.modu.office.controller.Auth.ManagerAuthController;
 import com.modu.office.controller.Auth.UserAuthController;
+import com.modu.office.entity.AppUser;
+import com.modu.office.entity.enums.UserRole;
+import com.modu.office.service.*;
 import com.modu.office.security.JwtAuthenticationFilter;
 import com.modu.office.security.OAuth2AuthenticationSuccessHandler;
-import com.modu.office.service.*;
-import org.springframework.cache.CacheManager;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import org.springframework.context.annotation.Import;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * 모든 Controller 테스트의 공통 기반 클래스.
@@ -26,18 +29,13 @@ import org.springframework.context.annotation.Import;
  * Why: @WebMvcTest 컨텍스트에서 필요한 모든 @MockBean을 한 곳에 선언하여
  * 각 테스트 파일이 테스트 로직에만 집중하도록 관심사를 분리.
  * </p>
- *
- * <p>
- * 주의: AuditLogController는 UpdateLogService를 사용함 (AuditLogService 없음).
- * </p>
  */
+@ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
 @WebMvcTest(controllers = {
-        // Auth
         UserAuthController.class,
         ManagerAuthController.class,
         AdminAuthController.class,
-        // Core Domain
         UserController.class,
         OfficeController.class,
         RoomController.class,
@@ -46,7 +44,6 @@ import org.springframework.context.annotation.Import;
         ReviewController.class,
         RoomFavoriteController.class,
         NotificationController.class,
-        // Admin
         AdminManagerController.class,
         AdminReservationController.class,
         AdminUserController.class,
@@ -56,6 +53,10 @@ import org.springframework.context.annotation.Import;
         PaymentController.class
 })
 public abstract class ControllerTestSupport extends RestDocsSupport {
+
+    protected static final LocalDateTime FIXED_DATE_TIME = LocalDateTime.of(2026, 12, 25, 10, 0, 0);
+    protected static final LocalDate FIXED_DATE = LocalDate.of(2026, 12, 25);
+    protected static final LocalDateTime FIXED_RESERVATION_START = FIXED_DATE_TIME.plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
 
     @Autowired
     protected ObjectMapper objectMapper;

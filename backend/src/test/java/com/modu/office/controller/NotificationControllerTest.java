@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
@@ -37,7 +36,7 @@ class NotificationControllerTest extends ControllerTestSupport {
                                 .targetUrl("/reservations/100")
                                 .message(message)
                                 .isRead(isRead)
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(FIXED_DATE_TIME)
                                 .build();
         }
 
@@ -114,6 +113,7 @@ class NotificationControllerTest extends ControllerTestSupport {
                                                                 .description("특정 알림을 읽음 상태로 변경합니다.")
                                                                 .pathParameters(
                                                                                 parameterWithName("notificationId").description("읽음 처리할 알림 ID"))
+                                                                .responseSchema(schema("EmptyResponse"))
                                                                 .build())));
         }
 
@@ -128,6 +128,7 @@ class NotificationControllerTest extends ControllerTestSupport {
                                                                 .tag(TAG)
                                                                 .summary("모든 알림 읽음 처리")
                                                                 .description("사용자의 모든 알림을 일괄 읽음 상태로 변경합니다.")
+                                                                .responseSchema(schema("EmptyResponse"))
                                                                 .build())));
         }
 }

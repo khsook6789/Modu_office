@@ -19,7 +19,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -133,7 +132,7 @@ public class ReviewService {
     private void evictReviewSummary(Long roomId) {
         var cache = cacheManager.getCache(CacheConfig.REVIEW_SUMMARY);
         if (cache != null) {
-            cache.evict(roomId);
+            cache.evict(java.util.Objects.requireNonNull(roomId, "회의실 ID는 필수입니다."));
         }
     }
 }

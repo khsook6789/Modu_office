@@ -5,11 +5,10 @@ import com.modu.office.entity.enums.*;
 import com.modu.office.event.ReservationChangedEvent;
 import com.modu.office.event.ReservationCreatedEvent;
 import com.modu.office.repository.*;
+import com.modu.office.support.IntegrationTestSupport;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
@@ -25,10 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 
  * 예약 이벤트 발생 시 감사 로그가 올바르게 저장되는지 검증합니다.
  */
-@SpringBootTest
-@ActiveProfiles("test")
 @SuppressWarnings("null")
-class ReservationEventListenerTest {
+class ReservationEventListenerTest extends IntegrationTestSupport {
 
         @Autowired
         private ApplicationEventPublisher eventPublisher;
@@ -109,6 +106,7 @@ class ReservationEventListenerTest {
                                 .longitude(126.9780)
                                 .openTime(LocalTime.of(9, 0))
                                 .closeTime(LocalTime.of(18, 0))
+                                .openDays(new Short[]{1, 2, 3, 4, 5})
                                 .build();
                 officeRepository.save(office);
 
@@ -162,6 +160,7 @@ class ReservationEventListenerTest {
                 assertThat(logs).hasSize(1);
 
                 UpdateLog log = logs.get(0);
+                assertThat(log.getReservation()).as("UpdateLog should have a Reservation reference").isNotNull();
                 assertThat(log.getReservation().getId()).isEqualTo(reservation.getId());
                 assertThat(log.getAction()).isEqualTo(LogAction.CREATE);
                 assertThat(log.getActor().getId()).isEqualTo(user.getId());
@@ -197,9 +196,12 @@ class ReservationEventListenerTest {
                 beforeData.put("startAt", originalStart.toString());
 
                 // when - 트랜잭션 내에서 예약 수정 및 이벤트 발행
+                // 참고: updateTimeRange()는 endAtIncludeBufferTime을 갱신하지 않으므로
+                // EXCLUDE 제약조건(tstzrange(start_at, end_at_include_buffer_time)) 위반 방지를 위해
+                // 새 시간 범위를 endAtIncludeBufferTime(day+1 12:00) 이내로 설정
                 transactionTemplate.execute(status -> {
-                        LocalDateTime newStart = LocalDateTime.now().plusDays(2).withHour(14).withMinute(0);
-                        LocalDateTime newEnd = LocalDateTime.now().plusDays(2).withHour(16).withMinute(0);
+                        LocalDateTime newStart = originalStart.plusMinutes(30);  // day+1 10:30
+                        LocalDateTime newEnd = originalEnd.minusMinutes(30);     // day+1 11:30
                         reservation.updateTimeRange(newStart, newEnd);
                         reservationRepository.save(reservation);
 
@@ -291,6 +293,7 @@ class ReservationEventListenerTest {
                 });
 
                 // then
+                assertThat(room).as("Test setup: room should not be null").isNotNull();
                 org.mockito.Mockito.verify(notificationService).notifyRoomReservationCreated(
                                 org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.any(Reservation.class));
@@ -300,20 +303,22 @@ class ReservationEventListenerTest {
         @DisplayName("예약 취소 시 WebSocket 알림이 전송된다")
         void 예약_취소_시_WebSocket_알림이_전송된다() {
                 // given
-                Reservation reservation = transactionTemplate.execute(status -> {
-                        Reservation res = Reservation.builder()
-                                        .user(user)
-                                        .office(office)
-                                        .room(room)
-                                        .title("Cancel Test")
-                                        .startAt(LocalDateTime.now().plusDays(1))
-                                        .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
-                                        .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(2))
-                                        .status(ReservationStatus.CONFIRMED)
-                                        .build();
-                        reservationRepository.save(res);
-                        return res;
-                });
+                Reservation reservation = java.util.Objects.requireNonNull(
+                        transactionTemplate.execute(status -> {
+                                Reservation res = Reservation.builder()
+                                                .user(user)
+                                                .office(office)
+                                                .room(room)
+                                                .title("Cancel Test")
+                                                .startAt(LocalDateTime.now().plusDays(1))
+                                                .endAt(LocalDateTime.now().plusDays(1).plusHours(2))
+                                                .endAtIncludeBufferTime(LocalDateTime.now().plusDays(1).plusHours(2))
+                                                .status(ReservationStatus.CONFIRMED)
+                                                .build();
+                                reservationRepository.save(res);
+                                return res;
+                        }),
+                        "Test setup failed: transactionTemplate.execute() should not return null");
 
                 // when
                 transactionTemplate.execute(status -> {
@@ -323,6 +328,7 @@ class ReservationEventListenerTest {
                 });
 
                 // then
+                assertThat(room).as("Test setup: room should not be null").isNotNull();
                 org.mockito.Mockito.verify(notificationService).notifyRoomReservationCancelled(
                                 org.mockito.ArgumentMatchers.eq(room.getId()),
                                 org.mockito.ArgumentMatchers.eq(reservation.getId()));

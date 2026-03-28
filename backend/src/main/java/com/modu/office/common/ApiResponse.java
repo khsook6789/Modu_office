@@ -1,5 +1,6 @@
 package com.modu.office.common;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.modu.office.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonPropertyOrder({"status", "code", "message", "data"})
 public class ApiResponse<T> {
 
     private String status;

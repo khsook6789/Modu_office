@@ -116,12 +116,17 @@ npm install
 npm run dev         # http://localhost:5173
 ```
 
-### API 문서 (Swagger UI)
+### API 명세 (API Documentation)
 
-서버 실행 후 아래 주소에서 전체 API 명세 및 테스트 가이드를 확인할 수 있습니다.
+- **Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- **에러 코드 목록**: [ErrorCode.java](backend/src/main/java/com/modu/office/exception/ErrorCode.java)
+- **최신화 방법**: 테스트 코드 수정 후 `./gradlew openapi3` 실행
 
-- **URL**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
-- **참고**: `SWAGGER_TEST_GUIDE.md`의 최신 가이드 내용이 Swagger UI 상단에 자동으로 주입됩니다.
+### 테스트 실행 (Running Tests)
+
+- **전체 테스트**: `./gradlew test` (240개 테스트, ~1분)
+- **커버리지 리포트**: `./gradlew test jacocoTestReport` → `build/reports/jacoco/test/html/index.html`
+- **특정 테스트 클래스**: `./gradlew test --tests "com.modu.office.service.ReservationServiceTest"`
 
 ---
 

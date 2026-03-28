@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +54,7 @@ class RoomFavoriteControllerTest extends ControllerTestSupport {
                 .officeId(100L)
                 .officeName("강남 지점")
                 .officeLocation("서울시 강남구")
-                .createdAt(LocalDateTime.now())
+                .createdAt(FIXED_DATE_TIME)
                 .build();
     }
 
@@ -89,6 +88,8 @@ class RoomFavoriteControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("즐겨찾기 추가")
                                     .description("로그인한 사용자가 특정 회의실을 자신의 즐겨찾기 목록에 추가합니다.")
+                                    .requestSchema(schema("AddFavoriteRequest"))
+                                    .responseSchema(schema("FavoriteResponse"))
                                     .requestFields(
                                             fieldWithPath("roomId").type(JsonFieldType.NUMBER)
                                                     .description("즐겨찾기할 회의실 ID" + constDocs(AddFavoriteRequest.class, "roomId")))
@@ -146,6 +147,7 @@ class RoomFavoriteControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("즐겨찾기 삭제")
                                     .description("사용자의 즐겨찾기 목록에서 특정 회의실을 제거합니다.")
+                                    .responseSchema(schema("EmptyResponse"))
                                     .pathParameters(
                                             parameterWithName("roomId").description("삭제할 즐겨찾기의 회의실 ID"))
                                     .responseFields(
@@ -185,6 +187,7 @@ class RoomFavoriteControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("내 즐겨찾기 목록 조회")
                                     .description("현재 로그인한 사용자가 '찜'한 전체 회의실 목록을 지점 정보와 함께 동적으로 조회합니다.")
+                                    .responseSchema(schema("FavoriteListResponse"))
                                     .responseFields(
                                             fieldWithPath("status").type(JsonFieldType.STRING)
                                                     .description("처리 상태"),
@@ -239,6 +242,7 @@ class RoomFavoriteControllerTest extends ControllerTestSupport {
                                     .tag(TAG)
                                     .summary("즐겨찾기 여부 확인")
                                     .description("특정 회의실이 현재 사용자의 즐겨찾기에 등록되어 있는지 여부를 확인합니다.")
+                                    .responseSchema(schema("BooleanResponse"))
                                     .pathParameters(
                                             parameterWithName("roomId").description("즐겨찾기 여부를 확인할 회의실 ID"))
                                     .responseFields(

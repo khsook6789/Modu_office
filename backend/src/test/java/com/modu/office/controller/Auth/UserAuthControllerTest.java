@@ -52,21 +52,10 @@ class UserAuthControllerTest extends ControllerTestSupport {
                                                                 .description("새로운 일반 사용자 계정을 생성합니다. 모든 필드는 필수이며, 이메일은 중복될 수 없습니다.")
                                                                 .requestSchema(schema("UserSignupRequest"))
                                                                 .requestFields(
-                                                                                fieldWithPath("email").type(
-                                                                                                JsonFieldType.STRING)
-                                                                                                .description("이메일 (로그인 ID)"
-                                                                                                                + constDocs(UserSignupRequest.class,
-                                                                                                                                "email")),
-                                                                                fieldWithPath("password").type(
-                                                                                                JsonFieldType.STRING)
-                                                                                                .description("비밀번호"
-                                                                                                                + constDocs(UserSignupRequest.class,
-                                                                                                                                "password")),
-                                                                                fieldWithPath("name").type(
-                                                                                                JsonFieldType.STRING)
-                                                                                                .description("사용자 이름"
-                                                                                                                + constDocs(UserSignupRequest.class,
-                                                                                                                                "name")))
+                                                                                fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 (로그인 ID)" + constDocs(UserSignupRequest.class, "email")),
+                                                                                fieldWithPath("password").type(JsonFieldType.STRING).description("비밀번호" + constDocs(UserSignupRequest.class, "password")),
+                                                                                fieldWithPath("name").type(JsonFieldType.STRING).description("사용자 이름" + constDocs(UserSignupRequest.class, "name")))
+                                                                .responseSchema(schema("ApiResponse"))
                                                                 .build())));
         }
 
@@ -101,14 +90,10 @@ class UserAuthControllerTest extends ControllerTestSupport {
                                                                 .requestFields(
                                                                                 fieldWithPath("email").type(
                                                                                                 JsonFieldType.STRING)
-                                                                                                .description("이메일"
-                                                                                                                + constDocs(UserLoginRequest.class,
-                                                                                                                                "email")),
+                                                                                                .description("이메일" + constDocs(UserLoginRequest.class, "email")),
                                                                                 fieldWithPath("password").type(
                                                                                                 JsonFieldType.STRING)
-                                                                                                .description("비밀번호"
-                                                                                                                + constDocs(UserLoginRequest.class,
-                                                                                                                                "password")))
+                                                                                                .description("비밀번호" + constDocs(UserLoginRequest.class, "password")))
                                                                 .responseFields(
                                                                                 fieldWithPath("accessToken").type(
                                                                                                 JsonFieldType.STRING)
@@ -151,9 +136,7 @@ class UserAuthControllerTest extends ControllerTestSupport {
                                                                 .requestFields(
                                                                                 fieldWithPath("refreshToken").type(
                                                                                                 JsonFieldType.STRING)
-                                                                                                .description("갱신에 사용할 Refresh Token"
-                                                                                                                + constDocs(RefreshTokenRequest.class,
-                                                                                                                                "refreshToken")))
+                                                                                                .description("갱신에 사용할 Refresh Token" + constDocs(RefreshTokenRequest.class, "refreshToken")))
                                                                 .responseFields(
                                                                                 fieldWithPath("accessToken").type(
                                                                                                 JsonFieldType.STRING)
