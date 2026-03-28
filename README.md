@@ -357,8 +357,8 @@ erDiagram
 
 ## 팀원 (Team)
 
-| 역할         | 이름               | 담당 영역       | GitHub                                  |
-| ------------ | ------------------ | --------------- | --------------------------------------- |
-| **Backend**  | 오준서(piker0925)  | 백엔드 개발     | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/piker0925)  |
-| **Backend**  | 이진환(khsook6789) | 백엔드 개발     | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/khsook6789) |
-| **Frontend** | 문윤성(mys0423)    | 프론트엔드 개발 | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/mys0423)    |
+| 이름               | 역할       | GitHub                                  |
+| ------------------ | --------------- | --------------------------------------- |
+| 오준서(piker0925)  | **Backend**     | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/piker0925)  |
+| 이진환(khsook6789) | **Backend**     | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/khsook6789) |
+| 문윤성(mys0423)    | **Frontend** | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/mys0423)    |
