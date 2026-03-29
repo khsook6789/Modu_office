@@ -120,7 +120,8 @@ cd frontend && npm install && npm run dev
 
 #### **C. 테스트 및 검증 (Testing)**
 - **단위/통합 테스트**: `./gradlew test`
-- **커버리지 리포트**: `build/reports/jacoco/test/html/index.html`
+- **커버리지 리포트 생성**: `./gradlew jacocoTestReport`
+- **리포트 확인**: `start backend/build/reports/jacoco/test/html/index.html`
 - **프론트엔드 린트**: `npm run lint`
 
 ---
