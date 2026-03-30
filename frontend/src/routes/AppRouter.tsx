@@ -6,7 +6,6 @@ import AuthLayout from "../layouts/AuthLayout";
 
 import LoginPage from "../features/auth/LoginPage";
 import SignupPage from "../features/auth/SignupPage";
-import AdminSignupPage from "../features/auth/AdminSignupPage";
 import PendingApprovalPage from "../features/auth/PendingApprovalPage";
 
 import RoomsListPage from "../features/rooms/RoomsListPage";
@@ -47,7 +46,6 @@ export default function AppRouter() {
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/admin/signup" element={<AdminSignupPage />} />
             <Route path="/pending-approval" element={<PendingApprovalPage />} />
           </Route>
 

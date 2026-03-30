@@ -8,8 +8,7 @@ import { useToast } from '../../components/Toast';
 import Calendar from '../../components/Calendar/Calendar';
 import './BookingPage.css';
 
-// 토스 테스트 클라이언트 키 (공개값)
-const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY || 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
 
 interface ApiResponse<T> { status: string; message: string; data: T; }
 

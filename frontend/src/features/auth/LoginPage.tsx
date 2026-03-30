@@ -101,7 +101,6 @@ export default function LoginPage() {
                 <Link to="/signup" className="auth-footer-link">회원가입</Link>
             </div>
             
-            <Link to="/admin/signup" className="auth-admin-link">관리자 회원가입 (테스트용)</Link>
         </div>
     );
 }
