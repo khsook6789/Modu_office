@@ -1,5 +1,6 @@
 package com.modu.office.controller.Auth;
 
+import com.modu.office.common.ApiResponse;
 import com.modu.office.dto.request.RefreshTokenRequest;
 import com.modu.office.dto.request.manager.ManagerLoginRequest;
 import com.modu.office.dto.request.manager.ManagerSignupRequest;
@@ -23,9 +24,9 @@ public class ManagerAuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody ManagerSignupRequest request) {
+    public ApiResponse<String> signup(@Valid @RequestBody ManagerSignupRequest request) {
         authService.signupManager(request);
-        return ResponseEntity.ok("가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
+        return ApiResponse.success("가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
     }
 
     @PostMapping("/login")

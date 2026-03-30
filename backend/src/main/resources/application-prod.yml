@@ -31,6 +31,8 @@ app:
       - "http://localhost:3000"  # Full Stack 모드용 CORS 허용
   jwt:
     secret: ${JWT_SECRET}
+  oauth2:
+    redirect-uri: "http://localhost:3000/oauth2/redirect"
   toss-payments:
     secret-key: ${TOSS_SECRET_KEY}
 

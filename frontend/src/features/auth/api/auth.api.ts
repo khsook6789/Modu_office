@@ -1,4 +1,4 @@
-import { client } from '../../../api/client';
+import { client, BASE_URL } from '../../../api/client';
 
 export interface SignupData {
     email: string;
@@ -32,9 +32,9 @@ export interface LoginRequest {
     password: string;
 }
 
-// accessToken으로 /users/me를 직접 호출해 사용자 정보 조회
+// accessToken으로 /api/users/me를 호출해 사용자 정보 조회
 async function fetchUserProfile(accessToken: string): Promise<UserProfile> {
-    const response = await fetch(`http://localhost:8080/api/users/me`, {
+    const response = await fetch(`${BASE_URL}/users/me`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

@@ -53,10 +53,15 @@ jobs:
           
           echo "Waiting for backend healthcheck..."
           # 60초 동안 5초 간격으로 backend 컨테이너의 상태가 'healthy'인지 확인
-          timeout 60s sh -c 'until [ "$(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))" == "healthy" ]; do 
+          # POSIX sh 호환성을 위해 == 대신 = 사용
+          timeout 60s sh -c 'until [ "$(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))" = "healthy" ]; do 
             sleep 5
             echo "Checking backend health... current status: $(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))"
-          done'
+          done' || {
+            echo "❌ Backend failed to become healthy. Printing logs:"
+            docker compose -f docker-compose.prod.yml logs --no-color backend
+            exit 1
+          }
 
       # 5. 리소스 정리 (성공/실패 상관없이 실행)
       - name: Stop and Clean up

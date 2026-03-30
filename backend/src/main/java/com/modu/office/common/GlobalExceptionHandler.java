@@ -131,6 +131,17 @@ public class GlobalExceptionHandler {
         }
 
         /**
+         * 인증 실패 처리 (401 Unauthorized)
+         * 예: 로그인 실패 (비밀번호 불일치 등)
+         */
+        @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+        public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(org.springframework.security.core.AuthenticationException e) {
+                log.error("Authentication failed: {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(ApiResponse.error(ErrorCode.UNAUTHORIZED.getCode(), "이메일 또는 비밀번호가 일치하지 않습니다."));
+        }
+
+        /**
          * 접근 권한 없음 처리 (401 Unauthorized / 403 Forbidden)
          */
         @ExceptionHandler({ org.springframework.security.access.AccessDeniedException.class,
