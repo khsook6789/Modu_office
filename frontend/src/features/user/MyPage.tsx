@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { client, BASE_URL } from '../../api/client';
+import { client } from '../../api/client';
 import { reviewApi, type Review } from '../reviews/api/review.api';
+import ReviewList from '../reviews/components/ReviewList';
 import { useToast } from '../../components/Toast';
 import './MyPage.css';
 
@@ -70,24 +71,12 @@ export default function MyPage() {
         if (!pw) return;
         if (!window.confirm('정말로 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.')) return;
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${BASE_URL}/users/me`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                body: JSON.stringify({ password: pw }),
-            });
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || '탈퇴에 실패했습니다.');
-            }
+            await client.delete('/users/me', { body: JSON.stringify({ password: pw }) });
             toast.success('회원탈퇴가 완료되었습니다.');
             logout();
             navigate('/login');
         } catch (err: any) {
-            toast.error(err.message);
+            toast.error(err.message || '탈퇴에 실패했습니다.');
         }
     };
 
@@ -248,18 +237,11 @@ export default function MyPage() {
                                     </Link>
                                 </div>
                             ) : (
-                                <div className="review-list">
-                                    {reviews.map(r => (
-                                        <div key={r.id} className="my-review-item">
-                                            <div className="my-review-header">
-                                                <span className="review-stars">{'⭐'.repeat(r.rating)}</span>
-                                                <span className="review-date">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</span>
-                                            </div>
-                                            <p className="review-comment">{r.comment}</p>
-                                            <button className="review-delete-btn" onClick={() => handleDeleteReview(r.id)}>삭제</button>
-                                        </div>
-                                    ))}
-                                </div>
+                                <ReviewList
+                                    reviews={reviews}
+                                    onDelete={handleDeleteReview}
+                                    onUpdate={(updated) => setReviews(prev => prev.map(r => r.id === updated.id ? { ...r, rating: updated.rating, comment: updated.comment ?? (updated as any).content } : r))}
+                                />
                             )}
                         </div>
                     )}

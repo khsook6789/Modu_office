@@ -31,9 +31,53 @@ function RoomsListPageContent() {
     const { rooms, addRoom, deleteRoom } = useRooms();
     const { selectedOfficeId, selectedOffice, offices, createOffice, deleteOffice } = useOfficeContext();
     const toast = useToast();
-    const [filter, setFilter] = useState<'ALL' | 'AVAILABLE'>('ALL');
+    // 검색 필터
+    const [keyword, setKeyword] = useState('');
+    const [minCapacity, setMinCapacity] = useState('');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+    const [selectedFacilityNames, setSelectedFacilityNames] = useState<string[]>([]);
+    const [onlyAvailable, setOnlyAvailable] = useState(false);
+    const [searchedRooms, setSearchedRooms] = useState<typeof rooms | null>(null);
+    const [searching, setSearching] = useState(false);
 
-    
+    const isFiltered = !!(keyword || minCapacity || minPrice || maxPrice || selectedFacilityNames.length || onlyAvailable);
+
+    const handleSearch = async () => {
+        setSearching(true);
+        try {
+            const results = await roomApi.searchRooms({
+                keyword: keyword || undefined,
+                minCapacity: minCapacity ? Number(minCapacity) : undefined,
+                minPrice: minPrice ? Number(minPrice) : undefined,
+                maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                facilityNames: selectedFacilityNames.length ? selectedFacilityNames : undefined,
+            });
+            const filtered = onlyAvailable ? results.filter(r => r.isAvailable) : results;
+            const byOffice = selectedOfficeId ? filtered.filter(r => r.officeId === selectedOfficeId) : filtered;
+            setSearchedRooms(byOffice);
+        } catch {
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const handleReset = () => {
+        setKeyword('');
+        setMinCapacity('');
+        setMinPrice('');
+        setMaxPrice('');
+        setSelectedFacilityNames([]);
+        setOnlyAvailable(false);
+        setSearchedRooms(null);
+    };
+
+    const toggleFacility = (name: string) => {
+        setSelectedFacilityNames(prev =>
+            prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+        );
+    };
+
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOfficeModalOpen, setIsOfficeModalOpen] = useState(false);
@@ -85,10 +129,10 @@ function RoomsListPageContent() {
         setNewOfficeData(prev => ({ ...prev, location: place.formatted_address || place.name || '' }));
     };
 
-    // Filter rooms by selected office AND availability
-    const filteredRooms = rooms.filter(room => {
+    // 검색 결과 있으면 검색 결과, 없으면 전체 (오피스 필터 적용)
+    const displayRooms = searchedRooms ?? rooms.filter(room => {
         const matchesOffice = !selectedOfficeId || room.officeId === selectedOfficeId;
-        const matchesAvailability = filter === 'ALL' ? true : room.isAvailable;
+        const matchesAvailability = onlyAvailable ? room.isAvailable : true;
         return matchesOffice && matchesAvailability;
     });
 
@@ -212,27 +256,113 @@ function RoomsListPageContent() {
                 )}
             </div>
 
-            {/* Main Content Area */}
-            {/* Filters */}
-            <div className="filters-bar">
-                <button 
-                    className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-                    onClick={() => setFilter('ALL')}
-                >
-                    전체 회의실
-                </button>
-                <button 
-                    className={`filter-btn ${filter === 'AVAILABLE' ? 'active' : ''}`}
-                    onClick={() => setFilter('AVAILABLE')}
-                >
-                    예약 가능
-                </button>
+            {/* 검색 필터 패널 */}
+            <div className="search-filter-panel">
+                {/* 키워드 + 검색 버튼 */}
+                <div className="search-filter-row">
+                    <input
+                        type="text"
+                        className="search-filter-input"
+                        placeholder="회의실 이름으로 검색..."
+                        value={keyword}
+                        onChange={e => setKeyword(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                    />
+                    <button className="btn-action-primary" onClick={handleSearch} disabled={searching}>
+                        {searching ? '검색 중...' : '검색'}
+                    </button>
+                    {isFiltered && (
+                        <button className="btn-action-outline" onClick={handleReset}>초기화</button>
+                    )}
+                </div>
+
+                {/* 상세 필터 */}
+                <div className="search-filter-details">
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">최소 인원</label>
+                        <input
+                            type="number"
+                            className="search-filter-number"
+                            placeholder="명"
+                            min={1}
+                            value={minCapacity}
+                            onChange={e => setMinCapacity(e.target.value)}
+                        />
+                    </div>
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">가격 (원/시간)</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <input
+                                type="number"
+                                className="search-filter-number"
+                                placeholder="최소"
+                                min={0}
+                                step={1000}
+                                value={minPrice}
+                                onChange={e => setMinPrice(e.target.value)}
+                            />
+                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>~</span>
+                            <input
+                                type="number"
+                                className="search-filter-number"
+                                placeholder="최대"
+                                min={0}
+                                step={1000}
+                                value={maxPrice}
+                                onChange={e => setMaxPrice(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">예약 가능만</label>
+                        <label className="search-filter-toggle">
+                            <input
+                                type="checkbox"
+                                checked={onlyAvailable}
+                                onChange={e => setOnlyAvailable(e.target.checked)}
+                                style={{ accentColor: 'var(--color-primary)' }}
+                            />
+                            <span>예약 가능</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* 시설 필터 */}
+                {facilities.length > 0 && (
+                    <div className="search-filter-facilities">
+                        <span className="search-filter-label">시설/장비</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                            {facilities.map(f => (
+                                <button
+                                    key={f.id}
+                                    type="button"
+                                    onClick={() => toggleFacility(f.facilityName)}
+                                    className="search-facility-tag"
+                                    style={{
+                                        background: selectedFacilityNames.includes(f.facilityName) ? 'var(--color-primary)' : '#f1f5f9',
+                                        color: selectedFacilityNames.includes(f.facilityName) ? '#fff' : 'var(--color-text-sub)',
+                                        border: selectedFacilityNames.includes(f.facilityName) ? 'none' : '1px solid #e2e8f0',
+                                    }}
+                                >
+                                    {f.facilityName}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 결과 수 */}
+                {isFiltered && (
+                    <p className="search-result-count">
+                        {searching ? '검색 중...' : `${displayRooms.length}개의 회의실`}
+                    </p>
+                )}
             </div>
 
             {/* Rooms Grid */}
-            {filteredRooms.length > 0 ? (
+            {displayRooms.length > 0 ? (
                 <div className="rooms-grid">
-                    {filteredRooms.map(room => (
+                    {displayRooms.map(room => (
                         <RoomCard key={room.id} room={room} isManager={user?.role === 'MANAGER' || user?.role === 'ADMIN'} onDelete={deleteRoom} />
                     ))}
                 </div>

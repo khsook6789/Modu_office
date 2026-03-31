@@ -3,7 +3,7 @@ import { officeApi, type Office } from './api/office.api';
 import { client } from '../../api/client';
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { reviewApi, type Review } from '../reviews/api/review.api';
+import { reviewApi, type Review, type ReviewSummary } from '../reviews/api/review.api';
 import ReviewList from '../reviews/components/ReviewList';
 import ReviewForm from '../reviews/components/ReviewForm';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,12 +11,17 @@ import FavoriteButton from '../../components/FavoriteButton';
 import OfficeMap from '../../components/Map/OfficeMap';
 import { useToast } from '../../components/Toast';
 import { Skeleton } from '../../components/Skeleton';
+import RoomCard, { type Room } from './RoomCard';
 import './RoomDetailPage.css';
 
 export default function RoomDetailPage() {
-    // Use params if available, otherwise mock ID
     const { id } = useParams();
-    const roomId = id ? Number(id) : 101; // Default to 101 if no ID
+    const roomId = Number(id);
+
+    if (!id || isNaN(roomId)) {
+        navigate('/rooms', { replace: true });
+        return null;
+    }
 
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -30,12 +35,18 @@ export default function RoomDetailPage() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loadingReviews, setLoadingReviews] = useState(false);
     const [completedReservationId, setCompletedReservationId] = useState<number | null>(null);
+    const [similarRooms, setSimilarRooms] = useState<Room[]>([]);
+    const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
 
     const loadReviews = async () => {
         setLoadingReviews(true);
         try {
-            const data = await reviewApi.getReviewsByRoomId(roomId);
+            const [data, summary] = await Promise.all([
+                reviewApi.getReviewsByRoomId(roomId),
+                reviewApi.getReviewSummary(roomId),
+            ]);
             setReviews(data);
+            setReviewSummary(summary);
         } catch (error) {
             console.error("Failed to load reviews", error);
         } finally {
@@ -75,6 +86,8 @@ export default function RoomDetailPage() {
 
         fetchRoom();
         loadReviews();
+        roomApi.getSimilarRooms(roomId).then(setSimilarRooms).catch(() => {});
+        reviewApi.getReviewSummary(roomId).then(setReviewSummary);
         // 해당 방의 완료된 예약 조회 (리뷰 작성용)
         if (user?.id) {
             client.get<any>(`/reservations?userId=${user.id}&roomId=${roomId}`)
@@ -204,7 +217,16 @@ export default function RoomDetailPage() {
 
                     {/* Review Section */}
                     <div className="info-section">
-                        <h2 className="section-title">💬 이용 후기 ({reviews.length})</h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                            <h2 className="section-title" style={{ margin: 0 }}>💬 이용 후기</h2>
+                            {reviewSummary && reviewSummary.reviewCount > 0 && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fefce8', border: '1px solid #fde68a', borderRadius: '9999px', padding: '0.3rem 0.9rem' }}>
+                                    <span style={{ color: '#f59e0b', fontSize: '1rem' }}>★</span>
+                                    <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#92400e' }}>{reviewSummary.averageRating.toFixed(1)}</span>
+                                    <span style={{ color: '#a16207', fontSize: '0.85rem' }}>({reviewSummary.reviewCount}개)</span>
+                                </div>
+                            )}
+                        </div>
 
                         {user ? (
                             completedReservationId ? (
@@ -224,7 +246,11 @@ export default function RoomDetailPage() {
                         {loadingReviews ? (
                             <div style={{ textAlign: 'center', padding: '2rem 0', color: '#94a3b8' }}>리뷰를 불러오는 중...</div>
                         ) : (
-                            <ReviewList reviews={reviews} onDelete={handleDeleteReview} />
+                            <ReviewList
+                                reviews={reviews}
+                                onDelete={handleDeleteReview}
+                                onUpdate={(updated) => setReviews(prev => prev.map(r => r.id === updated.id ? { ...r, rating: updated.rating, comment: updated.comment ?? (updated as any).content } : r))}
+                            />
                         )}
                     </div>
                 </div>
@@ -266,6 +292,18 @@ export default function RoomDetailPage() {
                     </div>
                 </aside>
             </div>
+
+            {/* Similar Rooms */}
+            {similarRooms.length > 0 && (
+                <div className="info-section" style={{ marginTop: '3rem' }}>
+                    <h2 className="section-title">🏢 비슷한 공간</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem', marginTop: '1rem' }}>
+                        {similarRooms.map(r => (
+                            <RoomCard key={r.id} room={r} />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

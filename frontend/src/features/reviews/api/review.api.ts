@@ -10,6 +10,12 @@ export interface Review {
     createdAt: string;
 }
 
+export interface ReviewSummary {
+    roomId: number;
+    averageRating: number;
+    reviewCount: number;
+}
+
 export interface CreateReviewRequest {
     reservationId: number;
     rating: number;
@@ -43,8 +49,24 @@ export const reviewApi = {
         return response as any;
     },
 
+    // 리뷰 수정
+    updateReview: async (reviewId: number, data: { rating: number; content: string }): Promise<Review> => {
+        const response = await client.patch<Review>(`/reviews/${reviewId}`, data);
+        return response as any;
+    },
+
     // 리뷰 삭제
     deleteReview: async (reviewId: number): Promise<void> => {
         await client.delete(`/reviews/${reviewId}`);
+    },
+
+    // 회의실 리뷰 요약
+    getReviewSummary: async (roomId: number): Promise<ReviewSummary | null> => {
+        try {
+            const response = await client.get<ReviewSummary>(`/reviews/room/${roomId}/summary`);
+            return response as any;
+        } catch {
+            return null;
+        }
     },
 };

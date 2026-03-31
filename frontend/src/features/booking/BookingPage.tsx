@@ -39,6 +39,7 @@ export default function BookingPage() {
     const [title, setTitle] = useState('');
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [sseAlert, setSseAlert] = useState(false);
 
     // 결제 위젯 관련 상태
     const [paymentWidget, setPaymentWidget] = useState<PaymentWidgetInstance | null>(null);
@@ -56,6 +57,26 @@ export default function BookingPage() {
             })
             .catch(() => { toast.error('존재하지 않는 회의실입니다.'); navigate('/rooms'); });
     }, [roomId, navigate]);
+
+    // SSE: 회의실 실시간 예약 현황 구독
+    useEffect(() => {
+        if (!roomId) return;
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '/api';
+        const url = `${baseUrl}/notifications/subscribe/rooms/${roomId}?token=${encodeURIComponent(token)}`;
+        const es = new EventSource(url);
+
+        es.onmessage = () => {
+            setSseAlert(true);
+        };
+        es.addEventListener('reservation', () => {
+            setSseAlert(true);
+        });
+
+        return () => es.close();
+    }, [roomId]);
 
     // 가격 계산
     useEffect(() => {
@@ -223,6 +244,16 @@ export default function BookingPage() {
                         : '결제수단을 선택하고 결제를 완료해 주세요.'}
                 </p>
             </div>
+
+            {/* SSE 실시간 알림 */}
+            {sseAlert && (
+                <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '0.75rem', padding: '0.75rem 1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                    <span style={{ color: '#92400e', fontWeight: 600, fontSize: '0.9rem' }}>
+                        ⚡ 방금 다른 사용자가 이 회의실을 예약했습니다. 시간대를 확인 후 선택해 주세요.
+                    </span>
+                    <button onClick={() => setSseAlert(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#92400e', fontWeight: 700, fontSize: '1rem' }}>✕</button>
+                </div>
+            )}
 
             {/* Room Info Banner */}
             <div className="booking-room-banner shadow-subtle">
