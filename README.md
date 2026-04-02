@@ -124,6 +124,12 @@ cd frontend && npm install && npm run dev
 - **리포트 확인**: `start backend/build/reports/jacoco/test/html/index.html`
 - **프론트엔드 린트**: `npm run lint`
 
+#### **D. 부하 테스트 및 성능 검증 (Load Testing)**
+시스템의 한계를 측정하고 안정성을 확보하기 위해 `k6`를 활용한 부하 테스트를 수행합니다.
+- **실행 방법**: `./load-test/run-tests.sh`
+- **시나리오**: Baseline, Load, Stress, Spike, Soak, Recovery (총 6종)
+- **리포트 확인**: `load-test/reports-1/` 내 각 시나리오별 CSV 및 결과 데이터
+
 ---
 
 ### 3. 운영/스테이징 환경 (Production/Docker)

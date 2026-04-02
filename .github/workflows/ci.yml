@@ -32,6 +32,16 @@ jobs:
       - name: Run Backend Tests
         run: cd backend && ./gradlew test
 
+      # 3-1. 테스트 결과 보관 (Artifacts) - 성공/실패 여부 상관없이 업로드
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: |
+            backend/build/reports/tests/test/
+            backend/build/test-results/test/*.xml
+
       # 4. 도커 컴포즈 빌드 및 실행 테스트
       - name: Verify Full Stack Docker Build (via Compose)
         env:

@@ -18,14 +18,13 @@ RUN gradle build -x test --no-daemon --console=plain
 FROM eclipse-temurin:21-jre-alpine AS runner
 WORKDIR /app
 
-# 헬스체크용 wget 설치 (보안상 계정 전환 전에 실행)
-RUN apk add --no-cache wget
+# 헬스체크용 wget 설치 및 비root 사용자 생성 (보안)
+RUN apk add --no-cache wget && \
+    addgroup -S spring && adduser -S spring -G spring
 
-# 비root 사용자 실행 (보안)
-RUN addgroup -S spring && adduser -S spring -G spring
 USER spring
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

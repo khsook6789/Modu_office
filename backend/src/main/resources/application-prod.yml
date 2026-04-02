@@ -8,6 +8,11 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      connection-timeout: 5000
+      leak-detection-threshold: 10000
 
   jpa:
     hibernate:
@@ -25,20 +30,39 @@ spring:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
 
+server:
+  tomcat:
+    threads:
+      max: 400
+      min-spare: 50
+    accept-count: 300
+
 app:
   cors:
     allowed-origins:
-      - "http://localhost:3000"  # Full Stack 모드용 CORS 허용
+      - "http://localhost:3000"
   jwt:
     secret: ${JWT_SECRET}
   oauth2:
     redirect-uri: "http://localhost:3000/oauth2/redirect"
   toss-payments:
     secret-key: ${TOSS_SECRET_KEY}
+  data-seeding:
+    enabled: ${DATA_SEEDING_ENABLED:false}
+    clean-before-seeding: ${DATA_CLEAN_BEFORE_SEEDING:false}
 
 google:
   maps:
     api-key: ${GOOGLE_MAPS_API_KEY}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:

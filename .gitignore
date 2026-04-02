@@ -99,6 +99,9 @@ frontend/resource/Git/
 *.dump
 postgresql-*.log
 
+# --- Load Testing & Performance ---
+load-test/reports-*/
+
 # --- Other ---
 temp/
 tmp/
