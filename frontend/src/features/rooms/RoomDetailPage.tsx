@@ -16,16 +16,15 @@ import './RoomDetailPage.css';
 
 export default function RoomDetailPage() {
     const { id } = useParams();
-    const roomId = Number(id);
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const toast = useToast();
 
+    const roomId = Number(id);
     if (!id || isNaN(roomId)) {
         navigate('/rooms', { replace: true });
         return null;
     }
-
-    const navigate = useNavigate();
-    const { user } = useAuth();
-    const toast = useToast();
 
     // Room State
     const [room, setRoom] = useState<any>(null); // Ideally use Room type
