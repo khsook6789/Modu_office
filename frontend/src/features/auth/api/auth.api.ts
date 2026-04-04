@@ -54,7 +54,10 @@ async function tryLogin(endpoint: string, data: LoginRequest): Promise<LoginResp
 
         const user = await fetchUserProfile(tokenRes.accessToken);
         return { ...tokenRes, user };
-    } catch {
+    } catch (err: any) {
+        // 명확한 사유가 있는 에러(승인 대기 등)는 그대로 전파
+        const msg: string = err?.message ?? '';
+        if (msg && !msg.startsWith('API Error:')) throw err;
         return null;
     }
 }

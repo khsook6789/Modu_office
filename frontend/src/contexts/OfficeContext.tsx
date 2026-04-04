@@ -57,11 +57,6 @@ export const OfficeProvider: React.FC<OfficeProviderProps> = ({ children }) => {
                 ? await officeApi.getMyOffices()
                 : await officeApi.getAllOffices();
             setOffices(data);
-            
-            // Auto-select first office if available
-            if (data.length > 0 && !selectedOfficeId) {
-                setSelectedOfficeId(data[0].id);
-            }
         } catch (err: any) {
             console.error('Failed to load offices:', err);
             setError(err.message || 'Failed to load offices');

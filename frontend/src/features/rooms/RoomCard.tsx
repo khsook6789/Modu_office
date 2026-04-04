@@ -15,6 +15,7 @@ export interface Room {
     floor?: number;
     roomCode?: string;
     description?: string;
+    category?: string;
     bufferTime?: number;
 }
 
@@ -45,15 +46,17 @@ export default function RoomCard({ room, isManager, onDelete }: RoomCardProps) {
                             No Image
                         </div>
                     )}
-                    {/* Rating Badge Overlay */}
-                    <div className="rating-badge" style={{
-                        position: 'absolute', top: '10px', right: '10px',
-                        background: 'rgba(0,0,0,0.6)', color: '#fbbf24', // Amber-400
-                        padding: '4px 8px', borderRadius: '12px',
-                        fontSize: '0.8rem', fontWeight: 'bold', backdropFilter: 'blur(4px)'
-                    }}>
-                        ⭐ {room.rating ? room.rating.toFixed(1) : 'New'}
-                    </div>
+                    {/* Rating Badge Overlay - 실제 데이터 있을 때만 표시 */}
+                    {room.rating != null && (
+                        <div className="rating-badge" style={{
+                            position: 'absolute', top: '10px', right: '10px',
+                            background: 'rgba(0,0,0,0.6)', color: '#fbbf24',
+                            padding: '4px 8px', borderRadius: '12px',
+                            fontSize: '0.8rem', fontWeight: 'bold', backdropFilter: 'blur(4px)'
+                        }}>
+                            ⭐ {room.rating.toFixed(1)}
+                        </div>
+                    )}
                     {/* Delete Button for Operators */}
                     {isManager && (
                         <button
@@ -75,7 +78,14 @@ export default function RoomCard({ room, isManager, onDelete }: RoomCardProps) {
                 <div className="room-content">
                     <div className="room-header">
                         <h3 className="room-name">{room.name}</h3>
-                        <span className="room-location">📍 {room.floor}층 - {room.roomCode}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {room.category && (
+                                <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-primary)', background: 'var(--color-primary-glow)', borderRadius: '999px', padding: '0.15rem 0.6rem' }}>
+                                    {room.category}
+                                </span>
+                            )}
+                            <span className="room-location">📍 {room.floor}층 - {room.roomCode}</span>
+                        </div>
                     </div>
                     {room.description && (
                         <p className="room-description" style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0 0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: '1.4' }}>

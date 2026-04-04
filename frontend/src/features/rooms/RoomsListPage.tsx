@@ -234,6 +234,11 @@ function RoomsListPageContent() {
                         <div className="office-info-text">
                             <span>📍 {selectedOffice.location}</span>
                             <span>🕒 {selectedOffice.openTime} - {selectedOffice.closeTime}</span>
+                            {selectedOffice.description && (
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                    {selectedOffice.description}
+                                </span>
+                            )}
                         </div>
                         {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
                             <button

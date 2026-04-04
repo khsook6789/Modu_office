@@ -28,6 +28,9 @@ export default function Navbar() {
               {(user.role === 'MANAGER' || user.role === 'ADMIN') && (
                 <Link to="/operator" className="nav-link">운영자 대시보드</Link>
               )}
+              {user.role === 'ADMIN' && (
+                <Link to="/admin" className="nav-link" style={{ color: '#e11d48' }}>관리자</Link>
+              )}
               <NotificationBell />
               <div className="separator mx-sm h-4 border-l border-gray-300"></div>
               <div className="flex items-center gap-sm">

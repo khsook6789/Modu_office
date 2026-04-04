@@ -56,6 +56,7 @@ export const mapToRoom = (apiRoom: RoomResponse): Room => ({
     floor: apiRoom.floor,
     roomCode: apiRoom.roomCode,
     description: apiRoom.description,
+    category: apiRoom.category,
     price: apiRoom.price,
     bufferTime: apiRoom.bufferTime
 });
@@ -75,7 +76,9 @@ export const roomApi = {
             const response = await client.get<ApiResponse<PageResponse<RoomResponse>>>('/rooms/search?size=100');
             const pageData = response.data;
             if (pageData && Array.isArray(pageData.content)) {
-                return pageData.content.map(mapToRoom);
+                return pageData.content
+                    .filter(r => r.status !== 'INACTIVE' as any)
+                    .map(mapToRoom);
             }
             return [];
         } catch (error) {
