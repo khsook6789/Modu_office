@@ -3,6 +3,7 @@ import { client } from '../../../api/client';
 export interface Office {
     id: number;
     name: string;
+    description?: string;
     location: string;
     latitude: number;
     longitude: number;
