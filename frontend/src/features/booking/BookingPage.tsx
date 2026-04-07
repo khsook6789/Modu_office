@@ -151,8 +151,14 @@ export default function BookingPage() {
             return;
         }
 
-        const endAt = calculateEndDateTimeISO(date, startTime, Number(duration));
+        // 과거 시간 예약 방지 — 서버 유효성 검사 전 클라이언트에서 먼저 차단
         const startAt = `${date}T${startTime}:00`;
+        if (new Date(startAt) <= new Date()) {
+            toast.error('현재 시간 이후의 시간대만 예약할 수 있습니다.');
+            return;
+        }
+
+        const endAt = calculateEndDateTimeISO(date, startTime, Number(duration));
 
         // 예약 정보를 sessionStorage에 임시 저장 (결제 성공 후 생성)
         const info: PendingReservationInfo = {
@@ -169,6 +175,7 @@ export default function BookingPage() {
 
         setStep('payment');
     };
+
 
     // 2단계: 결제 요청 — 예약을 먼저 생성(PENDING)한 뒤 결제 위젯 호출
     const handlePayment = async () => {
