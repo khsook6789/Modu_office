@@ -97,12 +97,14 @@ export default function MyBookingsPage() {
                     setBookings(prev => prev.map(r => r.id === b.id ? { ...r, status: 'CANCELED' as const } : r));
                     toast.info(`"${b.roomName}" 예약이 결제 시간 초과로 자동 취소되었습니다.`);
                 } catch {
-                    // 서버에서 이미 취소됐거나 에러 — 목록 새로고침
+                    // 서버에서 이미 취소된 경우 — UI도 취소 상태로 동기화
+                    setBookings(prev => prev.map(r => r.id === b.id ? { ...r, status: 'CANCELED' as const } : r));
                 }
                 cancellingIdsRef.current.delete(b.id);
             }
         }
     }, [toast]);
+
 
     const loadBookings = useCallback(async () => {
         try {
@@ -111,8 +113,14 @@ export default function MyBookingsPage() {
             const response = await client.get<ApiResponse<ReservationResponse[]>>(
                 `/reservations?userId=${user!.id}`
             );
-            // client는 raw JSON({ status, message, data: [...] })을 반환
-            const list: ReservationResponse[] = Array.isArray(response.data) ? response.data : [];
+            // GET /reservations 응답은 Page 형식: { status, message, data: { content: [...], totalElements, ... } }
+            const raw = response as any;
+            const pageData = raw?.data ?? raw;
+            const list: ReservationResponse[] = Array.isArray(pageData?.content)
+                ? pageData.content
+                : Array.isArray(pageData)
+                    ? pageData
+                    : [];
             const sorted = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             setBookings(sorted);
 
