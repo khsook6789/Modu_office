@@ -31,9 +31,11 @@ export default function NotificationBell() {
                 setNotifications(prev => [notification, ...prev]);
                 setUnreadCount(prev => prev + 1);
             });
-            es.onerror = () => es.close();
+            // onerror 시 close() 하지 않음 — EventSource는 연결 오류 시 자동 재연결함
+            // close()를 호출하면 내장 재연결 동작이 중단되어 알림이 영구적으로 끊김
             esRef.current = es;
         } catch {}
+
 
         // 30초마다 폴링 fallback
         const interval = setInterval(fetchUnreadCount, 30000);

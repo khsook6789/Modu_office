@@ -53,12 +53,22 @@ export const notificationApi = {
         const token = localStorage.getItem('token');
         const url = `${BASE_URL}/notifications/subscribe${token ? `?token=${encodeURIComponent(token)}` : ''}`;
         const es = new EventSource(url);
-        es.onmessage = (e) => {
+
+        const handler = (e: MessageEvent) => {
             try {
                 const data = JSON.parse(e.data);
                 if (data && data.id) onMessage(data);
             } catch {}
         };
+
+        // 백엔드: SseEmitter.event().name("notification").data(...)
+        // named event는 addEventListener로만 수신 가능, onmessage는 name 없는 이벤트만 받음
+        es.addEventListener('notification', handler);
+
+        // fallback: name 없이 보내는 경우도 대비
+        es.onmessage = handler;
+
         return es;
     },
+
 };
