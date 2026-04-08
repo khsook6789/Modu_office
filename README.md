@@ -143,8 +143,8 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
 #### **B. 접속 정보 및 API 명세 (Access Info)**
-- **Service URL**: [http://localhost:3000](http://localhost:3000) (Nginx 서빙)
-- **API Swagger**: [http://localhost:3000/api/swagger-ui/index.html](http://localhost:3000/api/swagger-ui/index.html)
+- **Service URL**: [http://localhost](http://localhost) (Nginx 서빙)
+- **API Swagger**: [http://localhost/api/swagger-ui/index.html](http://localhost/api/swagger-ui/index.html)
 - **DB 접속(관리용)**: `127.0.0.1:5434` (로컬 호스트 전용)
 
 #### **C. 상태 확인 및 유지보수 (Maintenance)**

@@ -1,0 +1,103 @@
+# Modu Office CI/CD Workflow
+# 1. CI: 빌드 및 테스트 (모든 브랜치)
+# 2. CD: main 브랜치 push 시 EC2 자동 배포 (테스트 통과 시)
+# 3. Notification: Discord 알림 전송
+
+name: Modu Office CI/CD
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Corretto)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x backend/gradlew
+
+      - name: Run Backend Tests
+        run: cd backend && ./gradlew test
+
+      - name: Verify Full Stack Docker Build
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME || 'postgres' }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'dummy_secret_key_for_ci_build_verification_32_chars' }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID || 'dummy_id' }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET || 'dummy_secret' }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'dummy_key' }}
+          TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY || 'dummy_toss_key' }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY || 'dummy_vite_key' }}
+        run: |
+          docker compose -f docker-compose.prod.yml down
+          docker compose -f docker-compose.prod.yml build
+          docker compose -f docker-compose.prod.yml up -d
+          
+          echo "Waiting for backend healthcheck..."
+          timeout 60s sh -c 'until [ "$(docker inspect -f {{.State.Health.Status}} $(docker compose -f docker-compose.prod.yml ps -q backend))" = "healthy" ]; do 
+            sleep 5
+          done' || {
+            docker compose -f docker-compose.prod.yml logs --no-color backend
+            exit 1
+          }
+
+      - name: Stop and Clean up
+        if: always()
+        run: docker compose -f docker-compose.prod.yml down
+
+      # 테스트 실패 시 Discord 알림 (main 브랜치에서 실패했을 때만)
+      - name: Discord Notification (Test Failure)
+        if: failure() && github.ref == 'refs/heads/main'
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: failure
+          title: "❌ Build/Test Failed"
+          description: "브랜치: `${{ github.ref_name }}`\n테스트 단계에서 실패했습니다. 로그를 확인해 주세요."
+          color: 0xff0000
+
+  deploy:
+    name: Deploy to EC2
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/Modu_office || { echo "Directory not found"; exit 1; }
+            git pull origin main
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker image prune -f
+            echo "🚀 Deployment completed successfully!"
+
+      # 배포 성공/실패 Discord 알림
+      - name: Discord Notification (Deploy Result)
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          title: "🚀 Production Deployment"
+          description: |
+            **결과**: `${{ job.status }}`
+            **브랜치**: `${{ github.ref_name }}`
+            **커밋**: `${{ github.event.head_commit.message }}`
+          color: ${{ job.status == 'success' && '0x00ff00' || '0xff0000' }}
