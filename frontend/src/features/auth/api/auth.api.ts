@@ -55,9 +55,10 @@ async function tryLogin(endpoint: string, data: LoginRequest): Promise<LoginResp
         const user = await fetchUserProfile(tokenRes.accessToken);
         return { ...tokenRes, user };
     } catch (err: any) {
-        // 명확한 사유가 있는 에러(승인 대기 등)는 그대로 전파
+        // 명확한 사유가 있는 에러(승인 대기 중)는 그대로 전파
         const msg: string = err?.message ?? '';
-        if (msg && !msg.startsWith('API Error:')) throw err;
+        if (msg && msg.includes('MANAGER_PENDING_APPROVAL')) throw err;
+        // 그 외 에러(403 Forbidden, 404 등)는 다음 엔드포인트 시도
         return null;
     }
 }
