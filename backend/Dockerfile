@@ -24,6 +24,7 @@ RUN apk add --no-cache wget && \
 
 USER spring
 
+# build/libs 폴더의 jar 파일을 app.jar로 복사 (build.gradle에서 plain jar 생성을 막았으므로 안전함)
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080

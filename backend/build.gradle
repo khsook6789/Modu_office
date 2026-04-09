@@ -73,11 +73,15 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
-
 tasks.named('test') {
-    useJUnitPlatform()
+	useJUnitPlatform()
     systemProperty 'spring.profiles.active', 'test'
     finalizedBy jacocoTestReport
+}
+
+// plain jar 생성 방지 (Docker 빌드 시 충돌 방지 및 실행 파일 명확화)
+jar {
+    enabled = false
 }
 
 // Jacoco 커버리지 리포트 설정

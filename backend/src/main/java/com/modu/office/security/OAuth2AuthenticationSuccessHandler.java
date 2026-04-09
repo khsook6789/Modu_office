@@ -30,7 +30,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtTokenProvider jwtTokenProvider;
     private final AccountRepository accountRepository;
 
-    @Value("${app.oauth2.redirect-uri:http://localhost:3000/oauth2/redirect}")
+    @Value("${app.oauth2.redirect-uri:http://localhost/oauth2/redirect}")
     private String redirectUri;
 
     @Override
@@ -66,7 +66,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 프론트엔드로 리다이렉트 (토큰을 쿼리 파라미터로 전달)
         String targetUrl = UriComponentsBuilder
-                .fromUriString(redirectUri != null ? redirectUri : "http://localhost:3000/oauth2/redirect")
+                .fromUriString(redirectUri != null ? redirectUri : "http://localhost/oauth2/redirect")
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
                 .build()
