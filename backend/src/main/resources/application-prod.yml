@@ -68,3 +68,10 @@ logging:
   level:
     "[com.modu.office]": INFO
     "[org.hibernate.SQL]": WARN
+
+sentry:
+  dsn: ${SENTRY_DSN}
+  environment: production
+  enable-tracing: true
+  traces-sample-rate: 1.0
+  send-default-pii: false

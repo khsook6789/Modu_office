@@ -72,6 +72,13 @@ app:
   toss-payments:
     base-url: https://api.tosspayments.com
 
+# Sentry 에러 모니터링 (로컬에서는 DSN 비워둠 → 전송 안 함)
+sentry:
+  dsn:
+  environment: local
+  enable-tracing: true
+  traces-sample-rate: 0.0
+
 # Swagger / OpenAPI 설정
 springdoc:
   swagger-ui:
