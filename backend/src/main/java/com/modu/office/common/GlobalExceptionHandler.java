@@ -3,6 +3,7 @@ package com.modu.office.common;
 import com.modu.office.exception.BusinessException;
 import com.modu.office.exception.ErrorCode;
 import com.modu.office.exception.InvalidTimeUnitException;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ public class GlobalExceptionHandler {
          */
         @ExceptionHandler(OptimisticLockingFailureException.class)
         public ResponseEntity<ApiResponse<Void>> handleOptimisticLockingFailure(OptimisticLockingFailureException e) {
+                Sentry.captureException(e);
                 log.error("Concurrency conflict: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                                 .body(ApiResponse.error(ErrorCode.OPTIMISTIC_LOCK_CONFLICT.getCode(), "다른 사용자에 의해 데이터가 이미 수정되었습니다. 다시 시도해주세요."));
@@ -84,6 +86,7 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
         public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(
                         org.springframework.dao.DataIntegrityViolationException e) {
+                Sentry.captureException(e);
                 log.error("Data integrity violation: {}", e.getMessage());
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                                 .body(ApiResponse.error(ErrorCode.DUPLICATE_RESOURCE));
@@ -166,6 +169,7 @@ public class GlobalExceptionHandler {
          */
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception e) {
+                Sentry.captureException(e);
                 log.error("Internal server error", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));

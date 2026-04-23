@@ -44,6 +44,7 @@ services:
       JAVA_OPTS: "-Xmx384m -Xms256m -XX:+UseSerialGC"
       DATA_SEEDING_ENABLED: ${DATA_SEEDING_ENABLED:-false}
       DATA_CLEAN_BEFORE_SEEDING: ${DATA_CLEAN_BEFORE_SEEDING:-false}
+      SENTRY_DSN: ${SENTRY_DSN}
     ports:
       - "127.0.0.1:8080:8080"  # Actuator 메트릭 수집용 (로컬호스트 한정)
     depends_on:

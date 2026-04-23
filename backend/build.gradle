@@ -67,6 +67,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 
+    // Sentry (Spring Boot 3.x = jakarta 버전 필수)
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.19.0'
+
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
